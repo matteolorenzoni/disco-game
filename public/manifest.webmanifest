@@ -1,6 +1,6 @@
 {
-  "name": "app-base",
-  "short_name": "app-base",
+  "name": "disco-game",
+  "short_name": "disco-game",
   "theme_color": "#1976d2",
   "background_color": "#fafafa",
   "display": "standalone",

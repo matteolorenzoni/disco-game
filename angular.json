@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "app-base": {
+    "disco-game": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/app-base",
+            "outputPath": "dist/disco-game",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -65,10 +65,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "app-base:build:production"
+              "buildTarget": "disco-game:build:production"
             },
             "development": {
-              "buildTarget": "app-base:build:development"
+              "buildTarget": "disco-game:build:development"
             }
           },
           "defaultConfiguration": "development"
