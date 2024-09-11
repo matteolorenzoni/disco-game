@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { FirebaseService } from './service/firebase.service';
+import { AuthService } from './service/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -11,8 +12,10 @@ import { FirebaseService } from './service/firebase.service';
 })
 export class AppComponent {
   /* Services */
-  firebaseService = inject(FirebaseService);
+  readonly firebaseService = inject(FirebaseService);
+  readonly authService = inject(AuthService);
 
-  /* Variables */
-  title = 'disco-game';
+  constructor() {
+    this.authService.observeUserState();
+  }
 }
