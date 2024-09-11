@@ -1,0 +1,35 @@
+<form [formGroup]="signUpForm" (ngSubmit)="signUp()">
+  <div>
+    <label for="name">First Name</label>
+    <input id="name" formControlName="name" type="text" />
+  </div>
+
+  <div>
+    <label for="lastname">Last Name</label>
+    <input id="lastname" formControlName="lastname" type="text" />
+  </div>
+
+  <div>
+    <label for="username">Username</label>
+    <input id="username" formControlName="username" type="text" />
+  </div>
+
+  <div>
+    <label for="email">Email</label>
+    <input id="email" formControlName="email" type="email" />
+  </div>
+
+  <div>
+    <label for="password">Password</label>
+    <input id="password" formControlName="password" type="password" />
+  </div>
+
+  <div>
+    <label for="birthday">Birthday</label>
+    <input id="birthday" formControlName="birthDate" type="date" />
+  </div>
+
+  <button type="submit" [disabled]="signUpForm.invalid">Register</button>
+</form>
+
+<p><a href="./login">Indietro</a></p>
