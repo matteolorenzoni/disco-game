@@ -20,7 +20,8 @@ const firebaseErrorMessages: Record<string, string> = {
   'failed-precondition': "L'operazione non è riuscita a causa di condizioni non soddisfatte.",
   aborted: "L'operazione è stata interrotta a causa di un conflitto.",
   internal: 'Si è verificato un errore interno del server.',
-  unknown: 'Si è verificato un errore sconosciuto.'
+  unknown: 'Si è verificato un errore sconosciuto.',
+  'auth/invalid-credential': 'Credenziali non valide'
 };
 
 @Injectable({
