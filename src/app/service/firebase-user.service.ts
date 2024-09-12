@@ -3,6 +3,7 @@ import { FirebaseService } from './firebase.service';
 import { environment } from '../../environments/environment.development';
 import { User } from '../model/type.model';
 import { UserType } from '../model/enum.model';
+import { Doc } from '../model/firebase.model';
 
 @Injectable({
   providedIn: 'root'
@@ -51,6 +52,10 @@ export class FirebaseUserService {
       createdAt: new Date(),
       updatedAt: new Date()
     });
+  }
+
+  public async getUserById(userId: string): Promise<Doc<User> | undefined> {
+    return await this.firebaseService.getDocumentByProp<User>(this.COLLECTION, { key: 'id', value: userId });
   }
 
   /* --------------------------- Util ---------------------------*/

@@ -4,13 +4,18 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut,
-  User,
+  User as FirebaseUser,
   UserCredential
 } from 'firebase/auth';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { filter } from 'rxjs/internal/operators/filter';
+import { Observable } from 'rxjs/internal/Observable';
 import { FirebaseService } from './firebase.service';
 import { LogService } from './log.service';
 import { FirebaseError } from 'firebase/app';
 import { LogType } from '../model/enum.model';
+import { User } from '../model/type.model';
+import { environment } from '../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root'
@@ -21,12 +26,13 @@ export class AuthService {
   readonly logService = inject(LogService);
 
   /* Variables */
-  user = signal<User | undefined>(undefined);
-  userToken = signal<string | undefined>(undefined);
+  userFirebase = signal<FirebaseUser | null | undefined>(undefined);
+  userFirebaseToken = signal<string | null | undefined>(undefined);
+  user = signal<User | null | undefined>(undefined);
 
-  public async logIn(email: string, password: string): Promise<void> {
+  public async logIn(email: string, password: string): Promise<UserCredential> {
     try {
-      await signInWithEmailAndPassword(this.firebaseService.getAuth(), email, password);
+      return await signInWithEmailAndPassword(this.firebaseService.getAuth(), email, password);
     } catch (error: unknown) {
       if (error instanceof FirebaseError) {
         this.logService.addLogFirebase(LogType.ERROR, error.code);
@@ -59,9 +65,32 @@ export class AuthService {
 
   public observeUserState(): void {
     try {
-      onAuthStateChanged(this.firebaseService.getAuth(), (user) => {
-        if (user) this.setUserInfo(user);
-        else this.setUserInfo(undefined);
+      onAuthStateChanged(this.firebaseService.getAuth(), async (userFirebase) => {
+        console.log(`User UID: ${userFirebase?.uid}`); // TODO: eliminare
+
+        // User firebase
+        this.userFirebase.set(userFirebase);
+
+        // User firebase token
+        const userToken = await userFirebase?.getIdToken();
+        this.userFirebaseToken.set(userToken);
+
+        // User
+        if (userFirebase) {
+          const user = await this.firebaseService.getDocumentByProp<User>(environment.collection.USERS, {
+            key: 'id',
+            value: userFirebase.uid
+          });
+          if (!user) {
+            throw new Error(
+              'Registered user found but no associated document exists. Please contact support for assistance.'
+            );
+          }
+
+          this.user.set(user.props);
+        } else {
+          this.user.set(null);
+        }
       });
     } catch (error: unknown) {
       if (error instanceof FirebaseError) {
@@ -72,12 +101,7 @@ export class AuthService {
   }
 
   /* ---------------- Utils  ---------------- */
-  private async setUserInfo(user: User | undefined) {
-    // User
-    this.user.set(user);
-
-    // User token
-    const userToken = await user?.getIdToken();
-    this.userToken.set(userToken);
+  public userAsObservable(): Observable<User | null> {
+    return toObservable(this.user).pipe(filter((user) => user !== undefined));
   }
 }

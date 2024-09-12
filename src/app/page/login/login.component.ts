@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { FirebaseService } from '../../service/firebase.service';
 import { AuthService } from '../../service/auth.service';
-import { Router } from '@angular/router';
 import { UserType } from '../../model/enum.model';
+import { Router } from '@angular/router';
+import { FirebaseUserService } from '../../service/firebase-user.service';
 
 @Component({
   selector: 'app-login',
@@ -16,8 +16,8 @@ import { UserType } from '../../model/enum.model';
 })
 export class LoginComponent implements OnInit {
   /* Services */
-  readonly firebaseService = inject(FirebaseService);
   readonly authService = inject(AuthService);
+  readonly firebaseUserService = inject(FirebaseUserService);
   readonly router = inject(Router);
 
   /* Form */
@@ -32,18 +32,22 @@ export class LoginComponent implements OnInit {
   }
 
   /* ------------- Methods ------------- */
-  protected async login(): Promise<void> {
+  public async login(): Promise<void> {
+    if (this.loginForm.invalid) return;
     const { email, password } = this.loginForm.getRawValue();
-    const user = await this.authService.logIn(email, password);
-    switch (user.props.type) {
+    const userCredentials = await this.authService.logIn(email, password);
+    const user = await this.firebaseUserService.getUserById(userCredentials.user.uid);
+    switch (user?.props.type) {
       case UserType.ADMIN:
-        this.router.navigate(['/admin/dashboard']);
+        await this.router.navigate(['/admin/dashboard']);
         break;
       case UserType.USER:
-        this.router.navigate(['/user/dashboard']);
+        await this.router.navigate(['/user/dashboard']);
         break;
       default:
-        break;
+        throw new Error(
+          'Registered user found but no associated document exists. Please contact support for assistance.'
+        );
     }
   }
 

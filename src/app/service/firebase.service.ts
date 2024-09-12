@@ -2,7 +2,7 @@
 import { inject, Injectable } from '@angular/core';
 import { FirebaseError, initializeApp } from 'firebase/app';
 import { Auth, getAuth } from 'firebase/auth';
-import { Firestore, getDocs, getFirestore } from 'firebase/firestore';
+import { Firestore, getDocs, getFirestore, query, where } from 'firebase/firestore';
 import { FirebaseStorage, getStorage } from 'firebase/storage';
 import { collection as getCollection, addDoc } from 'firebase/firestore';
 import { environment } from '../../environments/environment.development';
@@ -61,6 +61,27 @@ export class FirebaseService {
       const docRef = await addDoc(collectionRef, data);
       // TODO: loader
       return docRef;
+    } catch (error: unknown) {
+      if (error instanceof FirebaseError) {
+        this.logService.addLogFirebase(LogType.ERROR, error.code);
+      }
+      throw error;
+    }
+  }
+
+  public async getDocumentByProp<T extends Record<string, any>>(
+    collection: string,
+    queryParam: { key: keyof T; value: any }
+  ): Promise<Doc<T> | undefined> {
+    try {
+      const collectionRef = getCollection(this.db, collection);
+      const q = query(collectionRef, where(queryParam.key as string, '==', queryParam.value));
+      const querySnapshot = await getDocs(q);
+      const documents = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        props: doc.data() as T
+      }));
+      return documents.length ? documents[0] : undefined;
     } catch (error: unknown) {
       if (error instanceof FirebaseError) {
         this.logService.addLogFirebase(LogType.ERROR, error.code);
