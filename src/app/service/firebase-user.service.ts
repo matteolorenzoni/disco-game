@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { FirebaseService } from './firebase.service';
 import { environment } from '../../environments/environment.development';
 import { User } from '../model/type.model';
+import { UserType } from '../model/enum.model';
 
 @Injectable({
   providedIn: 'root'
@@ -44,6 +45,7 @@ export class FirebaseUserService {
       birthDate,
       email,
       defaultCode,
+      type: UserType.USER,
       challengePoints: [],
       isActive: true,
       createdAt: new Date(),

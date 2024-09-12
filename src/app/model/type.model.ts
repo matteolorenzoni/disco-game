@@ -1,3 +1,5 @@
+import { UserType } from './enum.model';
+
 // Tipo User
 export type User = {
   id: string; // ID univoco dell'utente
@@ -6,6 +8,7 @@ export type User = {
   username: string; // Nome utente o nickname
   email: string; // Email dell'utente
   defaultCode: string; // Codice di default per creare o partecipare a squadre
+  type: UserType;
   birthDate: Date; // Data di nascita dell'utente
   challengePoints: ChallengePoint[]; // Lista delle sfide completate
   isActive: boolean; // Se il documento è attivo

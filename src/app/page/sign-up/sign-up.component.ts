@@ -27,7 +27,7 @@ export class SignUpComponent implements OnInit {
       nonNullable: true,
       validators: [Validators.required, Validators.minLength(6)]
     }),
-    birthDate: new FormControl(this.getTodayDate(), { nonNullable: true, validators: [Validators.required] }),
+    birthDate: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     email: new FormControl('', {
       nonNullable: true,
       validators: [Validators.required, Validators.email]
@@ -57,13 +57,5 @@ export class SignUpComponent implements OnInit {
     const date = new Date(birthDate);
     date.setHours(0, 0, 0, 0);
     await this.firebaseUserService.addUser(userCredential.user.uid, name, lastname, username, date, email);
-  }
-
-  getTodayDate(): string {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0'); // mesi sono 0-based
-    const day = String(today.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
   }
 }
