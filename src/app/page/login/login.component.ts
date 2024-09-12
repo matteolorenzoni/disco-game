@@ -1,7 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FirebaseService } from '../../service/firebase.service';
 import { AuthService } from '../../service/auth.service';
+import { Router } from '@angular/router';
+import { UserType } from '../../model/enum.model';
 
 @Component({
   selector: 'app-login',
@@ -13,7 +16,9 @@ import { AuthService } from '../../service/auth.service';
 })
 export class LoginComponent implements OnInit {
   /* Services */
-  authService = inject(AuthService);
+  readonly firebaseService = inject(FirebaseService);
+  readonly authService = inject(AuthService);
+  readonly router = inject(Router);
 
   /* Form */
   loginForm = new FormGroup({
@@ -29,7 +34,17 @@ export class LoginComponent implements OnInit {
   /* ------------- Methods ------------- */
   protected async login(): Promise<void> {
     const { email, password } = this.loginForm.getRawValue();
-    await this.authService.logIn(email, password);
+    const user = await this.authService.logIn(email, password);
+    switch (user.props.type) {
+      case UserType.ADMIN:
+        this.router.navigate(['/admin/dashboard']);
+        break;
+      case UserType.USER:
+        this.router.navigate(['/user/dashboard']);
+        break;
+      default:
+        break;
+    }
   }
 
   protected resetPassword(): void {
