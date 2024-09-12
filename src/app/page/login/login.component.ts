@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../service/auth.service';
 
@@ -11,7 +11,7 @@ import { AuthService } from '../../service/auth.service';
   styleUrls: ['./login.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   /* Services */
   authService = inject(AuthService);
 
@@ -20,6 +20,11 @@ export class LoginComponent {
     email: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
     password: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(6)] })
   });
+
+  /* ------------- Methods ------------- */
+  ngOnInit(): void {
+    this.authService.logout();
+  }
 
   /* ------------- Methods ------------- */
   protected async login(): Promise<void> {

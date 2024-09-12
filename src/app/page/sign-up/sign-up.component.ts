@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../service/auth.service';
 import { FirebaseUserService } from '../../service/firebase-user.service';
@@ -13,7 +13,7 @@ import { TypeCheckerService } from '../../service/type-checker.service';
   styleUrls: ['./sign-up.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SignUpComponent {
+export class SignUpComponent implements OnInit {
   /* Services */
   readonly authService = inject(AuthService);
   readonly firebaseUserService = inject(FirebaseUserService);
@@ -37,6 +37,11 @@ export class SignUpComponent {
       validators: [Validators.required, Validators.minLength(6)]
     })
   });
+
+  /* ------------- Methods ------------- */
+  ngOnInit(): void {
+    this.authService.logout();
+  }
 
   /* ------------- Methods ------------- */
   protected async signUp() {
