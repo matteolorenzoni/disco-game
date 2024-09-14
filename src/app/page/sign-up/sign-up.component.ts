@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AuthService } from '../../service/auth.service';
 import { FirebaseUserService } from '../../service/firebase-user.service';
 import { TypeCheckerService } from '../../service/type-checker.service';
 import { FromMap, SignUpModel } from '../../model/form.model';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-sign-up',
@@ -46,7 +46,7 @@ export class SignUpComponent implements OnInit {
 
   /* ------------- Methods ------------- */
   ngOnInit(): void {
-    this.authService.logout();
+    this.authService.logout(false);
   }
 
   /* ------------- Methods ------------- */
@@ -58,6 +58,6 @@ export class SignUpComponent implements OnInit {
     await this.firebaseUserService.addUser(userCredential.user.uid, {
       ...this.signUpForm.getRawValue()
     });
-    await this.router.navigate(['./login']);
+    await this.router.navigate(['/login']);
   }
 }

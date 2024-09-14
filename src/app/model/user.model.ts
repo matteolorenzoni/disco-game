@@ -1,5 +1,5 @@
 export type User = {
-  id: string; // ID univoco dell'utente
+  // id: string; // ID univoco dell'utente
   name: string; // Nome dell'utente
   lastname: string; // Cognome dell'utente
   username: string; // Nome utente o nickname

@@ -1,4 +1,6 @@
 import { inject, Injectable, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
@@ -7,21 +9,22 @@ import {
   User as FirebaseUser,
   UserCredential
 } from 'firebase/auth';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs/internal/operators/filter';
 import { Observable } from 'rxjs/internal/Observable';
 import { FirebaseService } from './firebase.service';
 import { LogService } from './log.service';
 import { User } from '../model/user.model';
-import { environment } from '../../environments/environment.development';
 import { LoginModel, SignUpModel } from '../model/form.model';
+import { FirebaseUserService } from './firebase-user.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   /* Services */
+  readonly router = inject(Router);
   readonly firebaseService = inject(FirebaseService);
+  readonly firebaseUserService = inject(FirebaseUserService);
   readonly logService = inject(LogService);
 
   /* Variables */
@@ -39,9 +42,10 @@ export class AuthService {
     }
   }
 
-  public async logout(): Promise<void> {
+  public async logout(redirect = true): Promise<void> {
     try {
       await signOut(this.firebaseService.getAuth());
+      if (redirect) await this.router.navigate(['/login']);
     } catch (error) {
       this.logService.addLogError(error);
       throw error;
@@ -71,12 +75,9 @@ export class AuthService {
 
       try {
         // User
-        if (userFirebase) {
-          const user = await this.firebaseService.getDocumentByProp<User>(environment.collection.USERS, {
-            key: 'id',
-            value: userFirebase.uid
-          });
-          this.user.set(user?.props ?? null);
+        if (userFirebase && window.location.pathname !== '/sign-up') {
+          const user = await this.firebaseUserService.getUserById(userFirebase.uid);
+          this.user.set(user.props);
         } else {
           this.user.set(null);
         }

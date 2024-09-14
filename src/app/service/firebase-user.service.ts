@@ -5,6 +5,7 @@ import { User } from '../model/user.model';
 import { UserType } from '../model/user.model';
 import { Doc } from '../model/firebase.model';
 import { SignUpModel } from '../model/form.model';
+import { userConverter } from '../model/converter.model';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +17,7 @@ export class FirebaseUserService {
   /* Constants */
   COLLECTION = environment.collection.USERS;
 
-  /* --------------------------- Create ---------------------------*/
+  /* --------------------------- Read ---------------------------*/
   private async getUserCodes(): Promise<string[]> {
     const users = await this.firebaseService.getAllDocuments<User>(this.COLLECTION);
     return users.map((user) => user.props.defaultCode);
@@ -32,8 +33,7 @@ export class FirebaseUserService {
     }
 
     /* Aggiunta documento a DB */
-    await this.firebaseService.addDocument<User>(this.COLLECTION, {
-      id,
+    await this.firebaseService.addDocumentById<User>(id, this.COLLECTION, {
       ...form,
       birthDate: new Date(form.birthDate),
       defaultCode,
@@ -45,8 +45,8 @@ export class FirebaseUserService {
     });
   }
 
-  public async getUserById(userId: string): Promise<Doc<User> | undefined> {
-    return await this.firebaseService.getDocumentByProp<User>(this.COLLECTION, { key: 'id', value: userId });
+  public async getUserById(userId: string): Promise<Doc<User>> {
+    return await this.firebaseService.getDocumentById<User>(this.COLLECTION, userId, userConverter);
   }
 
   /* --------------------------- Util ---------------------------*/

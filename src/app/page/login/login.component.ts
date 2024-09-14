@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AuthService } from '../../service/auth.service';
 import { UserType } from '../../model/user.model';
-import { Router } from '@angular/router';
 import { FirebaseUserService } from '../../service/firebase-user.service';
 import { FromMap, LoginModel } from '../../model/form.model';
 
@@ -29,7 +29,7 @@ export class LoginComponent implements OnInit {
 
   /* ------------- Methods ------------- */
   ngOnInit(): void {
-    this.authService.logout();
+    this.authService.logout(false);
   }
 
   /* ------------- Methods ------------- */

@@ -10,6 +10,7 @@ import {
   getDocs,
   getFirestore,
   query,
+  setDoc,
   updateDoc,
   where
 } from 'firebase/firestore';
@@ -109,6 +110,18 @@ export class FirebaseService {
   }
 
   /* --------------------- Methods CREATE --------------------- */
+  public async addDocumentById<T extends Record<string, any>>(id: string, collectionName: string, data: T) {
+    try {
+      const collectionRef = getCollection(this.db, collectionName);
+      const docRef = doc(collectionRef, id);
+      await setDoc(docRef, data);
+      return docRef;
+    } catch (error) {
+      this.logService.addLogError(error);
+      throw error;
+    }
+  }
+
   public async addDocument<T extends Record<string, any>>(collectionName: string, data: T) {
     try {
       const collectionRef = getCollection(this.db, collectionName);
