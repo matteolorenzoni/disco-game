@@ -1,4 +1,4 @@
-import { CommonModule, formatDate } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../service/auth.service';
@@ -30,7 +30,7 @@ export class SignUpComponent implements OnInit {
       nonNullable: true,
       validators: [Validators.required, Validators.minLength(6)]
     }),
-    birthDate: new FormControl(formatDate(new Date(), 'yyyy-MM-dd', 'it'), {
+    birthDate: new FormControl('', {
       nonNullable: true,
       validators: [Validators.required]
     }),

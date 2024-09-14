@@ -17,3 +17,13 @@ export type SignUpModel = {
   email: string;
   password: string;
 };
+
+export type EventModel = {
+  name: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  location: string;
+  imageUrl: string | null;
+  isActive: boolean;
+};

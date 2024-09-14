@@ -1,2 +1,38 @@
-<p>event-create works!</p>
-,
+<form [formGroup]="eventForm" (ngSubmit)="addOrUpdateEvent()">
+  <div class="form-group">
+    <label for="name">Event Name</label>
+    <input id="name" formControlName="name" type="text" placeholder="Event Name" />
+  </div>
+
+  <div class="form-group">
+    <label for="description">Description</label>
+    <textarea id="description" formControlName="description" placeholder="Description"></textarea>
+  </div>
+
+  <div class="form-group">
+    <label for="startDate">Start Date</label>
+    <input id="startDate" formControlName="startDate" type="datetime-local" />
+  </div>
+
+  <div class="form-group">
+    <label for="endDate">End Date</label>
+    <input id="endDate" formControlName="endDate" type="datetime-local" />
+  </div>
+
+  <div class="form-group">
+    <label for="location">Location</label>
+    <input id="location" formControlName="location" type="text" placeholder="Location" />
+  </div>
+
+  <div class="form-group">
+    <label for="imageUrl">Image URL</label>
+    <input id="imageUrl" formControlName="imageUrl" type="text" placeholder="Image URL" />
+  </div>
+
+  <div class="form-group form-check">
+    <input id="isActive" formControlName="isActive" type="checkbox" class="form-check-input" />
+    <label class="form-check-label" for="isActive">Active</label>
+  </div>
+
+  <button type="submit" class="btn btn-primary" [disabled]="eventForm.invalid">Submit</button>
+</form>

@@ -1,5 +1,5 @@
 export type Event = {
-  id: string; // ID univoco dell'evento
+  // id: string; // ID univoco dell'evento
   name: string; // Nome dell'evento
   description: string; // Descrizione dell'evento, inclusi dettagli come il tema e gli obiettivi
   startDate: Date; // Data e ora di inizio dell'evento
