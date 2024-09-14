@@ -16,6 +16,26 @@ export const routes: Routes = [
         path: 'dashboard',
         loadComponent: () => import('../page/admin/dashboard/dashboard.component').then((m) => m.DashboardComponent)
       },
+      {
+        path: 'events',
+        children: [
+          {
+            path: 'new',
+            loadComponent: () =>
+              import('../page/admin/event-create/event-create.component').then((m) => m.EventCreateComponent)
+          },
+          {
+            path: 'edit/:id',
+            loadComponent: () =>
+              import('../page/admin/event-create/event-create.component').then((m) => m.EventCreateComponent)
+          },
+          {
+            path: '',
+            loadComponent: () =>
+              import('../page/admin/event-list/event-list.component').then((m) => m.EventListComponent)
+          }
+        ]
+      },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: '**', redirectTo: 'dashboard' }
     ]
