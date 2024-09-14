@@ -35,11 +35,11 @@ export class EventCreateComponent implements OnInit {
         nonNullable: true,
         validators: [Validators.required, Validators.maxLength(500)]
       }),
-      startDate: new FormControl(formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss', 'it'), {
+      startDate: new FormControl('', {
         nonNullable: true,
         validators: [Validators.required]
       }),
-      endDate: new FormControl(formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss', 'it'), {
+      endDate: new FormControl('', {
         nonNullable: true,
         validators: [Validators.required]
       }),
@@ -59,15 +59,33 @@ export class EventCreateComponent implements OnInit {
   /* ------------------------ Lifecycle hooks ------------------------ */
   ngOnInit(): void {
     // Recupera l'ID dalla route
-    this.route.paramMap.subscribe((params) => {
+    this.route.paramMap.subscribe(async (params) => {
+      const eventId = params.get('id');
+      if (!eventId) return;
+
       this.eventId.set(params.get('id'));
-      console.log(this.eventId());
+      const { props } = await this.firebaseEventService.getEventById(eventId);
+      this.eventForm.setValue({
+        name: props.name,
+        description: props.description,
+        startDate: formatDate(props.startDate, 'yyyy-MM-dd HH:mm:ss', 'it'),
+        endDate: formatDate(props.endDate, 'yyyy-MM-dd HH:mm:ss', 'it'),
+        location: props.location,
+        imageUrl: props.imageUrl,
+        isActive: props.isActive
+      });
     });
   }
 
   /* ------------------------ Methods ------------------------ */
   protected async addOrUpdateEvent(): Promise<void> {
     if (this.eventForm.invalid) return;
-    await this.firebaseEventService.addEvent(this.eventForm.getRawValue());
+
+    const eventId = this.eventId();
+    if (eventId) {
+      await this.firebaseEventService.updateEvent(eventId, this.eventForm.getRawValue());
+    } else {
+      await this.firebaseEventService.addEvent(this.eventForm.getRawValue());
+    }
   }
 }

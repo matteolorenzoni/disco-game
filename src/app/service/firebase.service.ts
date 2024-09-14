@@ -2,7 +2,17 @@
 import { inject, Injectable } from '@angular/core';
 import { initializeApp } from 'firebase/app';
 import { Auth, getAuth } from 'firebase/auth';
-import { Firestore, getDocs, getFirestore, query, where } from 'firebase/firestore';
+import {
+  doc,
+  Firestore,
+  FirestoreDataConverter,
+  getDoc,
+  getDocs,
+  getFirestore,
+  query,
+  updateDoc,
+  where
+} from 'firebase/firestore';
 import { FirebaseStorage, getStorage } from 'firebase/storage';
 import { collection as getCollection, addDoc } from 'firebase/firestore';
 import { environment } from '../../environments/environment.development';
@@ -42,7 +52,29 @@ export class FirebaseService {
     return this.auth;
   }
 
-  /* --------------------- Methods --------------------- */
+  /* --------------------- Methods READ --------------------- */
+  public async getDocumentById<T>(
+    collectionName: string,
+    id: string,
+    converter: FirestoreDataConverter<T>
+  ): Promise<Doc<T>> {
+    try {
+      const collectionRef = getCollection(this.db, collectionName);
+      const docRef = doc(collectionRef, id).withConverter(converter);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data() as T;
+        return { id: docSnap.id, props: data };
+      } else {
+        throw new Error('Documento non trovato');
+      }
+    } catch (error) {
+      this.logService.addLogError(error);
+      throw error;
+    }
+  }
+
   public async getAllDocuments<T>(collectionName: string): Promise<Doc<T>[]> {
     try {
       const collectionRef = getCollection(this.db, collectionName);
@@ -51,17 +83,6 @@ export class FirebaseService {
         id: doc.id,
         props: doc.data() as T // Cast dei dati del documento a tipo T
       }));
-    } catch (error) {
-      this.logService.addLogError(error);
-      throw error;
-    }
-  }
-
-  public async addDocument<T extends Record<string, any>>(collectionName: string, data: T) {
-    try {
-      const collectionRef = getCollection(this.db, collectionName);
-      const docRef = await addDoc(collectionRef, data);
-      return docRef;
     } catch (error) {
       this.logService.addLogError(error);
       throw error;
@@ -81,6 +102,34 @@ export class FirebaseService {
         props: doc.data() as T
       }));
       return docs.length ? docs[0] : undefined;
+    } catch (error) {
+      this.logService.addLogError(error);
+      throw error;
+    }
+  }
+
+  /* --------------------- Methods CREATE --------------------- */
+  public async addDocument<T extends Record<string, any>>(collectionName: string, data: T) {
+    try {
+      const collectionRef = getCollection(this.db, collectionName);
+      const docRef = await addDoc(collectionRef, data);
+      return docRef;
+    } catch (error) {
+      this.logService.addLogError(error);
+      throw error;
+    }
+  }
+
+  /* --------------------- Methods READ --------------------- */
+  public async updateDocument<T extends Record<string, any>>(
+    id: string,
+    collectionName: string,
+    data: Partial<T>
+  ): Promise<void> {
+    try {
+      const collectionRef = getCollection(this.db, collectionName);
+      const docRef = doc(collectionRef, id);
+      await updateDoc(docRef, data as any);
     } catch (error) {
       this.logService.addLogError(error);
       throw error;
