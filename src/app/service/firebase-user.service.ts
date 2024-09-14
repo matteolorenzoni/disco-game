@@ -4,6 +4,7 @@ import { environment } from '../../environments/environment.development';
 import { User } from '../model/user.model';
 import { UserType } from '../model/user.model';
 import { Doc } from '../model/firebase.model';
+import { SignUpModel } from '../model/form.model';
 
 @Injectable({
   providedIn: 'root'
@@ -22,14 +23,7 @@ export class FirebaseUserService {
   }
 
   /* --------------------------- Create ---------------------------*/
-  public async addUser(
-    id: string,
-    name: string,
-    lastname: string,
-    username: string,
-    birthDate: Date,
-    email: string
-  ): Promise<void> {
+  public async addUser(id: string, form: SignUpModel): Promise<void> {
     /* Generazione un codice univoco */
     const codes = await this.getUserCodes();
     let defaultCode = this.generateRandomCode(6);
@@ -40,11 +34,8 @@ export class FirebaseUserService {
     /* Aggiunta documento a DB */
     await this.firebaseService.addDocument<User>(this.COLLECTION, {
       id,
-      name,
-      lastname,
-      username,
-      birthDate,
-      email,
+      ...form,
+      birthDate: new Date(form.birthDate),
       defaultCode,
       type: UserType.USER,
       challengePoints: [],

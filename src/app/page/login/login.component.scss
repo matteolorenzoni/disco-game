@@ -1,3 +1,133 @@
+// Variabili per il tema chiaro
+$primary-color: #007bff;
+$secondary-color: #6c757d;
+$background-color: #f8f9fa;
+$border-color: #ced4da;
+$border-radius: 8px;
+$shadow-color: rgba(0, 0, 0, 0.1);
+$input-padding: 0.75rem;
+$input-font-size: 1rem;
+$button-padding: 0.75rem 1.5rem;
+
 :host {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  padding-inline: 1rem;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 400px;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    &.input-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    label {
+      font-weight: bold;
+      color: #007bff;
+      margin-bottom: 0.25rem; // Spazio tra l'etichetta e l'input
+    }
+
+    input {
+      width: 100%; // Assicura che l'input si adatti al contenitore
+      padding: 0.75rem;
+      border: 1px solid #ced4da;
+      border-radius: 8px;
+      font-size: 1rem;
+      box-sizing: border-box; // Assicura che il padding e il bordo siano inclusi nella larghezza
+      transition:
+        border-color 0.3s,
+        box-shadow 0.3s;
+
+      &:focus {
+        border-color: #007bff;
+        outline: none;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+      }
+    }
+
+    .error-message {
+      font-size: 0.875rem;
+      color: #dc3545;
+    }
+  }
+
+  button[type='submit'] {
+    background-color: #007bff;
+    border: none;
+    color: #fff;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition:
+      background-color 0.3s,
+      box-shadow 0.3s;
+    width: 100%; // Assicura che il pulsante si adatti al contenitore
+
+    &:hover {
+      background-color: darken(#007bff, 10%);
+      box-shadow: 0 0 0 0.1rem rgba(0, 123, 255, 0.5);
+    }
+
+    &:disabled {
+      background-color: #6c757d;
+      cursor: not-allowed;
+    }
+  }
+}
+
+p {
+  text-align: center;
+  margin-top: 1.5rem;
+
+  a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+button {
   display: block;
+  width: 100%;
+  background-color: transparent;
+  border: none;
+  color: #007bff;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition:
+    color 0.3s,
+    background-color 0.3s;
+
+  &:hover {
+    color: darken(#007bff, 10%);
+    background-color: rgba(0, 123, 255, 0.1);
+  }
+}
+
+::ng-deep {
+  body {
+    margin: 0;
+  }
 }

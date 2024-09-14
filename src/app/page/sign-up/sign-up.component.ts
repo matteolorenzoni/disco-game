@@ -1,9 +1,11 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, formatDate } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../service/auth.service';
 import { FirebaseUserService } from '../../service/firebase-user.service';
 import { TypeCheckerService } from '../../service/type-checker.service';
+import { FromMap, SignUpModel } from '../../model/form.model';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-sign-up',
@@ -15,19 +17,23 @@ import { TypeCheckerService } from '../../service/type-checker.service';
 })
 export class SignUpComponent implements OnInit {
   /* Services */
+  readonly router = inject(Router);
   readonly authService = inject(AuthService);
   readonly firebaseUserService = inject(FirebaseUserService);
   readonly typeCheckerService = inject(TypeCheckerService);
 
   /* Form */
-  signUpForm = new FormGroup({
+  signUpForm = new FormGroup<FromMap<SignUpModel>>({
     name: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     lastname: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     username: new FormControl('', {
       nonNullable: true,
       validators: [Validators.required, Validators.minLength(6)]
     }),
-    birthDate: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    birthDate: new FormControl(formatDate(new Date(), 'yyyy-MM-dd', 'it'), {
+      nonNullable: true,
+      validators: [Validators.required]
+    }),
     email: new FormControl('', {
       nonNullable: true,
       validators: [Validators.required, Validators.email]
@@ -45,17 +51,13 @@ export class SignUpComponent implements OnInit {
 
   /* ------------- Methods ------------- */
   protected async signUp() {
-    const { name, lastname, username, birthDate, email, password } = this.signUpForm.getRawValue();
-    if (!this.typeCheckerService.isValidDate(birthDate)) {
-      throw new Error('Date not valid'); // TODO: toast
-    }
-
     /* Creazione utente */
-    const userCredential = await this.authService.signUp(email, password);
+    const userCredential = await this.authService.signUp(this.signUpForm.getRawValue());
 
     /* Aggiunta utente a DB */
-    const date = new Date(birthDate);
-    date.setHours(0, 0, 0, 0);
-    await this.firebaseUserService.addUser(userCredential.user.uid, name, lastname, username, date, email);
+    await this.firebaseUserService.addUser(userCredential.user.uid, {
+      ...this.signUpForm.getRawValue()
+    });
+    await this.router.navigate(['./login']);
   }
 }

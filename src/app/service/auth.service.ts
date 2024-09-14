@@ -14,6 +14,7 @@ import { FirebaseService } from './firebase.service';
 import { LogService } from './log.service';
 import { User } from '../model/user.model';
 import { environment } from '../../environments/environment.development';
+import { LoginModel, SignUpModel } from '../model/form.model';
 
 @Injectable({
   providedIn: 'root'
@@ -28,8 +29,9 @@ export class AuthService {
   userFirebaseToken = signal<string | null | undefined>(undefined);
   user = signal<User | null | undefined>(undefined);
 
-  public async logIn(email: string, password: string): Promise<UserCredential> {
+  public async logIn(form: LoginModel): Promise<UserCredential> {
     try {
+      const { email, password } = form;
       return await signInWithEmailAndPassword(this.firebaseService.getAuth(), email, password);
     } catch (error) {
       this.logService.addLogError(error);
@@ -46,8 +48,9 @@ export class AuthService {
     }
   }
 
-  public async signUp(email: string, password: string): Promise<UserCredential> {
+  public async signUp(form: SignUpModel): Promise<UserCredential> {
     try {
+      const { email, password } = form;
       return await createUserWithEmailAndPassword(this.firebaseService.getAuth(), email, password);
     } catch (error) {
       this.logService.addLogError(error);
@@ -73,13 +76,7 @@ export class AuthService {
             key: 'id',
             value: userFirebase.uid
           });
-          if (!user) {
-            throw new Error(
-              'Registered user found but no associated document exists. Please contact support for assistance.'
-            );
-          }
-
-          this.user.set(user.props);
+          this.user.set(user?.props ?? null);
         } else {
           this.user.set(null);
         }

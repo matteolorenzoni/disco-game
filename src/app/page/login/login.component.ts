@@ -5,6 +5,7 @@ import { AuthService } from '../../service/auth.service';
 import { UserType } from '../../model/user.model';
 import { Router } from '@angular/router';
 import { FirebaseUserService } from '../../service/firebase-user.service';
+import { FromMap, LoginModel } from '../../model/form.model';
 
 @Component({
   selector: 'app-login',
@@ -21,7 +22,7 @@ export class LoginComponent implements OnInit {
   readonly router = inject(Router);
 
   /* Form */
-  loginForm = new FormGroup({
+  loginForm = new FormGroup<FromMap<LoginModel>>({
     email: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
     password: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(6)] })
   });
@@ -34,8 +35,8 @@ export class LoginComponent implements OnInit {
   /* ------------- Methods ------------- */
   public async login(): Promise<void> {
     if (this.loginForm.invalid) return;
-    const { email, password } = this.loginForm.getRawValue();
-    const userCredentials = await this.authService.logIn(email, password);
+
+    const userCredentials = await this.authService.logIn(this.loginForm.getRawValue());
     const user = await this.firebaseUserService.getUserById(userCredentials.user.uid);
     switch (user?.props.type) {
       case UserType.ADMIN:
