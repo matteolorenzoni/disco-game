@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { inject, Injectable } from '@angular/core';
-import { FirebaseError, initializeApp } from 'firebase/app';
+import { initializeApp } from 'firebase/app';
 import { Auth, getAuth } from 'firebase/auth';
 import { Firestore, getDocs, getFirestore, query, where } from 'firebase/firestore';
 import { FirebaseStorage, getStorage } from 'firebase/storage';
@@ -8,7 +8,6 @@ import { collection as getCollection, addDoc } from 'firebase/firestore';
 import { environment } from '../../environments/environment.development';
 import { Doc } from '../model/firebase.model';
 import { LogService } from './log.service';
-import { LogType } from '../model/enum.model';
 
 @Injectable({
   providedIn: 'root'
@@ -19,9 +18,16 @@ export class FirebaseService {
 
   /* Variables */
   private app = initializeApp(environment.firebaseConfig);
-  private db = getFirestore(this.app);
-  private storage = getStorage(this.app);
-  private auth = getAuth(this.app);
+  private db: Firestore;
+  private storage: FirebaseStorage;
+  private auth: Auth;
+
+  /* --------------------- Constructor --------------------- */
+  constructor() {
+    this.db = getFirestore(this.app);
+    this.storage = getStorage(this.app);
+    this.auth = getAuth(this.app);
+  }
 
   /* --------------------- Getters --------------------- */
   public getDb(): Firestore {
@@ -41,51 +47,42 @@ export class FirebaseService {
     try {
       const collectionRef = getCollection(this.db, collectionName);
       const querySnapshot = await getDocs(collectionRef);
-
-      const documents = querySnapshot.docs.map((doc) => ({
+      return querySnapshot.docs.map((doc) => ({
         id: doc.id,
         props: doc.data() as T // Cast dei dati del documento a tipo T
       }));
-
-      return documents;
     } catch (error) {
-      console.error('Error getting documents:', error); // TODO: toast
+      this.logService.addLogError(error);
       throw error;
     }
   }
 
-  public async addDocument<T extends Record<string, any>>(collection: string, data: T) {
+  public async addDocument<T extends Record<string, any>>(collectionName: string, data: T) {
     try {
-      // TODO: loader
-      const collectionRef = getCollection(this.db, collection);
+      const collectionRef = getCollection(this.db, collectionName);
       const docRef = await addDoc(collectionRef, data);
-      // TODO: loader
       return docRef;
-    } catch (error: unknown) {
-      if (error instanceof FirebaseError) {
-        this.logService.addLogFirebase(LogType.ERROR, error.code);
-      }
+    } catch (error) {
+      this.logService.addLogError(error);
       throw error;
     }
   }
 
   public async getDocumentByProp<T extends Record<string, any>>(
-    collection: string,
+    collectionName: string,
     queryParam: { key: keyof T; value: any }
   ): Promise<Doc<T> | undefined> {
     try {
-      const collectionRef = getCollection(this.db, collection);
+      const collectionRef = getCollection(this.db, collectionName);
       const q = query(collectionRef, where(queryParam.key as string, '==', queryParam.value));
       const querySnapshot = await getDocs(q);
-      const documents = querySnapshot.docs.map((doc) => ({
+      const docs = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         props: doc.data() as T
       }));
-      return documents.length ? documents[0] : undefined;
-    } catch (error: unknown) {
-      if (error instanceof FirebaseError) {
-        this.logService.addLogFirebase(LogType.ERROR, error.code);
-      }
+      return docs.length ? docs[0] : undefined;
+    } catch (error) {
+      this.logService.addLogError(error);
       throw error;
     }
   }
