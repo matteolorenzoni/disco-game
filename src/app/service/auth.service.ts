@@ -12,7 +12,7 @@ import { filter } from 'rxjs/internal/operators/filter';
 import { Observable } from 'rxjs/internal/Observable';
 import { FirebaseService } from './firebase.service';
 import { LogService } from './log.service';
-import { User } from '../model/type.model';
+import { User } from '../model/user.model';
 import { environment } from '../../environments/environment.development';
 
 @Injectable({

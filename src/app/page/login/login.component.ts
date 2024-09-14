@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../service/auth.service';
-import { UserType } from '../../model/enum.model';
+import { UserType } from '../../model/user.model';
 import { Router } from '@angular/router';
 import { FirebaseUserService } from '../../service/firebase-user.service';
 

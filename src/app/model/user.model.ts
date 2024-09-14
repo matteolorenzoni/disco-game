@@ -1,6 +1,3 @@
-import { UserType } from './enum.model';
-
-// Tipo User
 export type User = {
   id: string; // ID univoco dell'utente
   name: string; // Nome dell'utente
@@ -16,9 +13,13 @@ export type User = {
   updatedAt: Date; // Data dell'ultimo aggiornamento dell'account
 };
 
-// Tipo ChallengePoint
 export type ChallengePoint = {
   challengeId: string; // ID della sfida completata
   eventId: string; // ID dell'evento associato alla sfida
   completionDate: Date; // Data di completamento della sfida
 };
+
+export enum UserType {
+  USER = 'USER',
+  ADMIN = 'ADMIN'
+}

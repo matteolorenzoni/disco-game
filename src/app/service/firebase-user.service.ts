@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { FirebaseService } from './firebase.service';
 import { environment } from '../../environments/environment.development';
-import { User } from '../model/type.model';
-import { UserType } from '../model/enum.model';
+import { User } from '../model/user.model';
+import { UserType } from '../model/user.model';
 import { Doc } from '../model/firebase.model';
 
 @Injectable({

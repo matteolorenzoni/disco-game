@@ -2,7 +2,7 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
 import { AuthService } from '../service/auth.service';
-import { UserType } from '../model/enum.model';
+import { UserType } from '../model/user.model';
 
 export const userGuard: CanActivateFn = async (route, state) => {
   const authService = inject(AuthService);
