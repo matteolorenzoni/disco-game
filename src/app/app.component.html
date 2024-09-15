@@ -1,3 +1,11 @@
 <main>
   <router-outlet></router-outlet>
 </main>
+
+@if (logService.logs().length) {
+  <ul>
+    @for (log of logService.logs(); track log.id) {
+      <li><app-toast [log]="log"></app-toast></li>
+    }
+  </ul>
+}

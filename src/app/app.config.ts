@@ -3,6 +3,7 @@ import { provideRouter } from '@angular/router';
 import { provideServiceWorker } from '@angular/service-worker';
 import { registerLocaleData } from '@angular/common';
 import localeIt from '@angular/common/locales/it';
+import { provideAnimations } from '@angular/platform-browser/animations';
 import { routes } from './router/app.routes';
 
 // Registrazione dei dati locali
@@ -16,7 +17,7 @@ export const appConfig: ApplicationConfig = {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000'
     }),
-    // Configurazione del locale predefinito
+    provideAnimations(),
     { provide: LOCALE_ID, useValue: 'it' }
   ]
 };

@@ -1,1 +1,16 @@
-/* You can add global styles to this file, and also import other style files */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+[role='button'] {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.25);
+  }
+
+  &:active {
+    transform: scale(0.75);
+  }
+}
