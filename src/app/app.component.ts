@@ -3,7 +3,6 @@ import { LogService } from './service/log.service';
 import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { FirebaseService } from './service/firebase.service';
-import { AuthService } from './service/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -15,10 +14,9 @@ import { AuthService } from './service/auth.service';
 export class AppComponent {
   /* Services */
   readonly firebaseService = inject(FirebaseService);
-  readonly authService = inject(AuthService);
   readonly logService = inject(LogService);
 
   constructor() {
-    this.authService.observeUserState();
+    this.firebaseService.observeUserState();
   }
 }

@@ -1,25 +1,50 @@
-import { inject, Injectable } from '@angular/core';
-import { FirebaseService } from './firebase.service';
+import { computed, inject, Injectable } from '@angular/core';
 import { environment } from '../../environments/environment.development';
 import { User } from '../model/user.model';
 import { UserType } from '../model/user.model';
 import { Doc } from '../model/firebase.model';
 import { SignUpModel } from '../model/form.model';
 import { userConverter } from '../model/converter.model';
+import { LogService } from './log.service';
+import { FirebaseService } from './firebase.service';
+import { FirebaseDocumentService } from './firebase-document.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class FirebaseUserService {
+export class UserService {
   /* Services */
   readonly firebaseService = inject(FirebaseService);
+  readonly documentService = inject(FirebaseDocumentService);
+  readonly logService = inject(LogService);
+
+  /* Variables */
+  user = computed(async () => {
+    const userFirebase = this.firebaseService.userFirebase();
+    try {
+      // User
+      if (userFirebase && window.location.pathname !== '/sign-up') {
+        const user = await this.getUserById(userFirebase.uid);
+        return user.props;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      this.logService.addLogError(userFirebase?.uid, error);
+      throw error;
+    }
+  });
 
   /* Constants */
   COLLECTION = environment.collection.USERS;
 
   /* --------------------------- Read ---------------------------*/
+  public async getUserById(userId: string): Promise<Doc<User>> {
+    return await this.documentService.getDocumentById<User>(this.COLLECTION, userId, userConverter);
+  }
+
   private async getUserCodes(): Promise<string[]> {
-    const users = await this.firebaseService.getAllDocuments<User>(this.COLLECTION);
+    const users = await this.documentService.getAllDocuments<User>(this.COLLECTION);
     return users.map((user) => user.props.defaultCode);
   }
 
@@ -33,7 +58,7 @@ export class FirebaseUserService {
     }
 
     /* Aggiunta documento a DB */
-    await this.firebaseService.addDocumentById<User>(id, this.COLLECTION, {
+    await this.documentService.addDocumentById<User>(id, this.COLLECTION, {
       ...form,
       birthDate: new Date(form.birthDate),
       defaultCode,
@@ -43,10 +68,9 @@ export class FirebaseUserService {
       createdAt: new Date(),
       updatedAt: new Date()
     });
-  }
 
-  public async getUserById(userId: string): Promise<Doc<User>> {
-    return await this.firebaseService.getDocumentById<User>(this.COLLECTION, userId, userConverter);
+    // Log
+    this.logService.addLogConfirm('Utente registrato correttamente');
   }
 
   /* --------------------------- Util ---------------------------*/

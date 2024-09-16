@@ -2,10 +2,9 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '../../service/auth.service';
-import { FirebaseUserService } from '../../service/firebase-user.service';
-import { TypeCheckerService } from '../../service/type-checker.service';
+import { UserService } from '../../service/user.service';
 import { FromMap, SignUpModel } from '../../model/form.model';
+import { FirebaseService } from '../../service/firebase.service';
 
 @Component({
   selector: 'app-sign-up',
@@ -18,9 +17,8 @@ import { FromMap, SignUpModel } from '../../model/form.model';
 export class SignUpComponent implements OnInit {
   /* Services */
   readonly router = inject(Router);
-  readonly authService = inject(AuthService);
-  readonly firebaseUserService = inject(FirebaseUserService);
-  readonly typeCheckerService = inject(TypeCheckerService);
+  readonly firebaseService = inject(FirebaseService);
+  readonly userService = inject(UserService);
 
   /* Form */
   signUpForm = new FormGroup<FromMap<SignUpModel>>({
@@ -46,16 +44,16 @@ export class SignUpComponent implements OnInit {
 
   /* ------------- Methods ------------- */
   ngOnInit(): void {
-    this.authService.logout(false);
+    this.firebaseService.logout(false);
   }
 
   /* ------------- Methods ------------- */
   protected async signUp() {
     /* Creazione utente */
-    const userCredential = await this.authService.signUp(this.signUpForm.getRawValue());
+    const userCredential = await this.firebaseService.signUp(this.signUpForm.getRawValue());
 
     /* Aggiunta utente a DB */
-    await this.firebaseUserService.addUser(userCredential.user.uid, {
+    await this.userService.addUser(userCredential.user.uid, {
       ...this.signUpForm.getRawValue()
     });
     await this.router.navigate(['/login']);

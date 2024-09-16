@@ -1,40 +1,43 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { inject, Injectable } from '@angular/core';
-import { initializeApp } from 'firebase/app';
-import { Auth, getAuth } from 'firebase/auth';
+import { inject, Injectable, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { FirebaseApp, initializeApp } from 'firebase/app';
 import {
-  doc,
-  Firestore,
-  FirestoreDataConverter,
-  getDoc,
-  getDocs,
-  getFirestore,
-  query,
-  setDoc,
-  updateDoc,
-  where
-} from 'firebase/firestore';
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+  User as FirebaseUser,
+  UserCredential,
+  Auth,
+  getAuth
+} from 'firebase/auth';
+import { Firestore, getFirestore } from 'firebase/firestore';
 import { FirebaseStorage, getStorage } from 'firebase/storage';
-import { collection as getCollection, addDoc } from 'firebase/firestore';
 import { environment } from '../../environments/environment.development';
-import { Doc } from '../model/firebase.model';
+import { LoginModel, SignUpModel } from '../model/form.model';
 import { LogService } from './log.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FirebaseService {
-  /* Services */
+  /* Variables */
+  readonly router = inject(Router);
   readonly logService = inject(LogService);
 
   /* Variables */
-  private app = initializeApp(environment.firebaseConfig);
+  private app: FirebaseApp;
   private db: Firestore;
   private storage: FirebaseStorage;
   private auth: Auth;
 
+  /* Variables */
+  userFirebase = signal<FirebaseUser | null | undefined>(undefined);
+  userFirebaseToken = signal<string | null | undefined>(undefined);
+
   /* --------------------- Constructor --------------------- */
   constructor() {
+    this.app = initializeApp(environment.firebaseConfig);
     this.db = getFirestore(this.app);
     this.storage = getStorage(this.app);
     this.auth = getAuth(this.app);
@@ -53,99 +56,47 @@ export class FirebaseService {
     return this.auth;
   }
 
-  /* --------------------- Methods READ --------------------- */
-  public async getDocumentById<T>(
-    collectionName: string,
-    id: string,
-    converter: FirestoreDataConverter<T>
-  ): Promise<Doc<T>> {
+  /* --------------------------- Auth ---------------------------*/
+  public async logIn(form: LoginModel): Promise<UserCredential> {
     try {
-      const collectionRef = getCollection(this.db, collectionName);
-      const docRef = doc(collectionRef, id).withConverter(converter);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        const data = docSnap.data() as T;
-        return { id: docSnap.id, props: data };
-      } else {
-        throw new Error('Documento non trovato');
-      }
+      const { email, password } = form;
+      return await signInWithEmailAndPassword(this.auth, email, password);
     } catch (error) {
-      this.logService.addLogError(error);
+      this.logService.addLogError(this.userFirebase()?.uid, error);
       throw error;
     }
   }
 
-  public async getAllDocuments<T>(collectionName: string): Promise<Doc<T>[]> {
+  public async logout(redirect = true): Promise<void> {
     try {
-      const collectionRef = getCollection(this.db, collectionName);
-      const querySnapshot = await getDocs(collectionRef);
-      return querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        props: doc.data() as T // Cast dei dati del documento a tipo T
-      }));
+      await signOut(this.auth);
+      if (redirect) await this.router.navigate(['/login']);
     } catch (error) {
-      this.logService.addLogError(error);
+      this.logService.addLogError(this.userFirebase()?.uid, error);
       throw error;
     }
   }
 
-  public async getDocumentByProp<T extends Record<string, any>>(
-    collectionName: string,
-    queryParam: { key: keyof T; value: any }
-  ): Promise<Doc<T> | undefined> {
+  public async signUp(form: SignUpModel): Promise<UserCredential> {
     try {
-      const collectionRef = getCollection(this.db, collectionName);
-      const q = query(collectionRef, where(queryParam.key as string, '==', queryParam.value));
-      const querySnapshot = await getDocs(q);
-      const docs = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        props: doc.data() as T
-      }));
-      return docs.length ? docs[0] : undefined;
+      const { email, password } = form;
+      return await createUserWithEmailAndPassword(this.auth, email, password);
     } catch (error) {
-      this.logService.addLogError(error);
+      this.logService.addLogError(this.userFirebase()?.uid, error);
       throw error;
     }
   }
 
-  /* --------------------- Methods CREATE --------------------- */
-  public async addDocumentById<T extends Record<string, any>>(id: string, collectionName: string, data: T) {
-    try {
-      const collectionRef = getCollection(this.db, collectionName);
-      const docRef = doc(collectionRef, id);
-      await setDoc(docRef, data);
-      return docRef;
-    } catch (error) {
-      this.logService.addLogError(error);
-      throw error;
-    }
-  }
+  public observeUserState(): void {
+    onAuthStateChanged(this.auth, async (userFirebase) => {
+      console.log(`User UID: ${userFirebase?.uid}`); // TODO: eliminare
 
-  public async addDocument<T extends Record<string, any>>(collectionName: string, data: T) {
-    try {
-      const collectionRef = getCollection(this.db, collectionName);
-      const docRef = await addDoc(collectionRef, data);
-      return docRef;
-    } catch (error) {
-      this.logService.addLogError(error);
-      throw error;
-    }
-  }
+      // User firebase
+      this.userFirebase.set(userFirebase);
 
-  /* --------------------- Methods READ --------------------- */
-  public async updateDocument<T extends Record<string, any>>(
-    id: string,
-    collectionName: string,
-    data: Partial<T>
-  ): Promise<void> {
-    try {
-      const collectionRef = getCollection(this.db, collectionName);
-      const docRef = doc(collectionRef, id);
-      await updateDoc(docRef, data as any);
-    } catch (error) {
-      this.logService.addLogError(error);
-      throw error;
-    }
+      // User firebase token
+      const userToken = await userFirebase?.getIdToken();
+      this.userFirebaseToken.set(userToken);
+    });
   }
 }

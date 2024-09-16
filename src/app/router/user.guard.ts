@@ -1,33 +1,53 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { filter } from 'rxjs/internal/operators/filter';
 import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
-import { AuthService } from '../service/auth.service';
+import { User as FirebaseUser } from 'firebase/auth';
+import { UserService } from '../service/user.service';
+import { FirebaseService } from '../service/firebase.service';
 import { UserType } from '../model/user.model';
 
 export const userGuard: CanActivateFn = async (route, state) => {
-  const authService = inject(AuthService);
   const router = inject(Router);
+  const firebaseService = inject(FirebaseService);
+  const userService = inject(UserService);
 
   try {
-    // Usa l'Observable e filtra i valori undefined
-    const user = await firstValueFrom(authService.userAsObservable());
+    // Recupera l'utente Firebase, filtrando i valori undefined
+    const userFirebase = await firstValueFrom(
+      toObservable(firebaseService.userFirebase).pipe(filter((user): user is FirebaseUser => user !== undefined))
+    );
 
-    // Verifica il tipo di utente
-    const currentUserType = user?.type;
+    // Recupera l'utente dalla tua applicazione
+    let user = await firstValueFrom(toObservable(userService.user).pipe(filter((user) => user !== undefined)));
 
-    if (state.url.startsWith('/login')) {
-      switch (currentUserType) {
-        case UserType.ADMIN:
-          await router.navigate(['/admin']);
-          break;
-        case UserType.USER:
-          await router.navigate(['/user']);
-          break;
-        default:
-          break;
-      }
+    // Se non esiste l'utente dell'app ma esiste quello Firebase, carica i suoi dati
+    if (!user && userFirebase) {
+      const fetchedUser = await userService.getUserById(userFirebase.uid);
+      user = fetchedUser.props;
     }
 
+    // Se non ci sono utenti, reindirizza al login
+    if (!user) {
+      await router.navigate(['/login']);
+      return false;
+    }
+
+    // Verifica il tipo di utente per reindirizzamenti
+    const currentUserType = user?.type;
+
+    // Gestisci la navigazione basata sul tipo di utente
+    if (state.url.startsWith('/login')) {
+      if (currentUserType === UserType.ADMIN) {
+        await router.navigate(['/admin']);
+      } else if (currentUserType === UserType.USER) {
+        await router.navigate(['/user']);
+      }
+      return false; // Impedisce l'accesso alla pagina di login se già autenticato
+    }
+
+    // Blocca l'accesso non autorizzato ad aree specifiche
     if (state.url.startsWith('/admin') && currentUserType !== UserType.ADMIN) {
       await router.navigate(['/unauthorized']);
       return false;
@@ -38,8 +58,10 @@ export const userGuard: CanActivateFn = async (route, state) => {
       return false;
     }
 
+    // Se tutte le condizioni sono soddisfatte, consenti l'accesso
     return true;
   } catch {
+    // Se si verifica un errore, reindirizza al login
     await router.navigate(['/login']);
     return false;
   }
