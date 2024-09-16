@@ -36,6 +36,30 @@ export const routes: Routes = [
           }
         ]
       },
+      {
+        path: 'challenges',
+        children: [
+          {
+            path: 'new',
+            loadComponent: () =>
+              import('../page/admin/challenge-create/challenge-create.component').then(
+                (m) => m.ChallengeCreateComponent
+              )
+          },
+          {
+            path: 'edit/:id',
+            loadComponent: () =>
+              import('../page/admin/challenge-create/challenge-create.component').then(
+                (m) => m.ChallengeCreateComponent
+              )
+          },
+          {
+            path: '',
+            loadComponent: () =>
+              import('../page/admin/challenge-list/challenge-list.component').then((m) => m.ChallengeListComponent)
+          }
+        ]
+      },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: '**', redirectTo: 'dashboard' }
     ]
