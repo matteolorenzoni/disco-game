@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@ang
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { endDateValidator } from '../../../util/utils';
-import { FirebaseEventService } from '../../../service/firebase-event.service';
+import { EventService } from '../../../service/event.service';
 import { EventModel, FromMap } from '../../../model/form.model';
 import { LogService } from './../../../service/log.service';
 
@@ -18,7 +18,7 @@ import { LogService } from './../../../service/log.service';
 export class EventCreateComponent implements OnInit {
   /* Services */
   readonly route = inject(ActivatedRoute);
-  readonly firebaseEventService = inject(FirebaseEventService);
+  readonly eventService = inject(EventService);
   readonly logService = inject(LogService);
 
   /* Variables */
@@ -64,7 +64,7 @@ export class EventCreateComponent implements OnInit {
       if (!eventId) return;
 
       this.eventId.set(params.get('id'));
-      const { props } = await this.firebaseEventService.getEventById(eventId);
+      const { props } = await this.eventService.getEventById(eventId);
       this.eventForm.setValue({
         name: props.name,
         description: props.description,
@@ -83,9 +83,9 @@ export class EventCreateComponent implements OnInit {
 
     const eventId = this.eventId();
     if (eventId) {
-      await this.firebaseEventService.updateEvent(eventId, this.eventForm.getRawValue());
+      await this.eventService.updateEvent(eventId, this.eventForm.getRawValue());
     } else {
-      await this.firebaseEventService.addEvent(this.eventForm.getRawValue());
+      await this.eventService.addEvent(this.eventForm.getRawValue());
     }
   }
 }
