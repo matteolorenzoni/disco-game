@@ -1,9 +1,8 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs/internal/operators/filter';
-import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
-import { User as FirebaseUser } from 'firebase/auth';
 import { UserService } from '../service/user.service';
 import { FirebaseService } from '../service/firebase.service';
 import { UserType } from '../model/user.model';
@@ -14,54 +13,50 @@ export const userGuard: CanActivateFn = async (route, state) => {
   const userService = inject(UserService);
 
   try {
-    // Recupera l'utente Firebase, filtrando i valori undefined
+    // Usa l'Observable di userFirebase e filtra i valori undefined
     const userFirebase = await firstValueFrom(
-      toObservable(firebaseService.userFirebase).pipe(filter((user): user is FirebaseUser => user !== undefined))
+      toObservable(firebaseService.userFirebase).pipe(filter((user) => user !== undefined))
     );
 
-    // Recupera l'utente dalla tua applicazione
-    let user = await firstValueFrom(toObservable(userService.user).pipe(filter((user) => user !== undefined)));
-
-    // Se non esiste l'utente dell'app ma esiste quello Firebase, carica i suoi dati
+    // Verifica se l'utente è già presente nel sistema, altrimenti lo recupera
+    let user = await userService.user();
     if (!user && userFirebase) {
-      const fetchedUser = await userService.getUserById(userFirebase.uid);
-      user = fetchedUser.props;
+      user = (await userService.getUserById(userFirebase.uid)).props;
     }
 
-    // Se non ci sono utenti, reindirizza al login
-    if (!user) {
-      await router.navigate(['/login']);
-      return false;
-    }
-
-    // Verifica il tipo di utente per reindirizzamenti
+    // Ottiene il tipo di utente (es. ADMIN, USER)
     const currentUserType = user?.type;
 
-    // Gestisci la navigazione basata sul tipo di utente
+    // Controlla se l'utente è già loggato e ridireziona in base al tipo di utente
     if (state.url.startsWith('/login')) {
-      if (currentUserType === UserType.ADMIN) {
-        await router.navigate(['/admin']);
-      } else if (currentUserType === UserType.USER) {
-        await router.navigate(['/user']);
+      switch (currentUserType) {
+        case UserType.ADMIN:
+          await router.navigate(['/admin']);
+          break;
+        case UserType.USER:
+          await router.navigate(['/user']);
+          break;
+        default:
+          break;
       }
-      return false; // Impedisce l'accesso alla pagina di login se già autenticato
     }
 
-    // Blocca l'accesso non autorizzato ad aree specifiche
+    // Controllo di accesso per la sezione /admin (solo per admin)
     if (state.url.startsWith('/admin') && currentUserType !== UserType.ADMIN) {
       await router.navigate(['/unauthorized']);
       return false;
     }
 
+    // Controllo di accesso per la sezione /user (solo per utenti normali)
     if (state.url.startsWith('/user') && currentUserType !== UserType.USER) {
       await router.navigate(['/unauthorized']);
       return false;
     }
 
-    // Se tutte le condizioni sono soddisfatte, consenti l'accesso
+    // Accesso permesso
     return true;
   } catch {
-    // Se si verifica un errore, reindirizza al login
+    // In caso di errore o se l'utente non è loggato, ridireziona alla pagina di login
     await router.navigate(['/login']);
     return false;
   }
