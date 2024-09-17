@@ -31,5 +31,15 @@
     </select>
   </div>
 
+  <div class="form-group">
+    <label for="startDate">Start Date</label>
+    <input id="startDate" formControlName="startDate" type="datetime-local" />
+  </div>
+
+  <div class="form-group">
+    <label for="endDate">End Date</label>
+    <input id="endDate" formControlName="endDate" type="datetime-local" />
+  </div>
+
   <button type="submit" class="btn btn-primary" [disabled]="challengeForm.invalid">Submit</button>
 </form>

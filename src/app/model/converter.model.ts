@@ -6,7 +6,8 @@ import {
   Timestamp
 } from 'firebase/firestore';
 import { ChallengePoint, User } from './user.model';
-import { Challenge, Event } from './event.model';
+import { EventChallenge, Event } from './event.model';
+import { Challenge, ChallengeStatus } from './challenge.model';
 
 /* ---------------------- Utils ---------------------- */
 // Funzione per convertire stringa ISO in oggetto Date
@@ -102,6 +103,43 @@ export const eventConverter: FirestoreDataConverter<Event> = {
         status: challenge.status
       })),
       isActive: data['isActive'],
+      createdAt: timestampToDate(data['createdAt'] as Timestamp),
+      updatedAt: timestampToDate(data['updatedAt'] as Timestamp)
+    };
+  }
+};
+
+export const challengeConverter: FirestoreDataConverter<Challenge> = {
+  toFirestore(challenge: Challenge): DocumentData {
+    return {
+      name: challenge.name,
+      description: challenge.description,
+      rules: challenge.rules,
+      points: challenge.points,
+      qrCodeUrl: challenge.qrCodeUrl,
+      complexity: challenge.complexity,
+      status: challenge.status,
+      isActive: challenge.isActive,
+      startDate: dateToString(challenge.startDate),
+      endDate: dateToString(challenge.endDate),
+      createdAt: dateToString(challenge.createdAt),
+      updatedAt: dateToString(challenge.updatedAt)
+    };
+  },
+
+  fromFirestore(snapshot: QueryDocumentSnapshot<DocumentData>, options: SnapshotOptions): Challenge {
+    const data = snapshot.data(options)!;
+    return {
+      name: data['name'],
+      description: data['description'],
+      rules: data['rules'],
+      points: data['points'],
+      qrCodeUrl: data['qrCodeUrl'],
+      complexity: data['complexity'],
+      status: data['status'] as ChallengeStatus,
+      isActive: data['isActive'],
+      startDate: timestampToDate(data['startDate'] as Timestamp),
+      endDate: timestampToDate(data['endDate'] as Timestamp),
       createdAt: timestampToDate(data['createdAt'] as Timestamp),
       updatedAt: timestampToDate(data['updatedAt'] as Timestamp)
     };
