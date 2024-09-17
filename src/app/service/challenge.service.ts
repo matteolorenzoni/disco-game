@@ -26,7 +26,6 @@ export class ChallengeService {
   public async addChallenge(form: ChallengeModel): Promise<void> {
     await this.documentService.addDocument<Challenge>(this.COLLECTION, {
       ...form,
-      qrCodeUrl: '',
       isActive: true,
       startDate: new Date(form.startDate),
       endDate: new Date(form.endDate),

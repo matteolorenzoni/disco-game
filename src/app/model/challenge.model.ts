@@ -4,7 +4,6 @@ export type Challenge = {
   description: string; // Descrizione della sfida
   rules: string; // Regole della sfida
   points: number; // Punti assegnati per il completamento della sfida
-  qrCodeUrl: string; // URL per il QR code della sfida
   complexity: number; // Complessità della sfida, da 1 (facile) a 5 (difficile)
   status: ChallengeStatus; // Stato della sfida
   isActive: boolean; // Per soft delete
