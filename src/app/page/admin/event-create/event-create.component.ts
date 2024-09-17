@@ -35,20 +35,16 @@ export class EventCreateComponent implements OnInit {
         nonNullable: true,
         validators: [Validators.required, Validators.maxLength(500)]
       }),
-      startDate: new FormControl('', {
-        nonNullable: true,
-        validators: [Validators.required]
-      }),
-      endDate: new FormControl('', {
-        nonNullable: true,
-        validators: [Validators.required]
-      }),
       location: new FormControl('', {
         nonNullable: true,
         validators: [Validators.required, Validators.maxLength(200)]
       }),
       imageUrl: new FormControl<string | null>(null),
-      isActive: new FormControl(true, {
+      startDate: new FormControl('', {
+        nonNullable: true,
+        validators: [Validators.required]
+      }),
+      endDate: new FormControl('', {
         nonNullable: true,
         validators: [Validators.required]
       })
@@ -68,11 +64,10 @@ export class EventCreateComponent implements OnInit {
       this.eventForm.setValue({
         name: props.name,
         description: props.description,
-        startDate: formatDate(props.startDate, 'yyyy-MM-dd HH:mm:ss', 'it'),
-        endDate: formatDate(props.endDate, 'yyyy-MM-dd HH:mm:ss', 'it'),
         location: props.location,
         imageUrl: props.imageUrl,
-        isActive: props.isActive
+        startDate: formatDate(props.startDate, 'yyyy-MM-dd HH:mm:ss', 'it'),
+        endDate: formatDate(props.endDate, 'yyyy-MM-dd HH:mm:ss', 'it')
       });
     });
   }
@@ -82,10 +77,11 @@ export class EventCreateComponent implements OnInit {
     if (this.eventForm.invalid) return;
 
     const eventId = this.eventId();
+    const form = this.eventForm.getRawValue();
     if (eventId) {
-      await this.eventService.updateEvent(eventId, this.eventForm.getRawValue());
+      await this.eventService.updateEvent(eventId, form);
     } else {
-      await this.eventService.addEvent(this.eventForm.getRawValue());
+      await this.eventService.addEvent(form);
     }
   }
 }

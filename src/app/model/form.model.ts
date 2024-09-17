@@ -22,11 +22,11 @@ export type SignUpModel = {
 export type EventModel = {
   name: string;
   description: string;
-  startDate: string;
-  endDate: string;
+
   location: string;
   imageUrl: string | null;
-  isActive: boolean;
+  startDate: string;
+  endDate: string;
 };
 
 export type ChallengeModel = {

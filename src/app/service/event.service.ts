@@ -26,9 +26,10 @@ export class EventService {
   public async addEvent(form: EventModel): Promise<void> {
     await this.documentService.addDocument<Event>(this.COLLECTION, {
       ...form,
+      challenges: [],
+      isActive: true,
       startDate: new Date(form.startDate),
       endDate: new Date(form.endDate),
-      challenges: [],
       createdAt: new Date(),
       updatedAt: new Date()
     });
