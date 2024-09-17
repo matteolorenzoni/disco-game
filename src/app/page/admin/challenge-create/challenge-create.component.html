@@ -1,2 +1,35 @@
-<p>challenge-create works!</p>
-,
+<form [formGroup]="challengeForm" (ngSubmit)="addOrUpdateChallenge()">
+  <div class="form-group">
+    <label for="name">Name:</label>
+    <input id="name" formControlName="name" />
+  </div>
+
+  <div class="form-group">
+    <label for="description">Description:</label>
+    <textarea id="description" formControlName="description"></textarea>
+  </div>
+
+  <div class="form-group">
+    <label for="rules">Rules:</label>
+    <textarea id="rules" formControlName="rules"></textarea>
+  </div>
+
+  <div class="form-group">
+    <label for="points">Points:</label>
+    <input id="points" formControlName="points" type="number" />
+  </div>
+
+  <div class="form-group">
+    <label for="complexity">Complexity (1-5):</label>
+    <input id="complexity" formControlName="complexity" type="number" min="1" max="5" step=".1" />
+  </div>
+
+  <div class="form-group">
+    <label for="status">Status:</label>
+    <select id="status" formControlName="status">
+      <option *ngFor="let status of challengeStatuses" [value]="status">{{ status }}</option>
+    </select>
+  </div>
+
+  <button type="submit" class="btn btn-primary" [disabled]="challengeForm.invalid">Submit</button>
+</form>
