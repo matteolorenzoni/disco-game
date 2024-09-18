@@ -72,6 +72,21 @@ export const routes: Routes = [
         path: 'dashboard',
         loadComponent: () => import('../page/user/dashboard/dashboard.component').then((m) => m.DashboardComponent)
       },
+      {
+        path: 'teams',
+        children: [
+          {
+            path: 'new',
+            loadComponent: () =>
+              import('../page/user/team-create/team-create.component').then((m) => m.TeamCreateComponent)
+          },
+          {
+            path: 'edit/:id',
+            loadComponent: () =>
+              import('../page/user/team-create/team-create.component').then((m) => m.TeamCreateComponent)
+          }
+        ]
+      },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: '**', redirectTo: 'dashboard' }
     ]

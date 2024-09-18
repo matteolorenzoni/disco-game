@@ -8,6 +8,7 @@ import {
 import { ChallengePoint, User } from './user.model';
 import { EventChallenge, Event } from './event.model';
 import { Challenge, ChallengeStatus } from './challenge.model';
+import { Team, TeamStatus } from './team.model';
 
 /* ---------------------- Utils ---------------------- */
 // Funzione per convertire stringa ISO in oggetto Date
@@ -136,6 +137,39 @@ export const challengeConverter: FirestoreDataConverter<Challenge> = {
       isActive: data['isActive'],
       startDate: timestampToDate(data['startDate'] as Timestamp),
       endDate: timestampToDate(data['endDate'] as Timestamp),
+      createdAt: timestampToDate(data['createdAt'] as Timestamp),
+      updatedAt: timestampToDate(data['updatedAt'] as Timestamp)
+    };
+  }
+};
+
+export const teamConverter: FirestoreDataConverter<Team> = {
+  toFirestore(team: Team): DocumentData {
+    return {
+      userId: team.userId,
+      eventId: team.eventId,
+      name: team.name,
+      description: team.description,
+      imageUrl: team.imageUrl,
+      status: team.status,
+      memberIds: team.memberIds,
+      isActive: team.isActive,
+      createdAt: dateToString(team.createdAt),
+      updatedAt: dateToString(team.updatedAt)
+    };
+  },
+
+  fromFirestore(snapshot: QueryDocumentSnapshot<DocumentData>, options: SnapshotOptions): Team {
+    const data = snapshot.data(options)!;
+    return {
+      userId: data['userId'],
+      eventId: data['eventId'],
+      name: data['name'],
+      description: data['description'],
+      imageUrl: data['imageUrl'] || null,
+      status: data['status'] as TeamStatus,
+      memberIds: data['memberIds'] || [],
+      isActive: data['isActive'],
       createdAt: timestampToDate(data['createdAt'] as Timestamp),
       updatedAt: timestampToDate(data['updatedAt'] as Timestamp)
     };
