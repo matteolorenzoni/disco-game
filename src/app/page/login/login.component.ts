@@ -36,7 +36,7 @@ export class LoginComponent implements OnInit {
 
   /* ------------- Methods ------------- */
   public async login(): Promise<void> {
-    if (this.loginForm.invalid) return;
+    if (this.loginForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
 
     // Operation
     const userCredentials = await this.firebaseService.logIn(this.loginForm.getRawValue());
@@ -49,9 +49,7 @@ export class LoginComponent implements OnInit {
         await this.router.navigate(['/user/dashboard']);
         break;
       default:
-        throw new Error(
-          "L'utente registrato è stato trovato ma non esiste un documento associato. Contattare il supporto per assistenza."
-        );
+        throw new Error('noUserDocument', { cause: 'noUserDocument' });
     }
 
     // Log

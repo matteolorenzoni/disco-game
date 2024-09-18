@@ -39,7 +39,7 @@ export class FirebaseDocumentService {
         const data = docSnap.data() as T;
         return { id: docSnap.id, props: data };
       } else {
-        throw new Error('Documento non trovato');
+        throw new Error('noDocument', { cause: 'noDocument' });
       }
     } catch (error) {
       this.logService.addLogError(this.firebaseService.userFirebase()?.uid, error);

@@ -68,9 +68,9 @@ export class ChallengeCreateComponent implements OnInit {
     // Recupera l'ID dalla route
     this.route.paramMap.subscribe(async (params) => {
       const challengeId = params.get('id');
+      this.challengeId.set(params.get('id'));
       if (!challengeId) return;
 
-      this.challengeId.set(params.get('id'));
       const { props } = await this.challengeService.getChallengeById(challengeId);
       this.challengeForm.setValue({
         name: props.name,
@@ -87,7 +87,7 @@ export class ChallengeCreateComponent implements OnInit {
 
   /* ------------------------ Methods ------------------------ */
   protected async addOrUpdateChallenge(): Promise<void> {
-    if (this.challengeForm.invalid) return;
+    if (this.challengeForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
 
     const challengeId = this.challengeId();
     const form = this.challengeForm.getRawValue();

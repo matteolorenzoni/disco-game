@@ -39,11 +39,11 @@ export class LogService {
   /* Variables */
   logs = signal<Log[]>([]);
 
-  public addLogConfirm(message: string): void {
-    this.addLog(LogType.OK, message);
+  public addLogConfirm(message: string, hide = true): void {
+    this.addLog(LogType.OK, message, hide);
   }
 
-  public addLogError(userId: string | undefined, error: unknown): void {
+  public addLogError(userId: string | undefined, error: unknown, hide = true): void {
     console.log(userId);
 
     let message = '';
@@ -55,11 +55,11 @@ export class LogService {
       message = error;
     }
 
-    this.addLog(LogType.ERROR, message);
+    this.addLog(LogType.ERROR, message, hide);
   }
 
   /* ------------------ Utils ------------------ */
-  public addLog(type: LogType, message: string): void {
+  public addLog(type: LogType, message: string, hide: boolean): void {
     // Usa timestamp come ID
     const id = Date.now();
 
@@ -67,7 +67,7 @@ export class LogService {
     this.logs.update((logs) => [...logs, { type, message, id }]);
 
     // Rimuovi il log dopo 3 secondi
-    setTimeout(() => this.removeLog(id), 3000);
+    if (hide) setTimeout(() => this.removeLog(id), 3000);
   }
 
   // Metodo per rimuovere il log per ID

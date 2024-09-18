@@ -57,9 +57,9 @@ export class EventCreateComponent implements OnInit {
     // Recupera l'ID dalla route
     this.route.paramMap.subscribe(async (params) => {
       const eventId = params.get('id');
+      this.eventId.set(params.get('id'));
       if (!eventId) return;
 
-      this.eventId.set(params.get('id'));
       const { props } = await this.eventService.getEventById(eventId);
       this.eventForm.setValue({
         name: props.name,
@@ -74,7 +74,7 @@ export class EventCreateComponent implements OnInit {
 
   /* ------------------------ Methods ------------------------ */
   protected async addOrUpdateEvent(): Promise<void> {
-    if (this.eventForm.invalid) return;
+    if (this.eventForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
 
     const eventId = this.eventId();
     const form = this.eventForm.getRawValue();
