@@ -20,19 +20,19 @@ export const routes: Routes = [
         path: 'events',
         children: [
           {
+            path: '',
+            loadComponent: () =>
+              import('../page/admin/event-list/event-list.component').then((m) => m.EventListComponent)
+          },
+          {
             path: 'new',
             loadComponent: () =>
               import('../page/admin/event-create/event-create.component').then((m) => m.EventCreateComponent)
           },
           {
-            path: 'edit/:id',
+            path: ':id',
             loadComponent: () =>
               import('../page/admin/event-create/event-create.component').then((m) => m.EventCreateComponent)
-          },
-          {
-            path: '',
-            loadComponent: () =>
-              import('../page/admin/event-list/event-list.component').then((m) => m.EventListComponent)
           }
         ]
       },
@@ -40,6 +40,11 @@ export const routes: Routes = [
         path: 'challenges',
         children: [
           {
+            path: '',
+            loadComponent: () =>
+              import('../page/admin/challenge-list/challenge-list.component').then((m) => m.ChallengeListComponent)
+          },
+          {
             path: 'new',
             loadComponent: () =>
               import('../page/admin/challenge-create/challenge-create.component').then(
@@ -47,16 +52,11 @@ export const routes: Routes = [
               )
           },
           {
-            path: 'edit/:id',
+            path: ':id',
             loadComponent: () =>
               import('../page/admin/challenge-create/challenge-create.component').then(
                 (m) => m.ChallengeCreateComponent
               )
-          },
-          {
-            path: '',
-            loadComponent: () =>
-              import('../page/admin/challenge-list/challenge-list.component').then((m) => m.ChallengeListComponent)
           }
         ]
       },
@@ -74,20 +74,26 @@ export const routes: Routes = [
       },
       {
         path: 'events',
-        loadComponent: () => import('../page/admin/event-list/event-list.component').then((m) => m.EventListComponent)
-      },
-      {
-        path: ':eventId/teams',
         children: [
           {
-            path: 'new',
+            path: '',
             loadComponent: () =>
-              import('../page/user/team-create/team-create.component').then((m) => m.TeamCreateComponent)
+              import('../page/admin/event-list/event-list.component').then((m) => m.EventListComponent)
           },
           {
-            path: 'edit/:teamId',
-            loadComponent: () =>
-              import('../page/user/team-create/team-create.component').then((m) => m.TeamCreateComponent)
+            path: ':eventId/teams',
+            children: [
+              {
+                path: 'new',
+                loadComponent: () =>
+                  import('../page/user/team-create/team-create.component').then((m) => m.TeamCreateComponent)
+              },
+              {
+                path: ':teamId',
+                loadComponent: () =>
+                  import('../page/user/team-create/team-create.component').then((m) => m.TeamCreateComponent)
+              }
+            ]
           }
         ]
       },
