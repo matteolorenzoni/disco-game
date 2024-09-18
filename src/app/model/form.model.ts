@@ -22,7 +22,6 @@ export type SignUpModel = {
 export type EventModel = {
   name: string;
   description: string;
-
   location: string;
   imageUrl: string | null;
   startDate: string;
@@ -38,4 +37,10 @@ export type ChallengeModel = {
   status: ChallengeStatus;
   startDate: string;
   endDate: string;
+};
+
+export type TeamModel = {
+  name: string;
+  description: string;
+  imageUrl: string | null;
 };

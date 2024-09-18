@@ -8,7 +8,7 @@ export type User = {
   type: UserType;
   birthDate: Date; // Data di nascita dell'utente
   challengePoints: ChallengePoint[]; // Lista delle sfide completate
-  isActive: boolean; // Se il documento è attivo
+  isActive: boolean; // Per soft delete
   createdAt: Date; // Data di creazione dell'account
   updatedAt: Date; // Data dell'ultimo aggiornamento dell'account
 };
