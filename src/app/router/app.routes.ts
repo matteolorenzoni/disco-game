@@ -73,7 +73,11 @@ export const routes: Routes = [
         loadComponent: () => import('../page/user/dashboard/dashboard.component').then((m) => m.DashboardComponent)
       },
       {
-        path: 'teams',
+        path: 'events',
+        loadComponent: () => import('../page/admin/event-list/event-list.component').then((m) => m.EventListComponent)
+      },
+      {
+        path: ':eventId/teams',
         children: [
           {
             path: 'new',
@@ -81,7 +85,7 @@ export const routes: Routes = [
               import('../page/user/team-create/team-create.component').then((m) => m.TeamCreateComponent)
           },
           {
-            path: 'edit/:id',
+            path: 'edit/:teamId',
             loadComponent: () =>
               import('../page/user/team-create/team-create.component').then((m) => m.TeamCreateComponent)
           }

@@ -23,11 +23,12 @@ export class TeamService {
   }
 
   /* --------------------------- Create ---------------------------*/
-  public async addTeam(form: TeamModel): Promise<void> {
+  public async addTeam(userId: string, defaultCode: string, eventId: string, form: TeamModel): Promise<void> {
     await this.documentService.addDocument<Team>(this.COLLECTION, {
       ...form,
-      userId: '',
-      eventId: '',
+      userId,
+      eventId,
+      defaultCode,
       status: TeamStatus.ACTIVE,
       memberIds: [],
       isActive: true,

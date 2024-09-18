@@ -5,6 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { LogService } from '../../../service/log.service';
 import { TeamService } from '../../../service/team.service';
 import { FromMap, TeamModel } from '../../../model/form.model';
+import { UserService } from '../../../service/user.service';
 
 @Component({
   selector: 'app-team-create',
@@ -17,10 +18,12 @@ import { FromMap, TeamModel } from '../../../model/form.model';
 export class TeamCreateComponent implements OnInit {
   /* Services */
   readonly route = inject(ActivatedRoute);
+  readonly userService = inject(UserService);
   readonly teamService = inject(TeamService);
   readonly logService = inject(LogService);
 
   /* Variables */
+  eventId = signal<string | null>(null);
   teamId = signal<string | null>(null);
 
   /* Form */
@@ -40,10 +43,14 @@ export class TeamCreateComponent implements OnInit {
   ngOnInit(): void {
     // Recupera l'ID dalla route
     this.route.paramMap.subscribe(async (params) => {
-      const teamId = params.get('id');
+      const eventId = params.get('eventId');
+      this.eventId.set(eventId);
+      if (!eventId) throw new Error('retry', { cause: 'retry' });
+
+      const teamId = params.get('teamId');
+      this.teamId.set(teamId);
       if (!teamId) return;
 
-      this.teamId.set(params.get('id'));
       const { props } = await this.teamService.getTeamById(teamId);
       this.teamForm.setValue({
         name: props.name,
@@ -55,14 +62,19 @@ export class TeamCreateComponent implements OnInit {
 
   /* ------------------------ Methods ------------------------ */
   protected async addOrUpdateTeam(): Promise<void> {
-    if (this.teamForm.invalid) return;
+    if (this.teamForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
+
+    const userId = this.userService.userId();
+    const user = await this.userService.user();
+    const eventId = this.eventId();
+    if (!userId || !user || !eventId) throw new Error('retry', { cause: 'retry' });
 
     const teamId = this.teamId();
     const form = this.teamForm.getRawValue();
     if (teamId) {
       await this.teamService.updateTeam(teamId, form);
     } else {
-      await this.teamService.addTeam(form);
+      await this.teamService.addTeam(userId, user.defaultCode, eventId, form);
     }
   }
 }

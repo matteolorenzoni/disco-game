@@ -19,18 +19,19 @@ export class UserService {
   readonly logService = inject(LogService);
 
   /* Variables */
+  userId = computed(() => this.firebaseService.userFirebase()?.uid);
   user = computed(async () => {
-    const userFirebase = this.firebaseService.userFirebase();
+    const userId = this.userId();
     try {
       // User
-      if (userFirebase && window.location.pathname !== '/sign-up') {
-        const user = await this.getUserById(userFirebase.uid);
+      if (userId && window.location.pathname !== '/sign-up') {
+        const user = await this.getUserById(userId);
         return user.props;
       } else {
         return null;
       }
     } catch (error) {
-      this.logService.addLogError(userFirebase?.uid, error);
+      this.logService.addLogError(userId, error);
       throw error;
     }
   });
