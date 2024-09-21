@@ -32,6 +32,7 @@ export type ChallengeModel = {
   name: string;
   description: string;
   rules: string;
+  imageUrl: string | null;
   points: number;
   maxTimes: number | null;
   complexity: number;

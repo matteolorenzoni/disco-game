@@ -3,6 +3,7 @@ export type Challenge = {
   name: string;
   description: string; // Descrizione della sfida
   rules: string; // Regole della sfida
+  imageUrl: string | null; // URL immagine
   points: number; // Punti assegnati per il completamento della sfida
   maxTimes: number | null; // NUmero di volte che una sfida può essere ripetuta
   complexity: number; // Complessità della sfida, da 1 (facile) a 5 (difficile)

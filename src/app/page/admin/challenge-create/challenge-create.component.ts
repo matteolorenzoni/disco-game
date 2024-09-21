@@ -41,6 +41,7 @@ export class ChallengeCreateComponent implements OnInit {
       nonNullable: true,
       validators: [Validators.required]
     }),
+    imageUrl: new FormControl<string | null>(null),
     points: new FormControl(0, {
       nonNullable: true,
       validators: [Validators.required, Validators.min(0)]
@@ -79,6 +80,7 @@ export class ChallengeCreateComponent implements OnInit {
         name: props.name,
         description: props.description,
         rules: props.rules,
+        imageUrl: props.imageUrl,
         points: props.points,
         maxTimes: props.maxTimes,
         complexity: props.complexity,
