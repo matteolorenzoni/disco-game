@@ -9,7 +9,9 @@ import {
   User as FirebaseUser,
   UserCredential,
   Auth,
-  getAuth
+  getAuth,
+  setPersistence,
+  browserLocalPersistence
 } from 'firebase/auth';
 import { Firestore, getFirestore } from 'firebase/firestore';
 import { FirebaseStorage, getStorage } from 'firebase/storage';
@@ -60,6 +62,7 @@ export class FirebaseService {
   public async logIn(form: LoginModel): Promise<UserCredential> {
     try {
       const { email, password } = form;
+      await setPersistence(this.auth, browserLocalPersistence);
       return await signInWithEmailAndPassword(this.auth, email, password);
     } catch (error) {
       this.logService.addLogError(this.userFirebase()?.uid, error);
