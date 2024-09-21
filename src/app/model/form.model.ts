@@ -33,6 +33,7 @@ export type ChallengeModel = {
   description: string;
   rules: string;
   points: number;
+  maxTimes: number | null;
   complexity: number;
   status: ChallengeStatus;
   startDate: string;

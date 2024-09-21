@@ -4,6 +4,7 @@ export type Challenge = {
   description: string; // Descrizione della sfida
   rules: string; // Regole della sfida
   points: number; // Punti assegnati per il completamento della sfida
+  maxTimes: number | null; // NUmero di volte che una sfida può essere ripetuta
   complexity: number; // Complessità della sfida, da 1 (facile) a 5 (difficile)
   status: ChallengeStatus; // Stato della sfida
   isActive: boolean; // Per soft delete

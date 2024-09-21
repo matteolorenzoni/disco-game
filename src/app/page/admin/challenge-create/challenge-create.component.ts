@@ -49,6 +49,9 @@ export class ChallengeCreateComponent implements OnInit {
       nonNullable: true,
       validators: [Validators.required]
     }),
+    maxTimes: new FormControl(null, {
+      validators: [Validators.min(1)]
+    }),
     complexity: new FormControl(1, {
       nonNullable: true,
       validators: [Validators.required, Validators.min(1), Validators.max(5)]
@@ -77,6 +80,7 @@ export class ChallengeCreateComponent implements OnInit {
         description: props.description,
         rules: props.rules,
         points: props.points,
+        maxTimes: props.maxTimes,
         complexity: props.complexity,
         status: props.status,
         startDate: formatDate(props.startDate, 'yyyy-MM-dd HH:mm:ss', 'it'),
@@ -89,12 +93,14 @@ export class ChallengeCreateComponent implements OnInit {
   protected async addOrUpdateChallenge(): Promise<void> {
     if (this.challengeForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
 
-    const challengeId = this.challengeId();
-    const form = this.challengeForm.getRawValue();
-    if (challengeId) {
-      await this.challengeService.updateChallenge(challengeId, form);
-    } else {
-      await this.challengeService.addChallenge(form);
-    }
+    console.log(this.challengeForm.getRawValue());
+
+    // const challengeId = this.challengeId();
+    // const form = this.challengeForm.getRawValue();
+    // if (challengeId) {
+    //   await this.challengeService.updateChallenge(challengeId, form);
+    // } else {
+    //   await this.challengeService.addChallenge(form);
+    // }
   }
 }
