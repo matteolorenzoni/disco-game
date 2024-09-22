@@ -44,15 +44,26 @@ export class UserService {
     return await this.documentService.getDocumentById<User>(this.COLLECTION, userId, userConverter);
   }
 
-  private async getUserCodes(): Promise<string[]> {
-    const users = await this.documentService.getAllDocuments<User>(this.COLLECTION);
-    return users.map((user) => user.props.defaultCode);
+  private async getUsers(): Promise<Doc<User>[]> {
+    return await this.documentService.getAllDocuments<User>(this.COLLECTION);
   }
 
   /* --------------------------- Create ---------------------------*/
   public async addUser(id: string, form: SignUpModel, imageUrl: string | null): Promise<void> {
     /* Generazione un codice univoco */
-    const codes = await this.getUserCodes();
+    const userDocs = await this.getUsers();
+    const { usernames, codes } = userDocs.reduce(
+      (acc, cur) => ({
+        usernames: [...acc.usernames, cur.props.username.toLowerCase()],
+        codes: [...acc.codes, cur.props.defaultCode]
+      }),
+      { usernames: [] as string[], codes: [] as string[] }
+    );
+
+    if (usernames.includes(form.username.toLowerCase())) {
+      throw new Error('usernameNotAvailable', { cause: 'usernameNotAvailable' });
+    }
+
     let defaultCode = this.generateRandomCode(6);
     while (codes.length < 2_000_000 && codes.includes(defaultCode)) {
       defaultCode = this.generateRandomCode(6);

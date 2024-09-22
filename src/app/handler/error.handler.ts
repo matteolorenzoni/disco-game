@@ -7,7 +7,8 @@ const errorMessages: Record<string, string> = {
   formNotValid: 'I valori inseriti non sono validi. Controlla i campi evidenziati e riprova.',
   noUserDocument:
     "L'utente registrato è stato trovato ma non esiste un documento associato. Contattare il supporto per assistenza.",
-  noDocument: 'Documento non trovato. Contattare il supporto per assistenza.'
+  noDocument: 'Documento non trovato. Contattare il supporto per assistenza.',
+  usernameNotAvailable: "L'username scelto non è disponibile, si prega di sceglierne un altro."
 };
 
 @Injectable()
