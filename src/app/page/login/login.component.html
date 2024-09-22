@@ -1,24 +1,93 @@
-<form [formGroup]="loginForm" (ngSubmit)="login()">
-  <div>
-    <label for="email">Email</label>
-    <input id="email" formControlName="email" type="email" />
-    <!-- <div *ngIf="f.email.touched && f.email.invalid">
-      <div *ngIf="f.email.errors?.required">Email is required</div>
-      <div *ngIf="f.email.errors?.email">Invalid email format</div>
-    </div> -->
+<div [style.grid-area]="'container_welcome'" class="container_welcome">
+  <div [style.grid-area]="'container_welcome'" class="container_welcome"></div>
+  <p>La notte è tua: accetta la sfida e conquista la discoteca con la tua squadra</p>
+  <div class="container_buttons">
+    <button
+      type="button"
+      class="inline-block w-full rounded-full bg-primary-500 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-on-primary shadow-primary-50 transition duration-150 ease-in-out hover:bg-primary-600 active:bg-primary-700 motion-reduce:transition-none"
+      (click)="setPage($event, 'login')">
+      Entra
+    </button>
+
+    <button
+      type="button"
+      class="inline-block w-full rounded-full bg-primary-100 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-on-secondary shadow-primary-50 transition duration-150 ease-in-out hover:bg-primary-200 active:bg-primary-300 motion-reduce:transition-none"
+      (click)="setPage($event, 'signup')">
+      Registrati
+    </button>
+  </div>
+</div>
+
+<section [@loginFormAnimation]="page() === 'login' ? 'center' : 'bottom'" class="container_form bg-secondary-500">
+  <div class="flex flex-col gap-1 text-center">
+    <h3 class="text-4xl font-semibold text-primary-400">Ben tornato!</h3>
+    <p class="text-sm text-primary-300">Accedi al tuo account</p>
   </div>
 
-  <div>
-    <label for="password">Password</label>
-    <input id="password" formControlName="password" type="password" />
-    <!-- <div *ngIf="f.password.touched && f.password.invalid">
-      <div *ngIf="f.password.errors?.required">Password is required</div>
-      <div *ngIf="f.password.errors?.minlength">Password must be at least 6 characters long</div>
-    </div> -->
-  </div>
+  <form [formGroup]="loginForm" (ngSubmit)="login()">
+    <div class="relative h-10">
+      <input
+        type="email"
+        class="ease h-full w-full rounded-md border border-primary-500 bg-transparent p-2 pl-10 text-sm text-primary-700 shadow-sm transition duration-300 placeholder:text-slate-400 hover:border-primary-700 focus:border-primary-800 focus:shadow focus:outline-none"
+        placeholder="Email"
+        formControlName="email" />
+      <div
+        class="absolute left-1 top-1 h-8 w-8 rounded border border-transparent bg-primary-500 p-1 text-center text-sm text-white shadow-sm transition-all">
+        <fa-icon [icon]="faUser"></fa-icon>
+      </div>
+    </div>
 
-  <button type="submit" [disabled]="loginForm.invalid">Login</button>
-</form>
+    <div class="relative h-10">
+      <input
+        type="password"
+        class="ease h-full w-full rounded-md border border-primary-500 bg-transparent p-2 pl-10 text-sm text-primary-700 shadow-sm transition duration-300 placeholder:text-slate-400 hover:border-primary-700 focus:border-primary-800 focus:shadow focus:outline-none"
+        placeholder="Password"
+        formControlName="password" />
+      <div
+        class="absolute left-1 top-1 h-8 w-8 rounded border border-transparent bg-primary-500 p-1 text-center text-sm text-white shadow-sm transition-all">
+        <fa-icon [icon]="faLock"></fa-icon>
+      </div>
+    </div>
 
-<p>Non hai un account? <a href="./sign-up">Registrati</a></p>
-<button>Password dimenticata?</button>
+    <div class="flex justify-between">
+      <div class="inline-flex items-center">
+        <label class="relative flex cursor-pointer items-center" for="check">
+          <input
+            id="check"
+            type="checkbox"
+            class="peer h-5 w-5 cursor-pointer appearance-none rounded border border-slate-300 shadow transition-all checked:border-primary-500 checked:bg-primary-500 hover:shadow-md" />
+          <span
+            class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform text-white opacity-0 peer-checked:opacity-100">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-3.5 w-3.5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              stroke="currentColor"
+              stroke-width="1">
+              <path
+                fill-rule="evenodd"
+                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                clip-rule="evenodd"></path>
+            </svg>
+          </span>
+        </label>
+        <label class="ml-2 cursor-pointer text-sm text-slate-600" for="check-2"> Ricordami </label>
+      </div>
+
+      <a href="./restore-password" class="text-sm text-primary-500 hover:underline">Password dimentica?</a>
+    </div>
+
+    <button
+      type="submit"
+      class="mt-16 inline-block w-full rounded-full bg-primary-500 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-on-primary shadow-primary-50 transition duration-150 ease-in-out hover:bg-primary-600 active:bg-primary-700 disabled:cursor-not-allowed disabled:bg-primary-100 disabled:text-primary-200"
+      [disabled]="loginForm.invalid"
+      (click)="setPage($event, 'login')">
+      Login
+    </button>
+  </form>
+
+  <p class="text-sm text-primary-300">
+    Non hai un account? <a href="./sign-up" class="font-bold text-primary-500 hover:underline">Registrati</a>
+  </p>
+</section>

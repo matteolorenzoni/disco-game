@@ -1,8 +1,8 @@
-import { FvToastComponent } from './components/fv-toast.component';
-import { LogService } from './service/log.service';
 import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { FirebaseService } from './service/firebase.service';
+import { LogService } from './service/log.service';
+import { FvToastComponent } from './components/fv-toast.component';
 
 @Component({
   selector: 'app-root',

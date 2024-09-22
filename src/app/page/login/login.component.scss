@@ -1,133 +1,67 @@
-// Variabili per il tema chiaro
-$primary-color: #007bff;
-$secondary-color: #6c757d;
-$background-color: #f8f9fa;
-$border-color: #ced4da;
-$border-radius: 8px;
-$shadow-color: rgba(0, 0, 0, 0.1);
-$input-padding: 0.75rem;
-$input-font-size: 1rem;
-$button-padding: 0.75rem 1.5rem;
-
 :host {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  display: grid;
+  grid-template-rows: 1fr 2fr;
+  grid-template-areas: '.' 'container_welcome';
+  gap: var(--gap-m);
+  padding: var(--padding-m);
+  overflow: hidden;
+
+  background-image: url('../../../assets/images/welcome1.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.container_welcome {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: 100%;
-  background-color: #f8f9fa;
-  padding: 1rem;
-}
+  justify-content: space-around;
+  gap: var(--gap-m);
+  color: #fff;
 
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  width: 100%;
-  max-width: 400px;
+  p {
+    text-align: center;
+    font-size: 1.2rem; /* Font leggermente più grande */
+    font-weight: 700; /* Maggiore enfasi */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Ombra per migliorare la leggibilità */
+  }
 
-  div {
+  .container_buttons {
+    width: 80%;
+
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--gap-m);
 
-    &.input-container {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    label {
-      font-weight: bold;
-      color: #007bff;
-      margin-bottom: 0.25rem; // Spazio tra l'etichetta e l'input
-    }
-
-    input {
-      width: 100%; // Assicura che l'input si adatti al contenitore
-      padding: 0.75rem;
-      border: 1px solid #ced4da;
-      border-radius: 8px;
-      font-size: 1rem;
-      box-sizing: border-box; // Assicura che il padding e il bordo siano inclusi nella larghezza
-      transition:
-        border-color 0.3s,
-        box-shadow 0.3s;
-
-      &:focus {
-        border-color: #007bff;
-        outline: none;
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-      }
-    }
-
-    .error-message {
-      font-size: 0.875rem;
-      color: #dc3545;
-    }
-  }
-
-  button[type='submit'] {
-    background-color: #007bff;
-    border: none;
-    color: #fff;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition:
-      background-color 0.3s,
-      box-shadow 0.3s;
-    width: 100%; // Assicura che il pulsante si adatti al contenitore
-
-    &:hover {
-      background-color: darken(#007bff, 10%);
-      box-shadow: 0 0 0 0.1rem rgba(0, 123, 255, 0.5);
-    }
-
-    &:disabled {
-      background-color: #6c757d;
-      cursor: not-allowed;
+    fv-buttons {
+      width: 100%;
     }
   }
 }
 
-p {
-  text-align: center;
-  margin-top: 1.5rem;
-
-  a {
-    color: #007bff;
-    text-decoration: none;
-    font-weight: bold;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-}
-
-button {
-  display: block;
+.container_form {
+  position: absolute;
+  left: 0;
+  bottom: -100vh;
+  height: fit-content;
   width: 100%;
-  background-color: transparent;
-  border: none;
-  color: #007bff;
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  cursor: pointer;
-  transition:
-    color 0.3s,
-    background-color 0.3s;
+  display: grid;
+  grid-template-rows: min-content 1fr min-content;
+  justify-items: center;
+  gap: calc(var(--gap-m) * 2);
+  padding: calc(var(--padding-m) * 2);
+  border-top-left-radius: calc(var(--padding-m) * 2);
+  border-top-right-radius: calc(var(--padding-m) * 2);
 
-  &:hover {
-    color: darken(#007bff, 10%);
-    background-color: rgba(0, 123, 255, 0.1);
-  }
-}
-
-::ng-deep {
-  body {
-    margin: 0;
+  form {
+    width: 100%;
+    max-width: 600px;
+    display: grid;
+    grid-template-rows: repeat(3, min-content) 1fr;
+    gap: var(--gap-m);
   }
 }

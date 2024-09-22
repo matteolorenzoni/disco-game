@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, inject, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UserType } from '../../model/user.model';
@@ -7,13 +7,17 @@ import { UserService } from '../../service/user.service';
 import { FromMap, LoginModel } from '../../model/form.model';
 import { LogService } from '../../service/log.service';
 import { FirebaseService } from '../../service/firebase.service';
+import { loginFormAnimation } from '../../animation/animations';
+import { faLock, faUser } from '@fortawesome/free-solid-svg-icons';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FaIconComponent],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
+  animations: [loginFormAnimation],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoginComponent implements OnInit {
@@ -23,18 +27,41 @@ export class LoginComponent implements OnInit {
   readonly userService = inject(UserService);
   readonly logService = inject(LogService);
 
+  /* Variables */
+  page = signal<'welcome' | 'login' | 'signup'>('welcome');
+
   /* Form */
   loginForm = new FormGroup<FromMap<LoginModel>>({
     email: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
     password: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(6)] })
   });
 
-  /* ------------- Methods ------------- */
+  /* Icons */
+  faUser = faUser;
+  faLock = faLock;
+
+  /* ----------------- Listeners ----------------- */
+  @HostListener('click', ['$event'])
+  onHostClick(event: Event): void {
+    // Verifica se il click è avvenuto all'interno della sezione "container_form"
+    const target = event.target as HTMLElement;
+    if (target.closest('section.container_form')) return; // Ignora il click
+
+    this.setPage(event, 'welcome');
+  }
+
+  /* ------------- Lifecycle ------------- */
   ngOnInit(): void {
     this.firebaseService.logout(false);
   }
 
-  /* ------------- Methods ------------- */
+  /* ----------------- Methods: page ----------------- */
+  protected setPage(event: Event, page: 'welcome' | 'login' | 'signup'): void {
+    event.stopPropagation();
+    this.page.set(page);
+  }
+
+  /* ------------- Methods: auth ------------- */
   public async login(): Promise<void> {
     if (this.loginForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
 
