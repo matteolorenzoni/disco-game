@@ -1,11 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { FirebaseService } from '../../service/firebase.service';
 import { UserService } from '../../service/user.service';
 import { FromMap, SignUpModel } from '../../model/form.model';
-import { FirebaseService } from '../../service/firebase.service';
-
 @Component({
   selector: 'app-sign-up',
   standalone: true,
@@ -19,6 +18,9 @@ export class SignUpComponent implements OnInit {
   readonly router = inject(Router);
   readonly firebaseService = inject(FirebaseService);
   readonly userService = inject(UserService);
+
+  /* Variables */
+  imagePreview = signal<string | ArrayBuffer | null | undefined>(undefined);
 
   /* Form */
   signUpForm = new FormGroup<FromMap<SignUpModel>>({
@@ -48,7 +50,7 @@ export class SignUpComponent implements OnInit {
   }
 
   /* ------------- Methods ------------- */
-  protected async signUp() {
+  protected async signUp(): Promise<void> {
     /* Creazione utente */
     const userCredential = await this.firebaseService.signUp(this.signUpForm.getRawValue());
 
@@ -57,5 +59,14 @@ export class SignUpComponent implements OnInit {
       ...this.signUpForm.getRawValue()
     });
     await this.router.navigate(['/login']);
+  }
+
+  protected onImageChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (e) => this.imagePreview.set(e.target?.result);
+      reader.readAsDataURL(input.files[0]);
+    }
   }
 }

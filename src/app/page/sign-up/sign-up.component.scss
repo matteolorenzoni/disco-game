@@ -1,97 +1,13 @@
 :host {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100%;
-  background-color: #f8f9fa;
-  padding: 1rem;
+  display: block;
 }
 
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+.container_form {
+  min-height: 100vh;
   width: 100%;
-  max-width: 400px;
-
-  div {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-
-    label {
-      font-weight: bold;
-      color: #007bff;
-      margin-bottom: 0.25rem; // Space between label and input
-    }
-
-    input {
-      width: 100%; // Ensure input fits within container
-      padding: 0.75rem;
-      border: 1px solid #ced4da;
-      border-radius: 8px;
-      font-size: 1rem;
-      box-sizing: border-box; // Include padding and border in width
-      transition:
-        border-color 0.3s,
-        box-shadow 0.3s;
-
-      &:focus {
-        border-color: #007bff;
-        outline: none;
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-      }
-    }
-
-    .error-message {
-      font-size: 0.875rem;
-      color: #dc3545;
-    }
-  }
-
-  button[type='submit'] {
-    background-color: #007bff;
-    border: none;
-    color: #fff;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition:
-      background-color 0.3s,
-      box-shadow 0.3s;
-    width: 100%; // Ensure button fits within container
-
-    &:hover {
-      background-color: darken(#007bff, 10%);
-      box-shadow: 0 0 0 0.1rem rgba(0, 123, 255, 0.5);
-    }
-
-    &:disabled {
-      background-color: #6c757d;
-      cursor: not-allowed;
-    }
-  }
-}
-
-p {
-  text-align: center;
-  margin-top: 1.5rem;
-
-  a {
-    color: #007bff;
-    text-decoration: none;
-    font-weight: bold;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-}
-
-::ng-deep {
-  body {
-    margin: 0;
-  }
+  display: grid;
+  grid-template-rows: min-content 1fr min-content;
+  justify-items: center;
+  gap: var(--gap-m);
+  padding: calc(var(--padding-m) * 2);
 }
