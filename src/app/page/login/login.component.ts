@@ -2,14 +2,14 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, HostListener, inject, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { UserType } from '../../model/user.model';
-import { UserService } from '../../service/user.service';
-import { FromMap, LoginModel } from '../../model/form.model';
-import { LogService } from '../../service/log.service';
-import { FirebaseService } from '../../service/firebase.service';
-import { loginFormAnimation } from '../../animation/animations';
 import { faLock, faUser } from '@fortawesome/free-solid-svg-icons';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import { FromMap, LoginModel } from '../../model/form.model';
+import { UserType } from '../../model/user.model';
+import { FirebaseService } from '../../service/firebase.service';
+import { LogService } from '../../service/log.service';
+import { UserService } from '../../service/user.service';
+import { loginFormAnimation } from '../../animation/animations';
 
 @Component({
   selector: 'app-login',
@@ -28,7 +28,8 @@ export class LoginComponent implements OnInit {
   readonly logService = inject(LogService);
 
   /* Variables */
-  page = signal<'welcome' | 'login' | 'signup'>('welcome');
+  page = signal<'welcome' | 'login'>('welcome');
+  rememberMe = signal<boolean>(true);
 
   /* Form */
   loginForm = new FormGroup<FromMap<LoginModel>>({
@@ -45,8 +46,7 @@ export class LoginComponent implements OnInit {
   onHostClick(event: Event): void {
     // Verifica se il click è avvenuto all'interno della sezione "container_form"
     const target = event.target as HTMLElement;
-    if (target.closest('section.container_form')) return; // Ignora il click
-
+    if (target.closest('section#container_form')) return; // Ignora il click
     this.setPage(event, 'welcome');
   }
 
@@ -56,9 +56,15 @@ export class LoginComponent implements OnInit {
   }
 
   /* ----------------- Methods: page ----------------- */
-  protected setPage(event: Event, page: 'welcome' | 'login' | 'signup'): void {
+  protected setPage(event: Event, page: 'welcome' | 'login'): void {
     event.stopPropagation();
     this.page.set(page);
+  }
+
+  protected onRememberMeChange(target: EventTarget | null) {
+    if (!target) return;
+    const checkbox = target as HTMLInputElement;
+    this.rememberMe.set(checkbox.checked);
   }
 
   /* ------------- Methods: auth ------------- */
@@ -66,7 +72,7 @@ export class LoginComponent implements OnInit {
     if (this.loginForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
 
     // Operation
-    const userCredentials = await this.firebaseService.logIn(this.loginForm.getRawValue());
+    const userCredentials = await this.firebaseService.logIn(this.loginForm.getRawValue(), this.rememberMe());
     const user = await this.userService.getUserById(userCredentials.user.uid);
     switch (user?.props.type) {
       case UserType.ADMIN:

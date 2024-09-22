@@ -12,13 +12,16 @@
     <button
       type="button"
       class="inline-block w-full rounded-full bg-primary-100 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-on-secondary shadow-primary-50 transition duration-150 ease-in-out hover:bg-primary-200 active:bg-primary-300 motion-reduce:transition-none"
-      (click)="setPage($event, 'signup')">
+      (click)="router.navigate(['/sign-up'])">
       Registrati
     </button>
   </div>
 </div>
 
-<section [@loginFormAnimation]="page() === 'login' ? 'center' : 'bottom'" class="container_form bg-secondary-500">
+<section
+  [@loginFormAnimation]="page() === 'login' ? 'center' : 'bottom'"
+  id="container_form"
+  class="container_form bg-secondary-500">
   <div class="flex flex-col gap-1 text-center">
     <h3 class="text-4xl font-semibold text-primary-400">Ben tornato!</h3>
     <p class="text-sm text-primary-300">Accedi al tuo account</p>
@@ -55,6 +58,8 @@
           <input
             id="check"
             type="checkbox"
+            [checked]="rememberMe()"
+            (change)="onRememberMeChange($event.target)"
             class="peer h-5 w-5 cursor-pointer appearance-none rounded border border-slate-300 shadow transition-all checked:border-primary-500 checked:bg-primary-500 hover:shadow-md" />
           <span
             class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform text-white opacity-0 peer-checked:opacity-100">
@@ -81,7 +86,6 @@
     <button
       type="submit"
       class="mt-16 inline-block w-full rounded-full bg-primary-500 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-on-primary shadow-primary-50 transition duration-150 ease-in-out hover:bg-primary-600 active:bg-primary-700 disabled:cursor-not-allowed disabled:bg-primary-100 disabled:text-primary-200"
-      [disabled]="loginForm.invalid"
       (click)="setPage($event, 'login')">
       Login
     </button>

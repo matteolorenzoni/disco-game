@@ -11,7 +11,8 @@ import {
   Auth,
   getAuth,
   setPersistence,
-  browserLocalPersistence
+  browserLocalPersistence,
+  browserSessionPersistence
 } from 'firebase/auth';
 import { Firestore, getFirestore } from 'firebase/firestore';
 import { FirebaseStorage, getStorage } from 'firebase/storage';
@@ -59,10 +60,10 @@ export class FirebaseService {
   }
 
   /* --------------------------- Auth ---------------------------*/
-  public async logIn(form: LoginModel): Promise<UserCredential> {
+  public async logIn(form: LoginModel, rememberMe: boolean): Promise<UserCredential> {
     try {
       const { email, password } = form;
-      await setPersistence(this.auth, browserLocalPersistence);
+      await setPersistence(this.auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
       return await signInWithEmailAndPassword(this.auth, email, password);
     } catch (error) {
       this.logService.addLogError(this.userFirebase()?.uid, error);
