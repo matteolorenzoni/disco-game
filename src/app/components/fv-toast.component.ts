@@ -3,11 +3,11 @@ import { ChangeDetectionStrategy, Component, computed, inject, input } from '@an
 import { trigger, style, transition, animate } from '@angular/animations'; // Import per animazioni
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faCircleCheck, faCircleExclamation, faXmark } from '@fortawesome/free-solid-svg-icons';
-import { Log, LogService } from '../../service/log.service';
-import { LogType } from '../../model/enum.model';
+import { Log, LogService } from '../service/log.service';
+import { LogType } from '../model/enum.model';
 
 @Component({
-  selector: 'app-toast',
+  selector: 'fv-toast',
   standalone: true,
   imports: [CommonModule, FaIconComponent],
   template: `
@@ -52,7 +52,7 @@ import { LogType } from '../../model/enum.model';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ToastComponent {
+export class FvToastComponent {
   /* Service */
   readonly logService = inject(LogService);
 

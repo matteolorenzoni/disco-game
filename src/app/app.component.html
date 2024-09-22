@@ -5,7 +5,7 @@
 @if (logService.logs().length) {
   <ul>
     @for (log of logService.logs(); track log.id) {
-      <li><app-toast [log]="log"></app-toast></li>
+      <li><fv-toast [log]="log"></fv-toast></li>
     }
   </ul>
 }
