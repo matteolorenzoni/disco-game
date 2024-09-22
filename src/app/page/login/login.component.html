@@ -27,7 +27,7 @@
     <p class="text-sm text-primary-300">Accedi al tuo account</p>
   </div>
 
-  <form [formGroup]="loginForm" (ngSubmit)="login()">
+  <form [formGroup]="loginForm" (ngSubmit)="login()" class="flex w-full max-w-2xl flex-col justify-between gap-2">
     <div class="relative h-10">
       <input
         type="email"
@@ -52,7 +52,7 @@
       </div>
     </div>
 
-    <div class="flex justify-between">
+    <div class="flex justify-between px-1">
       <div class="inline-flex items-center">
         <label class="relative flex cursor-pointer items-center" for="check">
           <input
@@ -85,8 +85,8 @@
 
     <button
       type="submit"
-      class="mt-16 inline-block w-full rounded-full bg-primary-500 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-on-primary shadow-primary-50 transition duration-150 ease-in-out hover:bg-primary-600 active:bg-primary-700 disabled:cursor-not-allowed disabled:bg-primary-100 disabled:text-primary-200"
-      (click)="setPage($event, 'login')">
+      [disabled]="loginForm.invalid"
+      class="mt-16 inline-block w-full rounded-full bg-primary-500 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-on-primary shadow-primary-50 transition duration-150 ease-in-out hover:bg-primary-600 active:bg-primary-700 disabled:cursor-not-allowed disabled:bg-primary-200 disabled:text-primary-300">
       Login
     </button>
   </form>
