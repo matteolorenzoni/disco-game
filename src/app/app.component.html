@@ -1,11 +1,15 @@
-<main>
-  <router-outlet></router-outlet>
-</main>
+@if (!isMobile() || isPortrait()) {
+  <main>
+    <router-outlet></router-outlet>
+  </main>
 
-@if (logService.logs().length) {
-  <ul>
-    @for (log of logService.logs(); track log.id) {
-      <li><fv-toast [log]="log"></fv-toast></li>
-    }
-  </ul>
+  @if (logService.logs().length) {
+    <ul>
+      @for (log of logService.logs(); track log.id) {
+        <li><fv-toast [log]="log"></fv-toast></li>
+      }
+    </ul>
+  }
+} @else {
+  <p>Utilizzare app in modalità verticale</p>
 }

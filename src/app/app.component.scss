@@ -25,3 +25,15 @@ ul {
     max-width: 800px;
   }
 }
+
+p {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #5c39a2;
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
