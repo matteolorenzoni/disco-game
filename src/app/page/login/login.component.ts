@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { faLock, faUser } from '@fortawesome/free-solid-svg-icons';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { FromMap, LoginModel } from '../../model/form.model';
-import { UserType } from '../../model/user.model';
+import { UserRole } from '../../model/user.model';
 import { FirebaseService } from '../../service/firebase.service';
 import { LogService } from '../../service/log.service';
 import { UserService } from '../../service/user.service';
@@ -74,11 +74,11 @@ export class LoginComponent implements OnInit {
     // Operation
     const userCredentials = await this.firebaseService.logIn(this.loginForm.getRawValue(), this.rememberMe());
     const user = await this.userService.getUserById(userCredentials.user.uid);
-    switch (user?.props.type) {
-      case UserType.ADMIN:
+    switch (user?.props.role) {
+      case UserRole.ADMIN:
         await this.router.navigate(['/admin/dashboard']);
         break;
-      case UserType.USER:
+      case UserRole.USER:
         await this.router.navigate(['/user/dashboard']);
         break;
       default:

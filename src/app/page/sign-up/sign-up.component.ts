@@ -21,6 +21,7 @@ export class SignUpComponent implements OnInit {
 
   /* Variables */
   imagePreview = signal<string | ArrayBuffer | null | undefined>(undefined);
+  imageFile = signal<File | undefined>(undefined);
 
   /* Form */
   signUpForm = new FormGroup<FromMap<SignUpModel>>({
@@ -54,19 +55,27 @@ export class SignUpComponent implements OnInit {
     /* Creazione utente */
     const userCredential = await this.firebaseService.signUp(this.signUpForm.getRawValue());
 
+    /* Aggiunta image a storage */
+    let imageUrl: string | null = null;
+    if (this.imageFile()) {
+      imageUrl = await this.firebaseService.saveImage(this.imageFile()!, userCredential.user.uid);
+    }
+
     /* Aggiunta utente a DB */
-    await this.userService.addUser(userCredential.user.uid, {
-      ...this.signUpForm.getRawValue()
-    });
+    await this.userService.addUser(userCredential.user.uid, { ...this.signUpForm.getRawValue() }, imageUrl);
     await this.router.navigate(['/login']);
   }
 
   protected onImageChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
+      const file = input.files[0];
       const reader = new FileReader();
-      reader.onload = (e) => this.imagePreview.set(e.target?.result);
-      reader.readAsDataURL(input.files[0]);
+      reader.onload = (e) => {
+        this.imagePreview.set(e.target?.result);
+        this.imageFile.set(file);
+      };
+      reader.readAsDataURL(file);
     }
   }
 }

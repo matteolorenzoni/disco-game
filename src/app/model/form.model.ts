@@ -14,9 +14,9 @@ export type SignUpModel = {
   name: string;
   lastname: string;
   username: string;
-  birthDate: string;
   email: string;
   password: string;
+  birthDate: string;
 };
 
 export type EventModel = {

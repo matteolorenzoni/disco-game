@@ -4,9 +4,10 @@ export type User = {
   lastname: string; // Cognome dell'utente
   username: string; // Nome utente o nickname
   email: string; // Email dell'utente
-  defaultCode: string; // Codice di default per creare o partecipare a squadre
-  type: UserType;
   birthDate: Date; // Data di nascita dell'utente
+  imageUrl: string | null;
+  role: UserRole; // URL immagine
+  defaultCode: string; // Codice di default per creare o partecipare a squadre
   challengePoints: ChallengePoint[]; // Lista delle sfide completate
   isActive: boolean; // Per soft delete
   createdAt: Date; // Data di creazione dell'account
@@ -19,7 +20,7 @@ export type ChallengePoint = {
   completionDate: Date; // Data di completamento della sfida
 };
 
-export enum UserType {
+export enum UserRole {
   USER = 'USER',
   ADMIN = 'ADMIN'
 }

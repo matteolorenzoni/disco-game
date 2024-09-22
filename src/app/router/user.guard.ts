@@ -5,7 +5,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs/internal/operators/filter';
 import { UserService } from '../service/user.service';
 import { FirebaseService } from '../service/firebase.service';
-import { UserType } from '../model/user.model';
+import { UserRole } from '../model/user.model';
 
 export const userGuard: CanActivateFn = async (route, state) => {
   const router = inject(Router);
@@ -25,15 +25,15 @@ export const userGuard: CanActivateFn = async (route, state) => {
     }
 
     // Ottiene il tipo di utente (es. ADMIN, USER)
-    const currentUserType = user?.type;
+    const currentUserType = user?.role;
 
     // Controlla se l'utente è già loggato e ridireziona in base al tipo di utente
     if (state.url.startsWith('/login')) {
       switch (currentUserType) {
-        case UserType.ADMIN:
+        case UserRole.ADMIN:
           await router.navigate(['/admin']);
           break;
-        case UserType.USER:
+        case UserRole.USER:
           await router.navigate(['/user']);
           break;
         default:
@@ -42,13 +42,13 @@ export const userGuard: CanActivateFn = async (route, state) => {
     }
 
     // Controllo di accesso per la sezione /admin (solo per admin)
-    if (state.url.startsWith('/admin') && currentUserType !== UserType.ADMIN) {
+    if (state.url.startsWith('/admin') && currentUserType !== UserRole.ADMIN) {
       await router.navigate(['/unauthorized']);
       return false;
     }
 
     // Controllo di accesso per la sezione /user (solo per utenti normali)
-    if (state.url.startsWith('/user') && currentUserType !== UserType.USER) {
+    if (state.url.startsWith('/user') && currentUserType !== UserRole.USER) {
       await router.navigate(['/unauthorized']);
       return false;
     }

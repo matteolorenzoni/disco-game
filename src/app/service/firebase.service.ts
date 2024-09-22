@@ -15,7 +15,7 @@ import {
   browserSessionPersistence
 } from 'firebase/auth';
 import { Firestore, getFirestore } from 'firebase/firestore';
-import { FirebaseStorage, getStorage } from 'firebase/storage';
+import { FirebaseStorage, getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
 import { environment } from '../../environments/environment.development';
 import { LoginModel, SignUpModel } from '../model/form.model';
 import { LogService } from './log.service';
@@ -85,6 +85,25 @@ export class FirebaseService {
     try {
       const { email, password } = form;
       return await createUserWithEmailAndPassword(this.auth, email, password);
+    } catch (error) {
+      this.logService.addLogError(this.userFirebase()?.uid, error);
+      throw error;
+    }
+  }
+
+  public async saveImage(image: File, name: string): Promise<string> {
+    try {
+      // Create a reference to 'mountains.jpg'
+      const imageType = image.type.split('/')[1] || 'jpg';
+      const imageRef = ref(this.storage, `${environment.collection.USERS}/${name}.${imageType}`);
+
+      /* Upload */
+      const snapshot = await uploadBytesResumable(imageRef, image);
+
+      /* Get download URL */
+      const downloadURL = await getDownloadURL(snapshot.ref);
+
+      return downloadURL;
     } catch (error) {
       this.logService.addLogError(this.userFirebase()?.uid, error);
       throw error;

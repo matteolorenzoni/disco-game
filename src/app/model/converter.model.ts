@@ -29,9 +29,10 @@ export const userConverter: FirestoreDataConverter<User> = {
       lastname: user.lastname,
       username: user.username,
       email: user.email,
-      defaultCode: user.defaultCode,
-      type: user.type,
       birthDate: dateToString(user.birthDate),
+      imageUrl: user.imageUrl,
+      role: user.role,
+      defaultCode: user.defaultCode,
       //TODO: Capire cosa fare
       challengePoints: user.challengePoints.map((point) => ({
         challengeId: point.challengeId,
@@ -50,9 +51,10 @@ export const userConverter: FirestoreDataConverter<User> = {
       lastname: data['lastname'],
       username: data['username'],
       email: data['email'],
-      defaultCode: data['defaultCode'],
-      type: data['type'],
       birthDate: timestampToDate(data['birthDate'] as Timestamp),
+      imageUrl: data['imageUrl'] || null,
+      role: data['role'],
+      defaultCode: data['defaultCode'],
       //TODO: Capire cosa fare
       challengePoints: data['challengePoints'].map((point: ChallengePoint) => ({
         challengeId: point.challengeId,

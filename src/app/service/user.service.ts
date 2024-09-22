@@ -1,7 +1,7 @@
 import { computed, inject, Injectable } from '@angular/core';
 import { environment } from '../../environments/environment.development';
 import { User } from '../model/user.model';
-import { UserType } from '../model/user.model';
+import { UserRole } from '../model/user.model';
 import { Doc } from '../model/firebase.model';
 import { SignUpModel } from '../model/form.model';
 import { userConverter } from '../model/converter.model';
@@ -50,7 +50,7 @@ export class UserService {
   }
 
   /* --------------------------- Create ---------------------------*/
-  public async addUser(id: string, form: SignUpModel): Promise<void> {
+  public async addUser(id: string, form: SignUpModel, imageUrl: string | null): Promise<void> {
     /* Generazione un codice univoco */
     const codes = await this.getUserCodes();
     let defaultCode = this.generateRandomCode(6);
@@ -62,8 +62,9 @@ export class UserService {
     await this.documentService.addDocumentById<User>(id, this.COLLECTION, {
       ...form,
       birthDate: new Date(form.birthDate),
+      imageUrl,
+      role: UserRole.USER,
       defaultCode,
-      type: UserType.USER,
       challengePoints: [],
       isActive: true,
       createdAt: new Date(),
