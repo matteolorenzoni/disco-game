@@ -43,4 +43,8 @@ Thumbs.db
 
 # Environments
 src/environments/*
+
+# Firebase
+.firebase
+
 .vscode/*
