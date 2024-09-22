@@ -11,11 +11,15 @@ import { LogType } from '../model/enum.model';
   standalone: true,
   imports: [CommonModule, FaIconComponent],
   template: `
-    <div @fade class="log" [style.backgroundColor]="logProps().color">
+    <div
+      @fade
+      class="flex items-center gap-2 rounded-md p-2 text-white shadow-lg"
+      [style.backgroundColor]="logProps().color">
       <fa-icon [icon]="logProps().icon"></fa-icon>
       <p>{{ log().message }}</p>
       <fa-icon
         role="button"
+        class="ml-auto"
         tabindex="0"
         aria-label="Chiudi"
         [icon]="ICON_CLOSE"
@@ -27,17 +31,6 @@ import { LogType } from '../model/enum.model';
     `
       :host {
         display: block;
-      }
-
-      .log {
-        display: grid;
-        grid-template-columns: min-content 1fr min-content;
-        align-items: center;
-        gap: var(--gap-m);
-        padding: var(--padding-m);
-        color: #ffffff;
-        border-radius: 6px;
-        box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
       }
     `
   ],

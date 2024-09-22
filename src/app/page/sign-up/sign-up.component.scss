@@ -1,9 +1,9 @@
 :host {
   display: block;
+  min-height: 100vh;
 }
 
 .container_form {
-  min-height: 100vh;
   width: 100%;
   display: grid;
   grid-template-rows: min-content 1fr min-content;
