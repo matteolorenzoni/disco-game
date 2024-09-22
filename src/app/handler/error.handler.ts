@@ -4,7 +4,7 @@ import { LogService } from '../service/log.service';
 
 const errorMessages: Record<string, string> = {
   retry: "E' avvenuto un errore, riprova più tardi. Se persiste contattare il supporto per assistenza.",
-  formNotValid: 'Il modulo non è valido. Controlla i campi evidenziati e riprova.',
+  formNotValid: 'I valori inseriti non sono validi. Controlla i campi evidenziati e riprova.',
   noUserDocument:
     "L'utente registrato è stato trovato ma non esiste un documento associato. Contattare il supporto per assistenza.",
   noDocument: 'Documento non trovato. Contattare il supporto per assistenza.'
