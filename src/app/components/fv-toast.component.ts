@@ -17,14 +17,9 @@ import { LogType } from '../model/enum.model';
       [style.backgroundColor]="logProps().color">
       <fa-icon [icon]="logProps().icon"></fa-icon>
       <p>{{ log().message }}</p>
-      <fa-icon
-        role="button"
-        class="ml-auto"
-        tabindex="0"
-        aria-label="Chiudi"
-        [icon]="ICON_CLOSE"
-        (click)="logService.removeLog(log().id)"
-        (keydown)="handleKeydown($event)"></fa-icon>
+      <button class="ml-auto" (click)="logService.removeLog(log().id)">
+        <fa-icon [icon]="ICON_CLOSE"></fa-icon>
+      </button>
     </div>
   `,
   styles: [
@@ -64,12 +59,4 @@ export class FvToastComponent {
 
   /* Enum */
   LogType: typeof LogType = LogType;
-
-  /* ------------------------ Methods ------------------------  */
-  protected handleKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Enter' || event.key === ' ') {
-      this.logService.removeLog(this.log().id);
-      event.preventDefault(); // Evita lo scrolling con 'Space'
-    }
-  }
 }

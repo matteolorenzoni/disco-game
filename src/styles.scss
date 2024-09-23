@@ -29,16 +29,3 @@ body {
   background-color: #e0dffd;
   // font-family: 'Libre Baskerville';
 }
-
-[role='button'] {
-  cursor: pointer;
-  transition: transform 0.2s ease;
-
-  &:hover {
-    transform: scale(1.25);
-  }
-
-  &:active {
-    transform: scale(0.75);
-  }
-}
