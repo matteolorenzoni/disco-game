@@ -11,6 +11,7 @@ export const routes: Routes = [
   {
     path: 'admin',
     canActivate: [userGuard],
+    loadComponent: () => import('../page/home/home.component').then((m) => m.HomeComponent),
     children: [
       {
         path: 'dashboard',
@@ -67,6 +68,7 @@ export const routes: Routes = [
   {
     path: 'user',
     canActivate: [userGuard],
+    loadComponent: () => import('../page/home/home.component').then((m) => m.HomeComponent),
     children: [
       {
         path: 'dashboard',
