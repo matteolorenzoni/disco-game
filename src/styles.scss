@@ -2,30 +2,30 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
-// @font-face {
-//   font-family: 'Libre Baskerville';
-//   src: url('/fonts/Libre_Baskerville/LibreBaskerville-Regular.ttf') format('truetype');
-//   font-weight: normal;
-//   font-style: normal;
-// }
+@font-face {
+  font-family: 'Roboto';
+  src: url('/fonts/Roboto/Roboto-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
 
-// @font-face {
-//   font-family: 'Libre Baskerville';
-//   src: url('/fonts/Libre_Baskerville/LibreBaskerville-Bold.ttf') format('truetype');
-//   font-weight: bold;
-//   font-style: normal;
-// }
+@font-face {
+  font-family: 'Roboto';
+  src: url('/fonts/Roboto/Roboto-Bold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
 
-// @font-face {
-//   font-family: 'Libre Baskerville';
-//   src: url('/fonts/Libre_Baskerville/LibreBaskerville-Italic.ttf') format('truetype');
-//   font-weight: normal;
-//   font-style: italic;
-// }
+@font-face {
+  font-family: 'Roboto';
+  src: url('/fonts/Roboto/Roboto-Italic.ttf') format('truetype');
+  font-weight: normal;
+  font-style: italic;
+}
 
 html,
 body {
   min-height: 100vh;
   background-color: #e0dffd;
-  // font-family: 'Libre Baskerville';
+  font-family: 'Roboto';
 }
