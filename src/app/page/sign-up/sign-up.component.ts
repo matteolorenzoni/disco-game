@@ -4,7 +4,10 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 import { FirebaseService } from '../../service/firebase.service';
 import { UserService } from '../../service/user.service';
+import { ImageService } from '../../service/image.service';
 import { FromMap, SignUpModel } from '../../model/form.model';
+import { environment } from '../../../environments/environment.development';
+
 @Component({
   selector: 'app-sign-up',
   standalone: true,
@@ -18,6 +21,7 @@ export class SignUpComponent implements OnInit {
   readonly router = inject(Router);
   readonly firebaseService = inject(FirebaseService);
   readonly userService = inject(UserService);
+  readonly imageService = inject(ImageService);
 
   /* Variables */
   imagePreview = signal<string | ArrayBuffer | null | undefined>(undefined);
@@ -58,24 +62,15 @@ export class SignUpComponent implements OnInit {
     /* Aggiunta image a storage */
     let imageUrl: string | null = null;
     if (this.imageFile()) {
-      imageUrl = await this.firebaseService.saveImage(this.imageFile()!, userCredential.user.uid);
+      imageUrl = await this.firebaseService.saveImage(
+        this.imageFile()!,
+        environment.collection.USERS,
+        userCredential.user.uid
+      );
     }
 
     /* Aggiunta utente a DB */
     await this.userService.addUser(userCredential.user.uid, { ...this.signUpForm.getRawValue() }, imageUrl);
     await this.router.navigate(['/login']);
-  }
-
-  protected onImageChange(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        this.imagePreview.set(e.target?.result);
-        this.imageFile.set(file);
-      };
-      reader.readAsDataURL(file);
-    }
   }
 }

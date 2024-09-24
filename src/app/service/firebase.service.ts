@@ -95,11 +95,11 @@ export class FirebaseService {
     }
   }
 
-  public async saveImage(image: File, name: string): Promise<string> {
+  public async saveImage(image: File, collection: string, name: string): Promise<string> {
     try {
       // Create a reference to 'mountains.jpg'
       const imageType = image.type.split('/')[1] || 'jpg';
-      const imageRef = ref(this.storage, `${environment.collection.USERS}/${name}.${imageType}`);
+      const imageRef = ref(this.storage, `${collection}/${name}.${imageType}`);
 
       /* Upload */
       const snapshot = await uploadBytesResumable(imageRef, image);
