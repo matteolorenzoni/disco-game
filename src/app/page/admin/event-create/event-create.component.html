@@ -1,33 +1,97 @@
-<form [formGroup]="eventForm" (ngSubmit)="addOrUpdateEvent()">
-  <div class="form-group">
-    <label for="name">Event Name</label>
-    <input id="name" formControlName="name" type="text" />
+<section class="container_form">
+  <div class="flex flex-col gap-1 text-center">
+    <h3 class="text-4xl font-semibold text-primary">Crea o modifica evento</h3>
+    <p class="text-sm text-primary-light">Inserisci le informazioni dell'evento</p>
   </div>
 
-  <div class="form-group">
-    <label for="description">Description</label>
-    <textarea id="description" formControlName="description"></textarea>
-  </div>
+  <form [formGroup]="eventForm" (ngSubmit)="addOrUpdateEvent()" class="flex w-full max-w-2xl flex-col gap-6">
+    <div class="flex w-full flex-col gap-1">
+      <label for="name" class="block text-sm font-medium text-primary"> Nome evento </label>
+      <input
+        id="name"
+        formControlName="name"
+        type="text"
+        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm transition duration-300 ease-in placeholder:text-slate-400 hover:border-slate-400 focus:border-primary focus:shadow focus:outline-none" />
+    </div>
 
-  <div class="form-group">
-    <label for="startDate">Start Date</label>
-    <input id="startDate" formControlName="startDate" type="datetime-local" />
-  </div>
+    <div class="flex w-full flex-col gap-1">
+      <label for="description" class="block text-sm font-medium text-primary"> Descrizione </label>
+      <textarea
+        id="description"
+        formControlName="description"
+        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm transition duration-300 ease-in placeholder:text-slate-400 hover:border-slate-400 focus:border-primary focus:shadow focus:outline-none"></textarea>
+    </div>
 
-  <div class="form-group">
-    <label for="endDate">End Date</label>
-    <input id="endDate" formControlName="endDate" type="datetime-local" />
-  </div>
+    <div class="flex w-full flex-col gap-1">
+      <label for="location" class="block text-sm font-medium text-primary"> Località </label>
+      <input
+        id="location"
+        formControlName="location"
+        type="text"
+        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm transition duration-300 ease-in placeholder:text-slate-400 hover:border-slate-400 focus:border-primary focus:shadow focus:outline-none" />
+    </div>
 
-  <div class="form-group">
-    <label for="location">Location</label>
-    <input id="location" formControlName="location" type="text" />
-  </div>
+    <div class="flex w-full flex-col gap-1">
+      <label for="startDate" class="block text-sm font-medium text-primary"> Data di inizio </label>
+      <input
+        id="startDate"
+        formControlName="startDate"
+        type="datetime-local"
+        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm transition duration-300 ease-in placeholder:text-slate-400 hover:border-slate-400 focus:border-primary focus:shadow focus:outline-none" />
+    </div>
 
-  <div class="form-group">
-    <label for="imageUrl">Image URL</label>
-    <input id="imageUrl" formControlName="imageUrl" type="text" />
-  </div>
+    <div class="flex w-full flex-col gap-1">
+      <label for="endDate" class="block text-sm font-medium text-primary"> Data di fine </label>
+      <input
+        id="endDate"
+        formControlName="endDate"
+        type="datetime-local"
+        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm transition duration-300 ease-in placeholder:text-slate-400 hover:border-slate-400 focus:border-primary focus:shadow focus:outline-none" />
+    </div>
 
-  <button type="submit" class="btn btn-primary" [disabled]="eventForm.invalid">Submit</button>
-</form>
+    <div class="flex w-full items-center justify-center"></div>
+
+    <!-- Anteprima immagine -->
+    <div class="flex w-full justify-center">
+      @if (!imagePreview()) {
+        <label
+          for="event-image-upload"
+          class="flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-300 bg-gray-50 hover:bg-gray-100">
+          <div class="flex flex-col items-center justify-center">
+            <svg
+              class="mb-4 h-8 w-8 text-gray-500"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 20 16">
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
+            </svg>
+            <p class="text-sm text-gray-500">
+              <span class="font-semibold">Carica immagine</span>
+            </p>
+          </div>
+          <input
+            id="event-image-upload"
+            type="file"
+            accept="image/png, image/jpeg"
+            (change)="imageService.onImageChange($event, imagePreview, imageFile)"
+            class="hidden" />
+        </label>
+      } @else {
+        <img [src]="imagePreview()" alt="Anteprima immagine" class="rounded-md object-cover" />
+      }
+    </div>
+
+    <button
+      type="submit"
+      [disabled]="eventForm.invalid"
+      class="mt-8 inline-block w-full rounded-full bg-primary px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-on-primary shadow-primary-light transition duration-150 ease-in-out hover:bg-primary-light active:bg-primary-dark disabled:cursor-not-allowed disabled:bg-primary/30 disabled:text-primary/50">
+      Salva Evento
+    </button>
+  </form>
+</section>

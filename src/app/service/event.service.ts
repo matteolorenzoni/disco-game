@@ -23,9 +23,10 @@ export class EventService {
   }
 
   /* --------------------------- Create ---------------------------*/
-  public async addEvent(form: EventModel): Promise<void> {
-    await this.documentService.addDocument<Event>(this.COLLECTION, {
+  public async addEvent(form: EventModel, imageUrl: string | null): Promise<string> {
+    const docRef = await this.documentService.addDocument<Event>(this.COLLECTION, {
       ...form,
+      imageUrl,
       challenges: [],
       isActive: true,
       startDate: new Date(form.startDate),
@@ -34,6 +35,7 @@ export class EventService {
       updatedAt: new Date()
     });
     this.logService.addLogConfirm('Evento aggiunto correttamente');
+    return docRef.id;
   }
 
   /* --------------------------- Update ---------------------------*/
@@ -42,6 +44,14 @@ export class EventService {
       ...form,
       startDate: new Date(form.startDate),
       endDate: new Date(form.endDate),
+      updatedAt: new Date()
+    });
+    this.logService.addLogConfirm('Evento aggiornato correttamente');
+  }
+
+  public async updateEventImageUrl(eventId: string, imageUrl: string | null): Promise<void> {
+    await this.documentService.updateDocument<Event>(eventId, this.COLLECTION, {
+      imageUrl,
       updatedAt: new Date()
     });
     this.logService.addLogConfirm('Evento aggiornato correttamente');

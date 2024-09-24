@@ -23,7 +23,6 @@ export type EventModel = {
   name: string;
   description: string;
   location: string;
-  imageUrl: string | null;
   startDate: string;
   endDate: string;
 };
