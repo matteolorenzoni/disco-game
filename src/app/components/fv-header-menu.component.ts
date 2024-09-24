@@ -7,7 +7,8 @@ import { faBars } from '@fortawesome/free-solid-svg-icons';
   selector: 'fv-header-menu',
   standalone: true,
   imports: [CommonModule, FaIconComponent],
-  template: ` <nav class="flex h-14 items-center justify-between overflow-hidden bg-primary p-3 text-on-primary">
+  template: ` <nav
+    class="fixed left-0 top-0 flex h-14 w-full items-center justify-between overflow-hidden bg-primary p-3 text-on-primary">
     <div class="flex h-full items-center gap-8">
       <button (click)="closeMenuEvt.emit($event)"><fa-icon [icon]="ICON_MENU"></fa-icon></button>
       <a class="flex" href="/user/dashboard">
