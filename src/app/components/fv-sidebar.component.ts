@@ -13,7 +13,7 @@ import { SideMenuItem } from '../page/home/home.component';
   imports: [CommonModule, RouterModule, FaIconComponent, RouterLink],
   template: `
     <div
-      class="absolute -top-14 z-20 flex h-screen w-64 flex-col gap-6 bg-primary p-4 text-on-primary shadow-lg transition-transform duration-300">
+      class="z-20 flex h-screen w-64 flex-col gap-6 bg-primary p-4 text-on-primary shadow-lg transition-transform duration-300">
       <div class="flex items-center gap-4 rounded-lg bg-white/10 p-4 shadow-md">
         <img
           [src]="(userService.user() | async)?.imageUrl ?? '/images/profile-user.png'"
@@ -76,6 +76,9 @@ import { SideMenuItem } from '../page/home/home.component';
     `
       :host {
         display: block;
+        position: fixed;
+        top: 0;
+        left: -16rem;
       }
     `
   ],

@@ -9,7 +9,7 @@ export const loginFormAnimation = trigger('loginFormAnimation', [
 
 // Sidebar
 export const sideMenuAnimation = trigger('sideMenuAnimation', [
-  state('hidden', style({ transform: 'translateX(-100%)' })),
-  state('visible', style({ transform: 'translateX(0)' })),
+  state('hidden', style({ left: '-16rem' })),
+  state('visible', style({ left: '0rem' })),
   transition('hidden <=> visible', [animate('300ms ease-in-out')])
 ]);
