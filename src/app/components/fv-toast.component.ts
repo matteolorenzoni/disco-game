@@ -13,13 +13,13 @@ import { LogType } from '../model/enum.model';
   template: `
     <div
       @fade
-      class="flex items-center gap-2 rounded-md p-2 text-white shadow-lg"
-      [style.backgroundColor]="logProps().color">
+      class="flex cursor-pointer items-center gap-2 rounded-md p-2 text-white shadow-lg"
+      [style.backgroundColor]="logProps().color"
+      tabindex="0"
+      (click)="logService.removeLog(log().id)"
+      (keydown)="logService.removeLog(log().id)">
       <fa-icon [icon]="logProps().icon"></fa-icon>
       <p>{{ log().message }}</p>
-      <button class="ml-auto" (click)="logService.removeLog(log().id)">
-        <fa-icon [icon]="ICON_CLOSE"></fa-icon>
-      </button>
     </div>
   `,
   styles: [

@@ -74,7 +74,11 @@ export class FirebaseService {
   public async logout(redirect = true): Promise<void> {
     try {
       await signOut(this.auth);
-      if (redirect) await this.router.navigate(['/login']);
+
+      if (redirect) {
+        this.logService.addLogConfirm('Logout completato. Buona giornata!');
+        await this.router.navigate(['/login']);
+      }
     } catch (error) {
       this.logService.addLogError(this.userFirebase()?.uid, error);
       throw error;
