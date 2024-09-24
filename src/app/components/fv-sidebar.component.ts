@@ -13,12 +13,12 @@ import { SideMenuItem } from '../page/home/home.component';
   imports: [CommonModule, RouterModule, FaIconComponent, RouterLink],
   template: `
     <div
-      class="absolute -top-14 z-20 flex h-screen w-64 flex-col gap-6 bg-primary p-4 text-white shadow-lg transition-transform duration-300">
+      class="absolute -top-14 z-20 flex h-screen w-64 flex-col gap-6 bg-primary p-4 text-on-primary shadow-lg transition-transform duration-300">
       <div class="flex items-center gap-4 rounded-lg bg-white/10 p-4 shadow-md">
         <img
           [src]="(userService.user() | async)?.imageUrl ?? '/images/profile-user.png'"
           alt="Immagine profilo"
-          class="h-14 w-14 rounded-full border-2 border-primary-variant object-cover object-center" />
+          class="h-14 w-14 rounded-full border-2 border-primary-dark object-cover object-center" />
         <div class="flex flex-col gap-1">
           <p class="text-xl font-semibold">{{ (userService.user() | async)?.username }}</p>
           <div class="flex flex-col gap-1 text-xs leading-3 text-gray-300">
@@ -33,9 +33,9 @@ import { SideMenuItem } from '../page/home/home.component';
           <li>
             <a
               [routerLink]="item.path"
-              [routerLinkActive]="'bg-primary-variant'"
+              [routerLinkActive]="'bg-primary-dark'"
               [routerLinkActiveOptions]="{ exact: true }"
-              class="flex items-center gap-2 rounded-md p-2 transition-colors duration-200 hover:bg-primary-variant"
+              class="flex items-center gap-2 rounded-md p-2 transition-colors duration-200 hover:bg-primary-dark"
               (click)="closeMenuEvt.emit($event)">
               <fa-icon class="h-6 w-6" [icon]="item.icon"></fa-icon>
               <span class="text-sm font-medium">{{ item.label }}</span>
@@ -44,15 +44,15 @@ import { SideMenuItem } from '../page/home/home.component';
         }
       </ul>
 
-      <hr class="border-primary-variant/60" />
+      <hr class="border-primary-dark/60" />
 
       <ul class="flex flex-col gap-2">
         <li>
           <a
             [routerLink]="'/settings'"
-            [routerLinkActive]="'bg-primary-variant'"
+            [routerLinkActive]="'bg-primary-dark'"
             [routerLinkActiveOptions]="{ exact: true }"
-            class="flex items-center gap-2 rounded-md p-2 transition-colors duration-200 hover:bg-primary-variant"
+            class="flex items-center gap-2 rounded-md p-2 transition-colors duration-200 hover:bg-primary-dark"
             (click)="closeMenuEvt.emit($event)">
             <fa-icon class="h-6 w-6" [icon]="ICON_SETTING"></fa-icon>
             <span class="text-sm font-medium">Impostazioni</span>
@@ -61,9 +61,9 @@ import { SideMenuItem } from '../page/home/home.component';
         <li>
           <a
             [routerLink]="'/login'"
-            [routerLinkActive]="'bg-primary-variant'"
+            [routerLinkActive]="'bg-primary-dark'"
             [routerLinkActiveOptions]="{ exact: true }"
-            class="flex items-center gap-2 rounded-md p-2 transition-colors duration-200 hover:bg-primary-variant"
+            class="flex items-center gap-2 rounded-md p-2 transition-colors duration-200 hover:bg-primary-dark"
             (click)="firebaseService.logout()">
             <fa-icon class="h-6 w-6" [icon]="ICON_LOGOUT"></fa-icon>
             <span class="text-sm font-medium">Logout</span>

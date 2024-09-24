@@ -4,14 +4,14 @@
   <div class="container_buttons">
     <button
       type="button"
-      class="inline-block w-full rounded-full bg-primary-500 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-on-primary shadow-primary-50 transition duration-150 ease-in-out hover:bg-primary-600 active:bg-primary-700 motion-reduce:transition-none"
+      class="inline-block w-full rounded-full bg-primary px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-on-primary shadow-primary-light transition duration-150 ease-in-out hover:bg-primary-light active:bg-primary-dark motion-reduce:transition-none"
       (click)="setPage($event, 'login')">
       Entra
     </button>
 
     <button
       type="button"
-      class="inline-block w-full rounded-full bg-primary-100 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-on-secondary shadow-primary-50 transition duration-150 ease-in-out hover:bg-primary-200 active:bg-primary-300 motion-reduce:transition-none"
+      class="inline-block w-full rounded-full bg-secondary px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-on-secondary shadow-primary-light transition duration-150 ease-in-out hover:bg-secondary-light active:bg-secondary-dark motion-reduce:transition-none"
       (click)="router.navigate(['/sign-up'])">
       Registrati
     </button>
@@ -21,21 +21,21 @@
 <section
   [@loginFormAnimation]="page() === 'login' ? 'center' : 'bottom'"
   id="container_form"
-  class="container_form bg-primary-100">
+  class="container_form bg-background">
   <div class="flex flex-col gap-1 text-center">
-    <h3 class="text-4xl font-semibold text-primary-400">Ben tornato!</h3>
-    <p class="text-sm text-primary-300">Accedi al tuo account</p>
+    <h3 class="text-4xl font-semibold text-primary">Ben tornato!</h3>
+    <p class="text-sm text-primary-light">Accedi al tuo account</p>
   </div>
 
   <form [formGroup]="loginForm" (ngSubmit)="login()" class="flex w-full max-w-2xl flex-col justify-between gap-2">
     <div class="relative h-10">
       <input
         type="email"
-        class="ease h-full w-full rounded-md border border-primary-500 bg-transparent p-2 pl-10 text-sm text-primary-700 shadow-sm transition duration-300 placeholder:text-slate-400 hover:border-primary-700 focus:border-primary-800 focus:shadow focus:outline-none"
+        class="h-full w-full rounded-md border border-slate-300 bg-white p-2 pl-10 text-sm text-slate-700 shadow-sm transition duration-300 ease-in placeholder:text-slate-400 hover:border-slate-400 focus:border-primary focus:shadow focus:outline-none"
         placeholder="Email"
         formControlName="email" />
       <div
-        class="absolute left-1 top-1 h-8 w-8 rounded border border-transparent bg-primary-500 p-1 text-center text-sm text-white shadow-sm transition-all">
+        class="absolute left-1 top-1 h-8 w-8 rounded border border-transparent bg-primary p-1 text-center text-sm text-on-primary shadow-sm transition-all">
         <fa-icon [icon]="faUser"></fa-icon>
       </div>
     </div>
@@ -43,11 +43,11 @@
     <div class="relative h-10">
       <input
         type="password"
-        class="ease h-full w-full rounded-md border border-primary-500 bg-transparent p-2 pl-10 text-sm text-primary-700 shadow-sm transition duration-300 placeholder:text-slate-400 hover:border-primary-700 focus:border-primary-800 focus:shadow focus:outline-none"
+        class="h-full w-full rounded-md border border-slate-300 bg-transparent bg-white p-2 pl-10 text-sm text-primary-light shadow-sm transition duration-300 ease-in placeholder:text-slate-400 hover:border-primary-light focus:border-primary-dark focus:shadow focus:outline-none"
         placeholder="Password"
         formControlName="password" />
       <div
-        class="absolute left-1 top-1 h-8 w-8 rounded border border-transparent bg-primary-500 p-1 text-center text-sm text-white shadow-sm transition-all">
+        class="absolute left-1 top-1 h-8 w-8 rounded border border-transparent bg-primary p-1 text-center text-sm text-on-primary shadow-sm transition-all">
         <fa-icon [icon]="faLock"></fa-icon>
       </div>
     </div>
@@ -60,9 +60,9 @@
             type="checkbox"
             [checked]="rememberMe()"
             (change)="onRememberMeChange($event.target)"
-            class="peer h-5 w-5 cursor-pointer appearance-none rounded border border-slate-300 shadow transition-all checked:border-primary-500 checked:bg-primary-500 hover:shadow-md" />
+            class="peer h-5 w-5 cursor-pointer appearance-none rounded border border-slate-300 shadow transition-all checked:border-primary checked:bg-primary hover:shadow-md" />
           <span
-            class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform text-white opacity-0 peer-checked:opacity-100">
+            class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform text-on-primary opacity-0 peer-checked:opacity-100">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="h-3.5 w-3.5"
@@ -77,22 +77,22 @@
             </svg>
           </span>
         </label>
-        <label class="ml-2 cursor-pointer text-sm text-slate-600" for="check-2"> Ricordami </label>
+        <label class="ml-2 cursor-pointer text-sm text-primary" for="check-2"> Ricordami </label>
       </div>
 
-      <a href="./restore-password" class="text-sm text-primary-500 hover:underline">Password dimentica?</a>
+      <a href="./restore-password" class="text-sm font-bold text-primary hover:underline">Password dimentica?</a>
     </div>
 
     <button
       type="submit"
       [disabled]="loginForm.invalid"
-      class="mt-16 inline-block w-full rounded-full bg-primary-500 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-on-primary shadow-primary-50 transition duration-150 ease-in-out hover:bg-primary-600 active:bg-primary-700 disabled:cursor-not-allowed disabled:bg-primary-200 disabled:text-primary-300">
+      class="mt-8 inline-block w-full rounded-full bg-primary px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-on-primary shadow-primary-light transition duration-150 ease-in-out hover:bg-primary-light active:bg-primary-dark disabled:cursor-not-allowed disabled:bg-primary/30 disabled:text-primary/50">
       Login
     </button>
   </form>
 
-  <p class="text-center text-sm text-primary-300">
+  <p class="text-center text-sm text-primary">
     Non hai un account?
-    <a href="./sign-up" class="font-bold text-primary-500 hover:underline">Registrati</a>
+    <a href="./sign-up" class="font-bold text-primary hover:underline">Registrati</a>
   </p>
 </section>

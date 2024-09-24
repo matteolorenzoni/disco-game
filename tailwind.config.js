@@ -4,37 +4,20 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: {
-          50: '#F0EBFE', // 5%
-          100: '#E0DFFD', // 10%
-          200: '#C5BDF9', // 20%
-          300: '#AB9BF5', // 30%
-          400: '#9078F1', // 40%
-          500: '#7766C6', // Colore di base
-          600: '#614DA1', // 60%
-          700: '#4A387D', // 70%
-          800: '#35225A', // 80%
-          900: '#211138', // 90%
-          1000: '#12061B' // 100%
-        },
-        // secondary: {
-        //   0: '#FFFFFF', // Bianco
-        //   100: '#F2E6FD', // 10%
-        //   200: '#E6D9FB', // 20%
-        //   300: '#D9C8F9', // 30%
-        //   400: '#C9B5F7', // 40%
-        //   500: '#E0DFFD', // Colore di base
-        //   600: '#B5C6E4', // 60%
-        //   700: '#A1B2D5', // 70%
-        //   800: '#8E9BC7', // 80%
-        //   900: '#7A85B8', // 90%
-        //   1000: '#4A4A4A' // 100%
-        // },
-        'on-primary': '#E0DFFD', // Testo bianco su sfondo primario
-        'on-secondary': '#000000', // Testo nero su sfondo secondario
-        'on-background': '#000000', // Testo nero su sfondo chiaro
-        'on-surface': '#000000', // Testo nero su superfici bianche
-        'on-error': '#FFFFFF' // Testo bianco su sfondo di errore
+        primary: '#7766C6' /* Colore principale usato per pulsanti, link e accenti principali */,
+        'primary-light': '#A598E0' /* Colore chiaro usato per hover o stati disabilitati */,
+        'primary-dark': '#4A387D' /* Colore scuro usato per hover o stati attivi */,
+        secondary: '#A5D6A7' /* Uato per pulsanti secondari, accenti minori e elementi alternativi */,
+        'secondary-light': '#C8E6C9 ' /* Colore chiaro usato per hover o stati disabilitati */,
+        'secondary-dark': '#81C784 ' /* Colore scuro usato per hover o stati attivi */,
+        background: '#E0DFFD' /* Colore di sfondo generale dell'applicazione */,
+        surface: '#FFFFFF' /* Colore di sfondo per superfici come card, modali o sezioni separate */,
+        error: '#B00020' /* Colore usato per indicare errori su pulsanti, testi o messaggi di errore */,
+        'on-primary': '#FFFFFF' /* Colore del testo o delle icone sopra elementi con sfondo 'primary' */,
+        'on-secondary': '#000000' /* Colore del testo o delle icone sopra elementi con sfondo 'secondary' */,
+        'on-background': '#000000' /* Colore del testo o delle icone sopra lo sfondo 'background' */,
+        'on-surface': '#000000' /* Colore del testo o delle icone sopra superfici 'surface' */,
+        'on-error': '#FFFFFF' /* Colore del testo o delle icone sopra elementi con sfondo 'error' */
       }
     }
   },
