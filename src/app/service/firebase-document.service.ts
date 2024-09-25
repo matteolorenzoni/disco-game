@@ -31,8 +31,8 @@ export class FirebaseDocumentService {
     converter: FirestoreDataConverter<T>
   ): Promise<Doc<T>> {
     try {
-      const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
-      const docRef = doc(collectionRef, id).withConverter(converter);
+      const collectionRef = getCollection(this.firebaseService.getDb(), collectionName).withConverter(converter);
+      const docRef = doc(collectionRef, id);
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
@@ -47,9 +47,9 @@ export class FirebaseDocumentService {
     }
   }
 
-  public async getAllDocuments<T>(collectionName: string): Promise<Doc<T>[]> {
+  public async getAllDocuments<T>(collectionName: string, converter: FirestoreDataConverter<T>): Promise<Doc<T>[]> {
     try {
-      const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
+      const collectionRef = getCollection(this.firebaseService.getDb(), collectionName).withConverter(converter);
       const querySnapshot = await getDocs(collectionRef);
       return querySnapshot.docs.map((doc) => ({
         id: doc.id,

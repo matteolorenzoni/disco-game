@@ -45,7 +45,7 @@ export class UserService {
   }
 
   private async getUsers(): Promise<Doc<User>[]> {
-    return await this.documentService.getAllDocuments<User>(this.COLLECTION);
+    return await this.documentService.getAllDocuments<User>(this.COLLECTION, userConverter);
   }
 
   /* --------------------------- Create ---------------------------*/

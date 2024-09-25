@@ -5,6 +5,7 @@ import { Event } from '../model/event.model';
 import { EventModel } from '../model/form.model';
 import { eventConverter } from '../model/converter.model';
 import { LogService } from './log.service';
+import { Doc } from '../model/firebase.model';
 
 @Injectable({
   providedIn: 'root'
@@ -18,8 +19,12 @@ export class EventService {
   COLLECTION = environment.collection.EVENTS;
 
   /* --------------------------- Read ---------------------------*/
-  public async getEventById(eventId: string) {
+  public async getEventById(eventId: string): Promise<Doc<Event>> {
     return await this.documentService.getDocumentById<Event>(this.COLLECTION, eventId, eventConverter);
+  }
+
+  public async getEvents(): Promise<Doc<Event>[]> {
+    return await this.documentService.getAllDocuments<Event>(this.COLLECTION, eventConverter);
   }
 
   /* --------------------------- Create ---------------------------*/

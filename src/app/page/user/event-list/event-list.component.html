@@ -1,0 +1,60 @@
+<ul class="flex flex-col gap-4 p-4">
+  @for (event of events(); track event.id) {
+    @if (event.id === eventIdSelected()) {
+      <li class="overflow-hidden rounded-lg bg-primary-dark shadow-md transition-all duration-300 ease-in-out">
+        <div class="relative flex flex-col gap-8 p-2">
+          <div class="relative">
+            <img
+              class="aspect-video h-auto w-full rounded-lg"
+              [src]="event.props.imageUrl ?? 'images/welcome1.png'"
+              alt="Immagine evento" />
+            <div
+              class="absolute inset-0 flex flex-col items-center justify-end gap-1 overflow-hidden rounded-lg bg-gradient-to-b from-transparent to-primary-dark p-4 pb-0 text-white">
+              <p class="text-center text-2xl font-bold">{{ event.props.name }}</p>
+              <p class="line-clamp-3 overflow-hidden text-ellipsis text-center text-sm italic text-gray-100">
+                {{ event.props.description }}
+              </p>
+              <p class="rounded-full bg-primary px-1 text-xs">
+                Sfide: <span class="font-bold">{{ event.props.challenges.length }}</span>
+              </p>
+              <div class="flex flex-col items-center">
+                <p class="text-xs font-medium text-gray-300">{{ event.props.location }}</p>
+                <p class="text-xxs text-gray-300/70">
+                  ({{ event.props.startDate | date: 'dd/MM HH:mm' }} - {{ event.props.endDate | date: 'dd/MM HH:mm' }})
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col gap-2">
+            <button
+              class="rounded-md bg-primary p-2 text-xs text-white transition duration-200 hover:bg-primary-light active:bg-primary-dark">
+              Crea squadra
+            </button>
+            <button
+              class="rounded-md bg-secondary p-2 text-xs text-white transition duration-200 hover:bg-secondary-light active:bg-secondary-dark">
+              Trova squadra
+            </button>
+          </div>
+        </div>
+      </li>
+    } @else {
+      <li
+        class="transform cursor-pointer overflow-hidden rounded-lg bg-primary-dark shadow-md transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-primary-dark"
+        [tabindex]="0"
+        (click)="eventIdSelected.set(event.id)"
+        (keydown)="eventIdSelected.set(event.id)">
+        <div class="relative p-2">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-base font-semibold text-on-background">{{ event.props.name }}</p>
+              <p class="text-xs text-gray-300">{{ event.props.location }}</p>
+            </div>
+            <div class="text-lg font-bold text-on-surface">
+              <p>{{ event.props.startDate | date: 'dd/MM' }}</p>
+            </div>
+          </div>
+        </div>
+      </li>
+    }
+  }
+</ul>

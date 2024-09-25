@@ -68,7 +68,6 @@ export const routes: Routes = [
   {
     path: 'user',
     canActivate: [userGuard],
-    loadComponent: () => import('../page/home/home.component').then((m) => m.HomeComponent),
     children: [
       {
         path: 'dashboard',
@@ -80,7 +79,7 @@ export const routes: Routes = [
           {
             path: '',
             loadComponent: () =>
-              import('../page/admin/event-list/event-list.component').then((m) => m.EventListComponent)
+              import('../page/user/event-list/event-list.component').then((m) => m.EventListComponent)
           },
           {
             path: ':eventId/teams',
