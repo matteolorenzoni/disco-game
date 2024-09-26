@@ -10,7 +10,9 @@ import {
   updateDoc,
   where,
   collection as getCollection,
-  addDoc
+  addDoc,
+  arrayUnion,
+  arrayRemove
 } from 'firebase/firestore';
 import { Doc } from '../model/firebase.model';
 import { LogService } from './log.service';
@@ -104,7 +106,7 @@ export class FirebaseDocumentService {
     }
   }
 
-  /* --------------------- Methods READ --------------------- */
+  /* --------------------- Methods UPDATE --------------------- */
   public async updateDocument<T extends Record<string, any>>(
     id: string,
     collectionName: string,
@@ -114,6 +116,25 @@ export class FirebaseDocumentService {
       const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
       const docRef = doc(collectionRef, id);
       await updateDoc(docRef, data as any);
+    } catch (error) {
+      this.logService.addLogError(this.firebaseService.userFirebase()?.uid, error);
+      throw error;
+    }
+  }
+
+  public async updateArrayProp<T extends Record<string, any>>(
+    operation: 'add' | 'remove',
+    id: string,
+    collectionName: string,
+    propToUpdate: keyof T,
+    valueToUpdate: T[keyof T]
+  ): Promise<void> {
+    try {
+      const teamRef = doc(this.firebaseService.getDb(), `${collectionName}/${id}`);
+      await updateDoc(teamRef, {
+        [propToUpdate]: operation === 'add' ? arrayUnion(valueToUpdate) : arrayRemove(valueToUpdate),
+        updatedAt: new Date()
+      });
     } catch (error) {
       this.logService.addLogError(this.firebaseService.userFirebase()?.uid, error);
       throw error;
