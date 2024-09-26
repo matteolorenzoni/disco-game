@@ -40,8 +40,11 @@ export type ChallengeModel = {
   endDate: string;
 };
 
-export type TeamModel = {
+export type NewTeamModel = {
   name: string;
-  description: string;
-  imageUrl: string | null;
+  // description: string;
+};
+
+export type SearchTeamModel = {
+  code: string;
 };

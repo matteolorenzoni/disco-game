@@ -50,23 +50,11 @@ export class UserService {
 
   /* --------------------------- Create ---------------------------*/
   public async addUser(id: string, form: SignUpModel, imageUrl: string | null): Promise<void> {
-    /* Generazione un codice univoco */
+    /* Controllo username univoco */
     const userDocs = await this.getUsers();
-    const { usernames, codes } = userDocs.reduce(
-      (acc, cur) => ({
-        usernames: [...acc.usernames, cur.props.username.toLowerCase()],
-        codes: [...acc.codes, cur.props.defaultCode]
-      }),
-      { usernames: [] as string[], codes: [] as string[] }
-    );
-
+    const usernames = userDocs.map((user) => user.props.username);
     if (usernames.includes(form.username.toLowerCase())) {
       throw new Error('usernameNotAvailable', { cause: 'usernameNotAvailable' });
-    }
-
-    let defaultCode = this.generateRandomCode(6);
-    while (codes.length < 2_000_000 && codes.includes(defaultCode)) {
-      defaultCode = this.generateRandomCode(6);
     }
 
     /* Aggiunta documento a DB */
@@ -75,7 +63,6 @@ export class UserService {
       birthDate: new Date(form.birthDate),
       imageUrl,
       role: UserRole.USER,
-      defaultCode,
       challengePoints: [],
       isActive: true,
       createdAt: new Date(),

@@ -7,7 +7,6 @@ export type User = {
   birthDate: Date; // Data di nascita dell'utente
   imageUrl: string | null;
   role: UserRole; // URL immagine
-  defaultCode: string; // Codice di default per creare o partecipare a squadre
   challengePoints: ChallengePoint[]; // Lista delle sfide completate
   isActive: boolean; // Per soft delete
   createdAt: Date; // Data di creazione dell'account

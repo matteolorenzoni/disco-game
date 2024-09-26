@@ -32,7 +32,6 @@ export const userConverter: FirestoreDataConverter<User> = {
       birthDate: dateToString(user.birthDate),
       imageUrl: user.imageUrl,
       role: user.role,
-      defaultCode: user.defaultCode,
       //TODO: Capire cosa fare
       challengePoints: user.challengePoints.map((point) => ({
         challengeId: point.challengeId,
@@ -54,7 +53,6 @@ export const userConverter: FirestoreDataConverter<User> = {
       birthDate: timestampToDate(data['birthDate'] as Timestamp),
       imageUrl: data['imageUrl'] || null,
       role: data['role'],
-      defaultCode: data['defaultCode'],
       //TODO: Capire cosa fare
       challengePoints: data['challengePoints'].map((point: ChallengePoint) => ({
         challengeId: point.challengeId,
@@ -156,8 +154,7 @@ export const teamConverter: FirestoreDataConverter<Team> = {
       eventId: team.eventId,
       name: team.name,
       description: team.description,
-      defaultCode: team.defaultCode,
-      imageUrl: team.imageUrl,
+      code: team.code,
       status: team.status,
       memberIds: team.memberIds,
       isActive: team.isActive,
@@ -173,8 +170,7 @@ export const teamConverter: FirestoreDataConverter<Team> = {
       eventId: data['eventId'],
       name: data['name'],
       description: data['description'],
-      defaultCode: data['defaultCode'],
-      imageUrl: data['imageUrl'] || null,
+      code: data['code'],
       status: data['status'] as TeamStatus,
       memberIds: data['memberIds'] || [],
       isActive: data['isActive'],

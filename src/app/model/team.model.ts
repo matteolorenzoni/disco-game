@@ -4,8 +4,7 @@ export type Team = {
   eventId: string; // ID dell'evento collegato
   name: string; // Nome della squadra
   description: string; // Descrizione della squadra
-  defaultCode: string; // Codice di default per creare o partecipare a squadre
-  imageUrl: string | null; // URL dell'immagine
+  code: string; // Codice di default per creare o partecipare a squadre
   status: TeamStatus; // Stato della squadra (es: "active", "disbanded")
   memberIds: string[]; // Array di ID degli utenti membri della squadra
   isActive: boolean; // Per soft delete

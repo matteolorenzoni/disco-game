@@ -8,7 +8,8 @@ const errorMessages: Record<string, string> = {
   noUserDocument:
     "L'utente registrato è stato trovato ma non esiste un documento associato. Contattare il supporto per assistenza.",
   noDocument: 'Documento non trovato. Contattare il supporto per assistenza.',
-  usernameNotAvailable: "L'username scelto non è disponibile, si prega di sceglierne un altro."
+  usernameNotAvailable: "L'username scelto non è disponibile, si prega di sceglierne un altro.",
+  tooManyTeams: "Troppe squadre create, contattare l'assistenza."
 };
 
 @Injectable()
