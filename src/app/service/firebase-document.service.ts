@@ -53,29 +53,27 @@ export class FirebaseDocumentService {
     try {
       const collectionRef = getCollection(this.firebaseService.getDb(), collectionName).withConverter(converter);
       const querySnapshot = await getDocs(collectionRef);
-      return querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        props: doc.data() as T // Cast dei dati del documento a tipo T
-      }));
+      return querySnapshot.docs.map((doc) => ({ id: doc.id, props: doc.data() as T }));
     } catch (error) {
       this.logService.addLogError(this.firebaseService.userFirebase()?.uid, error);
       throw error;
     }
   }
 
-  public async getDocumentByProp<T extends Record<string, any>>(
+  public async getDocumentsByProp<T extends Record<string, any>>(
     collectionName: string,
-    queryParam: { key: keyof T; value: any }
-  ): Promise<Doc<T> | undefined> {
+    queryParams: Partial<T>,
+    converter: FirestoreDataConverter<T>
+  ): Promise<Doc<T>[]> {
     try {
-      const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
-      const q = query(collectionRef, where(queryParam.key as string, '==', queryParam.value));
+      const collectionRef = getCollection(this.firebaseService.getDb(), collectionName).withConverter(converter);
+
+      // Crea un array di constraint per la query
+      const queryConstraints = Object.entries(queryParams).map(([key, value]) => where(key, '==', value));
+      const q = query(collectionRef, ...queryConstraints);
       const querySnapshot = await getDocs(q);
-      const docs = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        props: doc.data() as T
-      }));
-      return docs.length ? docs[0] : undefined;
+      const docs = querySnapshot.docs.map((doc) => ({ id: doc.id, props: doc.data() as T }));
+      return docs;
     } catch (error) {
       this.logService.addLogError(this.firebaseService.userFirebase()?.uid, error);
       throw error;
