@@ -27,11 +27,13 @@
           </div>
           <div class="flex flex-col gap-2">
             <button
-              class="rounded-md bg-primary p-2 text-xs text-white transition duration-200 hover:bg-primary-light active:bg-primary-dark">
+              class="rounded-md bg-primary p-2 text-xs text-white transition duration-200 hover:bg-primary-light active:bg-primary-dark"
+              (click)="newTeamModalIsOpen.set(true)">
               Crea squadra
             </button>
             <button
-              class="rounded-md bg-secondary p-2 text-xs text-white transition duration-200 hover:bg-secondary-light active:bg-secondary-dark">
+              class="rounded-md bg-secondary p-2 text-xs text-white transition duration-200 hover:bg-secondary-light active:bg-secondary-dark"
+              (click)="findTeamModalIsOpen.set(true)">
               Trova squadra
             </button>
           </div>
@@ -58,3 +60,81 @@
     }
   }
 </ul>
+
+<!-- Crea squadra -->
+<div
+  data-dialog-backdrop="sign-in-modal"
+  data-dialog-backdrop-close="true"
+  class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center bg-black bg-opacity-60 opacity-0 backdrop-blur-sm transition-opacity duration-300"
+  [ngClass]="{ 'opacity-100 pointer-events-auto': newTeamModalIsOpen() }"
+  [tabindex]="-1"
+  aria-hidden="true"
+  (click)="onBackdropClick($event)">
+  <div data-dialog="sign-in-modal" class="relative mx-auto w-4/5 max-w-[24rem] overflow-hidden rounded-lg shadow-sm">
+    <div class="flex flex-col gap-2 bg-primary p-2">
+      <h3 class="mb-4 text-center text-lg font-semibold text-on-primary">Crea squadra</h3>
+      <form
+        [formGroup]="newTeamForm"
+        (ngSubmit)="addTeam()"
+        class="flex w-full max-w-2xl flex-col justify-between gap-2">
+        <div class="relative h-10">
+          <input
+            class="h-full w-full rounded-md border border-slate-300 bg-white p-2 pl-10 text-sm text-slate-700 shadow-sm transition duration-300 ease-in placeholder:text-slate-400 hover:border-slate-400 focus:border-primary focus:shadow focus:outline-none"
+            placeholder="Nome squadra"
+            formControlName="name" />
+          <div
+            class="absolute left-1 top-1 h-8 w-8 rounded border border-transparent bg-primary p-1 text-center text-sm text-on-primary shadow-sm transition-all">
+            <fa-icon [icon]="ICON_TEAM"></fa-icon>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          [disabled]="newTeamForm.invalid"
+          class="inline-block w-full rounded-md bg-primary-dark px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-on-primary shadow-primary-light transition duration-150 ease-in-out hover:bg-primary-light active:bg-primary-dark disabled:cursor-not-allowed disabled:bg-white/40 disabled:text-white/60">
+          Crea
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Cerca squadra -->
+<div
+  data-dialog-backdrop="sign-in-modal"
+  data-dialog-backdrop-close="true"
+  class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center bg-black bg-opacity-60 opacity-0 backdrop-blur-sm transition-opacity duration-300"
+  [ngClass]="{ 'opacity-100 pointer-events-auto': findTeamModalIsOpen() }"
+  [tabindex]="-1"
+  aria-hidden="true"
+  (click)="onBackdropClick($event)">
+  <div data-dialog="sign-in-modal" class="relative mx-auto w-4/5 max-w-[24rem] overflow-hidden rounded-lg shadow-sm">
+    <div class="flex flex-col gap-2 bg-secondary p-2">
+      <h3 class="mb-4 text-center text-lg font-semibold text-on-secondary">Cerca squadra</h3>
+      <form
+        [formGroup]="findTeamForm"
+        (ngSubmit)="findTeam()"
+        class="flex w-full max-w-2xl flex-col justify-between gap-2">
+        <div class="relative h-10">
+          <input
+            class="h-full w-full rounded-md border border-slate-300 bg-white p-2 pl-10 text-sm text-slate-700 shadow-sm transition duration-300 ease-in placeholder:text-slate-400 hover:border-slate-400 focus:border-secondary focus:shadow focus:outline-none"
+            placeholder="Codice squadra"
+            minlength="6"
+            maxlength="6"
+            formControlName="code" />
+          <div
+            class="absolute left-1 top-1 h-8 w-8 rounded border border-transparent bg-secondary p-1 text-center text-sm text-on-secondary shadow-sm transition-all">
+            <fa-icon [icon]="ICON_TEAM"></fa-icon>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          [disabled]="findTeamForm.invalid"
+          class="inline-block w-full rounded-md bg-secondary-dark px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-on-secondary shadow-secondary-light transition duration-150 ease-in-out hover:bg-secondary-light active:bg-secondary-dark disabled:cursor-not-allowed disabled:bg-white/40 disabled:text-white/60">
+          Cerca
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

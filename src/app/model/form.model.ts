@@ -45,6 +45,6 @@ export type NewTeamModel = {
   // description: string;
 };
 
-export type SearchTeamModel = {
+export type FindTeamModel = {
   code: string;
 };

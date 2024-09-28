@@ -19,19 +19,35 @@ export class TeamService {
   COLLECTION = environment.collection.TEAMS;
 
   /* --------------------------- Read ---------------------------*/
-  public async getTeamById(teamId: string) {
+  public async getTeamById(teamId: string): Promise<Doc<Team>> {
     return await this.documentService.getDocumentById<Team>(this.COLLECTION, teamId, teamConverter);
   }
 
-  public async getTeams(): Promise<Doc<Team>[]> {
-    return await this.documentService.getAllDocuments<Team>(this.COLLECTION, teamConverter);
+  public async getTeamByCode(code: string): Promise<Doc<Team> | undefined> {
+    const teams = await this.documentService.getDocumentsByProp<Team>(this.COLLECTION, { code }, teamConverter);
+    return teams[0];
+  }
+
+  public async getTeamsByEvent(eventId: string): Promise<Doc<Team>[]> {
+    return await this.documentService.getDocumentsByProp<Team>(this.COLLECTION, { eventId }, teamConverter);
   }
 
   /* --------------------------- Create ---------------------------*/
   public async addTeam(userId: string, eventId: string, form: NewTeamModel): Promise<void> {
     /* Generazione un codice univoco */
-    const teamsDocs = await this.getTeams();
-    const codes = teamsDocs.map((user) => user.props.code);
+    const teamsDocs = await this.getTeamsByEvent(eventId);
+    const { names, codes } = teamsDocs.reduce(
+      (acc, cur) => ({
+        names: [...acc.names, cur.props.name.toLowerCase()],
+        codes: [...acc.codes, cur.props.code]
+      }),
+      { names: [] as string[], codes: [] as string[] }
+    );
+
+    if (names.includes(form.name.toLowerCase())) {
+      throw new Error('teamNameNotAvailable', { cause: 'teamNameNotAvailable' });
+    }
+
     if (codes.length > 2_000_000) {
       throw new Error('tooManyTeams', { cause: 'tooManyTeams' });
     }
@@ -53,7 +69,8 @@ export class TeamService {
       createdAt: new Date(),
       updatedAt: new Date()
     });
-    this.logService.addLogConfirm('Squadra creata correttamente');
+    navigator.clipboard.writeText(code);
+    this.logService.addLogConfirm(`Squadra creata! Codice: ${code} (copiato negli appunti)`);
   }
 
   /* --------------------------- Update ---------------------------*/
@@ -63,6 +80,11 @@ export class TeamService {
       updatedAt: new Date()
     });
     this.logService.addLogConfirm('Squadra aggiornata correttamente');
+  }
+
+  public async addTeamMember(teamId: string, memberId: string): Promise<void> {
+    await this.documentService.updateArrayProp<Team>('add', teamId, this.COLLECTION, 'memberIds', memberId);
+    this.logService.addLogConfirm('Sei stato aggiunto alla squadra con successo!');
   }
 
   /* --------------------------- Utils ---------------------------*/
