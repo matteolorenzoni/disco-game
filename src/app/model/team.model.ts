@@ -6,7 +6,7 @@ export type Team = {
   description: string; // Descrizione della squadra
   code: string; // Codice di default per creare o partecipare a squadre
   status: TeamStatus; // Stato della squadra (es: "active", "disbanded")
-  memberIds: string[]; // Array di ID degli utenti membri della squadra
+  members: string[]; // Array di ID degli utenti membri della squadra
   isActive: boolean; // Per soft delete
   createdAt: Date; // Data di creazione della squadra
   updatedAt: Date; // Data dell'ultimo aggiornamento della squadra

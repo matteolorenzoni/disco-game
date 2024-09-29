@@ -7,10 +7,12 @@ import {
   SnapshotOptions,
   Timestamp
 } from 'firebase/firestore';
-import { User, UserChallenge, UserGame, UserRole } from './user.model';
-import { EventChallenge, Event } from './event.model';
 import { Challenge, ChallengeStatus } from './challenge.model';
+import { Event, EventChallenge } from './event.model';
 import { Team, TeamStatus } from './team.model';
+import { User, UserRole } from './user.model';
+import { UserChallenge } from './user-challenge.model';
+import { UserGame } from './user-game.model';
 
 /* ---------------------- Utils ---------------------- */
 // Funzione per convertire stringa ISO in oggetto Date
@@ -149,7 +151,7 @@ export const teamConverter: FirestoreDataConverter<Team> = {
       description: team.description,
       code: team.code,
       status: team.status,
-      memberIds: team.memberIds,
+      members: team.members,
       isActive: team.isActive,
       createdAt: dateToString(team.createdAt),
       updatedAt: dateToString(team.updatedAt)
@@ -165,7 +167,7 @@ export const teamConverter: FirestoreDataConverter<Team> = {
       description: data['description'],
       code: data['code'],
       status: data['status'] as TeamStatus,
-      memberIds: data['memberIds'] || [],
+      members: data['members'],
       isActive: data['isActive'],
       createdAt: timestampToDate(data['createdAt'] as Timestamp),
       updatedAt: timestampToDate(data['updatedAt'] as Timestamp)

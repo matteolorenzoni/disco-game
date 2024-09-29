@@ -1,4 +1,5 @@
 import { DocumentReference } from 'firebase/firestore';
+import { UserGame } from './user-game.model';
 
 export type User = {
   // id: string; // ID univoco dell'utente
@@ -13,19 +14,6 @@ export type User = {
   isActive: boolean; // Indica se l'utente è attivo (true) o se è stato disattivato (false)
   createdAt: Date; // Data di creazione dell'account dell'utente
   updatedAt: Date; // Data dell'ultimo aggiornamento delle informazioni dell'account
-};
-
-export type UserGame = {
-  userId: string; // ID dell'utente che è il leader della squadra
-  eventId: string; // ID dell'evento a cui è associata la squadra
-  teamId: string; // ID della squadra
-  challenges: DocumentReference<UserChallenge>[]; // Elenco delle sfide completate dalla squadra
-};
-
-export type UserChallenge = {
-  challengeId: string; // ID della sfida completata
-  count: number; // Numero di volte che la sfida è stata completata
-  completionDates: Date[]; // Array delle date di completamento della sfida
 };
 
 export enum UserRole {
