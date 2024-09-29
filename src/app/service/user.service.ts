@@ -1,13 +1,16 @@
-import { computed, inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { environment } from '../../environments/environment.development';
-import { User } from '../model/user.model';
+import { User, UserGame } from '../model/user.model';
 import { UserRole } from '../model/user.model';
 import { Doc } from '../model/firebase.model';
 import { SignUpModel } from '../model/form.model';
-import { userConverter } from '../model/converter.model';
+import { userConverter, userGameConverter } from '../model/converter.model';
 import { LogService } from './log.service';
 import { FirebaseService } from './firebase.service';
 import { FirebaseDocumentService } from './firebase-document.service';
+
+const COL_USERS = environment.collection.USERS;
+const COL_USER_GAMES = environment.collection.GAMES;
 
 @Injectable({
   providedIn: 'root'
@@ -30,17 +33,26 @@ export class UserService {
       throw error;
     }
   });
-
-  /* Constants */
-  COLLECTION = environment.collection.USERS;
+  userGames = signal<Doc<UserGame>[]>([]);
 
   /* --------------------------- Read ---------------------------*/
   public async getUserById(userId: string): Promise<Doc<User>> {
-    return await this.documentService.getDocumentById<User>(this.COLLECTION, userId, userConverter);
+    // User
+    const userDoc = await this.documentService.getDocumentById<User>(COL_USERS, userId, userConverter);
+
+    // User games
+    const gamesPromises = userDoc.props.games.map(
+      async (gameRef) =>
+        await this.documentService.getDocumentById<UserGame>(COL_USER_GAMES, gameRef.id, userGameConverter)
+    );
+    const gamesDocs = await Promise.all(gamesPromises);
+    this.userGames.set(gamesDocs);
+
+    return userDoc;
   }
 
   private async getUsers(): Promise<Doc<User>[]> {
-    return await this.documentService.getAllDocuments<User>(this.COLLECTION, userConverter);
+    return await this.documentService.getAllDocuments<User>(COL_USERS, userConverter);
   }
 
   /* --------------------------- Create ---------------------------*/
@@ -53,7 +65,7 @@ export class UserService {
     }
 
     /* Aggiunta documento a DB */
-    await this.documentService.addDocumentById<User>(id, this.COLLECTION, {
+    await this.documentService.addDocumentById<User>(id, COL_USERS, {
       ...form,
       birthDate: new Date(form.birthDate),
       imageUrl,
@@ -68,14 +80,18 @@ export class UserService {
     this.logService.addLogConfirm('Utente registrato correttamente');
   }
 
-  /* --------------------------- Util ---------------------------*/
-  private generateRandomCode(length: number): string {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let result = '';
-    for (let i = 0; i < length; i++) {
-      const randomIndex = Math.floor(Math.random() * chars.length);
-      result += chars[randomIndex];
-    }
-    return result;
+  public async addGame(userId: string, eventId: string, teamId: string): Promise<void> {
+    const gameRef = await this.documentService.addDocument<UserGame>(COL_USER_GAMES, {
+      userId,
+      eventId,
+      teamId,
+      challenges: []
+    });
+    await this.documentService.updateArrayPropReference<User>(
+      'add',
+      'games',
+      `${COL_USERS}/${userId}`,
+      `${COL_USER_GAMES}/${gameRef.id}`
+    );
   }
 }

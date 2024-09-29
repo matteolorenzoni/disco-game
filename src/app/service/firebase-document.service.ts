@@ -123,9 +123,28 @@ export class FirebaseDocumentService {
     valueToUpdate: T[keyof T]
   ): Promise<void> {
     try {
-      const teamRef = doc(this.firebaseService.getDb(), `${collectionName}/${id}`);
-      await updateDoc(teamRef, {
+      const docRef = doc(this.firebaseService.getDb(), `${collectionName}/${id}`);
+      await updateDoc(docRef, {
         [propToUpdate]: operation === 'add' ? arrayUnion(valueToUpdate) : arrayRemove(valueToUpdate),
+        updatedAt: new Date()
+      });
+    } catch (error) {
+      this.logService.addLogError(this.firebaseService.userFirebase()?.uid, error);
+      throw error;
+    }
+  }
+
+  public async updateArrayPropReference<T extends Record<string, any>>(
+    operation: 'add' | 'remove',
+    propToUpdate: keyof T,
+    id: string,
+    references: string
+  ): Promise<void> {
+    try {
+      const docRef = doc(this.firebaseService.getDb(), id);
+      const referencesRef = doc(this.firebaseService.getDb(), references);
+      await updateDoc(docRef, {
+        [propToUpdate]: operation === 'add' ? arrayUnion(referencesRef) : arrayRemove(referencesRef),
         updatedAt: new Date()
       });
     } catch (error) {

@@ -1,11 +1,12 @@
-import { inject, Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { FirebaseDocumentService } from './firebase-document.service';
 import { environment } from '../../environments/environment.development';
-import { Team, TeamStatus } from '../model/team.model';
-import { NewTeamModel } from '../model/form.model';
-import { teamConverter } from '../model/converter.model';
 import { LogService } from './log.service';
+import { NewTeamModel } from '../model/form.model';
+import { Team, TeamStatus } from '../model/team.model';
 import { Doc } from '../model/firebase.model';
+import { teamConverter } from '../model/converter.model';
+import { UserService } from './user.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +14,7 @@ import { Doc } from '../model/firebase.model';
 export class TeamService {
   /* Services */
   readonly documentService = inject(FirebaseDocumentService);
+  readonly userService = inject(UserService);
   readonly logService = inject(LogService);
 
   /* Constants */
@@ -34,7 +36,7 @@ export class TeamService {
 
   /* --------------------------- Create ---------------------------*/
   public async addTeam(userId: string, eventId: string, form: NewTeamModel): Promise<void> {
-    /* Generazione un codice univoco */
+    /* Controllo se nome è univoco */
     const teamsDocs = await this.getTeamsByEvent(eventId);
     const { names, codes } = teamsDocs.reduce(
       (acc, cur) => ({
@@ -43,21 +45,21 @@ export class TeamService {
       }),
       { names: [] as string[], codes: [] as string[] }
     );
-
     if (names.includes(form.name.toLowerCase())) {
       throw new Error('teamNameNotAvailable', { cause: 'teamNameNotAvailable' });
     }
 
+    /* Generazione un codice univoco */
     if (codes.length > 2_000_000) {
       throw new Error('tooManyTeams', { cause: 'tooManyTeams' });
     }
-
     let code = this.generateRandomCode(6);
     while (codes.includes(code)) {
       code = this.generateRandomCode(6);
     }
 
-    await this.documentService.addDocument<Team>(this.COLLECTION, {
+    /* Aggiungo evento al DB */
+    const teamRef = await this.documentService.addDocument<Team>(this.COLLECTION, {
       ...form,
       userId,
       eventId,
@@ -69,6 +71,11 @@ export class TeamService {
       createdAt: new Date(),
       updatedAt: new Date()
     });
+
+    /* Aggiungo UserGame al DB e aggiorno User */
+    this.userService.addGame(userId, eventId, teamRef.id);
+
+    /* Log */
     navigator.clipboard.writeText(code);
     this.logService.addLogConfirm(`Squadra creata! Codice: ${code} (copiato negli appunti)`);
   }
