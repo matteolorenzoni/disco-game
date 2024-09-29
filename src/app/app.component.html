@@ -3,7 +3,8 @@
     <router-outlet></router-outlet>
 
     @if (logService.logs().length) {
-      <ul class="absolute bottom-0 left-0 flex max-h-80 w-full flex-col items-center gap-2 overflow-y-auto p-2">
+      <ul
+        class="absolute bottom-0 left-0 z-[1000] flex max-h-80 min-h-14 w-full flex-col items-center gap-2 overflow-y-auto p-2">
         @for (log of logService.logs(); track log.id) {
           <li class="w-full max-w-xl"><fv-toast [log]="log"></fv-toast></li>
         }
