@@ -4,8 +4,8 @@ import { environment } from '../../environments/environment.development';
 import { LogService } from './log.service';
 import { NewTeamModel } from '../model/form.model';
 import { Team, TeamStatus } from '../model/team.model';
-import { Doc } from '../model/firebase.model';
-import { teamConverter } from '../model/converter.model';
+import { Doc } from '../model/firebase';
+import { teamConverter } from '../model/converter';
 import { UserService } from './user.service';
 import { UserGameService } from './user-game.service';
 

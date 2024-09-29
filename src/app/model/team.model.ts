@@ -1,5 +1,4 @@
 export type Team = {
-  // id: string; // ID univoco della squadra
   userId: string; // ID dell'utente che ha creato la squadra
   eventId: string; // ID dell'evento collegato
   name: string; // Nome della squadra

@@ -1,6 +1,5 @@
 export type Challenge = {
-  // id: string; // ID univoco della sfida
-  name: string;
+  name: string; // Nome sfida
   description: string; // Descrizione della sfida
   rules: string; // Regole della sfida
   imageUrl: string | null; // URL immagine

@@ -4,7 +4,7 @@ import { trigger, style, transition, animate } from '@angular/animations'; // Im
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faCircleCheck, faCircleExclamation, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { Log, LogService } from '../service/log.service';
-import { LogType } from '../model/enum.model';
+import { LogType } from '../model/enum';
 
 @Component({
   selector: 'fv-toast',

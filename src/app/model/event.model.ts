@@ -1,5 +1,4 @@
 export type Event = {
-  // id: string; // ID univoco dell'evento
   name: string; // Nome dell'evento
   description: string; // Descrizione dell'evento, inclusi dettagli come il tema e gli obiettivi
   location: string; // Luogo in cui si svolge l'evento, che può essere un indirizzo o un nome di una struttura

@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { FirebaseError } from 'firebase/app';
-import { LogType } from '../model/enum.model';
+import { LogType } from '../model/enum';
 
 const firebaseErrorMessages: Record<string, string> = {
   'auth/email-already-in-use': "L'email è già in uso.",

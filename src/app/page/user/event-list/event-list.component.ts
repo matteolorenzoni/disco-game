@@ -5,7 +5,7 @@ import { trigger, transition, style, animate } from '@angular/animations';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faPeopleGroup } from '@fortawesome/free-solid-svg-icons';
 import { Event } from '../../../model/event.model';
-import { Doc } from '../../../model/firebase.model';
+import { Doc } from '../../../model/firebase';
 import { FindTeamModel, FromMap, NewTeamModel } from '../../../model/form.model';
 import { EventService } from '../../../service/event.service';
 import { FirebaseService } from '../../../service/firebase.service';

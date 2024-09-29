@@ -3,9 +3,9 @@ import { FirebaseDocumentService } from './firebase-document.service';
 import { environment } from '../../environments/environment.development';
 import { Event } from '../model/event.model';
 import { EventModel } from '../model/form.model';
-import { eventConverter } from '../model/converter.model';
+import { eventConverter } from '../model/converter';
 import { LogService } from './log.service';
-import { Doc } from '../model/firebase.model';
+import { Doc } from '../model/firebase';
 
 @Injectable({
   providedIn: 'root'

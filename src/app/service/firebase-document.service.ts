@@ -16,7 +16,7 @@ import {
   where,
   collection as getCollection
 } from 'firebase/firestore';
-import { Doc } from '../model/firebase.model';
+import { Doc } from '../model/firebase';
 import { FirebaseService } from './firebase.service';
 import { LogService } from './log.service';
 

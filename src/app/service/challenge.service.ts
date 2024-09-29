@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { FirebaseDocumentService } from './firebase-document.service';
 import { environment } from '../../environments/environment.development';
 import { ChallengeModel } from '../model/form.model';
-import { challengeConverter } from '../model/converter.model';
+import { challengeConverter } from '../model/converter';
 import { LogService } from './log.service';
 import { Challenge } from '../model/challenge.model';
 

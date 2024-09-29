@@ -1,8 +1,8 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { environment } from '../../environments/environment.development';
 import { UserGame } from '../model/user-game.model';
-import { Doc } from '../model/firebase.model';
-import { userGameConverter } from '../model/converter.model';
+import { Doc } from '../model/firebase';
+import { userGameConverter } from '../model/converter';
 import { FirebaseDocumentService } from './firebase-document.service';
 import { DocumentData, DocumentReference } from 'firebase/firestore';
 
