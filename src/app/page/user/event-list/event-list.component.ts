@@ -1,16 +1,18 @@
-import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faPeopleGroup } from '@fortawesome/free-solid-svg-icons';
-import { EventService } from '../../../service/event.service';
-import { TeamService } from '../../../service/team.service';
-import { FirebaseService } from '../../../service/firebase.service';
 import { Event } from '../../../model/event.model';
 import { Doc } from '../../../model/firebase.model';
-import { FromMap, NewTeamModel, FindTeamModel } from '../../../model/form.model';
+import { FindTeamModel, FromMap, NewTeamModel } from '../../../model/form.model';
+import { EventService } from '../../../service/event.service';
+import { FirebaseService } from '../../../service/firebase.service';
 import { LogService } from '../../../service/log.service';
+import { TeamService } from '../../../service/team.service';
+import { UserService } from './../../../service/user.service';
+import { UserGameService } from '../../../service/user-game.service';
 
 @Component({
   selector: 'app-event-list',
@@ -34,8 +36,10 @@ import { LogService } from '../../../service/log.service';
 export class EventListComponent implements OnInit {
   /* Services */
   readonly firebaseService = inject(FirebaseService);
+  readonly userService = inject(UserService);
   readonly eventService = inject(EventService);
   readonly teamService = inject(TeamService);
+  readonly userGameService = inject(UserGameService);
   readonly logService = inject(LogService);
 
   /* Variables */
@@ -84,6 +88,10 @@ export class EventListComponent implements OnInit {
   }
 
   protected async findTeam(): Promise<void> {
+    const userId = this.firebaseService.userFirebase()?.uid;
+    const eventId = this.eventIdSelected();
+    if (!userId || !eventId) throw new Error('retry', { cause: 'retry' });
+
     const form = this.findTeamForm.getRawValue();
     const team = await this.teamService.getTeamByCode(form.code);
     if (!team) {
@@ -91,10 +99,15 @@ export class EventListComponent implements OnInit {
       return;
     }
 
-    const memberId = this.firebaseService.userFirebase()?.uid;
-    if (!memberId) throw new Error('retry', { cause: 'retry' });
+    /* Aggiungo UserGame al DB */
+    const userGameRef = await this.userGameService.addUserGame(userId, eventId, team.id);
 
-    await this.teamService.addTeamMember(team.id, memberId);
+    /* Aggiorno User (prop: games) */
+    await this.userService.updateUserGames(userId, userGameRef.id);
+
+    /* Aggiorno Team (prop: members) */
+    await this.teamService.updateTeamMembers(team.id, userId);
+
     this.resetModalsAndForms();
   }
 

@@ -7,6 +7,10 @@ import { Team, TeamStatus } from '../model/team.model';
 import { Doc } from '../model/firebase.model';
 import { teamConverter } from '../model/converter.model';
 import { UserService } from './user.service';
+import { UserGameService } from './user-game.service';
+
+const COL_TEAMS = environment.collection.TEAMS;
+const COL_USERS = environment.collection.USERS;
 
 @Injectable({
   providedIn: 'root'
@@ -15,23 +19,21 @@ export class TeamService {
   /* Services */
   readonly documentService = inject(FirebaseDocumentService);
   readonly userService = inject(UserService);
+  readonly userGameService = inject(UserGameService);
   readonly logService = inject(LogService);
-
-  /* Constants */
-  COLLECTION = environment.collection.TEAMS;
 
   /* --------------------------- Read ---------------------------*/
   public async getTeamById(teamId: string): Promise<Doc<Team>> {
-    return await this.documentService.getDocumentById<Team>(this.COLLECTION, teamId, teamConverter);
+    return await this.documentService.getDocumentById<Team>(COL_TEAMS, teamId, teamConverter);
   }
 
   public async getTeamByCode(code: string): Promise<Doc<Team> | undefined> {
-    const teams = await this.documentService.getDocumentsByProp<Team>(this.COLLECTION, { code }, teamConverter);
+    const teams = await this.documentService.getDocumentsByProp<Team>(COL_TEAMS, { code }, teamConverter);
     return teams[0];
   }
 
   public async getTeamsByEvent(eventId: string): Promise<Doc<Team>[]> {
-    return await this.documentService.getDocumentsByProp<Team>(this.COLLECTION, { eventId }, teamConverter);
+    return await this.documentService.getDocumentsByProp<Team>(COL_TEAMS, { eventId }, teamConverter);
   }
 
   /* --------------------------- Create ---------------------------*/
@@ -59,21 +61,27 @@ export class TeamService {
     }
 
     /* Aggiungo evento al DB */
-    const teamRef = await this.documentService.addDocument<Team>(this.COLLECTION, {
+    const teamRef = await this.documentService.addDocument<Team>(COL_TEAMS, {
       ...form,
       userId,
       eventId,
       description: '',
       code,
       status: TeamStatus.ACTIVE,
-      memberIds: [],
+      members: [],
       isActive: true,
       createdAt: new Date(),
       updatedAt: new Date()
     });
 
-    /* Aggiungo UserGame al DB e aggiorno User */
-    this.userService.addGame(userId, eventId, teamRef.id);
+    /* Aggiungo UserGame al DB */
+    const userGameRef = await this.userGameService.addUserGame(userId, eventId, teamRef.id);
+
+    /* Aggiorno User (prop: games) */
+    await this.userService.updateUserGames(userId, userGameRef.id);
+
+    /* Aggiorno Team (prop: members) */
+    await this.updateTeamMembers(teamRef.id, userId);
 
     /* Log */
     navigator.clipboard.writeText(code);
@@ -82,16 +90,20 @@ export class TeamService {
 
   /* --------------------------- Update ---------------------------*/
   public async updateTeam(teamId: string, form: NewTeamModel): Promise<void> {
-    await this.documentService.updateDocument<Team>(teamId, this.COLLECTION, {
+    await this.documentService.updateDocument<Team>(teamId, COL_TEAMS, {
       ...form,
       updatedAt: new Date()
     });
     this.logService.addLogConfirm('Squadra aggiornata correttamente');
   }
 
-  public async addTeamMember(teamId: string, memberId: string): Promise<void> {
-    await this.documentService.updateArrayProp<Team>('add', teamId, this.COLLECTION, 'memberIds', memberId);
-    this.logService.addLogConfirm('Sei stato aggiunto alla squadra con successo!');
+  public async updateTeamMembers(teamId: string, userId: string): Promise<void> {
+    await this.documentService.updateArrayPropReference<Team>(
+      'add',
+      'members',
+      `${COL_TEAMS}/${teamId}`,
+      `${COL_USERS}/${userId}`
+    );
   }
 
   /* --------------------------- Utils ---------------------------*/

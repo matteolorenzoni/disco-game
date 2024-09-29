@@ -1,13 +1,15 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { environment } from '../../environments/environment.development';
-import { User, UserGame } from '../model/user.model';
+import { User } from '../model/user.model';
+import { UserGame } from '../model/user-game.model';
 import { UserRole } from '../model/user.model';
 import { Doc } from '../model/firebase.model';
 import { SignUpModel } from '../model/form.model';
-import { userConverter, userGameConverter } from '../model/converter.model';
+import { userConverter } from '../model/converter.model';
 import { LogService } from './log.service';
 import { FirebaseService } from './firebase.service';
 import { FirebaseDocumentService } from './firebase-document.service';
+import { UserGameService } from './user-game.service';
 
 const COL_USERS = environment.collection.USERS;
 const COL_USER_GAMES = environment.collection.GAMES;
@@ -19,6 +21,7 @@ export class UserService {
   /* Services */
   readonly firebaseService = inject(FirebaseService);
   readonly documentService = inject(FirebaseDocumentService);
+  readonly userGamesService = inject(UserGameService);
   readonly logService = inject(LogService);
 
   /* Variables */
@@ -41,12 +44,8 @@ export class UserService {
     const userDoc = await this.documentService.getDocumentById<User>(COL_USERS, userId, userConverter);
 
     // User games
-    const gamesPromises = userDoc.props.games.map(
-      async (gameRef) =>
-        await this.documentService.getDocumentById<UserGame>(COL_USER_GAMES, gameRef.id, userGameConverter)
-    );
-    const gamesDocs = await Promise.all(gamesPromises);
-    this.userGames.set(gamesDocs);
+    const userGames = await this.userGamesService.getUserGamesByRefs(userDoc.props.games);
+    this.userGames.set(userGames);
 
     return userDoc;
   }
@@ -80,18 +79,13 @@ export class UserService {
     this.logService.addLogConfirm('Utente registrato correttamente');
   }
 
-  public async addGame(userId: string, eventId: string, teamId: string): Promise<void> {
-    const gameRef = await this.documentService.addDocument<UserGame>(COL_USER_GAMES, {
-      userId,
-      eventId,
-      teamId,
-      challenges: []
-    });
+  /* --------------------------- Update ---------------------------*/
+  public async updateUserGames(userId: string, userGameId: string): Promise<void> {
     await this.documentService.updateArrayPropReference<User>(
       'add',
       'games',
       `${COL_USERS}/${userId}`,
-      `${COL_USER_GAMES}/${gameRef.id}`
+      `${COL_USER_GAMES}/${userGameId}`
     );
   }
 }

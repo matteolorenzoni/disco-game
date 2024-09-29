@@ -1,7 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { inject, Injectable } from '@angular/core';
 import {
+  addDoc,
+  arrayRemove,
+  arrayUnion,
   doc,
+  DocumentData,
+  DocumentReference,
   FirestoreDataConverter,
   getDoc,
   getDocs,
@@ -9,14 +14,11 @@ import {
   setDoc,
   updateDoc,
   where,
-  collection as getCollection,
-  addDoc,
-  arrayUnion,
-  arrayRemove
+  collection as getCollection
 } from 'firebase/firestore';
 import { Doc } from '../model/firebase.model';
-import { LogService } from './log.service';
 import { FirebaseService } from './firebase.service';
+import { LogService } from './log.service';
 
 @Injectable({
   providedIn: 'root'
@@ -76,7 +78,11 @@ export class FirebaseDocumentService {
   }
 
   /* --------------------- Methods CREATE --------------------- */
-  public async addDocumentById<T extends Record<string, any>>(id: string, collectionName: string, data: T) {
+  public async addDocumentById<T extends Record<string, any>>(
+    id: string,
+    collectionName: string,
+    data: T
+  ): Promise<DocumentReference<DocumentData, DocumentData>> {
     try {
       const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
       const docRef = doc(collectionRef, id);
@@ -88,7 +94,10 @@ export class FirebaseDocumentService {
     }
   }
 
-  public async addDocument<T extends Record<string, any>>(collectionName: string, data: T) {
+  public async addDocument<T extends Record<string, any>>(
+    collectionName: string,
+    data: T
+  ): Promise<DocumentReference<DocumentData, DocumentData>> {
     try {
       const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
       const docRef = await addDoc(collectionRef, data);
@@ -115,34 +124,15 @@ export class FirebaseDocumentService {
     }
   }
 
-  public async updateArrayProp<T extends Record<string, any>>(
-    operation: 'add' | 'remove',
-    id: string,
-    collectionName: string,
-    propToUpdate: keyof T,
-    valueToUpdate: T[keyof T]
-  ): Promise<void> {
-    try {
-      const docRef = doc(this.firebaseService.getDb(), `${collectionName}/${id}`);
-      await updateDoc(docRef, {
-        [propToUpdate]: operation === 'add' ? arrayUnion(valueToUpdate) : arrayRemove(valueToUpdate),
-        updatedAt: new Date()
-      });
-    } catch (error) {
-      this.logService.addLogError(this.firebaseService.userFirebase()?.uid, error);
-      throw error;
-    }
-  }
-
   public async updateArrayPropReference<T extends Record<string, any>>(
     operation: 'add' | 'remove',
     propToUpdate: keyof T,
-    id: string,
-    references: string
+    docId: string,
+    referenceId: string
   ): Promise<void> {
     try {
-      const docRef = doc(this.firebaseService.getDb(), id);
-      const referencesRef = doc(this.firebaseService.getDb(), references);
+      const docRef = doc(this.firebaseService.getDb(), docId);
+      const referencesRef = doc(this.firebaseService.getDb(), referenceId);
       await updateDoc(docRef, {
         [propToUpdate]: operation === 'add' ? arrayUnion(referencesRef) : arrayRemove(referencesRef),
         updatedAt: new Date()
