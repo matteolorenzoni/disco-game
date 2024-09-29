@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faPeopleGroup } from '@fortawesome/free-solid-svg-icons';
+import { faCrown, faPeopleGroup } from '@fortawesome/free-solid-svg-icons';
 import { Event } from '../../../model/event.model';
 import { Doc } from '../../../model/firebase';
 import { FindTeamModel, FromMap, NewTeamModel } from '../../../model/form.model';
@@ -13,11 +13,12 @@ import { LogService } from '../../../service/log.service';
 import { TeamService } from '../../../service/team.service';
 import { UserService } from './../../../service/user.service';
 import { UserGameService } from '../../../service/user-game.service';
+import { CheckExistTeamPipe } from '../../../pipe/check-exist-team.pipe';
 
 @Component({
   selector: 'app-event-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FaIconComponent],
+  imports: [CommonModule, ReactiveFormsModule, FaIconComponent, CheckExistTeamPipe],
   templateUrl: './event-list.component.html',
   styleUrls: ['./event-list.component.scss'],
   animations: [
@@ -67,6 +68,7 @@ export class EventListComponent implements OnInit {
   });
 
   /* Icons */
+  ICON_CROWN = faCrown;
   ICON_TEAM = faPeopleGroup;
 
   /* -------------------- Lifecycle hooks -------------------- */
@@ -82,8 +84,15 @@ export class EventListComponent implements OnInit {
     const eventId = this.eventIdSelected();
     if (!userId || !eventId) throw new Error('retry', { cause: 'retry' });
 
+    /* Aggiungo Team al DB */
     const form = this.newTeamForm.getRawValue();
-    await this.teamService.addTeam(userId, eventId, form);
+    const code = await this.teamService.addTeam(userId, eventId, form);
+
+    /* Log */
+    navigator.clipboard.writeText(code);
+    this.logService.addLogConfirm(`Squadra creata! Copiato codice ${code}`);
+
+    /* reset form */
     this.resetModalsAndForms();
   }
 
@@ -100,7 +109,13 @@ export class EventListComponent implements OnInit {
     }
 
     /* Aggiungo UserGame al DB */
-    const userGameRef = await this.userGameService.addUserGame(userId, eventId, team.id);
+    const userGameRef = await this.userGameService.addUserGame(
+      userId,
+      team.props.userId,
+      eventId,
+      team.id,
+      team.props.name
+    );
 
     /* Aggiorno User (prop: games) */
     await this.userService.updateUserGames(userId, userGameRef.id);
@@ -108,6 +123,10 @@ export class EventListComponent implements OnInit {
     /* Aggiorno Team (prop: members) */
     await this.teamService.updateTeamMembers(team.id, userId);
 
+    /* Log */
+    this.logService.addLogConfirm('Ora fa parte della squadra, buona fortuna');
+
+    /* reset form */
     this.resetModalsAndForms();
   }
 

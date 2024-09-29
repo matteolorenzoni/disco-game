@@ -2,8 +2,10 @@ import { DocumentReference } from 'firebase/firestore';
 import { UserChallenge } from './user-challenge.model';
 
 export type UserGame = {
-  userId: string; // ID dell'utente che è il leader della squadra
+  userId: string; // ID dell'utente
+  userIdLeader: string; // ID dell'utente leader della squadra
   eventId: string; // ID dell'evento a cui è associata la squadra
   teamId: string; // ID della squadra
+  teamName: string; // Nome della squadra
   challenges: DocumentReference<UserChallenge>[]; // Elenco delle sfide completate dalla squadra
 };

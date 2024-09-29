@@ -25,17 +25,36 @@
               </div>
             </div>
           </div>
-          <div class="flex flex-col gap-2">
-            <button
-              class="rounded-md bg-primary p-2 text-xs text-white transition duration-200 hover:bg-primary-light active:bg-primary-dark"
-              (click)="newTeamModalIsOpen.set(true)">
-              Crea squadra
-            </button>
-            <button
-              class="rounded-md bg-secondary p-2 text-xs text-white transition duration-200 hover:bg-secondary-light active:bg-secondary-dark"
-              (click)="findTeamModalIsOpen.set(true)">
-              Trova squadra
-            </button>
+          <div class="flex h-20 flex-col justify-end gap-2">
+            @if (eventIdSelected() | check_exist_team; as userGame) {
+              <div>
+                <p class="text-center text-xxs uppercase text-amber-300/40">
+                  Squadra
+                  @if (firebaseService.userFirebase()?.uid === userGame.props.userIdLeader) {
+                    <fa-icon [icon]="ICON_CROWN"></fa-icon>
+                  }
+                </p>
+                <p class="text-center text-xl font-semibold text-amber-300">
+                  {{ userGame.props.teamName }}
+                </p>
+              </div>
+              <button
+                class="rounded-md bg-amber-400 p-2 text-xs text-black transition duration-200 hover:bg-amber-300 active:bg-amber-500"
+                (click)="findTeamModalIsOpen.set(true)">
+                Visualizza squadra
+              </button>
+            } @else {
+              <button
+                class="rounded-md bg-primary p-2 text-xs text-white transition duration-200 hover:bg-primary-light active:bg-primary-dark"
+                (click)="newTeamModalIsOpen.set(true)">
+                Crea squadra
+              </button>
+              <button
+                class="rounded-md bg-secondary p-2 text-xs text-white transition duration-200 hover:bg-secondary-light active:bg-secondary-dark"
+                (click)="findTeamModalIsOpen.set(true)">
+                Trova squadra
+              </button>
+            }
           </div>
         </div>
       </li>

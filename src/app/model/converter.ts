@@ -179,8 +179,10 @@ export const userGameConverter: FirestoreDataConverter<UserGame> = {
   toFirestore(game: UserGame): DocumentData {
     return {
       userId: game.userId,
+      userIdLeader: game.userIdLeader,
       eventId: game.eventId,
       teamId: game.teamId,
+      teamName: game.teamName,
       challenges: game.challenges.map((challengeRef) => challengeRef.path) // Salva il percorso del riferimento
     };
   },
@@ -189,8 +191,10 @@ export const userGameConverter: FirestoreDataConverter<UserGame> = {
     const data = snapshot.data(options)!;
     return {
       userId: data['userId'],
+      userIdLeader: data['userIdLeader'],
       eventId: data['eventId'],
       teamId: data['teamId'],
+      teamName: data['teamName'],
       challenges: (data['challenges'] || []).map((challengePath: string) => {
         return doc(snapshot.ref.firestore, challengePath) as DocumentReference<UserChallenge>;
       })
