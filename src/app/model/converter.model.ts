@@ -1,11 +1,13 @@
 import {
+  doc,
   DocumentData,
+  DocumentReference,
   FirestoreDataConverter,
   QueryDocumentSnapshot,
   SnapshotOptions,
   Timestamp
 } from 'firebase/firestore';
-import { ChallengePoint, User } from './user.model';
+import { User, UserChallenge, UserGame, UserRole } from './user.model';
 import { EventChallenge, Event } from './event.model';
 import { Challenge, ChallengeStatus } from './challenge.model';
 import { Team, TeamStatus } from './team.model';
@@ -29,20 +31,16 @@ export const userConverter: FirestoreDataConverter<User> = {
       lastname: user.lastname,
       username: user.username,
       email: user.email,
-      birthDate: dateToString(user.birthDate),
+      birthDate: user.birthDate, // Considera di usare una funzione per convertire Date in Timestamp se necessario
       imageUrl: user.imageUrl,
       role: user.role,
-      //TODO: Capire cosa fare
-      challengePoints: user.challengePoints.map((point) => ({
-        challengeId: point.challengeId,
-        eventId: point.eventId,
-        completionDate: dateToString(point.completionDate)
-      })),
+      games: user.games.map((gameRef) => gameRef.path), // Salviamo il percorso dei riferimenti ai giochi
       isActive: user.isActive,
-      createdAt: dateToString(user.createdAt),
-      updatedAt: dateToString(user.updatedAt)
+      createdAt: user.createdAt, // Considera di convertire anche questo in Timestamp
+      updatedAt: user.updatedAt // Converti in Timestamp se necessario
     };
   },
+
   fromFirestore(snapshot: QueryDocumentSnapshot<DocumentData>, options: SnapshotOptions): User {
     const data = snapshot.data(options)!;
     return {
@@ -50,18 +48,13 @@ export const userConverter: FirestoreDataConverter<User> = {
       lastname: data['lastname'],
       username: data['username'],
       email: data['email'],
-      birthDate: timestampToDate(data['birthDate'] as Timestamp),
+      birthDate: data['birthDate'].toDate(), // Converti da Timestamp a Date
       imageUrl: data['imageUrl'] || null,
-      role: data['role'],
-      //TODO: Capire cosa fare
-      challengePoints: data['challengePoints'].map((point: ChallengePoint) => ({
-        challengeId: point.challengeId,
-        eventId: point.eventId,
-        completionDate: point.completionDate
-      })),
+      role: data['role'] as UserRole,
+      games: data['games'],
       isActive: data['isActive'],
-      createdAt: timestampToDate(data['createdAt'] as Timestamp),
-      updatedAt: timestampToDate(data['updatedAt'] as Timestamp)
+      createdAt: data['createdAt'].toDate(), // Converti da Timestamp a Date
+      updatedAt: data['updatedAt'].toDate() // Converti da Timestamp a Date
     };
   }
 };
@@ -176,6 +169,29 @@ export const teamConverter: FirestoreDataConverter<Team> = {
       isActive: data['isActive'],
       createdAt: timestampToDate(data['createdAt'] as Timestamp),
       updatedAt: timestampToDate(data['updatedAt'] as Timestamp)
+    };
+  }
+};
+
+export const userGameConverter: FirestoreDataConverter<UserGame> = {
+  toFirestore(game: UserGame): DocumentData {
+    return {
+      userId: game.userId,
+      eventId: game.eventId,
+      teamId: game.teamId,
+      challenges: game.challenges.map((challengeRef) => challengeRef.path) // Salva il percorso del riferimento
+    };
+  },
+
+  fromFirestore(snapshot: QueryDocumentSnapshot<DocumentData>, options: SnapshotOptions): UserGame {
+    const data = snapshot.data(options)!;
+    return {
+      userId: data['userId'],
+      eventId: data['eventId'],
+      teamId: data['teamId'],
+      challenges: (data['challenges'] || []).map((challengePath: string) => {
+        return doc(snapshot.ref.firestore, challengePath) as DocumentReference<UserChallenge>;
+      })
     };
   }
 };

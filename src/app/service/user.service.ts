@@ -19,17 +19,12 @@ export class UserService {
   readonly logService = inject(LogService);
 
   /* Variables */
-  userId = computed(() => this.firebaseService.userFirebase()?.uid);
   user = computed(async () => {
-    const userId = this.userId();
+    const userId = this.firebaseService.userFirebase()?.uid;
     try {
       // User
-      if (userId && window.location.pathname !== '/sign-up') {
-        const user = await this.getUserById(userId);
-        return user.props;
-      } else {
-        return null;
-      }
+      if (userId && window.location.pathname !== '/sign-up') return await this.getUserById(userId);
+      else return null;
     } catch (error) {
       this.logService.addLogError(userId, error);
       throw error;
@@ -63,7 +58,7 @@ export class UserService {
       birthDate: new Date(form.birthDate),
       imageUrl,
       role: UserRole.USER,
-      challengePoints: [],
+      games: [],
       isActive: true,
       createdAt: new Date(),
       updatedAt: new Date()

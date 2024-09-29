@@ -21,11 +21,11 @@ export const userGuard: CanActivateFn = async (route, state) => {
     // Verifica se l'utente è già presente nel sistema, altrimenti lo recupera
     let user = await userService.user();
     if (!user && userFirebase) {
-      user = (await userService.getUserById(userFirebase.uid)).props;
+      user = await userService.getUserById(userFirebase.uid);
     }
 
     // Ottiene il tipo di utente (es. ADMIN, USER)
-    const currentUserType = user?.role;
+    const currentUserType = user?.props.role;
 
     // Controlla se l'utente è già loggato e ridireziona in base al tipo di utente
     if (state.url.startsWith('/login')) {
