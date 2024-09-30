@@ -38,13 +38,10 @@ export class FirebaseDocumentService {
       const collectionRef = getCollection(this.firebaseService.getDb(), collectionName).withConverter(converter);
       const docRef = doc(collectionRef, id);
       const docSnap = await getDoc(docRef);
+      if (!docSnap.exists()) throw new Error('noDocument', { cause: 'noDocument' });
 
-      if (docSnap.exists()) {
-        const data = docSnap.data() as T;
-        return { id: docSnap.id, props: data };
-      } else {
-        throw new Error('noDocument', { cause: 'noDocument' });
-      }
+      const data = docSnap.data() as T;
+      return { id: docSnap.id, props: data };
     } catch (error) {
       this.logService.addLogError(this.firebaseService.userFirebase()?.uid, error);
       throw error;

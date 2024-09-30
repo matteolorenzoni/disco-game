@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable, signal } from '@angular/core';
 import { FirebaseError } from 'firebase/app';
 import { LogType } from '../model/enum';
@@ -43,7 +44,9 @@ export class LogService {
     this.addLog(LogType.OK, message, hide);
   }
 
-  public addLogError(userId: string | undefined, error: unknown, hide = true): void {
+  public addLogError(userId: string | undefined, error: any, hide = true): void {
+    if (error.cause) return;
+
     console.log(userId);
 
     let message = '';
