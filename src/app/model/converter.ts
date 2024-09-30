@@ -179,6 +179,7 @@ export const userGameConverter: FirestoreDataConverter<UserGame> = {
   toFirestore(game: UserGame): DocumentData {
     return {
       userId: game.userId,
+      userName: game.userName,
       userIdLeader: game.userIdLeader,
       eventId: game.eventId,
       teamId: game.teamId,
@@ -192,6 +193,7 @@ export const userGameConverter: FirestoreDataConverter<UserGame> = {
     const data = snapshot.data(options)!;
     return {
       userId: data['userId'],
+      userName: data['userName'],
       userIdLeader: data['userIdLeader'],
       eventId: data['eventId'],
       teamId: data['teamId'],

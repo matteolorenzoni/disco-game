@@ -38,6 +38,9 @@ export class TeamService {
 
   /* --------------------------- Create ---------------------------*/
   public async addTeam(userId: string, eventId: string, form: NewTeamModel): Promise<string> {
+    const userName = (await this.userService.user())?.props.username;
+    if (!userName) throw new Error('retry', { cause: 'retry' });
+
     /* Controllo se nome è univoco */
     const teamsDocs = await this.getTeamsByEvent(eventId);
     const { names, codes } = teamsDocs.reduce(
@@ -75,7 +78,14 @@ export class TeamService {
     });
 
     /* Aggiungo UserGame al DB */
-    const userGameRef = await this.userGameService.addUserGame(userId, userId, eventId, teamRef.id, form.name);
+    const userGameRef = await this.userGameService.addUserGame(
+      userId,
+      userName,
+      userId,
+      eventId,
+      teamRef.id,
+      form.name
+    );
 
     /* Aggiorno User (prop: games) */
     await this.userService.updateUserGames(userId, userGameRef.id);

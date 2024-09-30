@@ -97,9 +97,11 @@ export class EventListComponent implements OnInit {
   }
 
   protected async findTeam(): Promise<void> {
-    const userId = this.firebaseService.userFirebase()?.uid;
+    const user = await this.userService.user();
+    const userId = user?.id;
+    const userName = user?.props.username;
     const eventId = this.eventIdSelected();
-    if (!userId || !eventId) throw new Error('retry', { cause: 'retry' });
+    if (!userId || !userName || !eventId) throw new Error('retry', { cause: 'retry' });
 
     const form = this.findTeamForm.getRawValue();
     const team = await this.teamService.getTeamByCode(form.code);
@@ -111,6 +113,7 @@ export class EventListComponent implements OnInit {
     /* Aggiungo UserGame al DB */
     const userGameRef = await this.userGameService.addUserGame(
       userId,
+      userName,
       team.props.userId,
       eventId,
       team.id,

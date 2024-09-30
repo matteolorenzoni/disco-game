@@ -30,6 +30,7 @@ export class UserGameService {
   /* --------------------------- Create ---------------------------*/
   public async addUserGame(
     userId: string,
+    userName: string,
     userIdLeader: string,
     eventId: string,
     teamId: string,
@@ -37,6 +38,7 @@ export class UserGameService {
   ): Promise<DocumentReference<DocumentData, DocumentData>> {
     return await this.documentService.addDocument<UserGame>(COL_USER_GAMES, {
       userId,
+      userName,
       userIdLeader,
       eventId,
       teamId,
