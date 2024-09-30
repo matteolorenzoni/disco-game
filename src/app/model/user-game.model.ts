@@ -8,4 +8,5 @@ export type UserGame = {
   teamId: string; // ID della squadra
   teamName: string; // Nome della squadra
   challenges: DocumentReference<UserChallenge>[]; // Elenco delle sfide completate dalla squadra
+  points: number; // Somma dei punti ottenuti nelle varie sfide
 };

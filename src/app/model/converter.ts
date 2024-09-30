@@ -183,7 +183,8 @@ export const userGameConverter: FirestoreDataConverter<UserGame> = {
       eventId: game.eventId,
       teamId: game.teamId,
       teamName: game.teamName,
-      challenges: game.challenges.map((challengeRef) => challengeRef.path) // Salva il percorso del riferimento
+      challenges: game.challenges.map((challengeRef) => challengeRef.path),
+      points: game.points
     };
   },
 
@@ -197,7 +198,8 @@ export const userGameConverter: FirestoreDataConverter<UserGame> = {
       teamName: data['teamName'],
       challenges: (data['challenges'] || []).map((challengePath: string) => {
         return doc(snapshot.ref.firestore, challengePath) as DocumentReference<UserChallenge>;
-      })
+      }),
+      points: data['points']
     };
   }
 };

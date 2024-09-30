@@ -41,6 +41,7 @@ export class UserGameService {
       eventId,
       teamId,
       teamName,
+      points: 0,
       challenges: []
     });
   }
