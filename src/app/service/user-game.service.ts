@@ -27,6 +27,10 @@ export class UserGameService {
     return await Promise.all(promises);
   }
 
+  public async getUserGamesByTeamId(teamId: string): Promise<Doc<UserGame>[]> {
+    return await this.documentService.getDocumentsByProp<UserGame>(COL_USER_GAMES, { teamId }, userGameConverter);
+  }
+
   /* --------------------------- Create ---------------------------*/
   public async addUserGame(
     userId: string,

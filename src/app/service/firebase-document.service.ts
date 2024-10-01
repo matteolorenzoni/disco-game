@@ -52,10 +52,28 @@ export class FirebaseDocumentService {
     collectionName: string,
     converter: FirestoreDataConverter<T>
   ): Promise<Doc<T>[]> {
-    return await this.getDocumentsByProp(collectionName, {}, converter);
+    return await this.getActiveDocumentsByProp(collectionName, {}, converter);
   }
 
   public async getDocumentsByProp<T extends Record<string, any>>(
+    collectionName: string,
+    queryParams: Partial<T>,
+    converter: FirestoreDataConverter<T>
+  ): Promise<Doc<T>[]> {
+    try {
+      const collectionRef = getCollection(this.firebaseService.getDb(), collectionName).withConverter(converter);
+      const queryConstraints = Object.entries(queryParams).map(([key, value]) => where(key, '==', value));
+      const q = query(collectionRef, ...queryConstraints);
+      const querySnapshot = await getDocs(q);
+      const docs = querySnapshot.docs.map((doc) => ({ id: doc.id, props: doc.data() as T }));
+      return docs;
+    } catch (error) {
+      this.logService.addLogError(this.firebaseService.userFirebase()?.uid, error);
+      throw error;
+    }
+  }
+
+  public async getActiveDocumentsByProp<T extends Record<string, any>>(
     collectionName: string,
     queryParams: Partial<T>,
     converter: FirestoreDataConverter<T>

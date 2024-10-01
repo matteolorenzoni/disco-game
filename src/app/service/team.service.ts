@@ -28,12 +28,12 @@ export class TeamService {
   }
 
   public async getTeamByCode(code: string): Promise<Doc<Team> | undefined> {
-    const teams = await this.documentService.getDocumentsByProp<Team>(COL_TEAMS, { code }, teamConverter);
+    const teams = await this.documentService.getActiveDocumentsByProp<Team>(COL_TEAMS, { code }, teamConverter);
     return teams[0];
   }
 
   public async getTeamsByEvent(eventId: string): Promise<Doc<Team>[]> {
-    return await this.documentService.getDocumentsByProp<Team>(COL_TEAMS, { eventId }, teamConverter);
+    return await this.documentService.getActiveDocumentsByProp<Team>(COL_TEAMS, { eventId }, teamConverter);
   }
 
   /* --------------------------- Create ---------------------------*/
