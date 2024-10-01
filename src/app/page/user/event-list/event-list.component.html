@@ -40,7 +40,7 @@
               </div>
               <button
                 class="rounded-md bg-amber-400 p-2 text-xs text-black transition duration-200 hover:bg-amber-300 active:bg-amber-500"
-                (click)="findTeamModalIsOpen.set(true)">
+                (click)="goToTeam(userGame.props.eventId, userGame.props.teamId)">
                 Visualizza squadra
               </button>
             } @else {

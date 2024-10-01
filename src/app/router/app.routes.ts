@@ -81,19 +81,8 @@ export const routes: Routes = [
               import('../page/user/event-list/event-list.component').then((m) => m.EventListComponent)
           },
           {
-            path: ':eventId/teams',
-            children: [
-              {
-                path: 'new',
-                loadComponent: () =>
-                  import('../page/user/team-create/team-create.component').then((m) => m.TeamCreateComponent)
-              },
-              {
-                path: ':teamId',
-                loadComponent: () =>
-                  import('../page/user/team-create/team-create.component').then((m) => m.TeamCreateComponent)
-              }
-            ]
+            path: ':eventId/:teamId',
+            loadComponent: () => import('../page/user/team/team.component').then((m) => m.TeamComponent)
           }
         ]
       },

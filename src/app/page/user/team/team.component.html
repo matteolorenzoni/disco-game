@@ -1,0 +1,21 @@
+<div class="flex w-full flex-col gap-4 p-4 text-on-background">
+  <div>
+    <img src="" alt="" />
+  </div>
+
+  <ul>
+    @for (userGame of userGames(); track userGame.id) {
+      <li>
+        <p>{{ userGame.props.userName }}</p>
+        <span>{{ userGame.props.points }}</span>
+      </li>
+    }
+  </ul>
+
+  @if (userGamesActive(); as userGamesActive) {
+    <div class="mt-auto">
+      <p>{{ userGamesActive.props.userName }}</p>
+      <span>{{ userGamesActive.props.points }}</span>
+    </div>
+  }
+</div>

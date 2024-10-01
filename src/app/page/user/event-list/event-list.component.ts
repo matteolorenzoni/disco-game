@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faCrown, faPeopleGroup } from '@fortawesome/free-solid-svg-icons';
@@ -11,7 +12,7 @@ import { EventService } from '../../../service/event.service';
 import { FirebaseService } from '../../../service/firebase.service';
 import { LogService } from '../../../service/log.service';
 import { TeamService } from '../../../service/team.service';
-import { UserService } from './../../../service/user.service';
+import { UserService } from '../../../service/user.service';
 import { UserGameService } from '../../../service/user-game.service';
 import { CheckExistTeamPipe } from '../../../pipe/check-exist-team.pipe';
 
@@ -36,6 +37,7 @@ import { CheckExistTeamPipe } from '../../../pipe/check-exist-team.pipe';
 })
 export class EventListComponent implements OnInit {
   /* Services */
+  readonly router = inject(Router);
   readonly firebaseService = inject(FirebaseService);
   readonly userService = inject(UserService);
   readonly eventService = inject(EventService);
@@ -146,5 +148,9 @@ export class EventListComponent implements OnInit {
     this.findTeamModalIsOpen.set(false);
     this.newTeamForm.reset();
     this.findTeamForm.reset();
+  }
+
+  protected async goToTeam(eventId: string, teamId: string): Promise<void> {
+    await this.router.navigate([`user/events/${eventId}/${teamId}`]);
   }
 }
