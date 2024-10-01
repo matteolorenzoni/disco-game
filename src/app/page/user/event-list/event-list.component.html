@@ -1,7 +1,7 @@
 <ul class="flex flex-col gap-4 p-4">
   @for (event of events(); track event.id) {
     @if (event.id === eventIdSelected()) {
-      <li class="overflow-hidden rounded-lg bg-primary-dark shadow-md transition-all duration-300 ease-in-out">
+      <li class="overflow-hidden rounded-md bg-primary-dark shadow-md transition-all duration-300 ease-in-out">
         <div class="relative flex flex-col gap-8 p-2">
           <div class="relative">
             <img
@@ -60,7 +60,7 @@
       </li>
     } @else {
       <li
-        class="transform cursor-pointer overflow-hidden rounded-lg bg-primary-dark shadow-md transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-primary-dark"
+        class="transform cursor-pointer overflow-hidden rounded-md bg-primary-dark shadow-md transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-primary-dark"
         [tabindex]="0"
         (click)="eventIdSelected.set(event.id)"
         (keydown)="eventIdSelected.set(event.id)">

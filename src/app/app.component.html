@@ -1,6 +1,7 @@
 <main class="relative">
   @if (!isMobile() || isPortrait()) {
     <router-outlet></router-outlet>
+    <fv-bottom-navigation [menu]="MENU_USER"></fv-bottom-navigation>
 
     @if (logService.logs().length) {
       <ul
