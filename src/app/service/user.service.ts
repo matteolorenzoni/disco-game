@@ -66,7 +66,7 @@ export class UserService {
     /* Aggiunta documento a DB */
     await this.documentService.addDocumentById<User>(id, COL_USERS, {
       ...form,
-      birthDate: new Date(form.birthDate),
+      // birthDate: new Date(form.birthDate),
       imageUrl,
       role: UserRole.USER,
       games: [],

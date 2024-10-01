@@ -33,13 +33,13 @@ export const userConverter: FirestoreDataConverter<User> = {
       lastname: user.lastname,
       username: user.username,
       email: user.email,
-      birthDate: user.birthDate, // Considera di usare una funzione per convertire Date in Timestamp se necessario
+      // birthDate: user.birthDate,
       imageUrl: user.imageUrl,
       role: user.role,
-      games: user.games.map((gameRef) => gameRef.path), // Salviamo il percorso dei riferimenti ai giochi
+      games: user.games.map((gameRef) => gameRef.path),
       isActive: user.isActive,
-      createdAt: user.createdAt, // Considera di convertire anche questo in Timestamp
-      updatedAt: user.updatedAt // Converti in Timestamp se necessario
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
     };
   },
 
@@ -50,13 +50,13 @@ export const userConverter: FirestoreDataConverter<User> = {
       lastname: data['lastname'],
       username: data['username'],
       email: data['email'],
-      birthDate: data['birthDate'].toDate(), // Converti da Timestamp a Date
+      // birthDate: data['birthDate'].toDate(),
       imageUrl: data['imageUrl'] || null,
       role: data['role'] as UserRole,
       games: data['games'],
       isActive: data['isActive'],
-      createdAt: data['createdAt'].toDate(), // Converti da Timestamp a Date
-      updatedAt: data['updatedAt'].toDate() // Converti da Timestamp a Date
+      createdAt: data['createdAt'].toDate(),
+      updatedAt: data['updatedAt'].toDate()
     };
   }
 };

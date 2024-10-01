@@ -2,12 +2,11 @@ import { DocumentReference } from 'firebase/firestore';
 import { UserGame } from './user-game.model';
 
 export type User = {
-  // id: string; // ID univoco dell'utente
   name: string; // Nome dell'utente
   lastname: string; // Cognome dell'utente
   username: string; // Nome utente o nickname
   email: string; // Indirizzo email dell'utente
-  birthDate: Date; // Data di nascita dell'utente
+  // birthDate: Date; // Data di nascita dell'utente
   imageUrl: string | null; // URL dell'immagine del profilo, null se non presente
   role: UserRole; // Ruolo dell'utente (USER o ADMIN)
   games: DocumentReference<UserGame>[]; // Elenco delle squadre create o a cui l'utente ha partecipato nel tempo

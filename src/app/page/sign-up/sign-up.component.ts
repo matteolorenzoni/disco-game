@@ -35,10 +35,10 @@ export class SignUpComponent implements OnInit {
       nonNullable: true,
       validators: [Validators.required, Validators.minLength(6)]
     }),
-    birthDate: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required]
-    }),
+    // birthDate: new FormControl('', {
+    //   nonNullable: true,
+    //   validators: [Validators.required]
+    // }),
     email: new FormControl('', {
       nonNullable: true,
       validators: [Validators.required, Validators.email]
