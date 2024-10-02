@@ -1,19 +1,18 @@
 <main class="relative">
   @if (!isMobile() || isPortrait()) {
     <router-outlet></router-outlet>
-    <fv-bottom-navigation [menu]="MENU_USER"></fv-bottom-navigation>
-
-    @if (logService.logs().length) {
-      <ul
-        class="absolute bottom-0 left-0 z-[1000] flex max-h-80 min-h-14 w-full flex-col items-center gap-2 overflow-y-auto p-2">
-        @for (log of logService.logs(); track log.id) {
-          <li class="w-full max-w-xl"><fv-toast [log]="log"></fv-toast></li>
-        }
-      </ul>
-    }
   } @else {
     <p class="flex h-screen items-center justify-center text-2xl font-semibold uppercase text-primary">
       Utilizzare l'app in modalità verticale
     </p>
   }
 </main>
+
+@if (logService.logs().length) {
+  <ul
+    class="fixed bottom-0 left-0 z-[1000] flex max-h-80 min-h-14 w-full flex-col items-center gap-2 overflow-y-auto p-2">
+    @for (log of logService.logs(); track log.id) {
+      <li class="w-full max-w-xl"><fv-toast [log]="log"></fv-toast></li>
+    }
+  </ul>
+}
