@@ -47,8 +47,6 @@ export class LogService {
   public addLogError(userId: string | undefined, error: any, hide = true): void {
     if (error.cause) return;
 
-    console.log(userId);
-
     let message = '';
     if (error instanceof FirebaseError) {
       message = firebaseErrorMessages[error.code] || 'Errore sconosciuto';

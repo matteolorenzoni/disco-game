@@ -3,12 +3,11 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@ang
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { endDateValidator } from '../../../util/utils';
+import { EventModel, FromMap } from '../../../model/form.model';
 import { EventService } from '../../../service/event.service';
 import { FirebaseService } from '../../../service/firebase.service';
-import { ImageService } from '../../../service/image.service';
 import { LogService } from './../../../service/log.service';
-import { EventModel, FromMap } from '../../../model/form.model';
-import { environment } from '../../../../environments/environment.development';
+import { StorageService } from '../../../service/storage.service';
 
 @Component({
   selector: 'app-event-create',
@@ -22,8 +21,8 @@ export class EventCreateComponent implements OnInit {
   /* Services */
   readonly route = inject(ActivatedRoute);
   readonly firebaseService = inject(FirebaseService);
+  readonly storageService = inject(StorageService);
   readonly eventService = inject(EventService);
-  readonly imageService = inject(ImageService);
   readonly logService = inject(LogService);
 
   /* Variables */
@@ -95,11 +94,7 @@ export class EventCreateComponent implements OnInit {
 
       /* Aggiunta image a storage */
       if (this.imageFile()) {
-        const imageUrl = await this.firebaseService.saveImage(
-          this.imageFile()!,
-          environment.collection.EVENTS,
-          eventId
-        );
+        const imageUrl = await this.storageService.saveImage(this.imageFile()!, 'EVENTS', eventId);
         await this.eventService.updateEventImageUrl(eventId, imageUrl);
       }
     }

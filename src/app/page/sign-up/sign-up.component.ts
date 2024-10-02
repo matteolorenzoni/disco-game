@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Doc } from '../../model/firebase';
+import { FromMap, UserModel } from '../../model/form.model';
+import { User } from '../../model/user.model';
 import { FirebaseService } from '../../service/firebase.service';
+import { StorageService } from '../../service/storage.service';
 import { UserService } from '../../service/user.service';
-import { ImageService } from '../../service/image.service';
-import { FromMap, SignUpModel } from '../../model/form.model';
-import { environment } from '../../../environments/environment.development';
 
 @Component({
   selector: 'app-sign-up',
@@ -20,15 +21,15 @@ export class SignUpComponent implements OnInit {
   /* Services */
   readonly router = inject(Router);
   readonly firebaseService = inject(FirebaseService);
+  readonly storageService = inject(StorageService);
   readonly userService = inject(UserService);
-  readonly imageService = inject(ImageService);
 
   /* Variables */
   imagePreview = signal<string | ArrayBuffer | null | undefined>(undefined);
   imageFile = signal<File | undefined>(undefined);
 
   /* Form */
-  signUpForm = new FormGroup<FromMap<SignUpModel>>({
+  signUpForm = new FormGroup<FromMap<UserModel>>({
     name: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     lastname: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     username: new FormControl('', {

@@ -15,9 +15,9 @@ import {
   browserSessionPersistence
 } from 'firebase/auth';
 import { Firestore, getFirestore } from 'firebase/firestore';
-import { FirebaseStorage, getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
+import { FirebaseStorage, getStorage } from 'firebase/storage';
 import { environment } from '../../environments/environment.development';
-import { LoginModel, SignUpModel } from '../model/form.model';
+import { LoginModel } from '../model/form.model';
 import { LogService } from './log.service';
 
 @Injectable({
@@ -85,29 +85,9 @@ export class FirebaseService {
     }
   }
 
-  public async signUp(form: SignUpModel): Promise<UserCredential> {
+  public async signUp(email: string, password: string): Promise<UserCredential> {
     try {
-      const { email, password } = form;
       return await createUserWithEmailAndPassword(this.auth, email, password);
-    } catch (error) {
-      this.logService.addLogError(this.userFirebase()?.uid, error);
-      throw error;
-    }
-  }
-
-  public async saveImage(image: File, collection: string, name: string): Promise<string> {
-    try {
-      // Create a reference to 'mountains.jpg'
-      const imageType = image.type.split('/')[1] || 'jpg';
-      const imageRef = ref(this.storage, `${collection}/${name}.${imageType}`);
-
-      /* Upload */
-      const snapshot = await uploadBytesResumable(imageRef, image);
-
-      /* Get download URL */
-      const downloadURL = await getDownloadURL(snapshot.ref);
-
-      return downloadURL;
     } catch (error) {
       this.logService.addLogError(this.userFirebase()?.uid, error);
       throw error;

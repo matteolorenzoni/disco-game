@@ -79,7 +79,7 @@
             id="event-image-upload"
             type="file"
             accept="image/png, image/jpeg"
-            (change)="imageService.onImageChange($event, imagePreview, imageFile)"
+            (change)="storageService.onImageChange($event, imagePreview, imageFile)"
             class="hidden" />
         </label>
       } @else {

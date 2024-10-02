@@ -10,7 +10,7 @@ export type LoginModel = {
   password: string;
 };
 
-export type SignUpModel = {
+export type UserModel = {
   name: string;
   lastname: string;
   username: string;
