@@ -4,7 +4,7 @@
     <p class="text-sm text-primary-light">Inserisci le tue informazioni</p>
   </div>
 
-  <form [formGroup]="signUpForm" (ngSubmit)="signUp()" class="flex w-full max-w-2xl flex-col gap-6">
+  <form [formGroup]="signUpForm" (ngSubmit)="addOrUpdateUser()" class="flex w-full max-w-2xl flex-col gap-6">
     <div class="flex flex-col items-center gap-2">
       <img
         [src]="imagePreview() ?? '/images/profile-user.png'"
@@ -52,7 +52,7 @@
         id="email"
         formControlName="email"
         type="email"
-        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm transition duration-300 ease-in placeholder:text-slate-400 hover:border-slate-400 focus:border-primary focus:shadow focus:outline-none" />
+        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm transition duration-300 ease-in placeholder:text-slate-400 hover:border-slate-400 focus:border-primary focus:shadow focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500" />
     </div>
 
     <div class="flex w-full flex-col gap-1">
@@ -61,7 +61,7 @@
         id="password"
         formControlName="password"
         type="password"
-        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm transition duration-300 ease-in placeholder:text-slate-400 hover:border-slate-400 focus:border-primary focus:shadow focus:outline-none" />
+        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm transition duration-300 ease-in placeholder:text-slate-400 hover:border-slate-400 focus:border-primary focus:shadow focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500" />
     </div>
 
     <!-- <div class="flex w-full flex-col gap-1">
@@ -77,12 +77,14 @@
       type="submit"
       [disabled]="signUpForm.invalid"
       class="mt-8 inline-block w-full rounded-full bg-primary px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-on-primary shadow-primary-light transition duration-150 ease-in-out hover:bg-primary-light active:bg-primary-dark disabled:cursor-not-allowed disabled:bg-primary/30 disabled:text-primary/50">
-      Registrati
+      {{ user() ? 'Aggiorna' : 'Registrati' }}
     </button>
   </form>
 
-  <p class="text-center text-sm text-primary">
-    Hai già un account?
-    <a href="./login" class="font-bold text-primary hover:underline">Accedi</a>
-  </p>
+  @if (!user()) {
+    <p class="text-center text-sm text-primary">
+      Hai già un account?
+      <a href="./login" class="font-bold text-primary hover:underline">Accedi</a>
+    </p>
+  }
 </section>

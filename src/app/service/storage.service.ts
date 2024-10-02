@@ -2,7 +2,6 @@ import { inject, Injectable, WritableSignal } from '@angular/core';
 import { deleteObject, getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import { LogService } from './log.service';
 import { FirebaseService } from './firebase.service';
-import { environment } from '../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root'
@@ -13,9 +12,8 @@ export class StorageService {
   readonly logService = inject(LogService);
 
   /* --------------------------- Method Firebase --------------------------- */
-  public async saveImage(image: File, collectionKey: 'USERS' | 'EVENTS', name: string): Promise<string> {
+  public async saveImage(image: File, collection: string, name: string): Promise<string> {
     try {
-      const collection = environment.collection[collectionKey];
       const imageType = image.type.split('/')[1] || 'jpg';
       const imageRef = ref(this.firebaseService.getStorage(), `${collection}/${name}.${imageType}`);
 
@@ -31,9 +29,8 @@ export class StorageService {
     }
   }
 
-  public async updateImage(image: File, collectionKey: 'USERS' | 'EVENTS', name: string): Promise<string> {
+  public async updateImage(image: File, collection: string, name: string): Promise<string> {
     try {
-      const collection = environment.collection[collectionKey];
       const imageType = image.type.split('/')[1] || 'jpg';
       const imageRef = ref(this.firebaseService.getStorage(), `${collection}/${name}.${imageType}`);
 

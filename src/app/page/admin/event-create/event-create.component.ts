@@ -8,6 +8,9 @@ import { EventService } from '../../../service/event.service';
 import { FirebaseService } from '../../../service/firebase.service';
 import { LogService } from './../../../service/log.service';
 import { StorageService } from '../../../service/storage.service';
+import { environment } from '../../../../environments/environment.development';
+
+const COL_EVENTS = environment.collection.EVENTS;
 
 @Component({
   selector: 'app-event-create',
@@ -94,7 +97,7 @@ export class EventCreateComponent implements OnInit {
 
       /* Aggiunta image a storage */
       if (this.imageFile()) {
-        const imageUrl = await this.storageService.saveImage(this.imageFile()!, 'EVENTS', eventId);
+        const imageUrl = await this.storageService.saveImage(this.imageFile()!, COL_EVENTS, eventId);
         await this.eventService.updateEventImageUrl(eventId, imageUrl);
       }
     }

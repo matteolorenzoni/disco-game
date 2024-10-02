@@ -4,9 +4,8 @@
 
 .container_form {
   width: 100%;
-  display: grid;
-  grid-template-rows: min-content 1fr min-content;
+  display: flex;
+  flex-direction: column;
   justify-items: center;
   gap: var(--gap-m);
-  padding: calc(var(--padding-m) * 2);
 }

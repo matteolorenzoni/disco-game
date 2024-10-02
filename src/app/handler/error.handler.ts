@@ -9,7 +9,6 @@ const errorMessages: Record<string, string> = {
     "L'utente registrato è stato trovato ma non esiste un documento associato. Contattare il supporto per assistenza.",
   noDocument: 'Documento non trovato. Contattare il supporto per assistenza.',
   tooManyTeams: "Troppe squadre create, contattare l'assistenza.",
-  usernameNotAvailable: "L'username scelto non è disponibile, si prega di sceglierne un altro.",
   teamNameNotAvailable: 'Il nome scelto è già occupato, si prega di sceglierne un altro.'
 };
 

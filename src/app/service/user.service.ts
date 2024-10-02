@@ -4,7 +4,7 @@ import { User } from '../model/user.model';
 import { UserGame } from '../model/user-game.model';
 import { UserRole } from '../model/user.model';
 import { Doc } from '../model/firebase';
-import { SignUpModel } from '../model/form.model';
+import { UserModel } from '../model/form.model';
 import { userConverter } from '../model/converter';
 import { LogService } from './log.service';
 import { FirebaseService } from './firebase.service';
@@ -54,18 +54,20 @@ export class UserService {
     return await this.documentService.getAllDocuments<User>(COL_USERS, userConverter);
   }
 
-  /* --------------------------- Create ---------------------------*/
-  public async addUser(id: string, form: SignUpModel, imageUrl: string | null): Promise<void> {
-    /* Controllo username univoco */
+  public async checkUniqUsername(username: string): Promise<boolean> {
     const userDocs = await this.getUsers();
     const usernames = userDocs.map((user) => user.props.username);
-    if (usernames.includes(form.username.toLowerCase())) {
-      throw new Error('usernameNotAvailable', { cause: 'usernameNotAvailable' });
+    if (usernames.includes(username.toLowerCase())) {
+      this.logService.addLogConfirm("L'username scelto non è disponibile, si prega di sceglierne un altro.");
+      return false;
     }
+    return true;
+  }
 
-    /* Aggiunta documento a DB */
+  /* --------------------------- Create ---------------------------*/
+  public async addUser(id: string, userModelForm: UserModel, imageUrl: string | null): Promise<void> {
     await this.documentService.addDocumentById<User>(id, COL_USERS, {
-      ...form,
+      ...userModelForm,
       // birthDate: new Date(form.birthDate),
       imageUrl,
       role: UserRole.USER,
@@ -74,12 +76,21 @@ export class UserService {
       createdAt: new Date(),
       updatedAt: new Date()
     });
-
-    // Log
     this.logService.addLogConfirm('Utente registrato correttamente');
   }
 
   /* --------------------------- Update ---------------------------*/
+  public async updateUser(
+    userId: string,
+    userModelForm: UserModel,
+    imageUrl: string | null | undefined
+  ): Promise<void> {
+    const form: Partial<User> = { ...userModelForm, updatedAt: new Date() };
+    if (imageUrl !== undefined) form.imageUrl = imageUrl;
+    await this.documentService.updateDocument<User>(userId, COL_USERS, form);
+    this.logService.addLogConfirm('Utente aggiornato correttamente');
+  }
+
   public async updateUserGames(userId: string, userGameId: string): Promise<void> {
     await this.documentService.updateArrayPropReference<User>(
       'add',
