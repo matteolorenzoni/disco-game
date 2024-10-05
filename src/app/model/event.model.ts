@@ -14,6 +14,7 @@ export type Event = {
 export type EventChallenge = {
   challengeId: string; // ID della sfida collegata
   challengeStatus: ChallengeStatus; // Stato della sfida
+  maxTimes: number | null; // Numero di volte che una sfida può essere ripetuta
   startDate: Date; // Data e ora di inizio della sfida
   endDate: Date; // Data e ora di fine della sfida
 };

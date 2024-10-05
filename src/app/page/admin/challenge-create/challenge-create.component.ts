@@ -57,9 +57,6 @@ export class ChallengeCreateComponent implements OnInit {
       nonNullable: true,
       validators: [Validators.required, Validators.min(0)]
     }),
-    maxTimes: new FormControl(null, {
-      validators: [Validators.min(1)]
-    }),
     complexity: new FormControl(1, {
       nonNullable: true,
       validators: [Validators.required, Validators.min(1), Validators.max(5)]

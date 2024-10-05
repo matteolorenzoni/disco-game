@@ -33,7 +33,6 @@ export type ChallengeModel = {
   rules: string;
   type: ChallengeType;
   points: number;
-  maxTimes: number | null;
   complexity: number;
 };
 
