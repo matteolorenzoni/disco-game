@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@ang
 import { Router, RouterOutlet } from '@angular/router';
 import { FvBottomNavigationComponent } from '../../components/fv-bottom-navigation.component';
 import { MenuItem } from '../../model/type';
-import { faCalendarDays, faGears } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarDays, faGamepad, faGears } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-home',
@@ -30,6 +30,12 @@ export class HomeComponent implements OnInit {
     },
     {
       id: 1,
+      label: 'Sfide',
+      icon: faGamepad,
+      path: 'challenges'
+    },
+    {
+      id: 2,
       label: 'Impostazioni',
       icon: faGears,
       path: 'settings'

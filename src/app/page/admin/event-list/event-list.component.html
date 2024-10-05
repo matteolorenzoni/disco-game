@@ -1,2 +1,50 @@
-<p>event-list works!</p>
-,
+<h1 class="mb-6 text-3xl font-bold text-on-background">Eventi</h1>
+<ul class="flex flex-col gap-4">
+  @for (event of events(); track event.id) {
+    @if (event.id === eventIdSelected()) {
+      <li class="overflow-hidden rounded bg-surface text-gray-400 shadow-md transition-all duration-300 ease-in-out">
+        <img class="aspect-video h-auto w-full" [src]="event.props.imageUrl" alt="Immagine evento" />
+        <div class="flex flex-col gap-1 p-4">
+          <h3 class="text-xl text-on-surface">{{ event.props.name }}</h3>
+          <p class="flex gap-2 text-xs">
+            <fa-icon class="basis-4" [icon]="ICON_CALENDAR"></fa-icon>
+            <span> {{ event.props.startDate | date: 'dd/MM' }} - {{ event.props.endDate | date: 'dd/MM' }}</span>
+          </p>
+          <p class="flex gap-2 text-xs">
+            <fa-icon class="basis-4" [icon]="ICON_CLOCK"></fa-icon>
+            <span>{{ event.props.startDate | date: 'HH:mm' }} - {{ event.props.endDate | date: 'HH:mm' }}</span>
+          </p>
+          <p class="flex gap-2 text-xs">
+            <fa-icon class="basis-4" [icon]="ICON_LOCATION"></fa-icon>
+            <span>{{ event.props.location }}</span>
+          </p>
+          <p class="italic">{{ event.props.description }}</p>
+
+          <button
+            class="mt-4 rounded bg-primary p-2 text-xs text-white transition duration-200 hover:bg-primary-light active:bg-primary-dark"
+            (click)="goToUpdateEvent(event.id)">
+            Modifica
+          </button>
+        </div>
+      </li>
+    } @else {
+      <li
+        class="transform cursor-pointer overflow-hidden rounded bg-surface shadow-md transition-all duration-300 ease-in-out hover:scale-105"
+        [tabindex]="0"
+        (click)="eventIdSelected.set(event.id)"
+        (keydown)="eventIdSelected.set(event.id)">
+        <div class="relative p-2">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-base font-semibold text-on-background">{{ event.props.name }}</p>
+              <p class="text-xs text-gray-300">{{ event.props.location }}</p>
+            </div>
+            <div class="text-lg font-bold text-on-surface">
+              <p>{{ event.props.startDate | date: 'dd/MM' }}</p>
+            </div>
+          </div>
+        </div>
+      </li>
+    }
+  }
+</ul>
