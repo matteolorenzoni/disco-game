@@ -13,6 +13,14 @@ export type Event = {
 
 export type EventChallenge = {
   challengeId: string; // ID della sfida collegata
+  challengeStatus: ChallengeStatus; // Stato della sfida
   startDate: Date; // Data e ora di inizio della sfida
   endDate: Date; // Data e ora di fine della sfida
 };
+
+export enum ChallengeStatus {
+  ACTIVE = 'ACTIVE', // Sfida attiva e in corso
+  LOCKED = 'LOCKED', // Sfida in attesa di inizio
+  CANCELED = 'CANCELED', // Sfida annullata
+  SUSPENDED = 'SUSPENDED' // Sfida sospesa temporaneamente
+}

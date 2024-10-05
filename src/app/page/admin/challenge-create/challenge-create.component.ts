@@ -1,11 +1,11 @@
-import { CommonModule, formatDate } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { LogService } from '../../../service/log.service';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ChallengeStatus } from '../../../model/challenge.model';
 import { ChallengeModel, FromMap } from '../../../model/form.model';
 import { ChallengeService } from '../../../service/challenge.service';
+import { ChallengeType } from '../../../model/challenge.model';
 
 @Component({
   selector: 'app-challenge-create',
@@ -25,7 +25,7 @@ export class ChallengeCreateComponent implements OnInit {
   challengeId = signal<string | null>(null);
 
   /* Constants */
-  challengeStatuses = Object.values(ChallengeStatus);
+  challengeTypes = Object.values(ChallengeType);
 
   /* Form */
   challengeForm = new FormGroup<FromMap<ChallengeModel>>({
@@ -41,14 +41,13 @@ export class ChallengeCreateComponent implements OnInit {
       nonNullable: true,
       validators: [Validators.required]
     }),
-    imageUrl: new FormControl<string | null>(null),
+    type: new FormControl(ChallengeType.FROG, {
+      nonNullable: true,
+      validators: [Validators.required]
+    }),
     points: new FormControl(0, {
       nonNullable: true,
       validators: [Validators.required, Validators.min(0)]
-    }),
-    status: new FormControl<ChallengeStatus>(ChallengeStatus.ACTIVE, {
-      nonNullable: true,
-      validators: [Validators.required]
     }),
     maxTimes: new FormControl(null, {
       validators: [Validators.min(1)]
@@ -56,14 +55,6 @@ export class ChallengeCreateComponent implements OnInit {
     complexity: new FormControl(1, {
       nonNullable: true,
       validators: [Validators.required, Validators.min(1), Validators.max(5)]
-    }),
-    startDate: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required]
-    }),
-    endDate: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required]
     })
   });
 
@@ -76,18 +67,7 @@ export class ChallengeCreateComponent implements OnInit {
       if (!challengeId) return;
 
       const { props } = await this.challengeService.getChallengeById(challengeId);
-      this.challengeForm.setValue({
-        name: props.name,
-        description: props.description,
-        rules: props.rules,
-        imageUrl: props.imageUrl,
-        points: props.points,
-        maxTimes: props.maxTimes,
-        complexity: props.complexity,
-        status: props.status,
-        startDate: formatDate(props.startDate, 'yyyy-MM-dd HH:mm:ss', 'it'),
-        endDate: formatDate(props.endDate, 'yyyy-MM-dd HH:mm:ss', 'it')
-      });
+      this.challengeForm.setValue(props);
     });
   }
 

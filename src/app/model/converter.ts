@@ -7,7 +7,7 @@ import {
   SnapshotOptions,
   Timestamp
 } from 'firebase/firestore';
-import { Challenge, ChallengeStatus } from './challenge.model';
+import { Challenge } from './challenge.model';
 import { Event, EventChallenge } from './event.model';
 import { Team, TeamStatus } from './team.model';
 import { User, UserRole } from './user.model';
@@ -109,14 +109,11 @@ export const challengeConverter: FirestoreDataConverter<Challenge> = {
       name: challenge.name,
       description: challenge.description,
       rules: challenge.rules,
-      imageUrl: challenge.imageUrl,
+      type: challenge.type,
       points: challenge.points,
       maxTimes: challenge.maxTimes,
       complexity: challenge.complexity,
-      status: challenge.status,
       isActive: challenge.isActive,
-      startDate: dateToString(challenge.startDate),
-      endDate: dateToString(challenge.endDate),
       createdAt: dateToString(challenge.createdAt),
       updatedAt: dateToString(challenge.updatedAt)
     };
@@ -128,14 +125,11 @@ export const challengeConverter: FirestoreDataConverter<Challenge> = {
       name: data['name'],
       description: data['description'],
       rules: data['rules'],
-      imageUrl: data['imageUrl'] || null,
+      type: data['type'],
       points: data['points'],
       maxTimes: data['maxTimes'],
       complexity: data['complexity'],
-      status: data['status'] as ChallengeStatus,
       isActive: data['isActive'],
-      startDate: timestampToDate(data['startDate'] as Timestamp),
-      endDate: timestampToDate(data['endDate'] as Timestamp),
       createdAt: timestampToDate(data['createdAt'] as Timestamp),
       updatedAt: timestampToDate(data['updatedAt'] as Timestamp)
     };

@@ -27,8 +27,6 @@ export class ChallengeService {
     await this.documentService.addDocument<Challenge>(this.COLLECTION, {
       ...form,
       isActive: true,
-      startDate: new Date(form.startDate),
-      endDate: new Date(form.endDate),
       createdAt: new Date(),
       updatedAt: new Date()
     });
@@ -39,8 +37,6 @@ export class ChallengeService {
   public async updateChallenge(challengeId: string, form: ChallengeModel): Promise<void> {
     await this.documentService.updateDocument<Challenge>(challengeId, this.COLLECTION, {
       ...form,
-      startDate: new Date(form.startDate),
-      endDate: new Date(form.endDate),
       updatedAt: new Date()
     });
     this.logService.addLogConfirm('Sfida aggiornata correttamente');
