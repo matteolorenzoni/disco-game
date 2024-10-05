@@ -1,16 +1,17 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faCalendar, faClock, faLocationPin } from '@fortawesome/free-solid-svg-icons';
 import { Event } from '../../../model/event.model';
 import { Doc } from '../../../model/firebase';
 import { EventService } from '../../../service/event.service';
+import { FvFloatingButtonComponent } from '../../../components/fv-floating-button.component';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import { faCalendar, faClock, faLocationPin } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-event-list',
   standalone: true,
-  imports: [CommonModule, FaIconComponent],
+  imports: [CommonModule, FaIconComponent, FvFloatingButtonComponent],
   templateUrl: './event-list.component.html',
   styleUrls: ['./event-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

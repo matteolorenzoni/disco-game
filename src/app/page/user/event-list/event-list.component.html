@@ -1,12 +1,12 @@
 <ul class="flex flex-col gap-4">
   @for (event of events(); track event.id) {
     @if (event.id === eventIdSelected()) {
-      <li class="overflow-hidden rounded-md bg-primary-dark shadow-md transition-all duration-300 ease-in-out">
+      <li class="overflow-hidden rounded bg-primary-dark shadow-md transition-all duration-300 ease-in-out">
         <div class="relative flex flex-col gap-8 p-2">
           <div class="relative">
-            <img class="aspect-video h-auto w-full rounded-lg" [src]="event.props.imageUrl" alt="Immagine evento" />
+            <img class="aspect-video h-auto w-full rounded" [src]="event.props.imageUrl" alt="Immagine evento" />
             <div
-              class="absolute inset-0 flex flex-col items-center justify-end gap-1 overflow-hidden rounded-lg bg-gradient-to-b from-transparent to-primary-dark p-4 pb-0 text-white">
+              class="absolute inset-0 flex flex-col items-center justify-end gap-1 overflow-hidden rounded bg-gradient-to-b from-transparent to-primary-dark p-4 pb-0 text-white">
               <p class="text-center text-2xl font-bold">{{ event.props.name }}</p>
               <p class="line-clamp-3 overflow-hidden text-ellipsis text-center text-sm italic text-gray-100">
                 {{ event.props.description }}
@@ -36,18 +36,18 @@
                 </p>
               </div>
               <button
-                class="rounded-md bg-amber-400 p-2 text-xs text-black transition duration-200 hover:bg-amber-300 active:bg-amber-500"
+                class="rounded bg-amber-400 p-2 text-xs text-black transition duration-200 hover:bg-amber-300 active:bg-amber-500"
                 (click)="goToTeam(userGame.props.eventId, userGame.props.teamId)">
                 Visualizza squadra
               </button>
             } @else {
               <button
-                class="rounded-md bg-primary p-2 text-xs text-white transition duration-200 hover:bg-primary-light active:bg-primary-dark"
+                class="rounded bg-primary p-2 text-xs text-white transition duration-200 hover:bg-primary-light active:bg-primary-dark"
                 (click)="newTeamModalIsOpen.set(true)">
                 Crea squadra
               </button>
               <button
-                class="rounded-md bg-secondary p-2 text-xs text-white transition duration-200 hover:bg-secondary-light active:bg-secondary-dark"
+                class="rounded bg-secondary p-2 text-xs text-white transition duration-200 hover:bg-secondary-light active:bg-secondary-dark"
                 (click)="findTeamModalIsOpen.set(true)">
                 Trova squadra
               </button>
@@ -57,7 +57,7 @@
       </li>
     } @else {
       <li
-        class="transform cursor-pointer overflow-hidden rounded-md bg-primary-dark shadow-md transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-primary-dark"
+        class="transform cursor-pointer overflow-hidden rounded bg-surface text-on-surface shadow-md transition-all duration-300 ease-in-out hover:bg-surface/50 hover:text-gray-300"
         [tabindex]="0"
         (click)="eventIdSelected.set(event.id)"
         (keydown)="eventIdSelected.set(event.id)">
@@ -95,7 +95,7 @@
         class="flex w-full max-w-2xl flex-col justify-between gap-2">
         <div class="relative h-10">
           <input
-            class="h-full w-full rounded-md border border-slate-300 bg-white p-2 pl-10 text-sm text-slate-700 shadow-sm transition duration-300 ease-in placeholder:text-slate-400 hover:border-slate-400 focus:border-primary focus:shadow focus:outline-none"
+            class="h-full w-full rounded border border-slate-300 bg-white p-2 pl-10 text-sm text-slate-700 shadow-sm transition duration-300 ease-in placeholder:text-slate-400 hover:border-slate-400 focus:border-primary focus:shadow focus:outline-none"
             placeholder="Nome squadra"
             formControlName="name" />
           <div
@@ -107,7 +107,7 @@
         <button
           type="submit"
           [disabled]="newTeamForm.invalid"
-          class="inline-block w-full rounded-md bg-primary-dark px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-on-primary shadow-primary-light transition duration-150 ease-in-out hover:bg-primary-light active:bg-primary-dark disabled:cursor-not-allowed disabled:bg-white/40 disabled:text-white/60">
+          class="inline-block w-full rounded bg-primary-dark px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-on-primary shadow-primary-light transition duration-150 ease-in-out hover:bg-primary-light active:bg-primary-dark disabled:cursor-not-allowed disabled:bg-white/40 disabled:text-white/60">
           Crea
         </button>
       </form>
@@ -133,7 +133,7 @@
         class="flex w-full max-w-2xl flex-col justify-between gap-2">
         <div class="relative h-10">
           <input
-            class="h-full w-full rounded-md border border-slate-300 bg-white p-2 pl-10 text-sm text-slate-700 shadow-sm transition duration-300 ease-in placeholder:text-slate-400 hover:border-slate-400 focus:border-secondary focus:shadow focus:outline-none"
+            class="h-full w-full rounded border border-slate-300 bg-white p-2 pl-10 text-sm text-slate-700 shadow-sm transition duration-300 ease-in placeholder:text-slate-400 hover:border-slate-400 focus:border-secondary focus:shadow focus:outline-none"
             placeholder="Codice squadra"
             minlength="6"
             maxlength="6"
@@ -147,7 +147,7 @@
         <button
           type="submit"
           [disabled]="findTeamForm.invalid"
-          class="inline-block w-full rounded-md bg-secondary-dark px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-on-secondary shadow-secondary-light transition duration-150 ease-in-out hover:bg-secondary-light active:bg-secondary-dark disabled:cursor-not-allowed disabled:bg-white/40 disabled:text-white/60">
+          class="inline-block w-full rounded bg-secondary-dark px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-on-secondary shadow-secondary-light transition duration-150 ease-in-out hover:bg-secondary-light active:bg-secondary-dark disabled:cursor-not-allowed disabled:bg-white/40 disabled:text-white/60">
           Cerca
         </button>
       </form>
