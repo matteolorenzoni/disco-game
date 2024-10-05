@@ -1,0 +1,12 @@
+[
+  { "label": "Camaleonte", "icon": "chameleon" },
+  { "label": "Granchio", "icon": "crab" },
+  { "label": "Fenicottero", "icon": "flamingo" },
+  { "label": "Rana", "icon": "frog" },
+  { "label": "Leone", "icon": "lion" },
+  { "label": "Gufo", "icon": "owl" },
+  { "label": "Panda", "icon": "panda" },
+  { "label": "Pinguino", "icon": "penguin" },
+  { "label": "Bradipo", "icon": "sloth" },
+  { "label": "Zebra", "icon": "zebra" }
+]

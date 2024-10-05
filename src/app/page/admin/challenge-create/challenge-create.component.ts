@@ -6,6 +6,12 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ChallengeModel, FromMap } from '../../../model/form.model';
 import { ChallengeService } from '../../../service/challenge.service';
 import { ChallengeType } from '../../../model/challenge.model';
+import ChallengeTypes from './challenge-type.config.json';
+
+export type SelectOption = {
+  label: string;
+  icon: ChallengeType;
+};
 
 @Component({
   selector: 'app-challenge-create',
@@ -21,11 +27,13 @@ export class ChallengeCreateComponent implements OnInit {
   readonly challengeService = inject(ChallengeService);
   readonly logService = inject(LogService);
 
+  /* Constants */
+  OPTIONS = ChallengeTypes as SelectOption[];
+
   /* Variables */
   challengeId = signal<string | null>(null);
-
-  /* Constants */
-  challengeTypes = Object.values(ChallengeType);
+  challengeTypeModalIsOpen = signal<boolean>(false);
+  challengeTypeActive = signal<SelectOption>(this.OPTIONS.find((x) => x.icon === ChallengeType.FROG)!);
 
   /* Form */
   challengeForm = new FormGroup<FromMap<ChallengeModel>>({
@@ -69,20 +77,26 @@ export class ChallengeCreateComponent implements OnInit {
       const { props } = await this.challengeService.getChallengeById(challengeId);
       this.challengeForm.setValue(props);
     });
+
+    this.challengeForm.controls.type.valueChanges.subscribe((newValue) => {
+      this.challengeTypeActive.set(this.OPTIONS.find((x) => x.icon === newValue)!);
+    });
   }
 
-  /* ------------------------ Methods ------------------------ */
+  /* ------------------------ Methods: firebase ------------------------ */
   protected async addOrUpdateChallenge(): Promise<void> {
     if (this.challengeForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
+    const challengeId = this.challengeId();
+    const form = this.challengeForm.getRawValue();
+    if (challengeId) {
+      await this.challengeService.updateChallenge(challengeId, form);
+    } else {
+      await this.challengeService.addChallenge(form);
+    }
+  }
 
-    console.log(this.challengeForm.getRawValue());
-
-    // const challengeId = this.challengeId();
-    // const form = this.challengeForm.getRawValue();
-    // if (challengeId) {
-    //   await this.challengeService.updateChallenge(challengeId, form);
-    // } else {
-    //   await this.challengeService.addChallenge(form);
-    // }
+  /* ------------------------ Methods: utils ------------------------ */
+  protected selectChallengeTypeType(challengeType: ChallengeType): void {
+    this.challengeForm.controls.type.setValue(challengeType);
   }
 }

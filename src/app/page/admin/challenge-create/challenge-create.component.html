@@ -1,55 +1,116 @@
-<form [formGroup]="challengeForm" (ngSubmit)="addOrUpdateChallenge()">
-  <div class="form-group">
-    <label for="name">Name:</label>
-    <input id="name" formControlName="name" />
+<section class="flex flex-col gap-12">
+  <div class="flex flex-col gap-1 text-center">
+    <h3 class="text-4xl font-semibold text-primary">Sfida</h3>
+    <p class="text-sm text-primary-light">Inserisci le informazioni della sfida</p>
   </div>
 
-  <div class="form-group">
-    <label for="description">Description:</label>
-    <textarea id="description" formControlName="description"></textarea>
-  </div>
+  <form [formGroup]="challengeForm" (ngSubmit)="addOrUpdateChallenge()" class="flex w-full max-w-2xl flex-col gap-6">
+    <div class="flex w-full flex-col gap-1">
+      <label for="name" class="block text-sm font-medium text-primary"> Nome sfida </label>
+      <input
+        id="name"
+        formControlName="name"
+        type="text"
+        class="w-full rounded border border-slate-600 bg-surface px-3 py-2 text-sm text-on-surface shadow-sm transition duration-300 ease-in placeholder:text-slate-400 hover:border-primary-light focus:border-primary focus:shadow focus:outline-none" />
+    </div>
 
-  <div class="form-group">
-    <label for="rules">Rules:</label>
-    <textarea id="rules" formControlName="rules"></textarea>
-  </div>
+    <div class="flex w-full flex-col gap-1">
+      <label for="description" class="block text-sm font-medium text-primary"> Descrizione </label>
+      <textarea
+        id="description"
+        formControlName="description"
+        class="w-full rounded border border-slate-600 bg-surface px-3 py-2 text-sm text-on-surface shadow-sm transition duration-300 ease-in placeholder:text-slate-400 hover:border-primary-light focus:border-primary focus:shadow focus:outline-none"></textarea>
+    </div>
 
-  <div class="form-group">
-    <label for="imageUrl">Image URL</label>
-    <input id="imageUrl" formControlName="imageUrl" type="text" />
-  </div>
+    <div class="flex w-full flex-col gap-1">
+      <label for="type" class="block text-sm font-medium text-primary"> Tipo </label>
+      <button class="w-full" type="button" (click)="challengeTypeModalIsOpen.set(true)">
+        <div class="flex cursor-pointer items-center rounded border border-slate-600 bg-surface px-3 py-2">
+          <img [src]="'images/challenge/' + challengeTypeActive().icon + '.png'" alt="" class="mr-2 h-5 w-5" />
+          <span class="text-sm text-on-surface">{{ challengeTypeActive().label }}</span>
+          <svg class="ml-auto h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path
+              fill-rule="evenodd"
+              d="M10.53 3.47a.75.75 0 0 0-1.06 0L6.22 6.72a.75.75 0 0 0 1.06 1.06L10 5.06l2.72 2.72a.75.75 0 1 0 1.06-1.06l-3.25-3.25Zm-4.31 9.81 3.25 3.25a.75.75 0 0 0 1.06 0l3.25-3.25a.75.75 0 1 0-1.06-1.06L10 14.94l-2.72-2.72a.75.75 0 0 0-1.06 1.06Z"
+              clip-rule="evenodd" />
+          </svg>
+        </div>
+      </button>
+    </div>
 
-  <div class="form-group">
-    <label for="points">Points:</label>
-    <input id="points" formControlName="points" type="number" />
-  </div>
+    <div class="flex w-full flex-col gap-1">
+      <label for="rules" class="block text-sm font-medium text-primary"> Regole </label>
+      <textarea
+        id="rules"
+        formControlName="rules"
+        class="w-full rounded border border-slate-600 bg-surface px-3 py-2 text-sm text-on-surface shadow-sm transition duration-300 ease-in placeholder:text-slate-400 hover:border-primary-light focus:border-primary focus:shadow focus:outline-none"></textarea>
+    </div>
 
-  <div class="form-group">
-    <label for="maxTimes">Max times:</label>
-    <input id="maxTimes" formControlName="maxTimes" type="number" />
-  </div>
+    <div class="flex w-full flex-col gap-1">
+      <label for="points" class="block text-sm font-medium text-primary"> Punti </label>
+      <input
+        id="points"
+        formControlName="points"
+        type="number"
+        class="w-full rounded border border-slate-600 bg-surface px-3 py-2 text-sm text-on-surface shadow-sm transition duration-300 ease-in placeholder:text-slate-400 hover:border-primary-light focus:border-primary focus:shadow focus:outline-none" />
+    </div>
 
-  <div class="form-group">
-    <label for="complexity">Complexity (1-5):</label>
-    <input id="complexity" formControlName="complexity" type="number" min="1" max="5" step=".1" />
-  </div>
+    <div class="flex w-full flex-col gap-1">
+      <label for="complexity" class="block text-sm font-medium text-primary"> Complessità </label>
+      <input
+        id="complexity"
+        formControlName="complexity"
+        type="number"
+        min="1"
+        max="5"
+        step=".1"
+        class="w-full rounded border border-slate-600 bg-surface px-3 py-2 text-sm text-on-surface shadow-sm transition duration-300 ease-in placeholder:text-slate-400 hover:border-primary-light focus:border-primary focus:shadow focus:outline-none" />
+    </div>
 
-  <div class="form-group">
-    <label for="status">Status:</label>
-    <select id="status" formControlName="status">
-      <option *ngFor="let status of challengeStatuses" [value]="status">{{ status }}</option>
-    </select>
-  </div>
+    <div class="flex w-full flex-col gap-1">
+      <label for="maxTimes" class="block text-sm font-medium text-primary">
+        Massimo numero di tentativi (vuoto se senza limite)
+      </label>
+      <input
+        id="maxTimes"
+        formControlName="maxTimes"
+        type="number"
+        class="w-full rounded border border-slate-600 bg-surface px-3 py-2 text-sm text-on-surface shadow-sm transition duration-300 ease-in placeholder:text-slate-400 hover:border-primary-light focus:border-primary focus:shadow focus:outline-none" />
+    </div>
 
-  <div class="form-group">
-    <label for="startDate">Start Date</label>
-    <input id="startDate" formControlName="startDate" type="datetime-local" />
-  </div>
+    <button
+      type="submit"
+      [disabled]="challengeForm.invalid"
+      class="mt-8 inline-block w-full rounded-full bg-primary px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-on-primary shadow-primary-light transition duration-150 ease-in-out hover:bg-primary-light active:bg-primary-dark disabled:cursor-not-allowed disabled:bg-primary/30 disabled:text-primary/50">
+      Salva Sfida
+    </button>
+  </form>
+</section>
 
-  <div class="form-group">
-    <label for="endDate">End Date</label>
-    <input id="endDate" formControlName="endDate" type="datetime-local" />
+<!-- Cerca squadra -->
+<div
+  data-dialog-backdrop="sign-in-modal"
+  data-dialog-backdrop-close="true"
+  class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center bg-black bg-opacity-60 opacity-0 backdrop-blur-sm transition-opacity duration-300"
+  [ngClass]="{ 'opacity-100 pointer-events-auto': challengeTypeModalIsOpen() }"
+  [tabindex]="-1"
+  aria-hidden="true"
+  (click)="challengeTypeModalIsOpen.set(false)">
+  <div data-dialog="sign-in-modal" class="relative mx-auto w-4/5 max-w-[40rem] overflow-hidden rounded-lg shadow-sm">
+    <div class="flex flex-col gap-2 bg-surface p-2">
+      <h3 class="mb-4 text-center text-lg font-semibold text-on-secondary">Seleziona tipo</h3>
+      <ul class="grid grid-cols-[repeat(auto-fill,minmax(8rem,1fr))] gap-2 text-on-surface">
+        @for (option of OPTIONS; track $index) {
+          <li
+            class="cursor-pointer rounded bg-black/20 p-2 shadow hover:bg-black/60"
+            [ngClass]="{ 'bg-black/60': option.icon === challengeTypeActive().icon }">
+            <button class="flex w-full flex-col items-center gap-2" (click)="selectChallengeTypeType(option.icon)">
+              <img class="h-16 w-16" [src]="'images/challenge/' + option.icon + '.png'" alt="" />
+              <span>{{ option.label }}</span>
+            </button>
+          </li>
+        }
+      </ul>
+    </div>
   </div>
-
-  <button type="submit" class="btn btn-primary" [disabled]="challengeForm.invalid">Submit</button>
-</form>
+</div>
