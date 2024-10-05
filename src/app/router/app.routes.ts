@@ -11,6 +11,7 @@ export const routes: Routes = [
   {
     path: 'admin',
     canActivate: [userGuard],
+    loadComponent: () => import('../page/home/home.component').then((m) => m.HomeComponent),
     children: [
       {
         path: 'dashboard',
@@ -57,6 +58,19 @@ export const routes: Routes = [
               import('../page/admin/challenge-create/challenge-create.component').then(
                 (m) => m.ChallengeCreateComponent
               )
+          }
+        ]
+      },
+      {
+        path: 'settings',
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('../page/user/settings/settings.component').then((m) => m.SettingsComponent)
+          },
+          {
+            path: 'profile',
+            loadComponent: () => import('../page/sign-up/sign-up.component').then((m) => m.SignUpComponent)
           }
         ]
       },
