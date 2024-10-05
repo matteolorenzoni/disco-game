@@ -5,6 +5,7 @@ import { ChallengeModel } from '../model/form.model';
 import { challengeConverter } from '../model/converter';
 import { LogService } from './log.service';
 import { Challenge } from '../model/challenge.model';
+import { Doc } from '../model/firebase';
 
 @Injectable({
   providedIn: 'root'
@@ -18,8 +19,11 @@ export class ChallengeService {
   COLLECTION = environment.collection.CHALLENGES;
 
   /* --------------------------- Read ---------------------------*/
-  public async getChallengeById(challengeId: string) {
+  public async getChallengeById(challengeId: string): Promise<Doc<Challenge>> {
     return await this.documentService.getDocumentById<Challenge>(this.COLLECTION, challengeId, challengeConverter);
+  }
+  public async getChallenges(): Promise<Doc<Challenge>[]> {
+    return await this.documentService.getAllDocuments<Challenge>(this.COLLECTION, challengeConverter);
   }
 
   /* --------------------------- Create ---------------------------*/
