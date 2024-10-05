@@ -1,7 +1,7 @@
 <section class="flex flex-col justify-center gap-8" [ngClass]="{ 'p-4': !user() }">
   <div class="flex flex-col gap-1 text-center">
-    <h3 class="text-4xl font-semibold text-primary">Registrazione</h3>
-    <p class="text-sm text-primary-light">Inserisci le tue informazioni</p>
+    <h1 class="text-3xl font-bold text-primary-light">Registrazione</h1>
+    <h2 class="text-sm text-primary-light">Inserisci le tue informazioni</h2>
   </div>
 
   <form [formGroup]="signUpForm" (ngSubmit)="addOrUpdateUser()" class="flex w-full flex-col gap-4">
@@ -9,14 +9,14 @@
       <img
         [src]="imagePreview() ?? '/images/profile-user.png'"
         alt="Anteprima immagine"
-        class="h-32 w-32 rounded-full object-cover object-center shadow-md shadow-surface" />
+        class="h-32 w-32 rounded-full border-2 border-primary object-cover object-center shadow-md" />
 
       <label for="imageUpload" class="flex cursor-pointer flex-col items-center">
         <div class="rounded-md bg-primary p-2 text-xs text-on-primary">Carica immagine</div>
         <input
           id="imageUpload"
           type="file"
-          accept="image/png, image/jpeg"
+          accept="image/jpg, image/jpeg, image/png"
           (change)="storageService.onImageChange($event, imagePreview, imageFile)"
           class="hidden" />
       </label>
