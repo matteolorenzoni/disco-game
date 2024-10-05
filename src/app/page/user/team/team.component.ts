@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { StorageReference } from 'firebase/storage';
@@ -19,7 +19,7 @@ const COL_USERS = environment.collection.USERS;
 @Component({
   selector: 'app-team',
   standalone: true,
-  imports: [CommonModule, FaIconComponent, UserImageUrlPipe],
+  imports: [CommonModule, FaIconComponent, UserImageUrlPipe, NgOptimizedImage],
   templateUrl: './team.component.html',
   styleUrls: ['./team.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

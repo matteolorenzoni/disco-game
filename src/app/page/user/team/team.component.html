@@ -13,9 +13,15 @@
         <ul class="flex flex-col gap-1">
           @for (userGame of userGames(); track userGame.id) {
             <li class="flex h-12 items-center gap-2 rounded bg-surface/40 p-2 shadow">
-              @let imageUrl = userGame.props.userId | user_image_url: teamUserImageRefs() | async;
               <div class="relative h-full">
-                <img class="aspect-square h-full rounded-full" [src]="imageUrl" alt="Immagine utente" />
+                @let imageUrl = userGame.props.userId | user_image_url: teamUserImageRefs() | async;
+                <img
+                  class="h-full rounded-full"
+                  [ngSrc]="imageUrl ?? 'images/profile-user.png'"
+                  width="32"
+                  height="32"
+                  priority
+                  alt="Immagine utente" />
                 @if (userGame.props.userId === userGame.props.userIdLeader) {
                   <fa-icon class="top absolute -top-2 left-0 text-xs text-amber-300" [icon]="ICON_CROWN"></fa-icon>
                 }
@@ -30,8 +36,16 @@
       <div class="fixed bottom-16 left-0 flex w-full flex-col gap-1 rounded-t px-4 py-2 backdrop-blur-xl">
         <h2 class="text-xl font-bold">Io</h2>
         <div class="flex h-12 w-full items-center gap-2 rounded bg-surface/40 p-2 shadow">
-          @let imageUrl = userGamesActive.props.userId | user_image_url: teamUserImageRefs() | async;
-          <img class="aspect-square h-full rounded-full" [src]="imageUrl" alt="Immagine utente" />
+          <div class="h-full overflow-hidden rounded-full">
+            @let imageUrl = userGamesActive.props.userId | user_image_url: teamUserImageRefs() | async;
+            <img
+              class="h-full"
+              [ngSrc]="imageUrl ?? 'images/profile-user.png'"
+              width="32"
+              height="32"
+              priority
+              alt="Immagine utente" />
+          </div>
           <p>{{ userGamesActive.props.userName }}</p>
           <span class="ml-auto">{{ userGamesActive.props.points }}</span>
         </div>
