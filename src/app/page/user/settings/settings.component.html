@@ -17,7 +17,7 @@
   </li>
 
   <li class="pt-4 hover:text-gray-400">
-    <a [routerLink]="'/login'" class="flex gap-4">
+    <a [routerLink]="'/login'" class="flex gap-4" (click)="firebaseService.logout()">
       <fa-icon class="" [icon]="ICON_LOGOUT"></fa-icon>
       <span class="">Logout</span>
     </a>
