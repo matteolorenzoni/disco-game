@@ -28,8 +28,8 @@ export class EventService {
   }
 
   /* --------------------------- Create ---------------------------*/
-  public async addEvent(form: EventModel, imageUrl: string | null): Promise<string> {
-    const docRef = await this.documentService.addDocument<Event>(this.COLLECTION, {
+  public async addEventById(eventId: string, form: EventModel, imageUrl: string): Promise<string> {
+    const docRef = await this.documentService.addDocumentById<Event>(eventId, this.COLLECTION, {
       ...form,
       imageUrl,
       challenges: [],
@@ -54,7 +54,7 @@ export class EventService {
     this.logService.addLogConfirm('Evento aggiornato correttamente');
   }
 
-  public async updateEventImageUrl(eventId: string, imageUrl: string | null): Promise<void> {
+  public async updateEventImageUrl(eventId: string, imageUrl: string): Promise<void> {
     await this.documentService.updateDocument<Event>(eventId, this.COLLECTION, {
       imageUrl,
       updatedAt: new Date()

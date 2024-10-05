@@ -93,6 +93,22 @@ export class FirebaseDocumentService {
   }
 
   /* --------------------- Methods CREATE --------------------- */
+  public createDocId(collectionName: string): string {
+    try {
+      // Ottieni un riferimento alla collezione
+      const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
+
+      // Genera un nuovo riferimento al documento
+      const newDocRef = doc(collectionRef);
+
+      // Restituisci l'ID generato
+      return newDocRef.id;
+    } catch (error) {
+      this.logService.addLogError(this.firebaseService.userFirebase()?.uid, error);
+      throw error;
+    }
+  }
+
   public async addDocumentById<T extends Record<string, any>>(
     id: string,
     collectionName: string,

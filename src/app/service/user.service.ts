@@ -65,8 +65,8 @@ export class UserService {
   }
 
   /* --------------------------- Create ---------------------------*/
-  public async addUser(id: string, userModelForm: UserModel, imageUrl: string | null): Promise<void> {
-    await this.documentService.addDocumentById<User>(id, COL_USERS, {
+  public async addUserById(userId: string, userModelForm: UserModel, imageUrl: string | null): Promise<void> {
+    await this.documentService.addDocumentById<User>(userId, COL_USERS, {
       ...userModelForm,
       // birthDate: new Date(form.birthDate),
       imageUrl,

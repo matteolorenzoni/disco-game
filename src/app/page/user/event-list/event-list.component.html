@@ -4,10 +4,7 @@
       <li class="overflow-hidden rounded-md bg-primary-dark shadow-md transition-all duration-300 ease-in-out">
         <div class="relative flex flex-col gap-8 p-2">
           <div class="relative">
-            <img
-              class="aspect-video h-auto w-full rounded-lg"
-              [src]="event.props.imageUrl ?? 'images/welcome1.png'"
-              alt="Immagine evento" />
+            <img class="aspect-video h-auto w-full rounded-lg" [src]="event.props.imageUrl" alt="Immagine evento" />
             <div
               class="absolute inset-0 flex flex-col items-center justify-end gap-1 overflow-hidden rounded-lg bg-gradient-to-b from-transparent to-primary-dark p-4 pb-0 text-white">
               <p class="text-center text-2xl font-bold">{{ event.props.name }}</p>

@@ -101,7 +101,7 @@ export class SignUpComponent implements OnInit {
     }
 
     /* Aggiunta utente a DB */
-    await this.userService.addUser(userCredential.user.uid, userModelForm, imageUrl);
+    await this.userService.addUserById(userCredential.user.uid, userModelForm, imageUrl);
     await this.router.navigate(['/login']);
   }
 

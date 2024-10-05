@@ -87,7 +87,7 @@ export const eventConverter: FirestoreDataConverter<Event> = {
       name: data['name'],
       description: data['description'],
       location: data['location'],
-      imageUrl: data['imageUrl'] || null,
+      imageUrl: data['imageUrl'],
       //TODO: Capire cosa fare
       challenges: data['challenges'].map((challenge: EventChallenge) => ({
         challengeId: challenge.challengeId,

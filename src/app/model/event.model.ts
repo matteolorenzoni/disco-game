@@ -2,7 +2,7 @@ export type Event = {
   name: string; // Nome dell'evento
   description: string; // Descrizione dell'evento, inclusi dettagli come il tema e gli obiettivi
   location: string; // Luogo in cui si svolge l'evento, che può essere un indirizzo o un nome di una struttura
-  imageUrl: string | null; // URL dell'immagine di copertura dell'evento (opzionale)
+  imageUrl: string; // URL dell'immagine di copertura dell'evento
   challenges: EventChallenge[]; // Array di sfide collegate all'evento
   isActive: boolean; // Per soft delete
   startDate: Date; // Data e ora di inizio dell'evento

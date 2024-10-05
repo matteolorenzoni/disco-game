@@ -2,13 +2,14 @@ import { CommonModule, formatDate } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { endDateValidator } from '../../../util/utils';
+import { environment } from '../../../../environments/environment.development';
 import { EventModel, FromMap } from '../../../model/form.model';
+import { FirebaseDocumentService } from '../../../service/firebase-document.service';
 import { EventService } from '../../../service/event.service';
 import { FirebaseService } from '../../../service/firebase.service';
-import { LogService } from './../../../service/log.service';
+import { LogService } from '../../../service/log.service';
 import { StorageService } from '../../../service/storage.service';
-import { environment } from '../../../../environments/environment.development';
+import { endDateValidator } from '../../../util/utils';
 
 const COL_EVENTS = environment.collection.EVENTS;
 
@@ -24,13 +25,14 @@ export class EventCreateComponent implements OnInit {
   /* Services */
   readonly route = inject(ActivatedRoute);
   readonly firebaseService = inject(FirebaseService);
+  readonly firebaseDocumentService = inject(FirebaseDocumentService);
   readonly storageService = inject(StorageService);
   readonly eventService = inject(EventService);
   readonly logService = inject(LogService);
 
   /* Variables */
   eventId = signal<string | null>(null);
-  imagePreview = signal<string | ArrayBuffer | null | undefined>(undefined);
+  imagePreview = signal<string | ArrayBuffer | undefined>(undefined);
   imageFile = signal<File | undefined>(undefined);
 
   /* Form */
@@ -92,14 +94,14 @@ export class EventCreateComponent implements OnInit {
     if (eventId) {
       await this.eventService.updateEvent(eventId, form);
     } else {
-      /* Creazione evento */
-      const eventId = await this.eventService.addEvent(form, null);
+      /* Creo id documento */
+      const eventId = this.firebaseDocumentService.createDocId(COL_EVENTS);
 
-      /* Aggiunta image a storage */
-      if (this.imageFile()) {
-        const imageUrl = await this.storageService.saveImage(this.imageFile()!, COL_EVENTS, eventId);
-        await this.eventService.updateEventImageUrl(eventId, imageUrl);
-      }
+      /* Creo immagine */
+      const imageUrl = await this.storageService.saveImage(this.imageFile()!, COL_EVENTS, eventId);
+
+      /* Creazione evento */
+      await this.eventService.addEventById(eventId, form, imageUrl);
     }
   }
 }
