@@ -10,16 +10,10 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
   imports: [CommonModule, FaIconComponent],
   template: ` <button
     class="fixed bottom-20 right-4 h-12 w-12 rounded-full bg-primary p-2 text-on-primary transition duration-100 ease-in active:scale-95 active:bg-primary-dark"
-    (click)="router.navigate([path()])">
+    (click)="execute()()">
     <fa-icon [icon]="ICON_ADD"></fa-icon>
   </button>`,
-  styles: [
-    `
-      :host {
-        display: block;
-      }
-    `
-  ],
+  styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FvFloatingButtonComponent {
@@ -27,7 +21,7 @@ export class FvFloatingButtonComponent {
   readonly router = inject(Router);
 
   /* Inputs */
-  path = input.required<string>();
+  execute = input.required<() => void>();
 
   /* Icons */
   ICON_ADD = faPlus;

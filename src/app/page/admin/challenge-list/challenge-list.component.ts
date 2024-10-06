@@ -33,4 +33,8 @@ export class ChallengeListComponent implements OnInit {
   protected async updateChallenge(challengeId: string): Promise<void> {
     await this.router.navigateByUrl(`admin/challenges/${challengeId}`);
   }
+
+  protected async executeFloatingButton(): Promise<void> {
+    await this.router.navigateByUrl('admin/challenges/new');
+  }
 }

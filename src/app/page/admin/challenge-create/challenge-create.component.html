@@ -76,30 +76,32 @@
   </form>
 </section>
 
-<!-- Cerca squadra -->
-<div
-  data-dialog-backdrop="sign-in-modal"
-  data-dialog-backdrop-close="true"
-  class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center bg-black bg-opacity-60 opacity-0 backdrop-blur-sm transition-opacity duration-300"
-  [ngClass]="{ 'opacity-100 pointer-events-auto': challengeTypeModalIsOpen() }"
-  [tabindex]="-1"
-  aria-hidden="true"
-  (click)="challengeTypeModalIsOpen.set(false)">
-  <div data-dialog="sign-in-modal" class="relative mx-auto w-4/5 max-w-[40rem] overflow-hidden rounded-lg shadow-sm">
-    <div class="flex flex-col gap-2 bg-surface p-2">
-      <h3 class="mb-4 text-center text-lg font-semibold text-on-secondary">Seleziona tipo</h3>
-      <ul class="grid grid-cols-[repeat(auto-fill,minmax(8rem,1fr))] gap-2 text-on-surface">
-        @for (option of OPTIONS; track $index) {
-          <li
-            class="cursor-pointer rounded bg-black/20 p-2 shadow hover:bg-black/60"
-            [ngClass]="{ 'bg-black/60': option.icon === challengeTypeActive().icon }">
-            <button class="flex w-full flex-col items-center gap-2" (click)="selectChallengeTypeType(option.icon)">
-              <img class="h-16 w-16" [src]="'images/challenge/' + option.icon + '.png'" alt="" />
-              <span>{{ option.label }}</span>
-            </button>
-          </li>
-        }
-      </ul>
+<!-- Seleziona tipo della sfida -->
+@if (challengeTypeModalIsOpen()) {
+  <div
+    data-dialog-backdrop="sign-in-modal"
+    data-dialog-backdrop-close="true"
+    class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center bg-black bg-opacity-60 opacity-0 backdrop-blur-sm transition-opacity duration-300"
+    [ngClass]="{ 'opacity-100 pointer-events-auto': challengeTypeModalIsOpen() }"
+    [tabindex]="-1"
+    aria-hidden="true"
+    (click)="challengeTypeModalIsOpen.set(false)">
+    <div data-dialog="sign-in-modal" class="relative mx-auto w-4/5 max-w-[40rem] overflow-hidden rounded-lg shadow-sm">
+      <div class="flex flex-col gap-2 bg-surface p-2">
+        <h3 class="mb-4 text-center text-lg font-semibold text-on-secondary">Seleziona tipo</h3>
+        <ul class="grid grid-cols-[repeat(auto-fill,minmax(8rem,1fr))] gap-2 text-on-surface">
+          @for (option of OPTIONS; track $index) {
+            <li
+              class="cursor-pointer rounded bg-black/20 p-2 shadow hover:bg-black/60"
+              [ngClass]="{ 'bg-black/60': option.icon === challengeTypeActive().icon }">
+              <button class="flex w-full flex-col items-center gap-2" (click)="selectChallengeTypeType(option.icon)">
+                <img class="h-16 w-16" [src]="'images/challenge/' + option.icon + '.png'" alt="" />
+                <span>{{ option.label }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+      </div>
     </div>
   </div>
-</div>
+}

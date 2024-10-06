@@ -1,6 +1,6 @@
-<h1 class="fixed left-0 top-0 w-full p-4 text-3xl font-bold text-on-background backdrop-blur-sm">Sfide</h1>
+<h1 class="mb-6 text-3xl font-bold text-on-background">Sfide</h1>
 
-<ul class="mt-16 grid grid-cols-[repeat(auto-fill,minmax(20rem,1fr))] gap-4 text-on-surface">
+<ul class="grid grid-cols-[repeat(auto-fill,minmax(20rem,1fr))] gap-4 text-on-surface">
   @for (challenge of challenges(); track challenge.id) {
     <li
       class="cursor-pointer rounded bg-surface p-4 shadow transition duration-100 ease-in hover:bg-black/50 active:scale-95">
@@ -18,13 +18,13 @@
         </div>
         <div class="text-start">
           <h6 class="text-sm">Descrizione</h6>
-          <p class="line-clamp-3 whitespace-pre-line break-words text-xs italic text-gray-400">
+          <p class="line-clamp-3 whitespace-pre-line break-all text-xs italic text-gray-400">
             {{ challenge.props.description }}
           </p>
         </div>
         <div class="text-start">
           <h6 class="text-sm">Regole</h6>
-          <p class="line-clamp-3 whitespace-pre-line break-words text-xs italic text-gray-400">
+          <p class="line-clamp-3 whitespace-pre-line break-all text-xs italic text-gray-400">
             {{ challenge.props.rules }}
           </p>
         </div>
@@ -33,4 +33,4 @@
   }
 </ul>
 
-<fv-floating-button [path]="'admin/challenges/new'"></fv-floating-button>
+<fv-floating-button [execute]="executeFloatingButton.bind(this)"></fv-floating-button>
