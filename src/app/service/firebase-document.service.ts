@@ -55,7 +55,7 @@ export class FirebaseDocumentService {
     return await this.getDocumentsByProp(collectionName, {}, converter);
   }
 
-  public async getAllActiveDocuments<T extends Record<string, any>>(
+  public async getAllActiveDocuments<T extends Record<string, any> & { isActive: boolean }>(
     collectionName: string,
     converter: FirestoreDataConverter<T>
   ): Promise<Doc<T>[]> {
@@ -80,7 +80,7 @@ export class FirebaseDocumentService {
     }
   }
 
-  public async getActiveDocumentsByProp<T extends Record<string, any>>(
+  public async getActiveDocumentsByProp<T extends Record<string, any> & { isActive: boolean }>(
     collectionName: string,
     queryParams: Partial<T>,
     converter: FirestoreDataConverter<T>

@@ -1,5 +1,6 @@
 import { FormControl } from '@angular/forms';
 import { ChallengeType } from './challenge.model';
+import { ChallengeStatus } from './event-challenge.model';
 
 export type FromMap<T> = {
   [K in keyof T]: FormControl<T[K]>;
@@ -34,6 +35,14 @@ export type ChallengeModel = {
   type: ChallengeType;
   points: number;
   complexity: number;
+};
+
+export type EventChallengeModel = {
+  challengeId: string;
+  challengeStatus: ChallengeStatus;
+  maxTimes: number | null;
+  startDate: Date | null;
+  endDate: Date | null;
 };
 
 export type NewTeamModel = {

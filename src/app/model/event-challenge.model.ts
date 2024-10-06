@@ -1,0 +1,19 @@
+import { ChallengeType } from './challenge.model';
+
+export type EventChallenge = {
+  eventId: string; // ID evento
+  challengeId: string; // ID della sfida collegata
+  challengeName: string; // Nome della sfida collegata
+  challengeType: ChallengeType; // Tipo della sfida collegata
+  challengeStatus: ChallengeStatus; // Stato della sfida
+  maxTimes: number | null; // Numero di volte che una sfida può essere ripetuta
+  startDate: Date | null; // Data e ora di inizio della sfida
+  endDate: Date | null; // Data e ora di fine della sfida
+};
+
+export enum ChallengeStatus {
+  ACTIVE = 'ACTIVE', // Sfida attiva e in corso
+  LOCKED = 'LOCKED', // Sfida in attesa di inizio
+  CANCELED = 'CANCELED', // Sfida annullata
+  SUSPENDED = 'SUSPENDED' // Sfida sospesa temporaneamente
+}

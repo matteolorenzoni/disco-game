@@ -7,12 +7,13 @@ import {
   SnapshotOptions,
   Timestamp
 } from 'firebase/firestore';
-import { Challenge } from './challenge.model';
-import { Event, EventChallenge } from './event.model';
+import { Challenge, ChallengeType } from './challenge.model';
+import { Event } from './event.model';
 import { Team, TeamStatus } from './team.model';
 import { User, UserRole } from './user.model';
 import { UserChallenge } from './user-challenge.model';
 import { UserGame } from './user-game.model';
+import { ChallengeStatus, EventChallenge } from './event-challenge.model';
 
 /* ---------------------- Utils ---------------------- */
 // Funzione per convertire stringa ISO in oggetto Date
@@ -68,12 +69,7 @@ export const eventConverter: FirestoreDataConverter<Event> = {
       description: event.description,
       location: event.location,
       imageUrl: event.imageUrl,
-      //TODO: Capire cosa fare
-      challenges: event.challenges.map((challenge) => ({
-        challengeId: challenge.challengeId,
-        startDate: dateToString(challenge.startDate),
-        endDate: dateToString(challenge.endDate)
-      })),
+      challenges: event.challenges.map((eventChallengeRef) => eventChallengeRef.path),
       isActive: event.isActive,
       startDate: dateToString(event.startDate),
       endDate: dateToString(event.endDate),
@@ -88,12 +84,7 @@ export const eventConverter: FirestoreDataConverter<Event> = {
       description: data['description'],
       location: data['location'],
       imageUrl: data['imageUrl'],
-      //TODO: Capire cosa fare
-      challenges: data['challenges'].map((challenge: EventChallenge) => ({
-        challengeId: challenge.challengeId,
-        startDate: challenge.startDate,
-        endDate: challenge.endDate
-      })),
+      challenges: data['challenges'],
       isActive: data['isActive'],
       startDate: timestampToDate(data['startDate'] as Timestamp),
       endDate: timestampToDate(data['endDate'] as Timestamp),
@@ -194,6 +185,35 @@ export const userGameConverter: FirestoreDataConverter<UserGame> = {
         return doc(snapshot.ref.firestore, challengePath) as DocumentReference<UserChallenge>;
       }),
       points: data['points']
+    };
+  }
+};
+
+export const eventChallengeConverter: FirestoreDataConverter<EventChallenge> = {
+  toFirestore(eventChallenge: EventChallenge): DocumentData {
+    return {
+      eventId: eventChallenge.eventId,
+      challengeId: eventChallenge.challengeId,
+      challengeName: eventChallenge.challengeName,
+      challengeType: eventChallenge.challengeType,
+      challengeStatus: eventChallenge.challengeStatus,
+      maxTimes: eventChallenge.maxTimes,
+      startDate: eventChallenge.startDate ? eventChallenge.startDate.toISOString() : null,
+      endDate: eventChallenge.endDate ? eventChallenge.endDate.toISOString() : null
+    };
+  },
+
+  fromFirestore(snapshot: QueryDocumentSnapshot<DocumentData>, options: SnapshotOptions): EventChallenge {
+    const data = snapshot.data(options)!;
+    return {
+      eventId: data['eventId'],
+      challengeId: data['challengeId'],
+      challengeName: data['challengeName'],
+      challengeType: data['challengeType'] as ChallengeType,
+      challengeStatus: data['challengeStatus'] as ChallengeStatus,
+      maxTimes: data['maxTimes'] !== null ? Number(data['maxTimes']) : null,
+      startDate: data['startDate'] ? timestampToDate(data['startDate'] as Timestamp) : null,
+      endDate: data['endDate'] ? timestampToDate(data['endDate'] as Timestamp) : null
     };
   }
 };
