@@ -41,8 +41,8 @@ export type EventChallengeModel = {
   challengeId: string;
   challengeStatus: ChallengeStatus;
   maxTimes: number | null;
-  startDate: Date | null;
-  endDate: Date | null;
+  startDate: string | null;
+  endDate: string | null;
 };
 
 export type NewTeamModel = {

@@ -42,6 +42,10 @@ export class EventListComponent implements OnInit {
     await this.router.navigate([`admin/events/${eventId}`]);
   }
 
+  protected async goToUpdateEventChallenges(eventId: string): Promise<void> {
+    await this.router.navigate([`admin/events/${eventId}/challenges`]);
+  }
+
   protected async executeFloatingButton(): Promise<void> {
     await this.router.navigateByUrl('admin/events/new');
   }

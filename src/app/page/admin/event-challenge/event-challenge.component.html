@@ -1,0 +1,167 @@
+<h1 class="text-3xl font-bold text-on-background">Sfide</h1>
+
+<div class="mt-4 w-full overflow-x-hidden rounded shadow-md">
+  <table class="w-full text-left">
+    <thead class="bg-primary uppercase text-on-primary">
+      <tr>
+        <th scope="col" class="p-2">Sfida</th>
+        <th scope="col" class="p-2"><fa-icon [icon]="ICON_STATUS"></fa-icon></th>
+        <th scope="col" class="p-2"><fa-icon [icon]="ICON_MAX_TIMES"></fa-icon></th>
+        <th scope="col" class="p-2"><fa-icon [icon]="ICON_START"></fa-icon></th>
+        <th scope="col" class="p-2"><fa-icon [icon]="ICON_END"></fa-icon></th>
+        <th scope="col" class="p-2"></th>
+      </tr>
+    </thead>
+    <tbody class="bg-surface text-xs text-on-surface">
+      @for (eventChallenge of eventChallenges(); track eventChallenge.id) {
+        <tr class="border-b">
+          <td class="p-2">
+            <div class="flex items-center gap-2">
+              <img
+                class="h-6 w-6 rounded-full"
+                [src]="'images/challenge/' + eventChallenge.props.challengeType + '.png'"
+                alt="Tipo" />
+              <p class="line-clamp-3">{{ eventChallenge.props.challengeName }}</p>
+            </div>
+          </td>
+          <td class="p-2">
+            <fa-icon [icon]="ICON_STATUS_VALUE[eventChallenge.props.challengeStatus]"></fa-icon>
+          </td>
+          <td class="p-2">
+            @if (eventChallenge.props.maxTimes; as maxTimes) {
+              <p>{{ maxTimes }}</p>
+            } @else {
+              <fa-icon [icon]="ICON_INFINITE"></fa-icon>
+            }
+          </td>
+          <td class="p-2 text-xxs">
+            <div class="flex flex-col gap-1">
+              @if (eventChallenge.props.startDate; as startDate) {
+                <p class="inline-flex gap-1">
+                  <fa-icon [icon]="ICON_CALENDAR"></fa-icon>
+                  <span>{{ startDate | date: 'dd/MM' }}</span>
+                </p>
+                <p class="inline-flex gap-1">
+                  <fa-icon [icon]="ICON_CLOCK"> </fa-icon>
+                  <span>{{ startDate | date: 'HH:mm' }}</span>
+                </p>
+              } @else {
+                <p>-</p>
+              }
+            </div>
+          </td>
+          <td class="p-2 text-xxs">
+            <div class="flex flex-col gap-1">
+              @if (eventChallenge.props.endDate; as endDate) {
+                <p class="inline-flex gap-1">
+                  <fa-icon [icon]="ICON_CALENDAR"></fa-icon>
+                  <span>{{ endDate | date: 'dd/MM' }}</span>
+                </p>
+                <p class="inline-flex gap-1">
+                  <fa-icon [icon]="ICON_CLOCK"> </fa-icon>
+                  <span>{{ endDate | date: 'HH:mm' }}</span>
+                </p>
+              } @else {
+                <p>-</p>
+              }
+            </div>
+          </td>
+          <td class="p-2">
+            <button
+              class="text-primary hover:text-primary-light active:scale-95 active:text-primary-dark"
+              (click)="goToUpdateEventChallenge(eventChallenge.id)">
+              <fa-icon [icon]="ICON_PEN"></fa-icon>
+            </button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+<fv-floating-button [execute]="executeFloatingButton.bind(this)"></fv-floating-button>
+
+<!-- Seleziona tipo della sfida -->
+@if (formModalIsOpen()) {
+  <div
+    data-dialog-backdrop="sign-in-modal"
+    data-dialog-backdrop-close="true"
+    class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center bg-black bg-opacity-60 opacity-0 backdrop-blur-sm transition-opacity duration-300"
+    [ngClass]="{ 'opacity-100 pointer-events-auto': formModalIsOpen() }"
+    [tabindex]="-1"
+    aria-hidden="true"
+    (click)="onBackdropClick($event)">
+    <div data-dialog="sign-in-modal" class="relative mx-auto w-4/5 max-w-[40rem] overflow-hidden rounded shadow-sm">
+      <div class="flex flex-col gap-2 bg-surface p-4">
+        <h3 class="mb-4 text-center text-lg font-semibold text-on-secondary">Sfida</h3>
+        <form
+          [formGroup]="eventChallengeForm"
+          class="flex w-full flex-col gap-6"
+          (submit)="addOrUpdateEventChallenge()">
+          <!-- Challenge -->
+          <div class="flex w-full flex-col gap-1">
+            <label for="challengeId" class="block text-sm font-medium text-primary">Sfida</label>
+            <select
+              id="challengeId"
+              formControlName="challengeId"
+              class="w-full rounded border border-slate-600 bg-surface px-3 py-2 text-sm text-on-surface shadow-sm transition duration-300 ease-in hover:border-primary-light focus:border-primary focus:shadow focus:outline-none">
+              @for (challenge of challenges(); track challenge.id) {
+                <option [value]="challenge.id">{{ challenge.props.name }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Status -->
+          <div class="flex w-full flex-col gap-1">
+            <label for="challengeStatus" class="block text-sm font-medium text-primary">Stato</label>
+            <select
+              id="challengeStatus"
+              formControlName="challengeStatus"
+              class="w-full rounded border border-slate-600 bg-surface px-3 py-2 text-sm text-on-surface shadow-sm transition duration-300 ease-in hover:border-primary-light focus:border-primary focus:shadow focus:outline-none">
+              @for (option of OPTIONS; track option.status) {
+                <option [value]="option.status">{{ option.label }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Max Times -->
+          <div class="flex w-full flex-col gap-1">
+            <label for="maxTimes" class="block text-sm font-medium text-primary">Numero Massimo di Tentativi</label>
+            <input
+              id="maxTimes"
+              formControlName="maxTimes"
+              type="number"
+              class="w-full rounded border border-slate-600 bg-surface px-3 py-2 text-sm text-on-surface shadow-sm transition duration-300 ease-in hover:border-primary-light focus:border-primary focus:shadow focus:outline-none" />
+          </div>
+
+          <!-- Start Date -->
+          <div class="flex w-full flex-col gap-1">
+            <label for="startDate" class="block text-sm font-medium text-primary">Data di Inizio</label>
+            <input
+              id="startDate"
+              formControlName="startDate"
+              type="datetime-local"
+              class="w-full rounded border border-slate-600 bg-surface px-3 py-2 text-sm text-on-surface shadow-sm transition duration-300 ease-in hover:border-primary-light focus:border-primary focus:shadow focus:outline-none" />
+          </div>
+
+          <!-- End Date -->
+          <div class="flex w-full flex-col gap-1">
+            <label for="endDate" class="block text-sm font-medium text-primary">Data di Fine</label>
+            <input
+              id="endDate"
+              formControlName="endDate"
+              type="datetime-local"
+              class="w-full rounded border border-slate-600 bg-surface px-3 py-2 text-sm text-on-surface shadow-sm transition duration-300 ease-in hover:border-primary-light focus:border-primary focus:shadow focus:outline-none" />
+          </div>
+
+          <button
+            type="submit"
+            class="mt-8 inline-block w-full rounded-full bg-primary px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-on-primary shadow-primary-light transition duration-150 ease-in-out hover:bg-primary-light active:bg-primary-dark disabled:cursor-not-allowed disabled:bg-primary/30 disabled:text-primary/50"
+            [disabled]="eventChallengeForm.invalid">
+            {{ eventChallenge() ? 'Aggiorna' : 'Aggiungi' }}
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+}

@@ -31,9 +31,21 @@ export const routes: Routes = [
               import('../page/admin/event-create/event-create.component').then((m) => m.EventCreateComponent)
           },
           {
-            path: ':id',
-            loadComponent: () =>
-              import('../page/admin/event-create/event-create.component').then((m) => m.EventCreateComponent)
+            path: ':eventId',
+            children: [
+              {
+                path: '',
+                loadComponent: () =>
+                  import('../page/admin/event-create/event-create.component').then((m) => m.EventCreateComponent)
+              },
+              {
+                path: 'challenges',
+                loadComponent: () =>
+                  import('../page/admin/event-challenge/event-challenge.component').then(
+                    (m) => m.EventChallengeComponent
+                  )
+              }
+            ]
           }
         ]
       },

@@ -1,0 +1,6 @@
+[
+  { "label": "Attivo", "status": "ACTIVE" },
+  { "label": "Bloccato", "status": "LOCKED" },
+  { "label": "Cancellato", "status": "CANCELED" },
+  { "label": "Sospeso", "status": "SUSPENDED" }
+]

@@ -198,8 +198,8 @@ export const eventChallengeConverter: FirestoreDataConverter<EventChallenge> = {
       challengeType: eventChallenge.challengeType,
       challengeStatus: eventChallenge.challengeStatus,
       maxTimes: eventChallenge.maxTimes,
-      startDate: eventChallenge.startDate ? eventChallenge.startDate.toISOString() : null,
-      endDate: eventChallenge.endDate ? eventChallenge.endDate.toISOString() : null
+      startDate: eventChallenge.startDate ? dateToString(eventChallenge.startDate) : null,
+      endDate: eventChallenge.endDate ? dateToString(eventChallenge.endDate) : null
     };
   },
 
