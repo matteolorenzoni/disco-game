@@ -51,7 +51,7 @@ export class UserService {
   }
 
   private async getUsers(): Promise<Doc<User>[]> {
-    return await this.documentService.getAllDocuments<User>(COL_USERS, userConverter);
+    return await this.documentService.getAllActiveDocuments<User>(COL_USERS, userConverter);
   }
 
   public async checkUniqUsername(username: string): Promise<boolean> {

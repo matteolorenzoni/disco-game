@@ -52,6 +52,13 @@ export class FirebaseDocumentService {
     collectionName: string,
     converter: FirestoreDataConverter<T>
   ): Promise<Doc<T>[]> {
+    return await this.getDocumentsByProp(collectionName, {}, converter);
+  }
+
+  public async getAllActiveDocuments<T extends Record<string, any>>(
+    collectionName: string,
+    converter: FirestoreDataConverter<T>
+  ): Promise<Doc<T>[]> {
     return await this.getActiveDocumentsByProp(collectionName, {}, converter);
   }
 

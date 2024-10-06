@@ -7,6 +7,8 @@ import { LogService } from './log.service';
 import { Challenge } from '../model/challenge.model';
 import { Doc } from '../model/firebase';
 
+const COL_CHALLENGES = environment.collection.CHALLENGES;
+
 @Injectable({
   providedIn: 'root'
 })
@@ -15,20 +17,17 @@ export class ChallengeService {
   readonly documentService = inject(FirebaseDocumentService);
   readonly logService = inject(LogService);
 
-  /* Constants */
-  COLLECTION = environment.collection.CHALLENGES;
-
   /* --------------------------- Read ---------------------------*/
   public async getChallengeById(challengeId: string): Promise<Doc<Challenge>> {
-    return await this.documentService.getDocumentById<Challenge>(this.COLLECTION, challengeId, challengeConverter);
+    return await this.documentService.getDocumentById<Challenge>(COL_CHALLENGES, challengeId, challengeConverter);
   }
   public async getChallenges(): Promise<Doc<Challenge>[]> {
-    return await this.documentService.getAllDocuments<Challenge>(this.COLLECTION, challengeConverter);
+    return await this.documentService.getAllActiveDocuments<Challenge>(COL_CHALLENGES, challengeConverter);
   }
 
   /* --------------------------- Create ---------------------------*/
   public async addChallenge(form: ChallengeModel): Promise<void> {
-    await this.documentService.addDocument<Challenge>(this.COLLECTION, {
+    await this.documentService.addDocument<Challenge>(COL_CHALLENGES, {
       ...form,
       isActive: true,
       createdAt: new Date(),
@@ -39,7 +38,7 @@ export class ChallengeService {
 
   /* --------------------------- Update ---------------------------*/
   public async updateChallenge(challengeId: string, form: ChallengeModel): Promise<void> {
-    await this.documentService.updateDocument<Challenge>(challengeId, this.COLLECTION, {
+    await this.documentService.updateDocument<Challenge>(challengeId, COL_CHALLENGES, {
       ...form,
       updatedAt: new Date()
     });
