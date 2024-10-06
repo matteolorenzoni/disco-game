@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { LogService } from '../../../service/log.service';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ChallengeModel, FromMap } from '../../../model/form.model';
+import { LogService } from '../../../service/log.service';
 import { ChallengeService } from '../../../service/challenge.service';
+import { ChallengeModel, FromMap } from '../../../model/form.model';
 import { ChallengeType } from '../../../model/challenge.model';
 import ChallengeTypes from './challenge-type.config.json';
 
@@ -93,7 +93,15 @@ export class ChallengeCreateComponent implements OnInit {
   }
 
   /* ------------------------ Methods: utils ------------------------ */
+  protected onBackdropClick(event: MouseEvent): void {
+    const clickedElement = event.target as HTMLElement;
+    if (clickedElement.dataset['dialogBackdrop'] === 'sign-in-modal') {
+      this.challengeTypeModalIsOpen.set(false);
+    }
+  }
+
   protected selectChallengeTypeType(challengeType: ChallengeType): void {
     this.challengeForm.controls.type.setValue(challengeType);
+    this.challengeTypeModalIsOpen.set(false);
   }
 }

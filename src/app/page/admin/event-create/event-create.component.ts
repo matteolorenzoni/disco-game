@@ -3,6 +3,8 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@ang
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { environment } from '../../../../environments/environment.development';
+import { Doc } from '../../../model/firebase';
+import { Event } from '../../../model/event.model';
 import { EventModel, FromMap } from '../../../model/form.model';
 import { FirebaseDocumentService } from '../../../service/firebase-document.service';
 import { EventService } from '../../../service/event.service';
@@ -31,7 +33,7 @@ export class EventCreateComponent implements OnInit {
   readonly logService = inject(LogService);
 
   /* Variables */
-  eventId = signal<string | null>(null);
+  event = signal<Doc<Event> | undefined>(undefined);
   imagePreview = signal<string | ArrayBuffer | undefined>(undefined);
   imageFile = signal<File | undefined>(undefined);
 
@@ -66,22 +68,22 @@ export class EventCreateComponent implements OnInit {
   ngOnInit(): void {
     // Recupera l'ID dalla route
     this.route.paramMap.subscribe(async (params) => {
-      const eventId = params.get('id');
-      this.eventId.set(params.get('id'));
+      const eventId = params.get('eventId');
       if (!eventId) return;
 
       /* Info generali */
-      const { props } = await this.eventService.getEventById(eventId);
+      const event = await this.eventService.getEventById(eventId);
+      this.event.set(event);
       this.eventForm.setValue({
-        name: props.name,
-        description: props.description,
-        location: props.location,
-        startDate: formatDate(props.startDate, 'yyyy-MM-dd HH:mm:ss', 'it'),
-        endDate: formatDate(props.endDate, 'yyyy-MM-dd HH:mm:ss', 'it')
+        name: event.props.name,
+        description: event.props.description,
+        location: event.props.location,
+        startDate: formatDate(event.props.startDate, 'yyyy-MM-dd HH:mm:ss', 'it'),
+        endDate: formatDate(event.props.endDate, 'yyyy-MM-dd HH:mm:ss', 'it')
       });
 
       /* Immagine */
-      this.imagePreview.set(props.imageUrl);
+      this.imagePreview.set(event.props.imageUrl);
     });
   }
 
@@ -89,10 +91,10 @@ export class EventCreateComponent implements OnInit {
   protected async addOrUpdateEvent(): Promise<void> {
     if (this.eventForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
 
-    const eventId = this.eventId();
+    const event = this.event();
     const form = this.eventForm.getRawValue();
-    if (eventId) {
-      await this.eventService.updateEvent(eventId, form);
+    if (event) {
+      await this.eventService.updateEvent(event.id, form);
     } else {
       /* Creo id documento */
       const eventId = this.firebaseDocumentService.createDocId(COL_EVENTS);
