@@ -12,7 +12,7 @@ import { RouterLinkActive, RouterModule } from '@angular/router';
     <nav class="fixed bottom-0 left-0 h-16 w-full bg-surface p-2 text-gray-400">
       <ul class="flex h-full items-center gap-2">
         @for (item of menu(); track item.id) {
-          <li class="grow">
+          <li class="flex-1">
             <a
               [routerLink]="item.path"
               routerLinkActive="text-white"

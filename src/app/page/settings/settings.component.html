@@ -10,14 +10,14 @@
 
 <ul class="m-auto flex h-fit w-full flex-col divide-y divide-slate-700 rounded-lg bg-surface p-4 text-on-surface">
   <li class="pb-4 hover:text-gray-400">
-    <a [routerLink]="'/user/settings/profile'" class="flex gap-4">
+    <a [routerLink]="['./profile']" class="flex gap-4">
       <fa-icon class="" [icon]="ICON_USER"></fa-icon>
       <span class="">Profilo</span>
     </a>
   </li>
 
   <li class="pt-4 hover:text-gray-400">
-    <a [routerLink]="'/login'" class="flex gap-4" (click)="firebaseService.logout()">
+    <a [routerLink]="['/login']" class="flex gap-4" (click)="firebaseService.logout()">
       <fa-icon class="" [icon]="ICON_LOGOUT"></fa-icon>
       <span class="">Logout</span>
     </a>

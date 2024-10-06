@@ -78,7 +78,7 @@ export const routes: Routes = [
         children: [
           {
             path: '',
-            loadComponent: () => import('../page/user/settings/settings.component').then((m) => m.SettingsComponent)
+            loadComponent: () => import('../page/settings/settings.component').then((m) => m.SettingsComponent)
           },
           {
             path: 'profile',
@@ -118,7 +118,7 @@ export const routes: Routes = [
         children: [
           {
             path: '',
-            loadComponent: () => import('../page/user/settings/settings.component').then((m) => m.SettingsComponent)
+            loadComponent: () => import('../page/settings/settings.component').then((m) => m.SettingsComponent)
           },
           {
             path: 'profile',

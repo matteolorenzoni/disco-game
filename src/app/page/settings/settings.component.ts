@@ -3,10 +3,10 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@ang
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faCircleUser, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 import { RouterModule } from '@angular/router';
-import { Doc } from '../../../model/firebase';
-import { User } from '../../../model/user.model';
-import { UserService } from '../../../service/user.service';
-import { FirebaseService } from '../../../service/firebase.service';
+import { Doc } from '../../model/firebase';
+import { User } from '../../model/user.model';
+import { UserService } from '../../service/user.service';
+import { FirebaseService } from '../../service/firebase.service';
 
 @Component({
   selector: 'app-settings',
