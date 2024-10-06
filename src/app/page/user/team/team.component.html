@@ -12,22 +12,25 @@
         <h2 class="text-xl font-bold">Squadra</h2>
         <ul class="flex flex-col gap-1">
           @for (userGame of userGames(); track userGame.id) {
-            <li class="flex h-12 items-center gap-2 rounded bg-surface/40 p-2 shadow">
-              <div class="relative h-full">
-                @let imageUrl = userGame.props.userId | user_image_url: teamUserImageRefs() | async;
-                <img
-                  class="h-full rounded-full"
-                  [ngSrc]="imageUrl ?? 'images/profile-user.png'"
-                  width="32"
-                  height="32"
-                  priority
-                  alt="Immagine utente" />
-                @if (userGame.props.userId === userGame.props.userIdLeader) {
-                  <fa-icon class="top absolute -top-2 left-0 text-xs text-amber-300" [icon]="ICON_CROWN"></fa-icon>
-                }
-              </div>
-              <p class="text-sm">{{ userGame.props.userName }}</p>
-              <span class="ml-auto text-lg font-semibold">{{ userGame.props.points }}</span>
+            <li
+              class="h-12 cursor-pointer rounded bg-surface/25 p-2 shadow transition duration-100 ease-in hover:bg-surface/75 active:scale-975 active:bg-surface">
+              <button class="flex h-full w-full items-center gap-2" (click)="goToUserChallenges(userGame.props.userId)">
+                <div class="relative h-full">
+                  @let imageUrl = userGame.props.userId | user_image_url: teamUserImageRefs() | async;
+                  <img
+                    class="h-full rounded-full"
+                    [ngSrc]="imageUrl ?? 'images/profile-user.png'"
+                    width="32"
+                    height="32"
+                    priority
+                    alt="Immagine utente" />
+                  @if (userGame.props.userId === userGame.props.userIdLeader) {
+                    <fa-icon class="top absolute -top-2 left-0 text-xs text-amber-300" [icon]="ICON_CROWN"></fa-icon>
+                  }
+                </div>
+                <p class="text-sm">{{ userGame.props.userName }}</p>
+                <span class="ml-auto text-lg font-semibold">{{ userGame.props.points }}</span>
+              </button>
             </li>
           }
         </ul>

@@ -110,6 +110,10 @@ export const routes: Routes = [
           {
             path: ':eventId/:teamId',
             loadComponent: () => import('../page/user/team/team.component').then((m) => m.TeamComponent)
+          },
+          {
+            path: ':eventId/:teamId/:userId',
+            loadComponent: () => import('../page/user/user-team/user-team.component').then((m) => m.UserTeamComponent)
           }
         ]
       },

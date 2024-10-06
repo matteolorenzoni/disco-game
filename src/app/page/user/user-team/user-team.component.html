@@ -1,0 +1,22 @@
+@if (user(); as user) {
+  <div class="mb-12 text-on-background">
+    <h1 class="text-center text-3xl">{{ user.props.name }} {{ user.props.lastname }}</h1>
+    <h2 class="text-center text-xl">{{ user.props.username }}</h2>
+  </div>
+}
+
+<ul class="grid grid-cols-[repeat(auto-fill,minmax(6rem,1fr))] gap-4">
+  @for (eventChallenge of eventChallenges(); track eventChallenge.id) {
+    <li
+      class="shadwo flex flex-col items-center gap-2 rounded border-4 border-slate-700 bg-surface p-2 text-on-surface">
+      <img
+        class="h-20 w-20"
+        [src]="'images/challenge/' + eventChallenge.props.challengeType + '.png'"
+        [alt]="'Immagine ' + eventChallenge.props.challengeName" />
+      <div class="flex grow flex-col items-center justify-evenly gap-1">
+        <p class="text-center text-xs">{{ eventChallenge.props.challengeName }}</p>
+        <p class="text-center text-xs">85</p>
+      </div>
+    </li>
+  }
+</ul>

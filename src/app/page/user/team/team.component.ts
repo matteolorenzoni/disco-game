@@ -1,6 +1,6 @@
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { StorageReference } from 'firebase/storage';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faCrown } from '@fortawesome/free-solid-svg-icons';
@@ -26,6 +26,7 @@ const COL_USERS = environment.collection.USERS;
 })
 export class TeamComponent implements OnInit {
   /* Services */
+  readonly router = inject(Router);
   readonly route = inject(ActivatedRoute);
   readonly firebaseService = inject(FirebaseService);
   readonly storageService = inject(StorageService);
@@ -61,5 +62,10 @@ export class TeamComponent implements OnInit {
       this.userGamesActive.set(userGames.find((x) => x.props.userId === userId));
       this.teamUserImageRefs.set(userImageRefs.items);
     });
+  }
+
+  /* ---------------- Methods ---------------- */
+  protected goToUserChallenges(userId: string) {
+    this.router.navigate([`./`, userId], { relativeTo: this.route });
   }
 }
