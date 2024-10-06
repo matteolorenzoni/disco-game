@@ -21,6 +21,9 @@ module.exports = {
         'on-background': '#E4E4EB' /* Colore del testo o delle icone sopra lo sfondo 'background' */,
         'on-surface': '#E4E4EB' /* Colore del testo o delle icone sopra superfici 'surface' */,
         'on-error': '#FFFFFF' /* Colore del testo o delle icone sopra elementi con sfondo 'error' */
+      },
+      scale: {
+        975: '0.975'
       }
     }
   },
