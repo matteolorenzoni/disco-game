@@ -2,13 +2,13 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment.development';
 import { Doc } from '../../model/firebase';
 import { FromMap, UserModel } from '../../model/form.model';
 import { User } from '../../model/user.model';
 import { FirebaseService } from '../../service/firebase.service';
 import { StorageService } from '../../service/storage.service';
 import { UserService } from '../../service/user.service';
-import { environment } from '../../../environments/environment.development';
 
 const COL_USERS = environment.collection.USERS;
 
@@ -35,8 +35,8 @@ export class SignUpComponent implements OnInit {
   /* Form */
   signUpForm = new FormGroup<FromMap<UserModel>>({
     name: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    lastname: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    username: new FormControl('', {
+    lastName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    userName: new FormControl('', {
       nonNullable: true,
       validators: [Validators.required, Validators.minLength(6)]
     }),
@@ -67,8 +67,8 @@ export class SignUpComponent implements OnInit {
     if (user) {
       this.signUpForm.setValue({
         name: user.props.name,
-        lastname: user.props.lastname,
-        username: user.props.username,
+        lastName: user.props.lastName,
+        userName: user.props.userName,
         email: user.props.email,
         password: '******'
       });
@@ -87,8 +87,8 @@ export class SignUpComponent implements OnInit {
   }
 
   private async addUser(userModelForm: UserModel): Promise<void> {
-    /* Controllo username univoco */
-    const checkUsername = await this.userService.checkUniqUsername(userModelForm.username);
+    /* Controllo userName univoco */
+    const checkUsername = await this.userService.checkUniqUsername(userModelForm.userName);
     if (!checkUsername) return;
 
     /* Creazione utente */

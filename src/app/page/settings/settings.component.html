@@ -5,7 +5,7 @@
     [src]="user()?.props?.imageUrl ?? '/images/profile-user.png'"
     alt="Immagine utente"
     class="h-32 w-32 rounded-full border-2 border-on-background object-cover object-center shadow-md" />
-  <p>{{ user()?.props?.name }} {{ user()?.props?.lastname }}</p>
+  <p>{{ user()?.props?.name }} {{ user()?.props?.lastName }}</p>
 </div>
 
 <ul class="m-auto flex h-fit w-full flex-col divide-y divide-slate-700 rounded-lg bg-surface p-4 text-on-surface">
@@ -17,7 +17,7 @@
   </li>
 
   <li class="pt-4 hover:text-gray-400">
-    <a [routerLink]="['/login']" class="flex gap-4" (click)="firebaseService.logout()">
+    <a [routerLink]="['.']" class="flex gap-4" (click)="firebaseService.logout()">
       <fa-icon class="" [icon]="ICON_LOGOUT"></fa-icon>
       <span class="">Logout</span>
     </a>

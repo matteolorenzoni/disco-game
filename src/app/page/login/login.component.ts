@@ -86,7 +86,7 @@ export class LoginComponent implements OnInit {
     }
 
     // Log
-    this.logService.addLogConfirm(`Benvenuto ${user.props.username}`);
+    this.logService.addLogConfirm(`Benvenuto ${user.props.userName}`);
   }
 
   protected resetPassword(): void {

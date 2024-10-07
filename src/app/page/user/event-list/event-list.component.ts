@@ -5,16 +5,17 @@ import { Router } from '@angular/router';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faCrown, faPeopleGroup } from '@fortawesome/free-solid-svg-icons';
-import { Event } from '../../../model/event.model';
 import { Doc } from '../../../model/firebase';
+import { Event } from '../../../model/event.model';
 import { FindTeamModel, FromMap, NewTeamModel } from '../../../model/form.model';
+import { UserEventTeam } from '../../../model/user-event-team.model';
+import { CheckExistTeamPipe } from '../../../pipe/check-exist-team.pipe';
 import { EventService } from '../../../service/event.service';
 import { FirebaseService } from '../../../service/firebase.service';
 import { LogService } from '../../../service/log.service';
 import { TeamService } from '../../../service/team.service';
+import { UserEventTeamService } from '../../../service/user-event-team.service';
 import { UserService } from '../../../service/user.service';
-import { UserGameService } from '../../../service/user-game.service';
-import { CheckExistTeamPipe } from '../../../pipe/check-exist-team.pipe';
 
 @Component({
   selector: 'app-event-list',
@@ -42,12 +43,13 @@ export class EventListComponent implements OnInit {
   readonly userService = inject(UserService);
   readonly eventService = inject(EventService);
   readonly teamService = inject(TeamService);
-  readonly userGameService = inject(UserGameService);
+  readonly userEventTeamService = inject(UserEventTeamService);
   readonly logService = inject(LogService);
 
   /* Variables */
   events = signal<Doc<Event>[]>([]);
   eventIdSelected = signal<string | undefined>(undefined);
+  userEventTeams = signal<Doc<UserEventTeam>[]>([]);
   newTeamModalIsOpen = signal<boolean>(false);
   findTeamModalIsOpen = signal<boolean>(false);
 
@@ -75,61 +77,89 @@ export class EventListComponent implements OnInit {
 
   /* -------------------- Lifecycle hooks -------------------- */
   async ngOnInit(): Promise<void> {
-    const events = await this.eventService.getEvents();
+    const user = await this.userService.user();
+    if (!user) throw new Error('retry', { cause: 'retry' });
+
+    /* Event e UserEventTeams */
+    const [events, userEventTeams] = await Promise.all([
+      this.eventService.getEvents(),
+      this.userEventTeamService.getUserEventTeamByProp('userId', user.id)
+    ]);
     this.events.set(events);
     this.eventIdSelected.set(events[0].id);
+    this.userEventTeams.set(userEventTeams);
   }
 
   /* -------------------- Methods: firebase -------------------- */
   protected async addTeam(): Promise<void> {
-    const userId = this.firebaseService.userFirebase()?.uid;
+    const user = await this.userService.user();
     const eventId = this.eventIdSelected();
-    if (!userId || !eventId) throw new Error('retry', { cause: 'retry' });
+    if (!user || !eventId) throw new Error('retry', { cause: 'retry' });
 
     /* Aggiungo Team al DB */
     const form = this.newTeamForm.getRawValue();
-    const code = await this.teamService.addTeam(userId, eventId, form);
+    const { teamId, teamCode } = await this.teamService.addTeam(user.id, eventId, form);
+
+    /* Aggiungo UserEventTeam al DB */
+    const userEventTeamRef = await this.userEventTeamService.addUserEventTeam(
+      user.id,
+      eventId,
+      teamId,
+      user.id,
+      user.props.userName,
+      form.name
+    );
+
+    /* Aggiorno User (prop: userEventTeamRefs) */
+    await this.userService.updateUserEventTeam(user.id, userEventTeamRef.id);
+
+    /* Aggiorno Event (prop: userEventTeamRefs) */
+    await this.eventService.updateUserEventTeam(eventId, userEventTeamRef.id);
+
+    /* Aggiorno Team (prop: userEventTeamRefs) */
+    await this.teamService.updateUserEventTeam(teamId, userEventTeamRef.id);
 
     /* Log */
-    navigator.clipboard.writeText(code);
-    this.logService.addLogConfirm(`Squadra creata! Copiato codice ${code}`);
+    navigator.clipboard.writeText(teamCode);
+    this.logService.addLogConfirm(`Squadra creata! Codice ${teamCode} negli appunti`);
 
-    /* reset form */
+    /* Chiude modal e reset form */
     this.resetModalsAndForms();
   }
 
   protected async findTeam(): Promise<void> {
     const user = await this.userService.user();
-    const userId = user?.id;
-    const userName = user?.props.username;
     const eventId = this.eventIdSelected();
-    if (!userId || !userName || !eventId) throw new Error('retry', { cause: 'retry' });
+    if (!user || !eventId) throw new Error('retry', { cause: 'retry' });
 
     const form = this.findTeamForm.getRawValue();
     const team = await this.teamService.getTeamByCode(form.code);
     if (!team) {
-      this.logService.addLogError(this.firebaseService.userFirebase()?.uid, 'Nessuna squadra trovata');
+      this.logService.addLogError(user.id, 'Nessuna squadra trovata');
       return;
     }
 
-    /* Aggiungo UserGame al DB */
-    const userGameRef = await this.userGameService.addUserGame(
-      userId,
-      userName,
-      team.props.userId,
+    /* Aggiungo UserEventTeam al DB */
+    const userEventTeamRef = await this.userEventTeamService.addUserEventTeam(
+      user.id,
       eventId,
       team.id,
+      team.props.leaderId,
+      user.props.userName,
       team.props.name
     );
 
-    /* Aggiorno User (prop: games) */
-    await this.userService.updateUserGames(userId, userGameRef.id);
+    /* Aggiorno User (prop: userEventTeamRefs) */
+    await this.userService.updateUserEventTeam(user.id, userEventTeamRef.id);
 
-    /* Aggiorno Team (prop: members) */
-    await this.teamService.updateTeamMembers(team.id, userId);
+    /* Aggiorno Event (prop: userEventTeamRefs) */
+    await this.eventService.updateUserEventTeam(eventId, userEventTeamRef.id);
+
+    /* Aggiorno Team (prop: userEventTeamRefs) */
+    await this.teamService.updateUserEventTeam(team.id, userEventTeamRef.id);
 
     /* Log */
-    this.logService.addLogConfirm('Ora fa parte della squadra, buona fortuna');
+    this.logService.addLogConfirm('Ora fai parte della squadra, buona fortuna');
 
     /* reset form */
     this.resetModalsAndForms();

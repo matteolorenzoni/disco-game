@@ -7,10 +7,10 @@ import { Team, TeamStatus } from '../model/team.model';
 import { Doc } from '../model/firebase';
 import { teamConverter } from '../model/converter';
 import { UserService } from './user.service';
-import { UserGameService } from './user-game.service';
+import { UserEventTeamService } from './user-event-team.service';
 
 const COL_TEAMS = environment.collection.TEAMS;
-const COL_USERS = environment.collection.USERS;
+const COL_USER_EVENT_TEAM = environment.collection.USER_EVENT_TEAMS;
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +19,7 @@ export class TeamService {
   /* Services */
   readonly documentService = inject(FirebaseDocumentService);
   readonly userService = inject(UserService);
-  readonly userGameService = inject(UserGameService);
+  readonly userEventTeamService = inject(UserEventTeamService);
   readonly logService = inject(LogService);
 
   /* --------------------------- Read ---------------------------*/
@@ -32,16 +32,22 @@ export class TeamService {
     return teams[0];
   }
 
+  // TODO: vedere se aggiungere eventId a Team
   public async getTeamsByEvent(eventId: string): Promise<Doc<Team>[]> {
-    return await this.documentService.getActiveDocumentsByProp<Team>(COL_TEAMS, { eventId }, teamConverter);
+    const userEventTeams = await this.userEventTeamService.getUserEventTeamByProp('eventId', eventId);
+    const teamIds = userEventTeams.map((x) => x.props.teamId);
+    return await Promise.all(teamIds.map((x) => this.getTeamById(x)));
   }
 
   /* --------------------------- Create ---------------------------*/
-  public async addTeam(userId: string, eventId: string, form: NewTeamModel): Promise<string> {
-    const userName = (await this.userService.user())?.props.username;
-    if (!userName) throw new Error('retry', { cause: 'retry' });
+  public async addTeam(
+    userId: string,
+    eventId: string,
+    teamForm: NewTeamModel
+  ): Promise<{ teamId: string; teamCode: string }> {
+    const user = await this.userService.user();
+    if (!user) throw new Error('retry', { cause: 'retry' });
 
-    /* Controllo se nome è univoco */
     const teamsDocs = await this.getTeamsByEvent(eventId);
     const { names, codes } = teamsDocs.reduce(
       (acc, cur) => ({
@@ -50,11 +56,13 @@ export class TeamService {
       }),
       { names: [] as string[], codes: [] as string[] }
     );
-    if (names.includes(form.name.toLowerCase())) {
+
+    /* Check nome univoco */
+    if (names.includes(teamForm.name.toLowerCase())) {
       throw new Error('teamNameNotAvailable', { cause: 'teamNameNotAvailable' });
     }
 
-    /* Generazione un codice univoco */
+    /* Check codice univoco */
     if (codes.length > 2_000_000) {
       throw new Error('tooManyTeams', { cause: 'tooManyTeams' });
     }
@@ -65,35 +73,18 @@ export class TeamService {
 
     /* Aggiungo evento al DB */
     const teamRef = await this.documentService.addDocument<Team>(COL_TEAMS, {
-      ...form,
-      userId,
-      eventId,
+      leaderId: userId,
+      name: teamForm.name,
       description: '',
       code,
       status: TeamStatus.ACTIVE,
-      members: [],
+      userEventTeamRefs: [],
       isActive: true,
       createdAt: new Date(),
       updatedAt: new Date()
     });
 
-    /* Aggiungo UserGame al DB */
-    const userGameRef = await this.userGameService.addUserGame(
-      userId,
-      userName,
-      userId,
-      eventId,
-      teamRef.id,
-      form.name
-    );
-
-    /* Aggiorno User (prop: games) */
-    await this.userService.updateUserGames(userId, userGameRef.id);
-
-    /* Aggiorno Team (prop: members) */
-    await this.updateTeamMembers(teamRef.id, userId);
-
-    return code;
+    return { teamId: teamRef.id, teamCode: code };
   }
 
   /* --------------------------- Update ---------------------------*/
@@ -105,12 +96,12 @@ export class TeamService {
     this.logService.addLogConfirm('Squadra aggiornata correttamente');
   }
 
-  public async updateTeamMembers(teamId: string, userId: string): Promise<void> {
+  public async updateUserEventTeam(eventId: string, userEventTeamId: string): Promise<void> {
     await this.documentService.updateArrayPropReference<Team>(
       'add',
-      'members',
-      `${COL_TEAMS}/${teamId}`,
-      `${COL_USERS}/${userId}`
+      'userEventTeamRefs',
+      `${COL_TEAMS}/${eventId}`,
+      `${COL_USER_EVENT_TEAM}/${userEventTeamId}`
     );
   }
 

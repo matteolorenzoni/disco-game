@@ -1,21 +1,21 @@
 import { DocumentReference } from 'firebase/firestore';
-import { UserGame } from './user-game.model';
+import { UserEventTeam } from './user-event-team.model';
 
 export type User = {
   name: string; // Nome dell'utente
-  lastname: string; // Cognome dell'utente
-  username: string; // Nome utente o nickname
-  email: string; // Indirizzo email dell'utente
-  // birthDate: Date; // Data di nascita dell'utente
-  imageUrl: string | null; // URL dell'immagine del profilo, null se non presente
-  role: UserRole; // Ruolo dell'utente (USER o ADMIN)
-  games: DocumentReference<UserGame>[]; // Elenco delle squadre create o a cui l'utente ha partecipato nel tempo
-  isActive: boolean; // Indica se l'utente è attivo (true) o se è stato disattivato (false)
-  createdAt: Date; // Data di creazione dell'account dell'utente
-  updatedAt: Date; // Data dell'ultimo aggiornamento delle informazioni dell'account
+  lastName: string; // Cognome dell'utente
+  userName: string; // Nickname scelto dall'utente per identificarsi
+  email: string; // Indirizzo email dell'utente, utilizzato per la registrazione e la comunicazione
+  imageUrl: string | null; // URL dell'immagine del profilo dell'utente; può essere null se non è stato caricato nessun profilo
+  role: UserRole; // Ruolo dell'utente nel sistema; determina i permessi e le funzionalità accessibili (USER o ADMIN)
+  userEventTeamRefs: DocumentReference<UserEventTeam>[]; // Array di riferimenti ai documenti delle squadre a cui l'utente ha partecipato o creato nel tempo
+  isActive: boolean; // Flag per gestire la soft delete
+  createdAt: Date; // Data e ora di creazione dell'account dell'utente
+  updatedAt: Date; // Data e ora dell'ultimo aggiornamento delle informazioni dell'account
 };
 
+// Enumerazione che definisce i possibili ruoli degli utenti nel sistema
 export enum UserRole {
-  USER = 'USER', // Ruolo per gli utenti normali
-  ADMIN = 'ADMIN' // Ruolo per gli amministratori
+  USER = 'USER', // Ruolo standard per gli utenti normali, con accesso limitato
+  ADMIN = 'ADMIN' // Ruolo per gli amministratori, con accesso a funzionalità avanzate di gestione
 }

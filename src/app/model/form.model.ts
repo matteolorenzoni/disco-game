@@ -13,8 +13,8 @@ export type LoginModel = {
 
 export type UserModel = {
   name: string;
-  lastname: string;
-  username: string;
+  lastName: string;
+  userName: string;
   email: string;
   password: string;
   // birthDate: string;

@@ -12,7 +12,7 @@
                 {{ event.props.description }}
               </p>
               <p class="rounded-full bg-primary px-1 text-xs">
-                Sfide: <span class="font-bold">{{ event.props.challenges.length }}</span>
+                Sfide: <span class="font-bold">{{ event.props.eventChallengeRefs.length }}</span>
               </p>
               <div class="flex flex-col items-center">
                 <p class="text-xs font-medium text-gray-300">{{ event.props.location }}</p>
@@ -23,11 +23,11 @@
             </div>
           </div>
           <div class="flex h-20 flex-col justify-end gap-2">
-            @if (eventIdSelected() | check_exist_team; as userGame) {
+            @if (eventIdSelected() | check_exist_team: userEventTeams(); as userGame) {
               <div>
                 <p class="text-center text-xxs uppercase text-amber-300/40">
                   Squadra
-                  @if (firebaseService.userFirebase()?.uid === userGame.props.userIdLeader) {
+                  @if (firebaseService.userFirebase()?.uid === userGame.props.leaderId) {
                     <fa-icon [icon]="ICON_CROWN"></fa-icon>
                   }
                 </p>

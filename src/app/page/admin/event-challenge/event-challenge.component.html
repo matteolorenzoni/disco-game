@@ -158,7 +158,7 @@
             type="submit"
             class="mt-8 inline-block w-full rounded-full bg-primary px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-on-primary shadow-primary-light transition duration-150 ease-in-out hover:bg-primary-light active:bg-primary-dark disabled:cursor-not-allowed disabled:bg-primary/30 disabled:text-primary/50"
             [disabled]="eventChallengeForm.invalid">
-            {{ eventChallenge() ? 'Aggiorna' : 'Aggiungi' }}
+            {{ eventChallengeActive() ? 'Aggiorna' : 'Aggiungi' }}
           </button>
         </form>
       </div>

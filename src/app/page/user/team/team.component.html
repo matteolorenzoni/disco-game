@@ -1,22 +1,24 @@
 @if (event(); as event) {
-  @if (userGamesActive(); as userGamesActive) {
+  @if (userEventTeamActive(); as userEventTeamActive) {
     <div class="flex w-full flex-col gap-6 text-on-background">
       <div class="overflow-hidden rounded-lg shadow-lg">
         <img class="aspect-video h-auto w-full" [src]="event.props.imageUrl" alt="Immagine evento" />
         <div class="bg-surface p-2">
-          <p class="text-center text-lg font-semibold">{{ userGamesActive.props.teamName }}</p>
+          <p class="text-center text-lg font-semibold">{{ userEventTeamActive.props.teamName }}</p>
         </div>
       </div>
 
       <div class="flex flex-col gap-2">
         <h2 class="text-xl font-bold">Squadra</h2>
         <ul class="flex flex-col gap-1">
-          @for (userGame of userGames(); track userGame.id) {
+          @for (userEventTeam of userEventTeams(); track userEventTeam.id) {
             <li
               class="h-12 cursor-pointer rounded bg-surface/25 p-2 shadow transition duration-100 ease-in hover:bg-surface/75 active:scale-975 active:bg-surface">
-              <button class="flex h-full w-full items-center gap-2" (click)="goToUserChallenges(userGame.props.userId)">
+              <button
+                class="flex h-full w-full items-center gap-2"
+                (click)="goToUserChallenges(userEventTeam.props.userId)">
                 <div class="relative h-full">
-                  @let imageUrl = userGame.props.userId | user_image_url: teamUserImageRefs() | async;
+                  @let imageUrl = userEventTeam.props.userId | user_image_url: teamUserImageRefs() | async;
                   <img
                     class="h-full rounded-full"
                     [ngSrc]="imageUrl ?? 'images/profile-user.png'"
@@ -24,12 +26,12 @@
                     height="32"
                     priority
                     alt="Immagine utente" />
-                  @if (userGame.props.userId === userGame.props.userIdLeader) {
+                  @if (userEventTeam.props.userId === userEventTeam.props.leaderId) {
                     <fa-icon class="top absolute -top-2 left-0 text-xs text-amber-300" [icon]="ICON_CROWN"></fa-icon>
                   }
                 </div>
-                <p class="text-sm">{{ userGame.props.userName }}</p>
-                <span class="ml-auto text-lg font-semibold">{{ userGame.props.points }}</span>
+                <p class="text-sm">{{ userEventTeam.props.userName }}</p>
+                <span class="ml-auto text-lg font-semibold">{{ userEventTeam.props.totalPoints }}</span>
               </button>
             </li>
           }
@@ -40,7 +42,7 @@
         <h2 class="text-xl font-bold">Io</h2>
         <div class="flex h-12 w-full items-center gap-2 rounded bg-surface/40 p-2 shadow">
           <div class="h-full overflow-hidden rounded-full">
-            @let imageUrl = userGamesActive.props.userId | user_image_url: teamUserImageRefs() | async;
+            @let imageUrl = userEventTeamActive.props.userId | user_image_url: teamUserImageRefs() | async;
             <img
               class="h-full"
               [ngSrc]="imageUrl ?? 'images/profile-user.png'"
@@ -49,8 +51,8 @@
               priority
               alt="Immagine utente" />
           </div>
-          <p>{{ userGamesActive.props.userName }}</p>
-          <span class="ml-auto">{{ userGamesActive.props.points }}</span>
+          <p>{{ userEventTeamActive.props.userName }}</p>
+          <span class="ml-auto">{{ userEventTeamActive.props.totalPoints }}</span>
         </div>
       </div>
     </div>

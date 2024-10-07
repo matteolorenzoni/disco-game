@@ -1,7 +1,7 @@
 import { CommonModule, formatDate } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import {
   faCalendar,
@@ -17,15 +17,16 @@ import {
   faStopwatch20,
   faTrash
 } from '@fortawesome/free-solid-svg-icons';
-import { EventChallengeService } from '../../../service/event-challenge.service';
-import { ChallengeService } from '../../../service/challenge.service';
-import { Doc } from '../../../model/firebase';
-import { ChallengeStatus, EventChallenge } from '../../../model/event-challenge.model';
-import { EventChallengeModel, FromMap } from '../../../model/form.model';
 import { Challenge } from '../../../model/challenge.model';
+import { Doc } from '../../../model/firebase';
+import { EventChallenge, ChallengeStatus } from '../../../model/event-challenge.model';
+import { EventChallengeModel, FromMap } from '../../../model/form.model';
 import { endDateValidator } from '../../../util/utils';
-import EventChallengeStatus from './event-challenge-status.config.json';
+import { ChallengeService } from '../../../service/challenge.service';
+import { EventChallengeService } from '../../../service/event-challenge.service';
+import { EventService } from '../../../service/event.service';
 import { FvFloatingButtonComponent } from '../../../components/fv-floating-button.component';
+import EventChallengeStatus from './event-challenge-status.config.json';
 
 export type SelectOption = {
   label: string;
@@ -43,14 +44,15 @@ export type SelectOption = {
 export class EventChallengeComponent implements OnInit {
   /* Services */
   readonly route = inject(ActivatedRoute);
+  readonly eventService = inject(EventService);
   readonly challengeService = inject(ChallengeService);
   readonly eventChallengeService = inject(EventChallengeService);
 
   /* Variables */
   eventId = signal<string | undefined>(undefined);
   challenges = signal<Doc<Challenge>[]>([]);
-  eventChallenge = signal<Doc<EventChallenge> | undefined>(undefined);
   eventChallenges = signal<Doc<EventChallenge>[]>([]);
+  eventChallengeActive = signal<Doc<EventChallenge> | undefined>(undefined);
   formModalIsOpen = signal<boolean>(false);
 
   /* Constants */
@@ -127,21 +129,29 @@ export class EventChallengeComponent implements OnInit {
       endDate: form.endDate ? new Date(form.endDate) : null
     };
 
-    const eventChallengeId = this.eventChallenge()?.id;
-    if (!eventChallengeId) {
+    let eventChallengeActiveId = this.eventChallengeActive()?.id;
+    if (!eventChallengeActiveId) {
       /* Aggiungo a DB e aggiorno array */
-      const newEventChallengeId = await this.eventChallengeService.addEventChallenge(eventChallenge);
+      eventChallengeActiveId = await this.eventChallengeService.addEventChallenge(eventChallenge);
       this.eventChallenges.update((eventChallenges) => [
         ...eventChallenges,
-        { id: newEventChallengeId, props: eventChallenge }
+        { id: eventChallengeActiveId!, props: eventChallenge }
       ]);
     } else {
       /* Aggiorno DB e array */
-      await this.eventChallengeService.updateEventChallenge(eventChallengeId, eventChallenge);
+      await this.eventChallengeService.updateEventChallenge(eventChallengeActiveId, eventChallenge);
       this.eventChallenges.update((eventChallenges) =>
-        eventChallenges.map((x) => (x.id === eventChallengeId ? { id: eventChallengeId, props: eventChallenge } : x))
+        eventChallenges.map((x) =>
+          x.id === eventChallengeActiveId ? { id: eventChallengeActiveId, props: eventChallenge } : x
+        )
       );
     }
+
+    /* Aggiorno Event (prop: userEventTeamRefs) */
+    await this.eventService.updateEventChallenge(eventId, eventChallengeActiveId);
+
+    /* Aggiorno Challenge (prop: userEventTeamRefs) */
+    await this.challengeService.updateEventChallenge(form.challengeId, eventChallengeActiveId);
 
     /* Chiudo il modal e resetto il form */
     this.formModalIsOpen.set(false);
@@ -152,7 +162,7 @@ export class EventChallengeComponent implements OnInit {
   protected onBackdropClick(event: MouseEvent): void {
     const clickedElement = event.target as HTMLElement;
     if (clickedElement.dataset['dialogBackdrop'] === 'sign-in-modal') {
-      this.eventChallenge.set(undefined);
+      this.eventChallengeActive.set(undefined);
       this.eventChallengeForm.reset();
       this.formModalIsOpen.set(false);
     }
@@ -167,7 +177,7 @@ export class EventChallengeComponent implements OnInit {
     if (!eventChallengeActive) throw new Error('retry', { cause: 'retry' });
 
     /* Setto l'id selezionato (add or update) */
-    this.eventChallenge.set(eventChallengeActive);
+    this.eventChallengeActive.set(eventChallengeActive);
 
     /* Aggiorno il form */
     const { startDate, endDate } = eventChallengeActive.props;

@@ -8,6 +8,7 @@ import { Challenge } from '../model/challenge.model';
 import { Doc } from '../model/firebase';
 
 const COL_CHALLENGES = environment.collection.CHALLENGES;
+const COL_EVENT_CHALLENGES = environment.collection.EVENT_CHALLENGES;
 
 @Injectable({
   providedIn: 'root'
@@ -29,6 +30,7 @@ export class ChallengeService {
   public async addChallenge(form: ChallengeModel): Promise<void> {
     await this.documentService.addDocument<Challenge>(COL_CHALLENGES, {
       ...form,
+      eventChallengeRefs: [],
       isActive: true,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -43,5 +45,14 @@ export class ChallengeService {
       updatedAt: new Date()
     });
     this.logService.addLogConfirm('Sfida aggiornata correttamente');
+  }
+
+  public async updateEventChallenge(eventId: string, eventChallengeId: string): Promise<void> {
+    await this.documentService.updateArrayPropReference<Challenge>(
+      'add',
+      'eventChallengeRefs',
+      `${COL_CHALLENGES}/${eventId}`,
+      `${COL_EVENT_CHALLENGES}/${eventChallengeId}`
+    );
   }
 }
