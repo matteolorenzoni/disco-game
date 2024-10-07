@@ -1,6 +1,5 @@
 import { inject, Injectable } from '@angular/core';
 import { FirebaseDocumentService } from './firebase-document.service';
-import { LogService } from './log.service';
 import { EventChallenge } from '../model/event-challenge.model';
 import { environment } from '../../environments/environment.development';
 import { eventChallengeConverter } from '../model/converter';
@@ -14,7 +13,6 @@ const COL_EVENT_CHALLENGES = environment.collection.EVENT_CHALLENGES;
 export class EventChallengeService {
   /* Services */
   readonly documentService = inject(FirebaseDocumentService);
-  readonly logService = inject(LogService);
 
   /* --------------------------- Read ---------------------------*/
   public async getEventChallengesByEventId(eventId: string): Promise<Doc<EventChallenge>[]> {
@@ -28,7 +26,6 @@ export class EventChallengeService {
   /* --------------------------- Create ---------------------------*/
   public async addEventChallenge(newEventChallenge: EventChallenge): Promise<string> {
     const docRef = await this.documentService.addDocument<EventChallenge>(COL_EVENT_CHALLENGES, newEventChallenge);
-    this.logService.addLogConfirm('Sfida aggiunta');
     return docRef.id;
   }
 
@@ -39,6 +36,5 @@ export class EventChallengeService {
       startDate: form.startDate ? new Date(form.startDate) : null,
       endDate: form.endDate ? new Date(form.endDate) : null
     });
-    this.logService.addLogConfirm('Sfida aggiornata');
   }
 }

@@ -41,7 +41,7 @@ export class EventService {
       createdAt: new Date(),
       updatedAt: new Date()
     });
-    this.logService.addLogConfirm('Evento aggiunto correttamente');
+    this.logService.addLogConfirm('Evento aggiunto');
     return docRef.id;
   }
 
@@ -53,7 +53,7 @@ export class EventService {
       endDate: new Date(form.endDate),
       updatedAt: new Date()
     });
-    this.logService.addLogConfirm('Evento aggiornato correttamente');
+    this.logService.addLogConfirm('Evento aggiornato');
   }
 
   public async updateEventImageUrl(eventId: string, imageUrl: string): Promise<void> {
@@ -61,7 +61,6 @@ export class EventService {
       imageUrl,
       updatedAt: new Date()
     });
-    this.logService.addLogConfirm('Evento aggiornato correttamente');
   }
 
   public async updateUserEventTeam(eventId: string, userEventTeamId: string): Promise<void> {

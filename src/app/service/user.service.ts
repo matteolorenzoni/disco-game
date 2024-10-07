@@ -55,7 +55,7 @@ export class UserService {
       createdAt: new Date(),
       updatedAt: new Date()
     });
-    this.logService.addLogConfirm('Utente registrato correttamente');
+    this.logService.addLogConfirm('Utente registrato');
   }
 
   /* --------------------------- Update ---------------------------*/
@@ -67,7 +67,7 @@ export class UserService {
     const form: Partial<User> = { ...userModelForm, updatedAt: new Date() };
     if (imageUrl !== undefined) form.imageUrl = imageUrl;
     await this.documentService.updateDocument<User>(userId, COL_USERS, form);
-    this.logService.addLogConfirm('Utente aggiornato correttamente');
+    this.logService.addLogConfirm('Utente aggiornato');
   }
 
   public async updateUserEventTeam(userId: string, userEventTeamId: string): Promise<void> {

@@ -27,6 +27,7 @@ import { EventChallengeService } from '../../../service/event-challenge.service'
 import { EventService } from '../../../service/event.service';
 import { FvFloatingButtonComponent } from '../../../components/fv-floating-button.component';
 import EventChallengeStatus from './event-challenge-status.config.json';
+import { LogService } from '../../../service/log.service';
 
 export type SelectOption = {
   label: string;
@@ -47,6 +48,7 @@ export class EventChallengeComponent implements OnInit {
   readonly eventService = inject(EventService);
   readonly challengeService = inject(ChallengeService);
   readonly eventChallengeService = inject(EventChallengeService);
+  readonly logService = inject(LogService);
 
   /* Variables */
   eventId = signal<string | undefined>(undefined);
@@ -152,6 +154,9 @@ export class EventChallengeComponent implements OnInit {
 
     /* Aggiorno Challenge (prop: userEventTeamRefs) */
     await this.challengeService.updateEventChallenge(form.challengeId, eventChallengeActiveId);
+
+    /* Log */
+    this.logService.addLogConfirm(this.eventChallengeActive() ? 'Sfida aggiornata' : 'Sfida aggiunta');
 
     /* Chiudo il modal e resetto il form */
     this.formModalIsOpen.set(false);

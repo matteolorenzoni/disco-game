@@ -88,7 +88,7 @@ export class TeamService {
       ...form,
       updatedAt: new Date()
     });
-    this.logService.addLogConfirm('Squadra aggiornata correttamente');
+    this.logService.addLogConfirm('Squadra aggiornata');
   }
 
   public async updateUserEventTeam(eventId: string, userEventTeamId: string): Promise<void> {

@@ -35,7 +35,7 @@ export class ChallengeService {
       createdAt: new Date(),
       updatedAt: new Date()
     });
-    this.logService.addLogConfirm('Sfida aggiunta correttamente');
+    this.logService.addLogConfirm('Sfida aggiunta');
   }
 
   /* --------------------------- Update ---------------------------*/
@@ -44,7 +44,7 @@ export class ChallengeService {
       ...form,
       updatedAt: new Date()
     });
-    this.logService.addLogConfirm('Sfida aggiornata correttamente');
+    this.logService.addLogConfirm('Sfida aggiornata');
   }
 
   public async updateEventChallenge(eventId: string, eventChallengeId: string): Promise<void> {
