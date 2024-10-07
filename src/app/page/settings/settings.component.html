@@ -2,10 +2,10 @@
 
 <div class="flex flex-col items-center gap-4 text-on-background">
   <img
-    [src]="user()?.props?.imageUrl ?? '/images/profile-user.png'"
+    [src]="userService.user()?.props?.imageUrl ?? '/images/profile-user.png'"
     alt="Immagine utente"
     class="h-32 w-32 rounded-full border-2 border-on-background object-cover object-center shadow-md" />
-  <p>{{ user()?.props?.name }} {{ user()?.props?.lastName }}</p>
+  <p>{{ userService.user()?.props?.name }} {{ userService.user()?.props?.lastName }}</p>
 </div>
 
 <ul class="m-auto flex h-fit w-full flex-col divide-y divide-slate-700 rounded-lg bg-surface p-4 text-on-surface">

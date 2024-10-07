@@ -62,8 +62,7 @@ export class SignUpComponent implements OnInit {
       return;
     }
 
-    const user = await this.userService.user();
-    this.user.set(user);
+    const user = this.userService.user();
     if (user) {
       this.signUpForm.setValue({
         name: user.props.name,

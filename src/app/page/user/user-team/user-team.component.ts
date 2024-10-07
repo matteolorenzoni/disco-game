@@ -39,7 +39,6 @@ export class UserTeamComponent implements OnInit {
 
       /* Ottengo tutte le sfide per questo evento */
       const eventChallenge = await this.eventChallengeService.getEventChallengesByEventId(eventId);
-      console.log(eventChallenge);
       this.eventChallenges.set(eventChallenge);
     });
   }

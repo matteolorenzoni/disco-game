@@ -77,7 +77,7 @@ export class EventListComponent implements OnInit {
 
   /* -------------------- Lifecycle hooks -------------------- */
   async ngOnInit(): Promise<void> {
-    const user = await this.userService.user();
+    const user = this.userService.user();
     if (!user) throw new Error('retry', { cause: 'retry' });
 
     /* Event e UserEventTeams */
@@ -92,7 +92,7 @@ export class EventListComponent implements OnInit {
 
   /* -------------------- Methods: firebase -------------------- */
   protected async addTeam(): Promise<void> {
-    const user = await this.userService.user();
+    const user = this.userService.user();
     const eventId = this.eventIdSelected();
     if (!user || !eventId) throw new Error('retry', { cause: 'retry' });
 
@@ -128,7 +128,7 @@ export class EventListComponent implements OnInit {
   }
 
   protected async findTeam(): Promise<void> {
-    const user = await this.userService.user();
+    const user = this.userService.user();
     const eventId = this.eventIdSelected();
     if (!user || !eventId) throw new Error('retry', { cause: 'retry' });
 

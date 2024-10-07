@@ -6,7 +6,6 @@ import { NewTeamModel } from '../model/form.model';
 import { Team, TeamStatus } from '../model/team.model';
 import { Doc } from '../model/firebase';
 import { teamConverter } from '../model/converter';
-import { UserService } from './user.service';
 import { UserEventTeamService } from './user-event-team.service';
 
 const COL_TEAMS = environment.collection.TEAMS;
@@ -18,7 +17,6 @@ const COL_USER_EVENT_TEAM = environment.collection.USER_EVENT_TEAMS;
 export class TeamService {
   /* Services */
   readonly documentService = inject(FirebaseDocumentService);
-  readonly userService = inject(UserService);
   readonly userEventTeamService = inject(UserEventTeamService);
   readonly logService = inject(LogService);
 
@@ -45,9 +43,6 @@ export class TeamService {
     eventId: string,
     teamForm: NewTeamModel
   ): Promise<{ teamId: string; teamCode: string }> {
-    const user = await this.userService.user();
-    if (!user) throw new Error('retry', { cause: 'retry' });
-
     const teamsDocs = await this.getTeamsByEvent(eventId);
     const { names, codes } = teamsDocs.reduce(
       (acc, cur) => ({

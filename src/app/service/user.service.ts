@@ -1,4 +1,4 @@
-import { computed, inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { environment } from '../../environments/environment.development';
 import { User, UserRole } from '../model/user.model';
 import { Doc } from '../model/firebase';
@@ -23,17 +23,7 @@ export class UserService {
   readonly logService = inject(LogService);
 
   /* Variables */
-  user = computed(async () => {
-    const userId = this.firebaseService.userFirebase()?.uid;
-    try {
-      // User
-      if (userId && window.location.pathname !== '/sign-up') return await this.getUserById(userId);
-      else return null;
-    } catch (error) {
-      this.logService.addLogError(userId, error);
-      throw error;
-    }
-  });
+  user = signal<Doc<User> | undefined>(undefined);
 
   /* --------------------------- Read ---------------------------*/
   public async getUserById(userId: string): Promise<Doc<User>> {
