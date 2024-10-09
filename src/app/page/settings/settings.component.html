@@ -1,6 +1,6 @@
-<h1 class="text-3xl font-bold text-on-background">Profilo</h1>
+<h1 class="mb-8 text-center text-3xl font-bold text-on-background">Impostazioni</h1>
 
-<div class="flex flex-col items-center gap-4 text-on-background">
+<div class="mb-4 flex flex-col items-center gap-4 text-on-background">
   <img
     [src]="userService.user()?.props?.imageUrl ?? '/images/profile-user.png'"
     alt="Immagine utente"
@@ -8,16 +8,16 @@
   <p>{{ userService.user()?.props?.name }} {{ userService.user()?.props?.lastName }}</p>
 </div>
 
-<ul class="m-auto flex h-fit w-full flex-col divide-y divide-slate-700 rounded-lg bg-surface p-4 text-on-surface">
-  <li class="pb-4 hover:text-gray-400">
+<ul class="m-auto flex h-fit w-full flex-col divide-y divide-neutral-700 rounded-lg bg-surface p-4 text-on-surface">
+  <li class="pb-4">
     <a [routerLink]="['./profile']" class="flex gap-4">
       <fa-icon class="" [icon]="ICON_USER"></fa-icon>
       <span class="">Profilo</span>
     </a>
   </li>
 
-  <li class="pt-4 hover:text-gray-400">
-    <a [routerLink]="['.']" class="flex gap-4" (click)="firebaseService.logout()">
+  <li class="pt-4">
+    <a [routerLink]="['/login']" class="flex gap-4" (click)="firebaseService.logout(true)">
       <fa-icon class="" [icon]="ICON_LOGOUT"></fa-icon>
       <span class="">Logout</span>
     </a>

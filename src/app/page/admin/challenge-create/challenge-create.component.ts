@@ -72,7 +72,7 @@ export class ChallengeCreateComponent implements OnInit {
       if (!challengeId) return;
 
       const { props } = await this.challengeService.getChallengeById(challengeId);
-      this.challengeForm.setValue(props);
+      this.challengeForm.patchValue(props);
     });
 
     this.challengeForm.controls.type.valueChanges.subscribe((newValue) => {
@@ -100,7 +100,7 @@ export class ChallengeCreateComponent implements OnInit {
     }
   }
 
-  protected selectChallengeTypeType(challengeType: ChallengeType): void {
+  protected selectChallengeType(challengeType: ChallengeType): void {
     this.challengeForm.controls.type.setValue(challengeType);
     this.challengeTypeModalIsOpen.set(false);
   }

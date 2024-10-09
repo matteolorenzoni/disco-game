@@ -1,30 +1,29 @@
-<h1 class="mb-6 text-3xl font-bold text-on-background">Sfide</h1>
+<h1 class="mb-8 text-3xl font-bold text-on-background">Sfide</h1>
 
 <ul class="grid grid-cols-[repeat(auto-fill,minmax(20rem,1fr))] gap-4 text-on-surface">
   @for (challenge of challenges(); track challenge.id) {
-    <li
-      class="cursor-pointer rounded bg-surface p-4 shadow transition duration-100 ease-in hover:bg-black/50 active:scale-975">
+    <li class="cursor-pointer rounded border-2 border-neutral-800 bg-surface p-4 shadow hover:bg-neutral-800">
       <button class="flex w-full flex-col gap-2" (click)="updateChallenge(challenge.id)">
         <div class="flex w-full gap-4">
           <img class="h-16 w-16" [src]="'images/challenge/' + challenge.props.type + '.png'" alt="" />
           <div class="flex w-full flex-col overflow-hidden text-start">
-            <p class="mb-auto truncate text-lg font-semibold">{{ challenge.props.name }}</p>
-            <p class="text-xs text-gray-400">Punteggio: {{ challenge.props.points }}</p>
+            <p class="mb-auto truncate text-lg font-semibold text-on-background">{{ challenge.props.name }}</p>
+            <p class="text-xs text-neutral-400">Punteggio: {{ challenge.props.points }}</p>
             <div class="flex gap-2">
-              <span class="text-xs text-gray-400">Difficoltà: </span>
+              <span class="text-xs text-neutral-400">Difficoltà: </span>
               <fv-rating [rating]="challenge.props.complexity"></fv-rating>
             </div>
           </div>
         </div>
         <div class="text-start">
           <h6 class="text-sm">Descrizione</h6>
-          <p class="line-clamp-3 whitespace-pre-line break-all text-xs italic text-gray-400">
+          <p class="line-clamp-3 whitespace-pre-line break-all text-xs italic text-neutral-400">
             {{ challenge.props.description }}
           </p>
         </div>
         <div class="text-start">
           <h6 class="text-sm">Regole</h6>
-          <p class="line-clamp-3 whitespace-pre-line break-all text-xs italic text-gray-400">
+          <p class="line-clamp-3 whitespace-pre-line break-all text-xs italic text-neutral-400">
             {{ challenge.props.rules }}
           </p>
         </div>

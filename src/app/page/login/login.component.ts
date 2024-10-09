@@ -46,7 +46,7 @@ export class LoginComponent implements OnInit {
   onHostClick(event: Event): void {
     // Verifica se il click è avvenuto all'interno della sezione "container_form"
     const target = event.target as HTMLElement;
-    if (target.closest('section#container_form')) return; // Ignora il click
+    if (target.closest('#container_form')) return; // Ignora il click
     this.setPage(event, 'welcome');
   }
 

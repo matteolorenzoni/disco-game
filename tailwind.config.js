@@ -7,20 +7,46 @@ module.exports = {
         xxs: ['0.625rem', { lineHeight: '0.75rem' }]
       },
       colors: {
-        primary: '#7B4B92' /* Colore principale usato per pulsanti, link e accenti principali */,
-        'primary-light': '#9B6AB1' /* Colore chiaro usato per hover o stati disabilitati */,
-        'primary-dark': '#5B3A7F' /* Colore scuro usato per hover o stati attivi */,
-        secondary: '#4A758D' /* Uato per pulsanti secondari, accenti minori e elementi alternativi */,
-        'secondary-light': '#A2C7D4 ' /* Colore chiaro usato per hover o stati disabilitati */,
-        'secondary-dark': '#2F4858 ' /* Colore scuro usato per hover o stati attivi */,
-        background: '#0D1B2A' /* Colore di sfondo generale dell'applicazione */,
-        surface: '#1F2A44' /* Colore di sfondo per superfici come card, modali o sezioni separate */,
-        error: '#D95B6D' /* Colore usato per indicare errori su pulsanti, testi o messaggi di errore */,
-        'on-primary': '#FFFFFF' /* Colore del testo o delle icone sopra elementi con sfondo 'primary' */,
-        'on-secondary': '#FFFFFF' /* Colore del testo o delle icone sopra elementi con sfondo 'secondary' */,
-        'on-background': '#E4E4EB' /* Colore del testo o delle icone sopra lo sfondo 'background' */,
-        'on-surface': '#E4E4EB' /* Colore del testo o delle icone sopra superfici 'surface' */,
-        'on-error': '#FFFFFF' /* Colore del testo o delle icone sopra elementi con sfondo 'error' */
+        'neutral-50': '#fbfcfe',
+        'neutral-100': '#f0f4f8',
+        'neutral-200': '#dde7ee',
+        'neutral-300': '#cdd7e1',
+        'neutral-400': '#9fa6ad',
+        'neutral-500': '#636b74',
+        'neutral-600': '#555e68',
+        'neutral-700': '#32383e',
+        'neutral-800': '#171a1c',
+        'neutral-900': '#0b0d0e',
+        'primary-50': '#f2ebf5',
+        'primary-100': '#e0d2e7',
+        'primary-200': '#c1a6cf',
+        'primary-300': '#9f7ab5',
+        'primary-400': '#875f9f',
+        'primary-500': '#7B4B92',
+        'primary-600': '#6b3e7e',
+        'primary-700': '#59336a',
+        'primary-800': '#472755',
+        'primary-900': '#2e1a39',
+        'secondary-50': '#e0f4f8',
+        'secondary-100': '#b3e0e9',
+        'secondary-200': '#80c3d0',
+        'secondary-300': '#4DA6B5',
+        'secondary-400': '#4B928E',
+        'secondary-500': '#4A758D',
+        'secondary-600': '#3C5E70',
+        'secondary-700': '#2E4852',
+        'secondary-800': '#1F3234',
+        'secondary-900': '#111B1E',
+
+        background: '#000000',
+        'on-background': '#f0f4f8', // neutral-100
+        surface: '#0b0d0e', // neutral-900
+        'on-surface': '#dde7ee', // neutral-200
+        'field-color': '#dde7ee', // neutral-200
+        'field-background': '#0b0d0e', // fv-neutral-900
+        'field-border': '#32383e', // fv-neutral-700
+        'field-label-color': '#f0f4f8', // fv-neutral-100
+        'field-icon-color': '#636b74' // fv-neutral-500
       },
       scale: {
         975: '0.975'

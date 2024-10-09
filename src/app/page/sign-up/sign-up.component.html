@@ -1,18 +1,18 @@
-<section class="flex flex-col justify-center gap-8" [ngClass]="{ 'p-4': !user() }">
-  <div class="flex flex-col gap-1 text-center">
-    <h1 class="text-3xl font-bold text-primary-light">Registrazione</h1>
-    <h2 class="text-sm text-primary-light">Inserisci le tue informazioni</h2>
+<section class="flex flex-col justify-center gap-8" [ngClass]="{ 'p-4': !userService.user() }">
+  <div class="flex flex-col gap-1 text-center text-on-background">
+    <h3 class="text-3xl font-semibold text-white">Registrazione</h3>
+    <p class="text-sm">Inserisci le tue informazioni</p>
   </div>
 
-  <form [formGroup]="signUpForm" (ngSubmit)="addOrUpdateUser()" class="flex w-full flex-col gap-4">
+  <form [formGroup]="signUpForm" (ngSubmit)="addOrUpdateUser()" class="flex w-full flex-col gap-4 text-on-background">
     <div class="flex flex-col items-center gap-2">
       <img
         [src]="imagePreview() ?? '/images/profile-user.png'"
         alt="Anteprima immagine"
-        class="h-32 w-32 rounded-full border-2 border-primary object-cover object-center shadow-md" />
+        class="h-32 w-32 rounded-full object-cover object-center shadow" />
 
       <label for="imageUpload" class="flex cursor-pointer flex-col items-center">
-        <div class="rounded-md bg-primary p-2 text-xs text-on-primary">Carica immagine</div>
+        <div class="rounded-md bg-primary-500 p-2 text-xs text-white">Carica immagine</div>
         <input
           id="imageUpload"
           type="file"
@@ -23,68 +23,62 @@
     </div>
 
     <div class="flex w-full flex-col gap-1">
-      <label for="signup_name" class="block text-sm font-medium text-primary"> Nome </label>
+      <label for="name" class="block text-sm font-medium text-field-label-color"> Nome </label>
       <input
         id="signup_name"
         formControlName="name"
-        class="w-full rounded-md border border-slate-600 bg-surface px-3 py-2 text-sm text-on-surface shadow-sm transition duration-300 ease-in hover:border-primary-light focus:border-primary focus:shadow focus:outline-none" />
+        type="text"
+        class="w-full rounded border border-field-border bg-field-background px-3 py-2 text-sm text-field-color shadow-sm focus:border-2 focus:border-primary-500 focus:outline-none" />
     </div>
 
     <div class="flex w-full flex-col gap-1">
-      <label for="lastName" class="block text-sm font-medium text-primary"> Cognome </label>
+      <label for="lastName" class="block text-sm font-medium text-field-label-color"> Cognome </label>
       <input
         id="lastName"
         formControlName="lastName"
-        class="w-full rounded-md border border-slate-600 bg-surface px-3 py-2 text-sm text-on-surface shadow-sm transition duration-300 ease-in hover:border-primary-light focus:border-primary focus:shadow focus:outline-none" />
+        type="text"
+        class="w-full rounded border border-field-border bg-field-background px-3 py-2 text-sm text-field-color shadow-sm focus:border-2 focus:border-primary-500 focus:outline-none" />
     </div>
 
     <div class="flex w-full flex-col gap-1">
-      <label for="userName" class="block text-sm font-medium text-primary"> Username </label>
+      <label for="userName" class="block text-sm font-medium text-field-label-color"> Username </label>
       <input
         id="userName"
         formControlName="userName"
-        class="w-full rounded-md border border-slate-600 bg-surface px-3 py-2 text-sm text-on-surface shadow-sm transition duration-300 ease-in hover:border-primary-light focus:border-primary focus:shadow focus:outline-none" />
+        type="text"
+        class="w-full rounded border border-field-border bg-field-background px-3 py-2 text-sm text-field-color shadow-sm focus:border-2 focus:border-primary-500 focus:outline-none" />
     </div>
 
     <div class="flex w-full flex-col gap-1">
-      <label for="email" class="block text-sm font-medium text-primary"> Email </label>
+      <label for="email" class="block text-sm font-medium text-field-label-color"> Email </label>
       <input
         id="email"
         formControlName="email"
         type="email"
-        class="w-full rounded-md border border-slate-600 bg-surface px-3 py-2 text-sm text-on-surface shadow-sm transition duration-300 ease-in focus:border-primary focus:shadow focus:outline-none enabled:hover:border-primary-light disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-500" />
+        class="w-full rounded border border-field-border bg-field-background px-3 py-2 text-sm text-field-color shadow-sm focus:border-2 focus:border-primary-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-700 disabled:text-neutral-600" />
     </div>
 
     <div class="flex w-full flex-col gap-1">
-      <label for="password" class="block text-sm font-medium text-primary"> Password </label>
+      <label for="password" class="text-primary block text-sm font-medium"> Password </label>
       <input
         id="password"
         formControlName="password"
         type="password"
-        class="w-full rounded-md border border-slate-600 bg-surface px-3 py-2 text-sm text-on-surface shadow-sm transition duration-300 ease-in focus:border-primary focus:shadow focus:outline-none enabled:hover:border-primary-light disabled:cursor-not-allowed disabled:bg-gray-700 disabled:text-slate-500" />
+        class="w-full rounded border border-field-border bg-field-background px-3 py-2 text-sm text-field-color shadow-sm focus:border-2 focus:border-primary-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-700 disabled:text-neutral-600" />
     </div>
-
-    <!-- <div class="flex w-full flex-col gap-1">
-      <label for="birthday" class="block text-sm font-medium text-primary"> Data di nascita </label>
-      <input
-        id="birthday"
-        formControlName="birthDate"
-        type="date"
-        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm transition duration-300 ease-in  hover:border-primary-light focus:border-primary focus:shadow focus:outline-none" />
-    </div> -->
 
     <button
       type="submit"
       [disabled]="signUpForm.invalid"
-      class="mt-8 inline-block w-full rounded-full bg-primary px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-on-primary transition duration-150 ease-in-out hover:bg-primary-light active:bg-primary-dark disabled:cursor-not-allowed disabled:bg-primary/30 disabled:text-primary/50">
-      {{ user() ? 'Aggiorna' : 'Registrati' }}
+      class="mt-12 rounded bg-primary-500 p-2 text-xs uppercase text-on-background disabled:cursor-not-allowed disabled:bg-primary-200 disabled:text-primary-300">
+      {{ userService.user() ? 'Aggiorna' : 'Registrati' }}
     </button>
   </form>
 
-  @if (!user()) {
-    <p class="text-center text-sm text-primary">
+  @if (!userService.user()) {
+    <p class="text-center text-sm text-on-background">
       Hai già un account?
-      <a href="./login" class="font-bold text-primary hover:underline">Accedi</a>
+      <a href="./login" class="font-bold text-primary-500 hover:underline">Accedi</a>
     </p>
   }
 </section>

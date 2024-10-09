@@ -9,7 +9,7 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
   standalone: true,
   imports: [CommonModule, FaIconComponent],
   template: ` <button
-    class="fixed bottom-20 right-4 h-12 w-12 rounded-full bg-primary p-2 text-on-primary transition duration-100 ease-in active:scale-95 active:bg-primary-dark"
+    class="fixed bottom-20 right-4 h-12 w-12 rounded-full bg-primary-500 p-2 text-white"
     (click)="execute()()">
     <fa-icon [icon]="ICON_ADD"></fa-icon>
   </button>`,

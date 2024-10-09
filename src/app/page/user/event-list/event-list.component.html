@@ -1,73 +1,69 @@
+<h1 class="mb-8 text-3xl font-bold text-on-background">Eventi</h1>
+
 <ul class="flex flex-col gap-4">
   @for (event of events(); track event.id) {
     @if (event.id === eventIdSelected()) {
-      <li class="overflow-hidden rounded bg-primary-dark shadow-md transition-all duration-300 ease-in-out">
-        <div class="relative flex flex-col gap-8 p-2">
-          <div class="relative">
-            <img class="aspect-video h-auto w-full rounded" [src]="event.props.imageUrl" alt="Immagine evento" />
-            <div
-              class="absolute inset-0 flex flex-col items-center justify-end gap-1 overflow-hidden rounded bg-gradient-to-b from-transparent to-primary-dark p-4 pb-0 text-white">
-              <p class="text-center text-2xl font-bold">{{ event.props.name }}</p>
-              <p class="line-clamp-3 overflow-hidden text-ellipsis text-center text-sm italic text-gray-100">
-                {{ event.props.description }}
+      <li class="flex flex-col gap-8 overflow-hidden rounded bg-surface shadow">
+        <div class="relative">
+          <img class="aspect-video h-auto w-full" [src]="event.props.imageUrl" alt="Immagine evento" />
+          <div
+            class="absolute inset-0 flex flex-col items-center justify-end gap-1 overflow-hidden rounded bg-gradient-to-b from-transparent to-surface p-4 pb-0 text-white">
+            <p class="text-center text-2xl font-bold">{{ event.props.name }}</p>
+            <p class="line-clamp-3 overflow-hidden text-ellipsis text-center text-sm italic text-gray-100">
+              {{ event.props.description }}
+            </p>
+            <p class="rounded-full bg-primary-500 px-1 text-xs">
+              Sfide: <span class="font-bold">{{ event.props.eventChallengeRefs.length }}</span>
+            </p>
+            <div class="flex flex-col items-center">
+              <p class="text-xs font-medium text-gray-300">{{ event.props.location }}</p>
+              <p class="text-xxs text-gray-300/70">
+                ({{ event.props.startDate | date: 'dd/MM HH:mm' }} - {{ event.props.endDate | date: 'dd/MM HH:mm' }})
               </p>
-              <p class="rounded-full bg-primary px-1 text-xs">
-                Sfide: <span class="font-bold">{{ event.props.eventChallengeRefs.length }}</span>
-              </p>
-              <div class="flex flex-col items-center">
-                <p class="text-xs font-medium text-gray-300">{{ event.props.location }}</p>
-                <p class="text-xxs text-gray-300/70">
-                  ({{ event.props.startDate | date: 'dd/MM HH:mm' }} - {{ event.props.endDate | date: 'dd/MM HH:mm' }})
-                </p>
-              </div>
             </div>
           </div>
-          <div class="flex h-20 flex-col justify-end gap-2">
-            @if (eventIdSelected() | check_exist_team: userEventTeams(); as userGame) {
-              <div>
-                <p class="text-center text-xxs uppercase text-amber-300/40">
-                  Squadra
-                  @if (firebaseService.userFirebase()?.uid === userGame.props.leaderId) {
-                    <fa-icon [icon]="ICON_CROWN"></fa-icon>
-                  }
-                </p>
-                <p class="text-center text-xl font-semibold text-amber-300">
-                  {{ userGame.props.teamName }}
-                </p>
-              </div>
-              <button
-                class="rounded bg-amber-400 p-2 text-xs text-black transition duration-200 hover:bg-amber-300 active:bg-amber-500"
-                (click)="goToTeam(userGame.props.eventId, userGame.props.teamId)">
-                Visualizza squadra
-              </button>
-            } @else {
-              <button
-                class="rounded bg-primary p-2 text-xs text-white transition duration-200 hover:bg-primary-light active:bg-primary-dark"
-                (click)="newTeamModalIsOpen.set(true)">
-                Crea squadra
-              </button>
-              <button
-                class="rounded bg-secondary p-2 text-xs text-white transition duration-200 hover:bg-secondary-light active:bg-secondary-dark"
-                (click)="findTeamModalIsOpen.set(true)">
-                Trova squadra
-              </button>
-            }
-          </div>
+        </div>
+        <div class="flex h-20 flex-col justify-end gap-2 p-4">
+          @if (eventIdSelected() | check_exist_team: userEventTeams(); as userGame) {
+            <div>
+              <p class="text-center text-xxs uppercase text-amber-300/50">
+                Squadra
+                @if (firebaseService.userFirebase()?.uid === userGame.props.leaderId) {
+                  <fa-icon [icon]="ICON_CROWN"></fa-icon>
+                }
+              </p>
+              <p class="text-center text-xl font-semibold text-amber-300">
+                {{ userGame.props.teamName }}
+              </p>
+            </div>
+            <button
+              class="rounded bg-amber-400 p-2 text-xs text-black"
+              (click)="goToTeam(userGame.props.eventId, userGame.props.teamId)">
+              Visualizza squadra
+            </button>
+          } @else {
+            <button class="rounded bg-primary-500 p-2 text-xs text-white" (click)="newTeamModalIsOpen.set(true)">
+              Crea squadra
+            </button>
+            <button class="rounded bg-secondary-500 p-2 text-xs text-white" (click)="findTeamModalIsOpen.set(true)">
+              Trova squadra
+            </button>
+          }
         </div>
       </li>
     } @else {
       <li
-        class="transform cursor-pointer overflow-hidden rounded bg-surface text-on-surface shadow-md transition-all duration-300 ease-in-out hover:bg-surface/50 hover:text-gray-300"
+        class="transform cursor-pointer overflow-hidden rounded bg-surface text-on-surface shadow hover:bg-neutral-800"
         [tabindex]="0"
         (click)="eventIdSelected.set(event.id)"
         (keydown)="eventIdSelected.set(event.id)">
         <div class="relative p-2">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-base font-semibold text-on-background">{{ event.props.name }}</p>
-              <p class="text-xs text-gray-300">{{ event.props.location }}</p>
+              <p class="text-base font-semibold text-white">{{ event.props.name }}</p>
+              <p class="text-xs">{{ event.props.location }}</p>
             </div>
-            <div class="text-lg font-bold text-on-surface">
+            <div class="text-lg font-bold">
               <p>{{ event.props.startDate | date: 'dd/MM' }}</p>
             </div>
           </div>
@@ -82,25 +78,25 @@
   <div
     data-dialog-backdrop="sign-in-modal"
     data-dialog-backdrop-close="true"
-    class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center bg-black bg-opacity-60 opacity-0 backdrop-blur-sm transition-opacity duration-300"
+    class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center bg-black bg-opacity-60 opacity-0 backdrop-blur-sm"
     [ngClass]="{ 'opacity-100 pointer-events-auto': newTeamModalIsOpen() }"
     [tabindex]="-1"
-    aria-hidden="true"
+    (keydown)="(undefined)"
     (click)="onBackdropClick($event)">
-    <div data-dialog="sign-in-modal" class="relative mx-auto w-4/5 max-w-[24rem] overflow-hidden rounded-lg shadow-sm">
-      <div class="flex flex-col gap-2 bg-primary p-2">
-        <h3 class="mb-4 text-center text-lg font-semibold text-on-primary">Crea squadra</h3>
+    <div data-dialog="sign-in-modal" class="relative mx-auto w-4/5 max-w-[24rem] overflow-hidden rounded shadow-sm">
+      <div class="flex flex-col gap-2 bg-primary-500 p-2">
+        <h3 class="mb-4 text-center text-lg font-semibold text-white">Crea squadra</h3>
         <form
           [formGroup]="newTeamForm"
           (ngSubmit)="addTeam()"
           class="flex w-full max-w-2xl flex-col justify-between gap-2">
           <div class="relative h-10">
             <input
-              class="h-full w-full rounded border border-slate-300 bg-white p-2 pl-10 text-sm text-slate-700 shadow-sm transition duration-300 ease-in hover:border-slate-400 focus:border-primary focus:shadow focus:outline-none"
+              class="h-full w-full bg-primary-300 p-2 pl-10 text-sm text-on-surface shadow-sm focus:outline-none"
               placeholder="Nome squadra"
               formControlName="name" />
             <div
-              class="absolute left-1 top-1 h-8 w-8 rounded border border-transparent bg-primary p-1 text-center text-sm text-on-primary shadow-sm transition-all">
+              class="absolute left-1 top-1 h-8 w-8 rounded border border-transparent bg-primary-700 p-1 text-center text-sm text-on-surface shadow">
               <fa-icon [icon]="ICON_TEAM"></fa-icon>
             </div>
           </div>
@@ -108,7 +104,7 @@
           <button
             type="submit"
             [disabled]="newTeamForm.invalid"
-            class="inline-block w-full rounded bg-primary-dark px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-on-primary shadow-primary-light transition duration-150 ease-in-out hover:bg-primary-light active:bg-primary-dark disabled:cursor-not-allowed disabled:bg-white/40 disabled:text-white/60">
+            class="rounded bg-primary-700 p-2 text-xs uppercase text-on-background disabled:cursor-not-allowed disabled:bg-primary-200 disabled:text-primary-300">
             Crea
           </button>
         </form>
@@ -122,27 +118,27 @@
   <div
     data-dialog-backdrop="sign-in-modal"
     data-dialog-backdrop-close="true"
-    class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center bg-black bg-opacity-60 opacity-0 backdrop-blur-sm transition-opacity duration-300"
+    class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center bg-black bg-opacity-60 opacity-0 backdrop-blur-sm"
     [ngClass]="{ 'opacity-100 pointer-events-auto': findTeamModalIsOpen() }"
     [tabindex]="-1"
     aria-hidden="true"
     (click)="onBackdropClick($event)">
     <div data-dialog="sign-in-modal" class="relative mx-auto w-4/5 max-w-[24rem] overflow-hidden rounded-lg shadow-sm">
-      <div class="flex flex-col gap-2 bg-secondary p-2">
-        <h3 class="mb-4 text-center text-lg font-semibold text-on-secondary">Cerca squadra</h3>
+      <div class="flex flex-col gap-2 bg-secondary-500 p-2">
+        <h3 class="mb-4 text-center text-lg font-semibold text-white">Cerca squadra</h3>
         <form
           [formGroup]="findTeamForm"
           (ngSubmit)="findTeam()"
           class="flex w-full max-w-2xl flex-col justify-between gap-2">
           <div class="relative h-10">
             <input
-              class="h-full w-full rounded border border-slate-300 bg-white p-2 pl-10 text-sm text-slate-700 shadow-sm transition duration-300 ease-in hover:border-slate-400 focus:border-secondary focus:shadow focus:outline-none"
+              class="h-full w-full bg-secondary-300 p-2 pl-10 text-sm text-on-surface shadow-sm focus:outline-none"
               placeholder="Codice squadra"
               minlength="6"
               maxlength="6"
               formControlName="code" />
             <div
-              class="absolute left-1 top-1 h-8 w-8 rounded border border-transparent bg-secondary p-1 text-center text-sm text-on-secondary shadow-sm transition-all">
+              class="absolute left-1 top-1 h-8 w-8 rounded border border-transparent bg-secondary-700 p-1 text-center text-sm text-on-surface shadow">
               <fa-icon [icon]="ICON_TEAM"></fa-icon>
             </div>
           </div>
@@ -150,7 +146,7 @@
           <button
             type="submit"
             [disabled]="findTeamForm.invalid"
-            class="inline-block w-full rounded bg-secondary-dark px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-on-secondary shadow-secondary-light transition duration-150 ease-in-out hover:bg-secondary-light active:bg-secondary-dark disabled:cursor-not-allowed disabled:bg-white/40 disabled:text-white/60">
+            class="rounded bg-secondary-700 p-2 text-xs uppercase text-on-background disabled:cursor-not-allowed disabled:bg-secondary-200 disabled:text-secondary-300">
             Cerca
           </button>
         </form>

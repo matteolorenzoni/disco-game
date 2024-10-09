@@ -3,9 +3,7 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@ang
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment.development';
-import { Doc } from '../../model/firebase';
 import { FromMap, UserModel } from '../../model/form.model';
-import { User } from '../../model/user.model';
 import { FirebaseService } from '../../service/firebase.service';
 import { StorageService } from '../../service/storage.service';
 import { UserService } from '../../service/user.service';
@@ -28,7 +26,6 @@ export class SignUpComponent implements OnInit {
   readonly userService = inject(UserService);
 
   /* Variables */
-  user = signal<Doc<User> | null | undefined>(undefined);
   imagePreview = signal<string | ArrayBuffer | null | undefined>(undefined);
   imageFile = signal<File | undefined>(undefined);
 
@@ -79,7 +76,7 @@ export class SignUpComponent implements OnInit {
 
   /* ------------- Methods ------------- */
   protected async addOrUpdateUser(): Promise<void> {
-    const user = this.user();
+    const user = this.userService.user();
     const userModelForm = this.signUpForm.getRawValue();
     if (user) await this.updateUser(user.id, userModelForm);
     else await this.addUser(userModelForm);
