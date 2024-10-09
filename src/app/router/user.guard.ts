@@ -30,6 +30,8 @@ export const userGuard: CanActivateFn = async (route, state) => {
 
     // Controlla se l'utente è già loggato e ridireziona in base al tipo di utente
     if (state.url.startsWith('/login')) {
+      if (!userFirebase) return true;
+
       switch (currentUserType) {
         case UserRole.ADMIN:
           await router.navigate(['/admin']);

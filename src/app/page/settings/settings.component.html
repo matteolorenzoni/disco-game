@@ -1,25 +1,49 @@
-<h1 class="mb-8 text-center text-3xl font-bold text-on-background">Impostazioni</h1>
-
-<div class="mb-4 flex flex-col items-center gap-4 text-on-background">
-  <img
-    [src]="userService.user()?.props?.imageUrl ?? '/images/profile-user.png'"
-    alt="Immagine utente"
-    class="h-32 w-32 rounded-full border-2 border-on-background object-cover object-center shadow-md" />
-  <p>{{ userService.user()?.props?.name }} {{ userService.user()?.props?.lastName }}</p>
+<div class="mb-4 flex flex-col gap-6">
+  <div class="flex flex-col gap-4">
+    <nav>
+      <ol class="flex gap-2 text-xs text-neutral-400">
+        <li>
+          <a [routerLink]="['']"><fa-icon [icon]="ICON_HOME"></fa-icon></a>
+        </li>
+        <li><fa-icon [icon]="ICON_RIGHT"></fa-icon></li>
+        <li class="font-medium text-primary-500">
+          <a [routerLink]="['../settings']">Impostazioni</a>
+        </li>
+      </ol>
+    </nav>
+    <h1 class="text-3xl font-bold text-on-surface">Impostazioni</h1>
+  </div>
+  <div class="bord -mx-4 border-b border-neutral-700 px-4 text-on-surface">
+    <div tabindex="-1" role="tablist">
+      @for (tab of TABS; track tab.id) {
+        <button
+          [tabindex]="activeTab().id === tab.id ? 0 : -1"
+          type="button"
+          role="tab"
+          class="rounded-t px-4 py-2 text-sm text-neutral-400 hover:bg-neutral-800"
+          [ngClass]="{ 'text-on-surface border-b-2 border-primary-500 font-semibold': activeTab().id === tab.id }"
+          (click)="activeTab.set(tab)">
+          {{ tab.label }}
+        </button>
+      }
+    </div>
+  </div>
 </div>
 
-<ul class="m-auto flex h-fit w-full flex-col divide-y divide-neutral-700 rounded-lg bg-surface p-4 text-on-surface">
-  <li class="pb-4">
-    <a [routerLink]="['./profile']" class="flex gap-4">
-      <fa-icon class="" [icon]="ICON_USER"></fa-icon>
-      <span class="">Profilo</span>
-    </a>
-  </li>
+@switch (activeTab().id) {
+  @case ('profile') {
+    <div class="rounded-lg border border-card-border bg-surface p-4">
+      <div class="-mx-4 border-b border-card-border px-4 pb-4">
+        <p class="text-base text-on-surface">Info personali</p>
+        <p class="text-sm text-neutral-400">Personalizza come le informazioni del tuo profilo appariranno alle reti.</p>
+      </div>
+      <app-user-create class="pt-4"></app-user-create>
+    </div>
 
-  <li class="pt-4">
-    <a [routerLink]="['/login']" class="flex gap-4" (click)="firebaseService.logout(true)">
-      <fa-icon class="" [icon]="ICON_LOGOUT"></fa-icon>
-      <span class="">Logout</span>
-    </a>
-  </li>
-</ul>
+    <button
+      class="mt-12 w-full rounded border border-rose-600 px-8 py-2 text-xs font-semibold text-rose-600 hover:text-white"
+      (click)="firebaseService.logout(true)">
+      Esci
+    </button>
+  }
+}

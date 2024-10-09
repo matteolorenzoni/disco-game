@@ -40,13 +40,18 @@ module.exports = {
 
         background: '#000000',
         'on-background': '#f0f4f8', // neutral-100
+
         surface: '#0b0d0e', // neutral-900
         'on-surface': '#dde7ee', // neutral-200
+
         'field-color': '#dde7ee', // neutral-200
         'field-background': '#0b0d0e', // fv-neutral-900
         'field-border': '#32383e', // fv-neutral-700
         'field-label-color': '#f0f4f8', // fv-neutral-100
-        'field-icon-color': '#636b74' // fv-neutral-500
+        'field-icon-color': '#636b74', // fv-neutral-500
+
+        'card-background': '#0b0d0e', // fv-neutral-900
+        'card-border': '#32383e99' // fv-neutral-700, 60%
       },
       scale: {
         975: '0.975'
