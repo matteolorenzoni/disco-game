@@ -29,7 +29,7 @@ export class FvButtonComponent {
   /* Inputs */
   type = input<ButtonType>('button');
   label = input.required<string>();
-  twColor = input.required<string>();
+  twColor = input<string>('primary');
   disabled = input<boolean>(false);
   onClick = input<() => void>();
 

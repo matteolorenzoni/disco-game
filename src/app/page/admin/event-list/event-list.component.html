@@ -22,10 +22,9 @@
           <p class="whitespace-pre-line break-words text-base italic leading-4">{{ event.props.description }}</p>
 
           <div class="mt-4 flex flex-col gap-2">
-            <fv-button label="Modifica" twColor="primary" [onClick]="goToUpdateEvent.bind(this, event.id)"></fv-button>
+            <fv-button label="Modifica" [onClick]="goToUpdateEvent.bind(this, event.id)"></fv-button>
             <fv-button-outlined
               label="Sfide"
-              twColor="primary"
               [onClick]="goToUpdateEventChallenges.bind(this, event.id)"></fv-button-outlined>
           </div>
         </div>

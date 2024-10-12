@@ -7,12 +7,16 @@ module.exports = {
       variants: ['hover', 'active']
     },
     {
-      pattern: /border-(primary|rose)-(500|600|700)/,
-      variants: ['hover', 'active']
+      pattern: /border-(primary|secondary|rose)-(500|600|700)/,
+      variants: ['hover', 'active', 'focus']
     },
     {
-      pattern: /text-(primary|rose)-(500|600|700)/,
-      variants: ['hover', 'active']
+      pattern: /text-(primary|secondary|rose)-(200|500|600|700)/,
+      variants: ['hover', 'active', 'peer-focus', 'focus']
+    },
+    {
+      pattern: /caret-(primary|secondary)-(500)/,
+      variants: ['focus']
     }
   ],
   theme: {

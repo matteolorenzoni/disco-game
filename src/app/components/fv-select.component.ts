@@ -16,14 +16,20 @@ export type SelectOption<T> = {
       <select
         [id]="name()"
         [formControlName]="name()"
-        class="peer mt-6 w-full rounded border border-field-border bg-field-background px-3 py-2 text-xs text-field-color shadow-sm focus:border-2 focus:border-primary-500 focus:text-primary-200 focus:caret-primary-500 focus:outline-none disabled:bg-neutral-700 disabled:text-neutral-600">
+        class="peer mt-6 w-full rounded border border-field-border bg-field-background px-3 py-2 text-xs text-field-color shadow-sm focus:border-2 focus:outline-none disabled:bg-neutral-700 disabled:text-neutral-600"
+        [ngClass]="[
+          'focus:border-' + twColor() + '-500',
+          'focus:text-' + twColor() + '-200',
+          'focus:caret-' + twColor() + '-500'
+        ]">
         @for (option of options(); track option.value) {
-          <option class="hover:bg-amber-300" [value]="option.value">{{ option.label }}</option>
+          <option [value]="option.value">{{ option.label }}</option>
         }
       </select>
       <label
         [for]="name()"
-        class="absolute left-0 top-0 block text-sm font-medium text-field-label-color peer-focus:font-semibold peer-focus:text-primary-500">
+        class="absolute left-0 top-0 block text-sm font-medium text-field-label-color peer-focus:font-semibold"
+        [ngClass]="['peer-focus:text-' + twColor() + '-500']">
         {{ label() }}
       </label>
     </div>
@@ -37,4 +43,5 @@ export class FvSelectComponent<T> {
   label = input.required<string>();
   name = input.required<string>();
   options = input.required<SelectOption<T>[]>();
+  twColor = input<string>('primary');
 }

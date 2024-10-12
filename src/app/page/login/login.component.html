@@ -1,7 +1,7 @@
 <section class="relative flex min-h-screen flex-col overflow-hidden bg-neutral-800 p-4 text-on-surface">
   <div class="mb-20 mt-auto">
     <div class="flex flex-col gap-4">
-      <fv-button label="Entra" twColor="primary" [onClick]="setPage.bind(this, 'login')"></fv-button>
+      <fv-button label="Entra" [onClick]="setPage.bind(this, 'login')"></fv-button>
       <fv-button label="Registrati" twColor="secondary" [onClick]="onGoToRegistry.bind(this)"></fv-button>
     </div>
   </div>
@@ -51,7 +51,7 @@
         <a href="./restore-password" class="text-sm font-bold hover:underline">Password dimentica?</a>
       </div>
 
-      <fv-button type="submit" label="Login" twColor="primary" [disabled]="loginForm.invalid"></fv-button>
+      <fv-button type="submit" label="Login" [disabled]="loginForm.invalid"></fv-button>
     </form>
 
     <p class="text-center text-sm">

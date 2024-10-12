@@ -41,7 +41,7 @@
               twColor="amber"
               [onClick]="goToTeam.bind(this, userGame.props.eventId, userGame.props.teamId)"></fv-button>
           } @else {
-            <fv-button label="Crea squadra" twColor="primary" [onClick]="openNewTeamModal.bind(this)"></fv-button>
+            <fv-button label="Crea squadra" [onClick]="openNewTeamModal.bind(this)"></fv-button>
             <fv-button label="Trova squadra" twColor="secondary" [onClick]="openFindTeamModal.bind(this)"></fv-button>
           }
         </div>
@@ -88,7 +88,7 @@
           (ngSubmit)="addTeam()"
           class="flex w-full max-w-2xl flex-col justify-between gap-2">
           <fv-field-icon name="name" label="Nome squadra" [icon]="ICON_TEAM"></fv-field-icon>
-          <fv-button type="submit" label="Crea" twColor="primary" [disabled]="newTeamForm.invalid"></fv-button>
+          <fv-button type="submit" label="Crea" [disabled]="newTeamForm.invalid"></fv-button>
         </form>
       </div>
     </div>
@@ -114,12 +114,8 @@
           [formGroup]="findTeamForm"
           (ngSubmit)="findTeam()"
           class="flex w-full max-w-2xl flex-col justify-between gap-2">
-          <fv-field-icon
-            class="focus:[&_input]:border-secondary-500 focus:[&_input]:text-secondary-200 focus:[&_input]:caret-secondary-500"
-            name="code"
-            label="Codice squadra"
-            [icon]="ICON_TEAM"></fv-field-icon>
-          <fv-button type="submit" label="Cerca" twColor="primary" [disabled]="findTeamForm.invalid"></fv-button>
+          <fv-field-icon name="code" label="Codice squadra" twColor="secondary" [icon]="ICON_TEAM"></fv-field-icon>
+          <fv-button type="submit" label="Cerca" [disabled]="findTeamForm.invalid"></fv-button>
         </form>
       </div>
     </div>
