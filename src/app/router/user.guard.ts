@@ -6,13 +6,17 @@ import { filter } from 'rxjs/internal/operators/filter';
 import { UserService } from '../service/user.service';
 import { FirebaseService } from '../service/firebase.service';
 import { UserRole } from '../model/user.model';
+import { HttpService } from '../service/http.service';
 
 export const userGuard: CanActivateFn = async (route, state) => {
   const router = inject(Router);
   const firebaseService = inject(FirebaseService);
+  const httpervice = inject(HttpService);
   const userService = inject(UserService);
 
   try {
+    httpervice.updateHttpCount(1);
+
     // Usa l'Observable di userFirebase e filtra i valori undefined
     const userFirebase = await firstValueFrom(
       toObservable(firebaseService.userFirebase).pipe(filter((user) => user !== undefined))
@@ -24,6 +28,8 @@ export const userGuard: CanActivateFn = async (route, state) => {
       user = await userService.getUserById(userFirebase.uid);
       userService.user.set(user);
     }
+
+    httpervice.updateHttpCount(-1);
 
     // Ottiene il tipo di utente (es. ADMIN, USER)
     const currentUserType = user?.props.role;

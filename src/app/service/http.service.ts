@@ -26,4 +26,9 @@ export class HttpService {
       this.httpRequestsActive.update((val) => val - 1);
     }
   }
+
+  /* -------------------- Utils -------------------- */
+  public updateHttpCount(count: 1 | -1) {
+    this.httpRequestsActive.update((val) => val + count);
+  }
 }
