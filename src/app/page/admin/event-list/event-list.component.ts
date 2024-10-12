@@ -9,11 +9,19 @@ import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faCalendar, faClock, faLocationPin } from '@fortawesome/free-solid-svg-icons';
 import { FvButtonComponent } from '../../../components/fv-button.component';
 import { FvButtonOutlinedComponent } from '../../../components/fv-button-outlined.component';
+import { TitleComponent } from '../../../components/title/title.component';
 
 @Component({
   selector: 'app-event-list',
   standalone: true,
-  imports: [CommonModule, FaIconComponent, FvButtonComponent, FvButtonOutlinedComponent, FvFloatingButtonComponent],
+  imports: [
+    CommonModule,
+    FaIconComponent,
+    TitleComponent,
+    FvButtonComponent,
+    FvButtonOutlinedComponent,
+    FvFloatingButtonComponent
+  ],
   templateUrl: './event-list.component.html',
   styleUrls: ['./event-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

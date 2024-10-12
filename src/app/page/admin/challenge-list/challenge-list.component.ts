@@ -6,11 +6,12 @@ import { ChallengeService } from '../../../service/challenge.service';
 import { Doc } from '../../../model/firebase';
 import { Challenge } from '../../../model/challenge.model';
 import { FvRatingComponent } from '../../../components/fv-rating.component';
+import { TitleComponent } from '../../../components/title/title.component';
 
 @Component({
   selector: 'app-challenge-list',
   standalone: true,
-  imports: [CommonModule, FvRatingComponent, FvFloatingButtonComponent],
+  imports: [CommonModule, TitleComponent, FvRatingComponent, FvFloatingButtonComponent],
   templateUrl: './challenge-list.component.html',
   styleUrls: ['./challenge-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

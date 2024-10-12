@@ -31,6 +31,7 @@ import { LogService } from '../../../service/log.service';
 import { FvFieldComponent } from '../../../components/fv-field.component';
 import { FvSelectComponent, SelectOption } from '../../../components/fv-select.component';
 import { FvButtonComponent } from '../../../components/fv-button.component';
+import { TitleComponent } from '../../../components/title/title.component';
 
 @Component({
   selector: 'app-event-challenge',
@@ -39,6 +40,7 @@ import { FvButtonComponent } from '../../../components/fv-button.component';
     CommonModule,
     ReactiveFormsModule,
     FaIconComponent,
+    TitleComponent,
     FvFieldComponent,
     FvSelectComponent,
     FvButtonComponent,

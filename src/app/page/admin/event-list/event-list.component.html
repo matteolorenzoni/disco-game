@@ -1,4 +1,4 @@
-<h1 class="mb-8 text-3xl font-bold text-on-background">Eventi</h1>
+<app-title [pages]="[{ path: '', label: 'Eventi' }]"></app-title>
 
 <ul class="flex flex-col gap-4">
   @for (event of events(); track event.id) {

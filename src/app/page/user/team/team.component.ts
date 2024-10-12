@@ -13,13 +13,14 @@ import { EventService } from '../../../service/event.service';
 import { StorageService } from '../../../service/storage.service';
 import { UserEventTeamService } from '../../../service/user-event-team.service';
 import { UserImageUrlPipe } from '../../../pipe/user-image-url.pipe';
+import { TitleComponent } from '../../../components/title/title.component';
 
 const COL_USERS = environment.collection.USERS;
 
 @Component({
   selector: 'app-team',
   standalone: true,
-  imports: [CommonModule, FaIconComponent, UserImageUrlPipe, NgOptimizedImage],
+  imports: [CommonModule, FaIconComponent, TitleComponent, UserImageUrlPipe, NgOptimizedImage],
   templateUrl: './team.component.html',
   styleUrls: ['./team.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

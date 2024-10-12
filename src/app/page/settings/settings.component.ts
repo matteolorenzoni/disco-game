@@ -7,6 +7,7 @@ import { FirebaseService } from '../../service/firebase.service';
 import { UserCreateComponent } from '../user/user-create/user-create.component';
 import { FvButtonComponent } from '../../components/fv-button.component';
 import { FvButtonOutlinedComponent } from '../../components/fv-button-outlined.component';
+import { TitleComponent } from '../../components/title/title.component';
 
 export type Tab = {
   id: 'profile' | 'notifications';
@@ -20,6 +21,7 @@ export type Tab = {
     CommonModule,
     RouterModule,
     FaIconComponent,
+    TitleComponent,
     UserCreateComponent,
     FvButtonComponent,
     FvButtonOutlinedComponent

@@ -18,6 +18,7 @@ import { UserEventTeamService } from '../../../service/user-event-team.service';
 import { UserService } from '../../../service/user.service';
 import { FvFieldIconComponent } from '../../../components/fv-field-icon.component';
 import { FvButtonComponent } from '../../../components/fv-button.component';
+import { TitleComponent } from '../../../components/title/title.component';
 
 @Component({
   selector: 'app-event-list',
@@ -26,6 +27,7 @@ import { FvButtonComponent } from '../../../components/fv-button.component';
     CommonModule,
     ReactiveFormsModule,
     FaIconComponent,
+    TitleComponent,
     FvFieldIconComponent,
     FvButtonComponent,
     CheckExistTeamPipe

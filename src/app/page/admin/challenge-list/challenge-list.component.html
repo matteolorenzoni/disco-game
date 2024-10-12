@@ -1,4 +1,4 @@
-<h1 class="mb-8 text-3xl font-bold text-on-background">Sfide</h1>
+<app-title [pages]="[{ path: '', label: 'Sfide' }]"> </app-title>
 
 <ul class="grid grid-cols-[repeat(auto-fill,minmax(20rem,1fr))] gap-4 text-on-surface">
   @for (challenge of challenges(); track challenge.id) {

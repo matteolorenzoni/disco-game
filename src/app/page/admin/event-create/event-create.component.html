@@ -1,7 +1,9 @@
-<div class="mb-8 flex flex-col gap-1 text-center text-on-background">
-  <h3 class="text-3xl font-semibold text-white">Evento</h3>
-  <p class="text-sm">Inserisci le informazioni dell'evento</p>
-</div>
+<app-title
+  [pages]="[
+    { path: '../../events', label: 'Eventi' },
+    { path: '', label: 'Evento' }
+  ]">
+</app-title>
 
 <form [formGroup]="eventForm" (ngSubmit)="addOrUpdateEvent()" class="flex w-full max-w-2xl flex-col gap-6">
   <fv-field name="name" label="Nome evento"></fv-field>

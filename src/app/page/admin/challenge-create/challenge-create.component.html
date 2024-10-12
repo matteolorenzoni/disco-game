@@ -1,7 +1,9 @@
-<div class="mb-8 flex flex-col gap-1 text-center text-on-background">
-  <h3 class="text-3xl font-semibold text-white">Sfida</h3>
-  <p class="text-sm">Inserisci le informazioni della sfida</p>
-</div>
+<app-title
+  [pages]="[
+    { path: '../../challenges', label: 'Sfide' },
+    { path: '', label: 'Sfida' }
+  ]">
+</app-title>
 
 <form [formGroup]="challengeForm" (ngSubmit)="addOrUpdateChallenge()" class="flex w-full max-w-2xl flex-col gap-6">
   <fv-field name="name" label="Nome sfida"></fv-field>
