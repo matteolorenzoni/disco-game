@@ -83,24 +83,16 @@
     [tabindex]="-1"
     (keydown)="(undefined)"
     (click)="onBackdropClick($event)">
-    <div data-dialog="sign-in-modal" class="relative mx-auto w-4/5 max-w-[24rem] overflow-hidden rounded shadow-sm">
-      <div class="flex flex-col gap-2 bg-primary-500 p-2">
+    <div
+      data-dialog="sign-in-modal"
+      class="relative mx-auto w-4/5 max-w-[24rem] overflow-hidden rounded-lg border border-white/15 bg-white/15 p-2 shadow backdrop-blur">
+      <div class="flex flex-col gap-2">
         <h3 class="mb-4 text-center text-lg font-semibold text-white">Crea squadra</h3>
         <form
           [formGroup]="newTeamForm"
           (ngSubmit)="addTeam()"
           class="flex w-full max-w-2xl flex-col justify-between gap-2">
-          <div class="relative h-10">
-            <input
-              class="h-full w-full bg-primary-300 p-2 pl-10 text-sm text-on-surface shadow-sm focus:outline-none"
-              placeholder="Nome squadra"
-              formControlName="name" />
-            <div
-              class="absolute left-1 top-1 h-8 w-8 rounded border border-transparent bg-primary-700 p-1 text-center text-sm text-on-surface shadow">
-              <fa-icon [icon]="ICON_TEAM"></fa-icon>
-            </div>
-          </div>
-
+          <fv-field-icon name="name" label="Nome squadra" [icon]="ICON_TEAM"></fv-field-icon>
           <button
             type="submit"
             [disabled]="newTeamForm.invalid"
@@ -123,26 +115,20 @@
     [tabindex]="-1"
     aria-hidden="true"
     (click)="onBackdropClick($event)">
-    <div data-dialog="sign-in-modal" class="relative mx-auto w-4/5 max-w-[24rem] overflow-hidden rounded-lg shadow-sm">
-      <div class="flex flex-col gap-2 bg-secondary-500 p-2">
+    <div
+      data-dialog="sign-in-modal"
+      class="relative mx-auto w-4/5 max-w-[24rem] overflow-hidden rounded-lg border border-white/15 bg-white/15 p-2 shadow backdrop-blur">
+      <div class="flex flex-col gap-2">
         <h3 class="mb-4 text-center text-lg font-semibold text-white">Cerca squadra</h3>
         <form
           [formGroup]="findTeamForm"
           (ngSubmit)="findTeam()"
           class="flex w-full max-w-2xl flex-col justify-between gap-2">
-          <div class="relative h-10">
-            <input
-              class="h-full w-full bg-secondary-300 p-2 pl-10 text-sm text-on-surface shadow-sm focus:outline-none"
-              placeholder="Codice squadra"
-              minlength="6"
-              maxlength="6"
-              formControlName="code" />
-            <div
-              class="absolute left-1 top-1 h-8 w-8 rounded border border-transparent bg-secondary-700 p-1 text-center text-sm text-on-surface shadow">
-              <fa-icon [icon]="ICON_TEAM"></fa-icon>
-            </div>
-          </div>
-
+          <fv-field-icon
+            class="focus:[&_input]:border-secondary-500 focus:[&_input]:text-secondary-200 focus:[&_input]:caret-secondary-500"
+            name="code"
+            label="Codice squadra"
+            [icon]="ICON_TEAM"></fv-field-icon>
           <button
             type="submit"
             [disabled]="findTeamForm.invalid"

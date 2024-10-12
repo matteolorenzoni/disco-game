@@ -12,13 +12,15 @@ import { FirebaseService } from '../../../service/firebase.service';
 import { LogService } from '../../../service/log.service';
 import { StorageService } from '../../../service/storage.service';
 import { endDateValidator } from '../../../util/utils';
+import { FvFieldComponent } from '../../../components/fv-field.component';
+import { FvTextAeraComponent } from '../../../components/fv-text-area.component';
 
 const COL_EVENTS = environment.collection.EVENTS;
 
 @Component({
   selector: 'app-event-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FvFieldComponent, FvTextAeraComponent],
   templateUrl: './event-create.component.html',
   styleUrls: ['./event-create.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

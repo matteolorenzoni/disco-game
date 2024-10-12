@@ -16,11 +16,12 @@ import { LogService } from '../../../service/log.service';
 import { TeamService } from '../../../service/team.service';
 import { UserEventTeamService } from '../../../service/user-event-team.service';
 import { UserService } from '../../../service/user.service';
+import { FvFieldIconComponent } from '../../../components/fv-field-icon.component';
 
 @Component({
   selector: 'app-event-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FaIconComponent, CheckExistTeamPipe],
+  imports: [CommonModule, ReactiveFormsModule, FaIconComponent, FvFieldIconComponent, CheckExistTeamPipe],
   templateUrl: './event-list.component.html',
   styleUrls: ['./event-list.component.scss'],
   animations: [

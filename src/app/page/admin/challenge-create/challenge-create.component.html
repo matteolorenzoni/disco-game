@@ -4,22 +4,9 @@
 </div>
 
 <form [formGroup]="challengeForm" (ngSubmit)="addOrUpdateChallenge()" class="flex w-full max-w-2xl flex-col gap-6">
-  <div class="flex w-full flex-col gap-1">
-    <label for="name" class="block text-sm font-medium text-field-label-color"> Nome sfida </label>
-    <input
-      id="name"
-      formControlName="name"
-      type="text"
-      class="w-full rounded border border-field-border bg-field-background px-3 py-2 text-sm text-field-color shadow-sm focus:border-2 focus:border-primary-500 focus:outline-none" />
-  </div>
+  <fv-field name="name" label="Nome sfida"></fv-field>
 
-  <div class="flex w-full flex-col gap-1">
-    <label for="description" class="block text-sm font-medium text-field-label-color"> Descrizione </label>
-    <textarea
-      id="description"
-      formControlName="description"
-      class="w-full rounded border border-field-border bg-field-background px-3 py-2 text-sm text-field-color shadow-sm focus:border-2 focus:border-primary-500 focus:outline-none"></textarea>
-  </div>
+  <fv-text-area name="description" label="Descrizione"></fv-text-area>
 
   <div class="flex w-full flex-col gap-1">
     <label for="type" class="block text-sm font-medium text-field-label-color"> Tipo </label>
@@ -38,34 +25,11 @@
     </button>
   </div>
 
-  <div class="flex w-full flex-col gap-1">
-    <label for="rules" class="block text-sm font-medium text-field-label-color"> Regole </label>
-    <textarea
-      id="rules"
-      formControlName="rules"
-      class="w-full rounded border border-field-border bg-field-background px-3 py-2 text-sm text-field-color shadow-sm focus:border-2 focus:border-primary-500 focus:outline-none"></textarea>
-  </div>
+  <fv-text-area name="rules" label="Regole"></fv-text-area>
 
-  <div class="flex w-full flex-col gap-1">
-    <label for="points" class="block text-sm font-medium text-field-label-color"> Punti </label>
-    <input
-      id="points"
-      formControlName="points"
-      type="number"
-      class="w-full rounded border border-field-border bg-field-background px-3 py-2 text-sm text-field-color shadow-sm focus:border-2 focus:border-primary-500 focus:outline-none" />
-  </div>
+  <fv-field name="points" label="Punti" type="number"></fv-field>
 
-  <div class="flex w-full flex-col gap-1">
-    <label for="complexity" class="block text-sm font-medium text-field-label-color"> Complessità </label>
-    <input
-      id="complexity"
-      formControlName="complexity"
-      type="number"
-      min="1"
-      max="5"
-      step=".1"
-      class="w-full rounded border border-field-border bg-field-background px-3 py-2 text-sm text-field-color shadow-sm focus:border-2 focus:border-primary-500 focus:outline-none" />
-  </div>
+  <fv-field name="complexity" label="Complessità" type="number" [min]="1" [max]="5" [step]="'.1'"></fv-field>
 
   <button
     type="submit"

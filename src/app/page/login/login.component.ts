@@ -3,18 +3,18 @@ import { ChangeDetectionStrategy, Component, HostListener, inject, OnInit, signa
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { faLock, faUser } from '@fortawesome/free-solid-svg-icons';
-import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { FromMap, LoginModel } from '../../model/form.model';
 import { UserRole } from '../../model/user.model';
 import { FirebaseService } from '../../service/firebase.service';
 import { LogService } from '../../service/log.service';
 import { UserService } from '../../service/user.service';
 import { loginFormAnimation } from '../../animation/animations';
+import { FvFieldIconComponent } from '../../components/fv-field-icon.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FaIconComponent],
+  imports: [CommonModule, ReactiveFormsModule, FvFieldIconComponent],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
   animations: [loginFormAnimation],

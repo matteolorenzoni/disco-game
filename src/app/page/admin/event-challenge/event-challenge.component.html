@@ -99,60 +99,19 @@
           class="flex w-full flex-col gap-6"
           (submit)="addOrUpdateEventChallenge()">
           <!-- Challenge -->
-          <div class="flex w-full flex-col gap-1">
-            <label for="challengeId" class="text-primary block text-sm font-medium">Sfida</label>
-            <select
-              id="challengeId"
-              formControlName="challengeId"
-              class="hover:border-primary-light focus:border-primary w-full rounded border border-slate-600 bg-surface px-3 py-2 text-sm text-on-surface shadow-sm transition duration-300 ease-in focus:shadow focus:outline-none">
-              @for (challenge of challenges(); track challenge.id) {
-                <option [value]="challenge.id">{{ challenge.props.name }}</option>
-              }
-            </select>
-          </div>
+          <fv-select name="challengeId" label="Sfida" [options]="challengesOptions()"></fv-select>
 
           <!-- Status -->
-          <div class="flex w-full flex-col gap-1">
-            <label for="challengeStatus" class="text-primary block text-sm font-medium">Stato</label>
-            <select
-              id="challengeStatus"
-              formControlName="challengeStatus"
-              class="hover:border-primary-light focus:border-primary w-full rounded border border-slate-600 bg-surface px-3 py-2 text-sm text-on-surface shadow-sm transition duration-300 ease-in focus:shadow focus:outline-none">
-              @for (option of OPTIONS; track option.status) {
-                <option [value]="option.status">{{ option.label }}</option>
-              }
-            </select>
-          </div>
+          <fv-select name="challengeStatus" label="Stato" [options]="OPTIONS"></fv-select>
 
           <!-- Max Times -->
-          <div class="flex w-full flex-col gap-1">
-            <label for="maxTimes" class="text-primary block text-sm font-medium">Numero Massimo di Tentativi</label>
-            <input
-              id="maxTimes"
-              formControlName="maxTimes"
-              type="number"
-              class="hover:border-primary-light focus:border-primary w-full rounded border border-slate-600 bg-surface px-3 py-2 text-sm text-on-surface shadow-sm transition duration-300 ease-in focus:shadow focus:outline-none" />
-          </div>
+          <fv-field name="maxTimes" label="Numero massimo di tentativi" type="number"></fv-field>
 
           <!-- Start Date -->
-          <div class="flex w-full flex-col gap-1">
-            <label for="startDate" class="text-primary block text-sm font-medium">Data di Inizio</label>
-            <input
-              id="startDate"
-              formControlName="startDate"
-              type="datetime-local"
-              class="hover:border-primary-light focus:border-primary w-full rounded border border-slate-600 bg-surface px-3 py-2 text-sm text-on-surface shadow-sm transition duration-300 ease-in focus:shadow focus:outline-none" />
-          </div>
+          <fv-field name="startDate" label="Data di inizio" type="datetime-local"></fv-field>
 
           <!-- End Date -->
-          <div class="flex w-full flex-col gap-1">
-            <label for="endDate" class="text-primary block text-sm font-medium">Data di Fine</label>
-            <input
-              id="endDate"
-              formControlName="endDate"
-              type="datetime-local"
-              class="hover:border-primary-light focus:border-primary w-full rounded border border-slate-600 bg-surface px-3 py-2 text-sm text-on-surface shadow-sm transition duration-300 ease-in focus:shadow focus:outline-none" />
-          </div>
+          <fv-field name="endDate" label="Data di fine" type="datetime-local"></fv-field>
 
           <button
             type="submit"

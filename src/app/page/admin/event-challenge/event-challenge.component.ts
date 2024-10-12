@@ -28,16 +28,20 @@ import { EventService } from '../../../service/event.service';
 import { FvFloatingButtonComponent } from '../../../components/fv-floating-button.component';
 import EventChallengeStatus from './event-challenge-status.config.json';
 import { LogService } from '../../../service/log.service';
-
-export type SelectOption = {
-  label: string;
-  status: ChallengeStatus;
-};
+import { FvFieldComponent } from '../../../components/fv-field.component';
+import { FvSelectComponent, SelectOption } from '../../../components/fv-select.component';
 
 @Component({
   selector: 'app-event-challenge',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FaIconComponent, FvFloatingButtonComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FaIconComponent,
+    FvFieldComponent,
+    FvSelectComponent,
+    FvFloatingButtonComponent
+  ],
   templateUrl: './event-challenge.component.html',
   styleUrls: ['./event-challenge.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -53,12 +57,13 @@ export class EventChallengeComponent implements OnInit {
   /* Variables */
   eventId = signal<string | undefined>(undefined);
   challenges = signal<Doc<Challenge>[]>([]);
+  challengesOptions = signal<SelectOption<string>[]>([]);
   eventChallenges = signal<Doc<EventChallenge>[]>([]);
   eventChallengeActive = signal<Doc<EventChallenge> | undefined>(undefined);
   formModalIsOpen = signal<boolean>(false);
 
   /* Constants */
-  OPTIONS = EventChallengeStatus as SelectOption[];
+  OPTIONS = EventChallengeStatus as SelectOption<ChallengeStatus>[];
 
   /* Icons */
   ICON_STATUS = faMobileScreenButton;
@@ -104,6 +109,7 @@ export class EventChallengeComponent implements OnInit {
 
       const challenges = await this.challengeService.getChallenges();
       this.challenges.set(challenges);
+      this.challengesOptions.set(challenges.map((x) => ({ label: x.props.name, value: x.id })));
 
       const eventChallenge = await this.eventChallengeService.getEventChallengesByEventId(eventId);
       this.eventChallenges.set(eventChallenge);

@@ -1,6 +1,6 @@
 [
-  { "label": "Attivo", "status": "ACTIVE" },
-  { "label": "Bloccato", "status": "LOCKED" },
-  { "label": "Cancellato", "status": "CANCELED" },
-  { "label": "Sospeso", "status": "SUSPENDED" }
+  { "label": "Attivo", "value": "ACTIVE" },
+  { "label": "Bloccato", "value": "LOCKED" },
+  { "label": "Cancellato", "value": "CANCELED" },
+  { "label": "Sospeso", "value": "SUSPENDED" }
 ]

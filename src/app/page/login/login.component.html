@@ -27,29 +27,9 @@
     </div>
 
     <form [formGroup]="loginForm" (ngSubmit)="login()" class="flex w-full max-w-2xl flex-col justify-between gap-2">
-      <div class="relative h-8">
-        <input
-          type="email"
-          class="h-full w-full rounded border border-field-border bg-surface p-2 pl-8 text-sm text-on-surface shadow focus:border-2 focus:border-primary-500 focus:outline-none"
-          placeholder="Email"
-          formControlName="email" />
-        <div
-          class="absolute left-0 top-0 flex h-8 w-8 items-center justify-center rounded border-transparent text-center text-sm text-field-icon-color shadow">
-          <fa-icon [icon]="faUser"></fa-icon>
-        </div>
-      </div>
+      <fv-field-icon name="email" label="Email" [icon]="faUser" type="email"></fv-field-icon>
 
-      <div class="relative h-8">
-        <input
-          type="password"
-          class="h-full w-full rounded border border-field-border bg-surface p-2 pl-8 text-sm text-on-surface shadow focus:border-2 focus:border-primary-500 focus:outline-none"
-          placeholder="Password"
-          formControlName="password" />
-        <div
-          class="absolute left-0 top-0 flex h-8 w-8 items-center justify-center rounded border-transparent text-center text-sm text-field-icon-color shadow">
-          <fa-icon [icon]="faLock"></fa-icon>
-        </div>
-      </div>
+      <fv-field-icon name="password" label="Password" [icon]="faLock" type="password"></fv-field-icon>
 
       <div class="flex justify-between px-1">
         <div class="inline-flex items-center">
