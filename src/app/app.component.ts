@@ -4,6 +4,7 @@ import { FirebaseService } from './service/firebase.service';
 import { LogService } from './service/log.service';
 import { FvToastComponent } from './components/fv-toast.component';
 import { FvBottomNavigationComponent } from './components/fv-bottom-navigation.component';
+import { HttpService } from './service/http.service';
 
 @Component({
   selector: 'app-root',
@@ -15,6 +16,7 @@ import { FvBottomNavigationComponent } from './components/fv-bottom-navigation.c
 export class AppComponent {
   /* Services */
   readonly firebaseService = inject(FirebaseService);
+  readonly httpService = inject(HttpService);
   readonly logService = inject(LogService);
 
   /* Variables */
