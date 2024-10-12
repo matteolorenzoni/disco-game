@@ -1,19 +1,8 @@
 <section class="relative flex min-h-screen flex-col overflow-hidden bg-neutral-800 p-4 text-on-surface">
   <div class="mb-20 mt-auto">
     <div class="flex flex-col gap-4">
-      <button
-        type="button"
-        class="inline-block w-full rounded-full bg-primary-500 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal transition"
-        (click)="setPage($event, 'login')">
-        Entra
-      </button>
-
-      <button
-        type="button"
-        class="inline-block w-full rounded-full bg-secondary-500 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal"
-        (click)="router.navigate(['/sign-up'])">
-        Registrati
-      </button>
+      <fv-button label="Entra" twColor="primary" [onClick]="setPage.bind(this, 'login')"></fv-button>
+      <fv-button label="Registrati" twColor="secondary" [onClick]="onGoToRegistry.bind(this)"></fv-button>
     </div>
   </div>
 
@@ -62,12 +51,7 @@
         <a href="./restore-password" class="text-sm font-bold hover:underline">Password dimentica?</a>
       </div>
 
-      <button
-        type="submit"
-        [disabled]="loginForm.invalid"
-        class="mt-8 inline-block w-full rounded bg-primary-500 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white disabled:cursor-not-allowed disabled:bg-neutral-700 disabled:text-neutral-800">
-        Login
-      </button>
+      <fv-button type="submit" label="Login" twColor="primary" [disabled]="loginForm.invalid"></fv-button>
     </form>
 
     <p class="text-center text-sm">

@@ -42,10 +42,6 @@
       <app-user-create class="pt-4"></app-user-create>
     </div>
 
-    <button
-      class="mt-12 w-full rounded border border-rose-600 px-8 py-2 text-xs font-semibold text-rose-600 hover:text-white"
-      (click)="firebaseService.logout(true)">
-      Esci
-    </button>
+    <fv-button-outlined class="mt-12" label="Esci" twColor="rose" [onClick]="logout.bind(this)"></fv-button-outlined>
   }
 }

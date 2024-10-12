@@ -113,12 +113,12 @@
           <!-- End Date -->
           <fv-field name="endDate" label="Data di fine" type="datetime-local"></fv-field>
 
-          <button
+          <fv-button
+            class="mt-12"
             type="submit"
-            class="bg-primary text-on-primary shadow-primary-light hover:bg-primary-light active:bg-primary-dark disabled:bg-primary/30 disabled:text-primary/50 mt-8 inline-block w-full rounded-full px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal transition duration-150 ease-in-out disabled:cursor-not-allowed"
-            [disabled]="eventChallengeForm.invalid">
-            {{ eventChallengeActive() ? 'Aggiorna' : 'Aggiungi' }}
-          </button>
+            [label]="eventChallengeActive() ? 'Aggiorna' : 'Salva'"
+            twColor="primary"
+            [disabled]="eventChallengeForm.invalid"></fv-button>
         </form>
       </div>
     </div>

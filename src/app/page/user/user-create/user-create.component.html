@@ -33,10 +33,10 @@
 
   <fv-field name="password" label="Password" type="password"></fv-field>
 
-  <button
+  <fv-button
+    class="mt-12"
     type="submit"
-    [disabled]="signUpForm.invalid"
-    class="mt-8 rounded bg-primary-500 p-2 text-xs uppercase text-on-background disabled:cursor-not-allowed disabled:bg-primary-200 disabled:text-primary-300">
-    {{ userService.user() ? 'Aggiorna' : 'Registrati' }}
-  </button>
+    [label]="userService.user() ? 'Aggiorna' : 'Registrati'"
+    twColor="primary"
+    [disabled]="signUpForm.invalid"></fv-button>
 </form>

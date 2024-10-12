@@ -17,11 +17,19 @@ import { TeamService } from '../../../service/team.service';
 import { UserEventTeamService } from '../../../service/user-event-team.service';
 import { UserService } from '../../../service/user.service';
 import { FvFieldIconComponent } from '../../../components/fv-field-icon.component';
+import { FvButtonComponent } from '../../../components/fv-button.component';
 
 @Component({
   selector: 'app-event-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FaIconComponent, FvFieldIconComponent, CheckExistTeamPipe],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FaIconComponent,
+    FvFieldIconComponent,
+    FvButtonComponent,
+    CheckExistTeamPipe
+  ],
   templateUrl: './event-list.component.html',
   styleUrls: ['./event-list.component.scss'],
   animations: [
@@ -167,6 +175,14 @@ export class EventListComponent implements OnInit {
   }
 
   /* -------------------- Methods: utils -------------------- */
+  protected openNewTeamModal(): void {
+    this.newTeamModalIsOpen.set(true);
+  }
+
+  protected openFindTeamModal(): void {
+    this.findTeamModalIsOpen.set(true);
+  }
+
   protected onBackdropClick(event: MouseEvent): void {
     const clickedElement = event.target as HTMLElement;
     if (clickedElement.dataset['dialogBackdrop'] === 'sign-in-modal') {

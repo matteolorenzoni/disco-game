@@ -51,10 +51,10 @@
     }
   </div>
 
-  <button
+  <fv-button
+    class="mt-12"
     type="submit"
-    [disabled]="eventForm.invalid || !imagePreview()"
-    class="rounded bg-primary-500 p-2 text-xs uppercase text-on-background disabled:cursor-not-allowed disabled:bg-primary-200 disabled:text-primary-300">
-    Salva Evento
-  </button>
+    [label]="event() ? 'Aggiorna' : 'Salva'"
+    twColor="primary"
+    [disabled]="eventForm.invalid || !imagePreview()"></fv-button>
 </form>

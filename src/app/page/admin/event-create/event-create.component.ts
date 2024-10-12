@@ -14,13 +14,14 @@ import { StorageService } from '../../../service/storage.service';
 import { endDateValidator } from '../../../util/utils';
 import { FvFieldComponent } from '../../../components/fv-field.component';
 import { FvTextAeraComponent } from '../../../components/fv-text-area.component';
+import { FvButtonComponent } from '../../../components/fv-button.component';
 
 const COL_EVENTS = environment.collection.EVENTS;
 
 @Component({
   selector: 'app-event-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FvFieldComponent, FvTextAeraComponent],
+  imports: [CommonModule, ReactiveFormsModule, FvFieldComponent, FvTextAeraComponent, FvButtonComponent],
   templateUrl: './event-create.component.html',
   styleUrls: ['./event-create.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

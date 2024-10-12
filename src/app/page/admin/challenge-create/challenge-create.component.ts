@@ -9,6 +9,7 @@ import { ChallengeType } from '../../../model/challenge.model';
 import ChallengeTypes from './challenge-type.config.json';
 import { FvFieldComponent } from '../../../components/fv-field.component';
 import { FvTextAeraComponent } from '../../../components/fv-text-area.component';
+import { FvButtonComponent } from '../../../components/fv-button.component';
 
 export type SelectOption = {
   label: string;
@@ -18,7 +19,7 @@ export type SelectOption = {
 @Component({
   selector: 'app-challenge-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FvFieldComponent, FvTextAeraComponent],
+  imports: [CommonModule, ReactiveFormsModule, FvFieldComponent, FvTextAeraComponent, FvButtonComponent],
   templateUrl: './challenge-create.component.html',
   styleUrls: ['./challenge-create.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

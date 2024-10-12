@@ -7,11 +7,13 @@ import { EventService } from '../../../service/event.service';
 import { FvFloatingButtonComponent } from '../../../components/fv-floating-button.component';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faCalendar, faClock, faLocationPin } from '@fortawesome/free-solid-svg-icons';
+import { FvButtonComponent } from '../../../components/fv-button.component';
+import { FvButtonOutlinedComponent } from '../../../components/fv-button-outlined.component';
 
 @Component({
   selector: 'app-event-list',
   standalone: true,
-  imports: [CommonModule, FaIconComponent, FvFloatingButtonComponent],
+  imports: [CommonModule, FaIconComponent, FvButtonComponent, FvButtonOutlinedComponent, FvFloatingButtonComponent],
   templateUrl: './event-list.component.html',
   styleUrls: ['./event-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

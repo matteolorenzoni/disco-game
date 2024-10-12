@@ -10,13 +10,14 @@ import { StorageService } from '../../../service/storage.service';
 import { UserService } from '../../../service/user.service';
 import { environment } from '../../../../environments/environment.development';
 import { FvFieldComponent } from '../../../components/fv-field.component';
+import { FvButtonComponent } from '../../../components/fv-button.component';
 
 const COL_USERS = environment.collection.USERS;
 
 @Component({
   selector: 'app-user-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FaIconComponent, FvFieldComponent],
+  imports: [CommonModule, ReactiveFormsModule, FaIconComponent, FvFieldComponent, FvButtonComponent],
   templateUrl: './user-create.component.html',
   styleUrls: ['./user-create.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

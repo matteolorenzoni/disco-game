@@ -5,6 +5,8 @@ import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faAngleRight, faCircleUser, faHome, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 import { FirebaseService } from '../../service/firebase.service';
 import { UserCreateComponent } from '../user/user-create/user-create.component';
+import { FvButtonComponent } from '../../components/fv-button.component';
+import { FvButtonOutlinedComponent } from '../../components/fv-button-outlined.component';
 
 export type Tab = {
   id: 'profile' | 'notifications';
@@ -14,7 +16,14 @@ export type Tab = {
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, RouterModule, FaIconComponent, UserCreateComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    FaIconComponent,
+    UserCreateComponent,
+    FvButtonComponent,
+    FvButtonOutlinedComponent
+  ],
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -37,4 +46,9 @@ export class SettingsComponent {
   ICON_RIGHT = faAngleRight;
   ICON_USER = faCircleUser;
   ICON_LOGOUT = faRightFromBracket;
+
+  /* --------------- Methods --------------- */
+  protected async logout(): Promise<void> {
+    await this.firebaseService.logout(true);
+  }
 }

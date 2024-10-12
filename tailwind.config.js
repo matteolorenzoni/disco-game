@@ -1,6 +1,20 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ['./src/**/*.{html,ts}'],
+  safelist: [
+    {
+      pattern: /bg-(primary|secondary|amber)-(500|600|700)/,
+      variants: ['hover', 'active']
+    },
+    {
+      pattern: /border-(primary|rose)-(500|600|700)/,
+      variants: ['hover', 'active']
+    },
+    {
+      pattern: /text-(primary|rose)-(500|600|700)/,
+      variants: ['hover', 'active']
+    }
+  ],
   theme: {
     extend: {
       fontSize: {

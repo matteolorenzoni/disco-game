@@ -31,12 +31,12 @@
 
   <fv-field name="complexity" label="Complessità" type="number" [min]="1" [max]="5" [step]="'.1'"></fv-field>
 
-  <button
+  <fv-button
+    class="mt-12"
     type="submit"
-    [disabled]="challengeForm.invalid"
-    class="rounded bg-primary-500 p-2 text-xs uppercase text-on-background disabled:cursor-not-allowed disabled:bg-primary-200 disabled:text-primary-300">
-    Salva Sfida
-  </button>
+    [label]="challengeId() ? 'Aggiorna' : 'Salva'"
+    twColor="primary"
+    [disabled]="challengeForm.invalid"></fv-button>
 </form>
 
 <!-- Seleziona tipo della sfida -->

@@ -36,18 +36,13 @@
                 {{ userGame.props.teamName }}
               </p>
             </div>
-            <button
-              class="rounded bg-amber-400 p-2 text-xs text-black"
-              (click)="goToTeam(userGame.props.eventId, userGame.props.teamId)">
-              Visualizza squadra
-            </button>
+            <fv-button
+              label="Visualizza squadra"
+              twColor="amber"
+              [onClick]="goToTeam.bind(this, userGame.props.eventId, userGame.props.teamId)"></fv-button>
           } @else {
-            <button class="rounded bg-primary-500 p-2 text-xs text-white" (click)="newTeamModalIsOpen.set(true)">
-              Crea squadra
-            </button>
-            <button class="rounded bg-secondary-500 p-2 text-xs text-white" (click)="findTeamModalIsOpen.set(true)">
-              Trova squadra
-            </button>
+            <fv-button label="Crea squadra" twColor="primary" [onClick]="openNewTeamModal.bind(this)"></fv-button>
+            <fv-button label="Trova squadra" twColor="secondary" [onClick]="openFindTeamModal.bind(this)"></fv-button>
           }
         </div>
       </li>
@@ -93,12 +88,7 @@
           (ngSubmit)="addTeam()"
           class="flex w-full max-w-2xl flex-col justify-between gap-2">
           <fv-field-icon name="name" label="Nome squadra" [icon]="ICON_TEAM"></fv-field-icon>
-          <button
-            type="submit"
-            [disabled]="newTeamForm.invalid"
-            class="rounded bg-primary-700 p-2 text-xs uppercase text-on-background disabled:cursor-not-allowed disabled:bg-primary-200 disabled:text-primary-300">
-            Crea
-          </button>
+          <fv-button type="submit" label="Crea" twColor="primary" [disabled]="newTeamForm.invalid"></fv-button>
         </form>
       </div>
     </div>
@@ -129,12 +119,7 @@
             name="code"
             label="Codice squadra"
             [icon]="ICON_TEAM"></fv-field-icon>
-          <button
-            type="submit"
-            [disabled]="findTeamForm.invalid"
-            class="rounded bg-secondary-700 p-2 text-xs uppercase text-on-background disabled:cursor-not-allowed disabled:bg-secondary-200 disabled:text-secondary-300">
-            Cerca
-          </button>
+          <fv-button type="submit" label="Cerca" twColor="primary" [disabled]="findTeamForm.invalid"></fv-button>
         </form>
       </div>
     </div>

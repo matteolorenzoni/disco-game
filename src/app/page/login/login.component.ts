@@ -10,11 +10,12 @@ import { LogService } from '../../service/log.service';
 import { UserService } from '../../service/user.service';
 import { loginFormAnimation } from '../../animation/animations';
 import { FvFieldIconComponent } from '../../components/fv-field-icon.component';
+import { FvButtonComponent } from '../../components/fv-button.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FvFieldIconComponent],
+  imports: [CommonModule, ReactiveFormsModule, FvFieldIconComponent, FvButtonComponent],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
   animations: [loginFormAnimation],
@@ -47,7 +48,8 @@ export class LoginComponent implements OnInit {
     // Verifica se il click è avvenuto all'interno della sezione "container_form"
     const target = event.target as HTMLElement;
     if (target.closest('#container_form')) return; // Ignora il click
-    this.setPage(event, 'welcome');
+    event.stopPropagation();
+    this.setPage('welcome');
   }
 
   /* ------------- Lifecycle ------------- */
@@ -56,8 +58,11 @@ export class LoginComponent implements OnInit {
   }
 
   /* ----------------- Methods: page ----------------- */
-  protected setPage(event: Event, page: 'welcome' | 'login'): void {
-    event.stopPropagation();
+  protected onGoToRegistry(): void {
+    this.router.navigate(['/sign-up']);
+  }
+
+  protected setPage(page: 'welcome' | 'login'): void {
     this.page.set(page);
   }
 
