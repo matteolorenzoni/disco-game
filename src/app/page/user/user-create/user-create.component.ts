@@ -11,6 +11,7 @@ import { UserService } from '../../../service/user.service';
 import { environment } from '../../../../environments/environment.development';
 import { FvFieldComponent } from '../../../components/fv-field.component';
 import { FvButtonComponent } from '../../../components/fv-button.component';
+import { HttpService } from '../../../service/http.service';
 
 const COL_USERS = environment.collection.USERS;
 
@@ -27,6 +28,7 @@ export class UserCreateComponent implements OnInit {
   readonly router = inject(Router);
   readonly firebaseService = inject(FirebaseService);
   readonly storageService = inject(StorageService);
+  readonly httpService = inject(HttpService);
   readonly userService = inject(UserService);
 
   /* Variables */
@@ -84,32 +86,38 @@ export class UserCreateComponent implements OnInit {
   }
 
   private async addUser(userModelForm: UserModel): Promise<void> {
-    /* Controllo userName univoco */
-    const checkUsername = await this.userService.checkUniqUsername(userModelForm.userName);
-    if (!checkUsername) return;
+    await this.httpService.execute(async () => {
+      /* Controllo userName univoco */
+      const checkUsername = await this.userService.checkUniqUsername(userModelForm.userName);
+      if (!checkUsername) return;
 
-    /* Creazione utente */
-    const userCredential = await this.firebaseService.signUp(userModelForm.email, userModelForm.password);
+      /* Creazione utente */
+      const userCredential = await this.firebaseService.signUp(userModelForm.email, userModelForm.password);
 
-    /* Creazione utente immagine */
-    let imageUrl: string | null = null;
-    if (this.imageFile()) {
-      imageUrl = await this.storageService.saveImage(this.imageFile()!, COL_USERS, userCredential.user.uid);
-    }
+      /* Creazione utente immagine */
+      let imageUrl: string | null = null;
+      if (this.imageFile()) {
+        imageUrl = await this.storageService.saveImage(this.imageFile()!, COL_USERS, userCredential.user.uid);
+      }
 
-    /* Aggiunta utente a DB */
-    await this.userService.addUserById(userCredential.user.uid, userModelForm, imageUrl);
-    await this.router.navigate(['/login']);
+      /* Aggiunta utente a DB */
+      await this.userService.addUserById(userCredential.user.uid, userModelForm, imageUrl);
+
+      /* Redirect */
+      await this.router.navigate(['/login']);
+    });
   }
 
   private async updateUser(userId: string, userModelForm: UserModel): Promise<void> {
-    /* Aggiornamento utente immagine */
-    let imageUrl: string | null | undefined;
-    if (this.imageFile()) {
-      imageUrl = await this.storageService.updateImage(this.imageFile()!, COL_USERS, userId);
-    }
+    await this.httpService.execute(async () => {
+      /* Aggiornamento utente immagine */
+      let imageUrl: string | null | undefined;
+      if (this.imageFile()) {
+        imageUrl = await this.storageService.updateImage(this.imageFile()!, COL_USERS, userId);
+      }
 
-    /* Creazione utente */
-    await this.userService.updateUser(userId, userModelForm, imageUrl);
+      /* Creazione utente */
+      await this.userService.updateUser(userId, userModelForm, imageUrl);
+    });
   }
 }

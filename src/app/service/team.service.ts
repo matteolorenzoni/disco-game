@@ -7,6 +7,7 @@ import { Team, TeamStatus } from '../model/team.model';
 import { Doc } from '../model/firebase';
 import { teamConverter } from '../model/converter';
 import { UserEventTeamService } from './user-event-team.service';
+import { HttpService } from './http.service';
 
 const COL_TEAMS = environment.collection.TEAMS;
 const COL_USER_EVENT_TEAM = environment.collection.USER_EVENT_TEAMS;
@@ -17,24 +18,30 @@ const COL_USER_EVENT_TEAM = environment.collection.USER_EVENT_TEAMS;
 export class TeamService {
   /* Services */
   readonly documentService = inject(FirebaseDocumentService);
+  readonly httpService = inject(HttpService);
   readonly userEventTeamService = inject(UserEventTeamService);
   readonly logService = inject(LogService);
 
   /* --------------------------- Read ---------------------------*/
   public async getTeamById(teamId: string): Promise<Doc<Team>> {
-    return await this.documentService.getDocumentById<Team>(COL_TEAMS, teamId, teamConverter);
+    return await this.httpService.execute(async () => {
+      return await this.documentService.getDocumentById<Team>(COL_TEAMS, teamId, teamConverter);
+    });
   }
 
   public async getTeamByCode(code: string): Promise<Doc<Team> | undefined> {
-    const teams = await this.documentService.getActiveDocumentsByProp<Team>(COL_TEAMS, { code }, teamConverter);
-    return teams[0];
+    return await this.httpService.execute(async () => {
+      const teams = await this.documentService.getActiveDocumentsByProp<Team>(COL_TEAMS, { code }, teamConverter);
+      return teams[0];
+    });
   }
 
-  // TODO: vedere se aggiungere eventId a Team
   public async getTeamsByEvent(eventId: string): Promise<Doc<Team>[]> {
-    const userEventTeams = await this.userEventTeamService.getUserEventTeamByProp('eventId', eventId);
-    const teamIds = userEventTeams.map((x) => x.props.teamId);
-    return await Promise.all(teamIds.map((x) => this.getTeamById(x)));
+    return await this.httpService.execute(async () => {
+      const userEventTeams = await this.userEventTeamService.getUserEventTeamByProp('eventId', eventId);
+      const teamIds = userEventTeams.map((x) => x.props.teamId);
+      return await Promise.all(teamIds.map((x) => this.getTeamById(x)));
+    });
   }
 
   /* --------------------------- Create ---------------------------*/
@@ -43,61 +50,67 @@ export class TeamService {
     eventId: string,
     teamForm: NewTeamModel
   ): Promise<{ teamId: string; teamCode: string }> {
-    const teamsDocs = await this.getTeamsByEvent(eventId);
-    const { names, codes } = teamsDocs.reduce(
-      (acc, cur) => ({
-        names: [...acc.names, cur.props.name.toLowerCase()],
-        codes: [...acc.codes, cur.props.code]
-      }),
-      { names: [] as string[], codes: [] as string[] }
-    );
+    return await this.httpService.execute(async () => {
+      const teamsDocs = await this.getTeamsByEvent(eventId);
+      const { names, codes } = teamsDocs.reduce(
+        (acc, cur) => ({
+          names: [...acc.names, cur.props.name.toLowerCase()],
+          codes: [...acc.codes, cur.props.code]
+        }),
+        { names: [] as string[], codes: [] as string[] }
+      );
 
-    /* Check nome univoco */
-    if (names.includes(teamForm.name.toLowerCase())) {
-      throw new Error('teamNameNotAvailable', { cause: 'teamNameNotAvailable' });
-    }
+      /* Check nome univoco */
+      if (names.includes(teamForm.name.toLowerCase())) {
+        throw new Error('teamNameNotAvailable', { cause: 'teamNameNotAvailable' });
+      }
 
-    /* Check codice univoco */
-    if (codes.length > 2_000_000) {
-      throw new Error('tooManyTeams', { cause: 'tooManyTeams' });
-    }
-    let code = this.generateRandomCode(6);
-    while (codes.includes(code)) {
-      code = this.generateRandomCode(6);
-    }
+      /* Check codice univoco */
+      if (codes.length > 2_000_000) {
+        throw new Error('tooManyTeams', { cause: 'tooManyTeams' });
+      }
+      let code = this.generateRandomCode(6);
+      while (codes.includes(code)) {
+        code = this.generateRandomCode(6);
+      }
 
-    /* Aggiungo evento al DB */
-    const teamRef = await this.documentService.addDocument<Team>(COL_TEAMS, {
-      leaderId: userId,
-      name: teamForm.name,
-      description: '',
-      code,
-      status: TeamStatus.ACTIVE,
-      userEventTeamRefs: [],
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      /* Aggiungo evento al DB */
+      const teamRef = await this.documentService.addDocument<Team>(COL_TEAMS, {
+        leaderId: userId,
+        name: teamForm.name,
+        description: '',
+        code,
+        status: TeamStatus.ACTIVE,
+        userEventTeamRefs: [],
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+
+      return { teamId: teamRef.id, teamCode: code };
     });
-
-    return { teamId: teamRef.id, teamCode: code };
   }
 
   /* --------------------------- Update ---------------------------*/
   public async updateTeam(teamId: string, form: NewTeamModel): Promise<void> {
-    await this.documentService.updateDocument<Team>(teamId, COL_TEAMS, {
-      ...form,
-      updatedAt: new Date()
+    return await this.httpService.execute(async () => {
+      await this.documentService.updateDocument<Team>(teamId, COL_TEAMS, {
+        ...form,
+        updatedAt: new Date()
+      });
+      this.logService.addLogConfirm('Squadra aggiornata');
     });
-    this.logService.addLogConfirm('Squadra aggiornata');
   }
 
   public async updateUserEventTeam(eventId: string, userEventTeamId: string): Promise<void> {
-    await this.documentService.updateArrayPropReference<Team>(
-      'add',
-      'userEventTeamRefs',
-      `${COL_TEAMS}/${eventId}`,
-      `${COL_USER_EVENT_TEAM}/${userEventTeamId}`
-    );
+    return await this.httpService.execute(async () => {
+      await this.documentService.updateArrayPropReference<Team>(
+        'add',
+        'userEventTeamRefs',
+        `${COL_TEAMS}/${eventId}`,
+        `${COL_USER_EVENT_TEAM}/${userEventTeamId}`
+      );
+    });
   }
 
   /* --------------------------- Utils ---------------------------*/

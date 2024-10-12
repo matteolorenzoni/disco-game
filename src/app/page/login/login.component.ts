@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, HostListener, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { faLock, faUser } from '@fortawesome/free-solid-svg-icons';
@@ -11,6 +11,7 @@ import { UserService } from '../../service/user.service';
 import { loginFormAnimation } from '../../animation/animations';
 import { FvFieldIconComponent } from '../../components/fv-field-icon.component';
 import { FvButtonComponent } from '../../components/fv-button.component';
+import { HttpService } from '../../service/http.service';
 
 @Component({
   selector: 'app-login',
@@ -21,10 +22,11 @@ import { FvButtonComponent } from '../../components/fv-button.component';
   animations: [loginFormAnimation],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent {
   /* Services */
   readonly router = inject(Router);
   readonly firebaseService = inject(FirebaseService);
+  readonly httpService = inject(HttpService);
   readonly userService = inject(UserService);
   readonly logService = inject(LogService);
 
@@ -52,11 +54,6 @@ export class LoginComponent implements OnInit {
     this.setPage('welcome');
   }
 
-  /* ------------- Lifecycle ------------- */
-  ngOnInit(): void {
-    this.firebaseService.logout(false);
-  }
-
   /* ----------------- Methods: page ----------------- */
   protected onGoToRegistry(): void {
     this.router.navigate(['/sign-up']);
@@ -76,22 +73,21 @@ export class LoginComponent implements OnInit {
   public async login(): Promise<void> {
     if (this.loginForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
 
-    // Operation
-    const userCredentials = await this.firebaseService.logIn(this.loginForm.getRawValue(), this.rememberMe());
-    const user = await this.userService.getUserById(userCredentials.user.uid);
-    switch (user?.props.role) {
-      case UserRole.ADMIN:
-        await this.router.navigate(['/admin/dashboard']);
-        break;
-      case UserRole.USER:
-        await this.router.navigate(['/user/dashboard']);
-        break;
-      default:
-        throw new Error('noUserDocument', { cause: 'noUserDocument' });
-    }
-
-    // Log
-    this.logService.addLogConfirm(`Benvenuto ${user.props.userName}`);
+    await this.httpService.execute(async () => {
+      const userCredentials = await this.firebaseService.logIn(this.loginForm.getRawValue(), this.rememberMe());
+      const user = await this.userService.getUserById(userCredentials.user.uid);
+      switch (user?.props.role) {
+        case UserRole.ADMIN:
+          await this.router.navigate(['/admin/dashboard']);
+          break;
+        case UserRole.USER:
+          await this.router.navigate(['/user/dashboard']);
+          break;
+        default:
+          throw new Error('noUserDocument', { cause: 'noUserDocument' });
+      }
+      this.logService.addLogConfirm(`Benvenuto ${user.props.userName}`);
+    });
   }
 
   protected resetPassword(): void {

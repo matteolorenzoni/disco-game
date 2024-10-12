@@ -15,10 +15,10 @@ export class HttpService {
   isLoader = computed(() => this.httpRequestsActive() > 0);
 
   /* -------------------- Methods -------------------- */
-  public async execute(toExecute: () => Promise<void>) {
+  public async execute<T>(toExecute: () => Promise<T>): Promise<T> {
     try {
       this.httpRequestsActive.update((val) => val + 1);
-      await toExecute();
+      return await toExecute();
     } catch (error) {
       this.logService.addLogError(this.firebaseService.userFirebase()?.uid, error);
       throw error;

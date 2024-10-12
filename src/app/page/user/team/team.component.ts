@@ -14,6 +14,7 @@ import { StorageService } from '../../../service/storage.service';
 import { UserEventTeamService } from '../../../service/user-event-team.service';
 import { UserImageUrlPipe } from '../../../pipe/user-image-url.pipe';
 import { TitleComponent } from '../../../components/title/title.component';
+import { HttpService } from '../../../service/http.service';
 
 const COL_USERS = environment.collection.USERS;
 
@@ -31,6 +32,7 @@ export class TeamComponent implements OnInit {
   readonly route = inject(ActivatedRoute);
   readonly firebaseService = inject(FirebaseService);
   readonly storageService = inject(StorageService);
+  readonly httpService = inject(HttpService);
   readonly eventService = inject(EventService);
   readonly userEventTeamService = inject(UserEventTeamService);
 
@@ -47,22 +49,25 @@ export class TeamComponent implements OnInit {
   /* ------------------------ Lifecycle hooks ------------------------ */
   ngOnInit(): void {
     // Recupera l'ID dalla route
-    this.route.paramMap.subscribe(async (params) => {
-      const eventId = params.get('eventId');
-      const teamId = params.get('teamId');
-      if (!eventId || !teamId) throw new Error('retry', { cause: 'retry' });
+    this.route.paramMap.subscribe(
+      async (params) =>
+        await this.httpService.execute(async () => {
+          const eventId = params.get('eventId');
+          const teamId = params.get('teamId');
+          if (!eventId || !teamId) throw new Error('retry', { cause: 'retry' });
 
-      const userId = this.firebaseService.userFirebase()?.uid;
-      const [userImageRefs, event, userGames] = await Promise.all([
-        this.storageService.getImageRefsByCollection(COL_USERS),
-        this.eventService.getEventById(eventId),
-        this.userEventTeamService.getUserEventTeamByProp('teamId', teamId)
-      ]);
-      this.event.set(event);
-      this.userEventTeams.set(userGames.filter((x) => x.props.userId !== userId));
-      this.userEventTeamActive.set(userGames.find((x) => x.props.userId === userId));
-      this.teamUserImageRefs.set(userImageRefs.items);
-    });
+          const userId = this.firebaseService.userFirebase()?.uid;
+          const [userImageRefs, event, userGames] = await Promise.all([
+            this.storageService.getImageRefsByCollection(COL_USERS),
+            this.eventService.getEventById(eventId),
+            this.userEventTeamService.getUserEventTeamByProp('teamId', teamId)
+          ]);
+          this.event.set(event);
+          this.userEventTeams.set(userGames.filter((x) => x.props.userId !== userId));
+          this.userEventTeamActive.set(userGames.find((x) => x.props.userId === userId));
+          this.teamUserImageRefs.set(userImageRefs.items);
+        })
+    );
   }
 
   /* ---------------- Methods ---------------- */

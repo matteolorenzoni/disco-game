@@ -13,58 +13,43 @@ export class StorageService {
 
   /* --------------------------- Method Firebase --------------------------- */
   public async getImageRefsByCollection(collection: string): Promise<ListResult> {
-    try {
-      // Crea un riferimento alla cartella specificata in Firebase Storage
-      const folderRef = ref(this.firebaseService.getStorage(), collection);
+    // Crea un riferimento alla cartella specificata in Firebase Storage
+    const folderRef = ref(this.firebaseService.getStorage(), collection);
 
-      // Recupera tutti i riferimenti delle immagini nella cartella specificata
-      return await listAll(folderRef);
-    } catch (error) {
-      this.logService.addLogError(this.firebaseService.userFirebase()?.uid, error);
-      throw error;
-    }
+    // Recupera tutti i riferimenti delle immagini nella cartella specificata
+    return await listAll(folderRef);
   }
 
   public async saveImage(image: File, collection: string, name: string): Promise<string> {
-    try {
-      // Crea un riferimento alla cartella specificata in Firebase Storage
-      const imageRef = ref(this.firebaseService.getStorage(), `${collection}/${name}.jpg`);
+    // Crea un riferimento alla cartella specificata in Firebase Storage
+    const imageRef = ref(this.firebaseService.getStorage(), `${collection}/${name}.jpg`);
 
-      // Carica la nuova immagine su Firebase Storage
-      const snapshot = await uploadBytesResumable(imageRef, image);
+    // Carica la nuova immagine su Firebase Storage
+    const snapshot = await uploadBytesResumable(imageRef, image);
 
-      // Ottieni l'URL della nuova immagine caricata
-      const downloadURL = await getDownloadURL(snapshot.ref);
-      return downloadURL;
-    } catch (error) {
-      this.logService.addLogError(this.firebaseService.userFirebase()?.uid, error);
-      throw error;
-    }
+    // Ottieni l'URL della nuova immagine caricata
+    const downloadURL = await getDownloadURL(snapshot.ref);
+    return downloadURL;
   }
 
   public async updateImage(image: File, collection: string, name: string): Promise<string> {
+    // Crea un riferimento alla cartella specificata in Firebase Storage
+    const imageRef = ref(this.firebaseService.getStorage(), `${collection}/${name}.jpg`);
+
+    // Verifica se esiste già un'immagine con lo stesso nome e la elimina
     try {
-      // Crea un riferimento alla cartella specificata in Firebase Storage
-      const imageRef = ref(this.firebaseService.getStorage(), `${collection}/${name}.jpg`);
-
-      // Verifica se esiste già un'immagine con lo stesso nome e la elimina
-      try {
-        const existingImageUrl = await getDownloadURL(imageRef);
-        if (existingImageUrl) await deleteObject(imageRef);
-      } catch {
-        // Ignora l'errore se l'immagine non esiste (comportamento atteso)
-      }
-
-      // Carica la nuova immagine su Firebase Storage
-      const snapshot = await uploadBytesResumable(imageRef, image);
-
-      // Ottieni l'URL della nuova immagine caricata
-      const downloadURL = await getDownloadURL(snapshot.ref);
-      return downloadURL;
-    } catch (error) {
-      this.logService.addLogError(this.firebaseService.userFirebase()?.uid, error);
-      throw error;
+      const existingImageUrl = await getDownloadURL(imageRef);
+      if (existingImageUrl) await deleteObject(imageRef);
+    } catch {
+      // Ignora l'errore se l'immagine non esiste (comportamento atteso)
     }
+
+    // Carica la nuova immagine su Firebase Storage
+    const snapshot = await uploadBytesResumable(imageRef, image);
+
+    // Ottieni l'URL della nuova immagine caricata
+    const downloadURL = await getDownloadURL(snapshot.ref);
+    return downloadURL;
   }
 
   /* --------------------------- Method Firebase --------------------------- */

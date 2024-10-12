@@ -16,6 +16,7 @@ import { FvFieldComponent } from '../../../components/fv-field.component';
 import { FvTextAeraComponent } from '../../../components/fv-text-area.component';
 import { FvButtonComponent } from '../../../components/fv-button.component';
 import { TitleComponent } from '../../../components/title/title.component';
+import { HttpService } from '../../../service/http.service';
 
 const COL_EVENTS = environment.collection.EVENTS;
 
@@ -40,6 +41,7 @@ export class EventCreateComponent implements OnInit {
   readonly firebaseService = inject(FirebaseService);
   readonly firebaseDocumentService = inject(FirebaseDocumentService);
   readonly storageService = inject(StorageService);
+  readonly httpService = inject(HttpService);
   readonly eventService = inject(EventService);
   readonly logService = inject(LogService);
 
@@ -102,19 +104,21 @@ export class EventCreateComponent implements OnInit {
   protected async addOrUpdateEvent(): Promise<void> {
     if (this.eventForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
 
-    const event = this.event();
-    const form = this.eventForm.getRawValue();
-    if (event) {
-      await this.eventService.updateEvent(event.id, form);
-    } else {
-      /* Creo id documento */
-      const eventId = this.firebaseDocumentService.createDocId(COL_EVENTS);
+    await this.httpService.execute(async () => {
+      const event = this.event();
+      const form = this.eventForm.getRawValue();
+      if (event) {
+        await this.eventService.updateEvent(event.id, form);
+      } else {
+        /* Creo id documento */
+        const eventId = this.firebaseDocumentService.createDocId(COL_EVENTS);
 
-      /* Creo immagine */
-      const imageUrl = await this.storageService.saveImage(this.imageFile()!, COL_EVENTS, eventId);
+        /* Creo immagine */
+        const imageUrl = await this.storageService.saveImage(this.imageFile()!, COL_EVENTS, eventId);
 
-      /* Creazione evento */
-      await this.eventService.addEventById(eventId, form, imageUrl);
-    }
+        /* Creazione evento */
+        await this.eventService.addEventById(eventId, form, imageUrl);
+      }
+    });
   }
 }

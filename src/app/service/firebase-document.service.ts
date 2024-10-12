@@ -34,18 +34,13 @@ export class FirebaseDocumentService {
     id: string,
     converter: FirestoreDataConverter<T>
   ): Promise<Doc<T>> {
-    try {
-      const collectionRef = getCollection(this.firebaseService.getDb(), collectionName).withConverter(converter);
-      const docRef = doc(collectionRef, id);
-      const docSnap = await getDoc(docRef);
-      if (!docSnap.exists()) throw new Error('noDocument', { cause: 'noDocument' });
+    const collectionRef = getCollection(this.firebaseService.getDb(), collectionName).withConverter(converter);
+    const docRef = doc(collectionRef, id);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) throw new Error('noDocument', { cause: 'noDocument' });
 
-      const data = docSnap.data() as T;
-      return { id: docSnap.id, props: data };
-    } catch (error) {
-      this.logService.addLogError(this.firebaseService.userFirebase()?.uid, error);
-      throw error;
-    }
+    const data = docSnap.data() as T;
+    return { id: docSnap.id, props: data };
   }
 
   public async getAllDocuments<T extends Record<string, any>>(
@@ -67,17 +62,12 @@ export class FirebaseDocumentService {
     queryParams: Partial<T>,
     converter: FirestoreDataConverter<T>
   ): Promise<Doc<T>[]> {
-    try {
-      const collectionRef = getCollection(this.firebaseService.getDb(), collectionName).withConverter(converter);
-      const queryConstraints = Object.entries(queryParams).map(([key, value]) => where(key, '==', value));
-      const q = query(collectionRef, ...queryConstraints);
-      const querySnapshot = await getDocs(q);
-      const docs = querySnapshot.docs.map((doc) => ({ id: doc.id, props: doc.data() as T }));
-      return docs;
-    } catch (error) {
-      this.logService.addLogError(this.firebaseService.userFirebase()?.uid, error);
-      throw error;
-    }
+    const collectionRef = getCollection(this.firebaseService.getDb(), collectionName).withConverter(converter);
+    const queryConstraints = Object.entries(queryParams).map(([key, value]) => where(key, '==', value));
+    const q = query(collectionRef, ...queryConstraints);
+    const querySnapshot = await getDocs(q);
+    const docs = querySnapshot.docs.map((doc) => ({ id: doc.id, props: doc.data() as T }));
+    return docs;
   }
 
   public async getActiveDocumentsByProp<T extends Record<string, any> & { isActive: boolean }>(
@@ -85,35 +75,25 @@ export class FirebaseDocumentService {
     queryParams: Partial<T>,
     converter: FirestoreDataConverter<T>
   ): Promise<Doc<T>[]> {
-    try {
-      const collectionRef = getCollection(this.firebaseService.getDb(), collectionName).withConverter(converter);
-      const queryConstraints = Object.entries(queryParams).map(([key, value]) => where(key, '==', value));
-      const isActiveConstraint = where('isActive', '==', true);
-      const q = query(collectionRef, ...queryConstraints, isActiveConstraint);
-      const querySnapshot = await getDocs(q);
-      const docs = querySnapshot.docs.map((doc) => ({ id: doc.id, props: doc.data() as T }));
-      return docs;
-    } catch (error) {
-      this.logService.addLogError(this.firebaseService.userFirebase()?.uid, error);
-      throw error;
-    }
+    const collectionRef = getCollection(this.firebaseService.getDb(), collectionName).withConverter(converter);
+    const queryConstraints = Object.entries(queryParams).map(([key, value]) => where(key, '==', value));
+    const isActiveConstraint = where('isActive', '==', true);
+    const q = query(collectionRef, ...queryConstraints, isActiveConstraint);
+    const querySnapshot = await getDocs(q);
+    const docs = querySnapshot.docs.map((doc) => ({ id: doc.id, props: doc.data() as T }));
+    return docs;
   }
 
   /* --------------------- Methods CREATE --------------------- */
   public createDocId(collectionName: string): string {
-    try {
-      // Ottieni un riferimento alla collezione
-      const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
+    // Ottieni un riferimento alla collezione
+    const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
 
-      // Genera un nuovo riferimento al documento
-      const newDocRef = doc(collectionRef);
+    // Genera un nuovo riferimento al documento
+    const newDocRef = doc(collectionRef);
 
-      // Restituisci l'ID generato
-      return newDocRef.id;
-    } catch (error) {
-      this.logService.addLogError(this.firebaseService.userFirebase()?.uid, error);
-      throw error;
-    }
+    // Restituisci l'ID generato
+    return newDocRef.id;
   }
 
   public async addDocumentById<T extends Record<string, any>>(
@@ -121,29 +101,19 @@ export class FirebaseDocumentService {
     collectionName: string,
     data: T
   ): Promise<DocumentReference<DocumentData, DocumentData>> {
-    try {
-      const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
-      const docRef = doc(collectionRef, id);
-      await setDoc(docRef, data);
-      return docRef;
-    } catch (error) {
-      this.logService.addLogError(this.firebaseService.userFirebase()?.uid, error);
-      throw error;
-    }
+    const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
+    const docRef = doc(collectionRef, id);
+    await setDoc(docRef, data);
+    return docRef;
   }
 
   public async addDocument<T extends Record<string, any>>(
     collectionName: string,
     data: T
   ): Promise<DocumentReference<DocumentData, DocumentData>> {
-    try {
-      const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
-      const docRef = await addDoc(collectionRef, data);
-      return docRef;
-    } catch (error) {
-      this.logService.addLogError(this.firebaseService.userFirebase()?.uid, error);
-      throw error;
-    }
+    const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
+    const docRef = await addDoc(collectionRef, data);
+    return docRef;
   }
 
   /* --------------------- Methods UPDATE --------------------- */
@@ -152,14 +122,9 @@ export class FirebaseDocumentService {
     collectionName: string,
     data: Partial<T>
   ): Promise<void> {
-    try {
-      const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
-      const docRef = doc(collectionRef, id);
-      await updateDoc(docRef, data as any);
-    } catch (error) {
-      this.logService.addLogError(this.firebaseService.userFirebase()?.uid, error);
-      throw error;
-    }
+    const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
+    const docRef = doc(collectionRef, id);
+    await updateDoc(docRef, data as any);
   }
 
   public async updateArrayPropReference<T extends Record<string, any>>(
@@ -168,16 +133,11 @@ export class FirebaseDocumentService {
     docId: string,
     referenceId: string
   ): Promise<void> {
-    try {
-      const docRef = doc(this.firebaseService.getDb(), docId);
-      const referencesRef = doc(this.firebaseService.getDb(), referenceId);
-      await updateDoc(docRef, {
-        [propToUpdate]: operation === 'add' ? arrayUnion(referencesRef) : arrayRemove(referencesRef),
-        updatedAt: new Date()
-      });
-    } catch (error) {
-      this.logService.addLogError(this.firebaseService.userFirebase()?.uid, error);
-      throw error;
-    }
+    const docRef = doc(this.firebaseService.getDb(), docId);
+    const referencesRef = doc(this.firebaseService.getDb(), referenceId);
+    await updateDoc(docRef, {
+      [propToUpdate]: operation === 'add' ? arrayUnion(referencesRef) : arrayRemove(referencesRef),
+      updatedAt: new Date()
+    });
   }
 }

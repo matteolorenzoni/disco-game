@@ -18,7 +18,6 @@ import { Firestore, getFirestore } from 'firebase/firestore';
 import { FirebaseStorage, getStorage } from 'firebase/storage';
 import { environment } from '../../environments/environment.development';
 import { LoginModel } from '../model/form.model';
-import { LogService } from './log.service';
 
 @Injectable({
   providedIn: 'root'
@@ -26,7 +25,6 @@ import { LogService } from './log.service';
 export class FirebaseService {
   /* Variables */
   readonly router = inject(Router);
-  readonly logService = inject(LogService);
 
   /* Variables */
   private app: FirebaseApp;
@@ -61,37 +59,17 @@ export class FirebaseService {
 
   /* --------------------------- Auth ---------------------------*/
   public async logIn(form: LoginModel, rememberMe: boolean): Promise<UserCredential> {
-    try {
-      const { email, password } = form;
-      await setPersistence(this.auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
-      return await signInWithEmailAndPassword(this.auth, email, password);
-    } catch (error) {
-      this.logService.addLogError(this.userFirebase()?.uid, error);
-      throw error;
-    }
+    const { email, password } = form;
+    await setPersistence(this.auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
+    return await signInWithEmailAndPassword(this.auth, email, password);
   }
 
-  public async logout(redirect = true): Promise<void> {
-    try {
-      await signOut(this.auth);
-
-      if (redirect) {
-        this.logService.addLogConfirm('Logout completato. Buona giornata!');
-        await this.router.navigate(['/login']);
-      }
-    } catch (error) {
-      this.logService.addLogError(this.userFirebase()?.uid, error);
-      throw error;
-    }
+  public async logout(): Promise<void> {
+    await signOut(this.auth);
   }
 
   public async signUp(email: string, password: string): Promise<UserCredential> {
-    try {
-      return await createUserWithEmailAndPassword(this.auth, email, password);
-    } catch (error) {
-      this.logService.addLogError(this.userFirebase()?.uid, error);
-      throw error;
-    }
+    return await createUserWithEmailAndPassword(this.auth, email, password);
   }
 
   public observeUserState(): void {

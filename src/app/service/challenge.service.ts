@@ -6,6 +6,7 @@ import { challengeConverter } from '../model/converter';
 import { LogService } from './log.service';
 import { Challenge } from '../model/challenge.model';
 import { Doc } from '../model/firebase';
+import { HttpService } from './http.service';
 
 const COL_CHALLENGES = environment.collection.CHALLENGES;
 const COL_EVENT_CHALLENGES = environment.collection.EVENT_CHALLENGES;
@@ -16,43 +17,54 @@ const COL_EVENT_CHALLENGES = environment.collection.EVENT_CHALLENGES;
 export class ChallengeService {
   /* Services */
   readonly documentService = inject(FirebaseDocumentService);
+  readonly httpService = inject(HttpService);
   readonly logService = inject(LogService);
 
   /* --------------------------- Read ---------------------------*/
   public async getChallengeById(challengeId: string): Promise<Doc<Challenge>> {
-    return await this.documentService.getDocumentById<Challenge>(COL_CHALLENGES, challengeId, challengeConverter);
+    return await this.httpService.execute(async () => {
+      return await this.documentService.getDocumentById<Challenge>(COL_CHALLENGES, challengeId, challengeConverter);
+    });
   }
   public async getChallenges(): Promise<Doc<Challenge>[]> {
-    return await this.documentService.getAllActiveDocuments<Challenge>(COL_CHALLENGES, challengeConverter);
+    return await this.httpService.execute(async () => {
+      return await this.documentService.getAllActiveDocuments<Challenge>(COL_CHALLENGES, challengeConverter);
+    });
   }
 
   /* --------------------------- Create ---------------------------*/
   public async addChallenge(form: ChallengeModel): Promise<void> {
-    await this.documentService.addDocument<Challenge>(COL_CHALLENGES, {
-      ...form,
-      eventChallengeRefs: [],
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date()
+    return await this.httpService.execute(async () => {
+      await this.documentService.addDocument<Challenge>(COL_CHALLENGES, {
+        ...form,
+        eventChallengeRefs: [],
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+      this.logService.addLogConfirm('Sfida aggiunta');
     });
-    this.logService.addLogConfirm('Sfida aggiunta');
   }
 
   /* --------------------------- Update ---------------------------*/
   public async updateChallenge(challengeId: string, form: ChallengeModel): Promise<void> {
-    await this.documentService.updateDocument<Challenge>(challengeId, COL_CHALLENGES, {
-      ...form,
-      updatedAt: new Date()
+    return await this.httpService.execute(async () => {
+      await this.documentService.updateDocument<Challenge>(challengeId, COL_CHALLENGES, {
+        ...form,
+        updatedAt: new Date()
+      });
+      this.logService.addLogConfirm('Sfida aggiornata');
     });
-    this.logService.addLogConfirm('Sfida aggiornata');
   }
 
   public async updateEventChallenge(eventId: string, eventChallengeId: string): Promise<void> {
-    await this.documentService.updateArrayPropReference<Challenge>(
-      'add',
-      'eventChallengeRefs',
-      `${COL_CHALLENGES}/${eventId}`,
-      `${COL_EVENT_CHALLENGES}/${eventChallengeId}`
-    );
+    return await this.httpService.execute(async () => {
+      await this.documentService.updateArrayPropReference<Challenge>(
+        'add',
+        'eventChallengeRefs',
+        `${COL_CHALLENGES}/${eventId}`,
+        `${COL_EVENT_CHALLENGES}/${eventChallengeId}`
+      );
+    });
   }
 }
