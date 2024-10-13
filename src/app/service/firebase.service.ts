@@ -72,7 +72,7 @@ export class FirebaseService {
     return await createUserWithEmailAndPassword(this.auth, email, password);
   }
 
-  public observeUserState(): void {
+  public observeUserState() {
     onAuthStateChanged(this.auth, async (userFirebase) => {
       console.log(`User UID: ${userFirebase?.uid}`); // TODO: eliminare
 

@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -18,7 +18,7 @@ const COL_USERS = environment.collection.USERS;
 @Component({
   selector: 'app-user-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FaIconComponent, FvFieldComponent, FvButtonComponent],
+  imports: [CommonModule, ReactiveFormsModule, FaIconComponent, FvFieldComponent, FvButtonComponent, NgOptimizedImage],
   templateUrl: './user-create.component.html',
   styleUrls: ['./user-create.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

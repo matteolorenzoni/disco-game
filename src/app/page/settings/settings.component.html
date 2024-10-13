@@ -18,14 +18,14 @@
 
 @switch (activeTab().id) {
   @case ('profile') {
-    <div class="rounded-lg border border-card-border bg-surface p-4">
+    <div class="mt-4 rounded-lg border border-card-border bg-surface p-4">
       <div class="-mx-4 border-b border-card-border px-4 pb-4">
         <p class="text-base font-semibold text-on-surface">Info personali</p>
         <p class="text-xs text-neutral-400">
           Personalizza il tuo profilo, mostra i tuoi successi e segui i tuoi progressi nelle sfide in discoteca
         </p>
       </div>
-      <app-user-create class="pt-4"></app-user-create>
+      <app-user-create class="mt-4"></app-user-create>
     </div>
 
     <fv-button-outlined class="mt-12" label="Esci" twColor="rose" [onClick]="logout.bind(this)"></fv-button-outlined>
