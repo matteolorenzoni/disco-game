@@ -1,72 +1,75 @@
 <app-title [pages]="[{ path: '', label: 'Eventi' }]"></app-title>
 
-<ul class="flex flex-col gap-4">
+<swiper-container space-between="16" slides-per-view="auto" (swiperslidechange)="onSlideChange($event)">
   @for (event of events(); track event.id) {
-    @if (event.id === eventIdSelected()) {
-      <li class="flex flex-col gap-8 overflow-hidden rounded bg-surface shadow">
-        <div class="relative">
-          <img class="aspect-video h-auto w-full" [src]="event.props.imageUrl" alt="Immagine evento" />
-          <div
-            class="absolute inset-0 flex flex-col items-center justify-end gap-1 overflow-hidden rounded bg-gradient-to-b from-transparent to-surface p-4 pb-0 text-white">
-            <p class="text-center text-2xl font-bold">{{ event.props.name }}</p>
-            <p class="line-clamp-3 overflow-hidden text-ellipsis text-center text-sm italic text-gray-100">
-              {{ event.props.description }}
-            </p>
-            <p class="rounded-full bg-primary-500 px-1 text-xs">
-              Sfide: <span class="font-bold">{{ event.props.eventChallengeRefs.length }}</span>
-            </p>
-            <div class="flex flex-col items-center">
-              <p class="text-xs font-medium text-gray-300">{{ event.props.location }}</p>
-              <p class="text-xxs text-gray-300/70">
-                ({{ event.props.startDate | date: 'dd/MM HH:mm' }} - {{ event.props.endDate | date: 'dd/MM HH:mm' }})
-              </p>
-            </div>
-          </div>
+    <swiper-slide class="w-4/5 text-on-surface">
+      <div
+        class="flex cursor-pointer flex-col gap-4 overflow-hidden rounded-lg border border-card-border bg-card-background shadow backdrop-blur">
+        <img class="aspect-video w-full text-white" [src]="event.props.imageUrl" alt="Immagine evento" />
+        <div class="flex flex-col gap-2 p-2">
+          <p class="truncate text-xl font-bold">{{ event.props.name }}</p>
+          <p class="flex gap-2 text-xxs text-neutral-400">
+            <fa-icon [icon]="ICON_CALENDAR"></fa-icon>
+            <span>{{ event.props.startDate | date: 'dd/MM/yyyy HH:mm' }}</span>
+            <span>{{ event.props.endDate | date: 'dd/MM/yyyy HH:mm' }}</span>
+          </p>
+          <p class="line-clamp-3 text-sm italic">{{ event.props.description }}</p>
         </div>
-        <div class="flex h-20 flex-col justify-end gap-2 p-4">
-          @if (eventIdSelected() | check_exist_team: userEventTeams(); as userGame) {
-            <div>
-              <p class="text-center text-xxs uppercase text-amber-300/50">
-                Squadra
-                @if (firebaseService.userFirebase()?.uid === userGame.props.leaderId) {
-                  <fa-icon [icon]="ICON_CROWN"></fa-icon>
-                }
-              </p>
-              <p class="text-center text-xl font-semibold text-amber-300">
-                {{ userGame.props.teamName }}
-              </p>
-            </div>
-            <fv-button
-              label="Visualizza squadra"
-              twColor="amber"
-              [onClick]="goToTeam.bind(this, userGame.props.eventId, userGame.props.teamId)"></fv-button>
-          } @else {
-            <fv-button label="Crea squadra" [onClick]="openNewTeamModal.bind(this)"></fv-button>
-            <fv-button label="Trova squadra" twColor="secondary" [onClick]="openFindTeamModal.bind(this)"></fv-button>
-          }
-        </div>
-      </li>
-    } @else {
-      <li
-        class="transform cursor-pointer overflow-hidden rounded bg-surface text-on-surface shadow hover:bg-neutral-800"
-        [tabindex]="0"
-        (click)="eventIdSelected.set(event.id)"
-        (keydown)="eventIdSelected.set(event.id)">
-        <div class="relative p-2">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-base font-semibold text-white">{{ event.props.name }}</p>
-              <p class="text-xs">{{ event.props.location }}</p>
-            </div>
-            <div class="text-lg font-bold">
-              <p>{{ event.props.startDate | date: 'dd/MM' }}</p>
-            </div>
-          </div>
-        </div>
-      </li>
-    }
+      </div>
+    </swiper-slide>
   }
-</ul>
+</swiper-container>
+
+<div class="mt-8 overflow-hidden">
+  @if (eventSelected()?.id | check_exist_team: userEventTeams(); as userGame) {
+    <div class="flex flex-col gap-1 rounded-lg border border-yellow-400/50 bg-yellow-400/25 p-2">
+      <p class="text-xxs uppercase">Squadra</p>
+      <div class="flex items-end overflow-hidden">
+        <p class="flex flex-1 gap-2 truncate text-xl leading-6">
+          @if (firebaseService.userFirebase()?.uid !== userGame.props.leaderId) {
+            <fa-icon [icon]="ICON_CROWN"></fa-icon>
+          }
+          <span> {{ userGame.props.teamName }} </span>
+        </p>
+        <fv-button
+          label="Visualizza squadra"
+          twColor="amber"
+          [onClick]="goToTeam.bind(this, userGame.props.eventId, userGame.props.teamId)">
+        </fv-button>
+      </div>
+    </div>
+  } @else {
+    <div class="flex flex-col gap-1 rounded-lg border border-card-border bg-card-background p-2">
+      <p class="flex gap-2 text-xxs uppercase">
+        <span>Squadra</span>
+      </p>
+      <div class="flex items-end gap-2 overflow-hidden">
+        <p class="basis-4/6 truncate">Nessuna squadra</p>
+        <fv-button class="flex-1 basis-1/6" label="Crea" [onClick]="openNewTeamModal.bind(this)"></fv-button>
+        <fv-button-outlined
+          class="flex-1 basis-1/6"
+          label="Trova"
+          twColor="secondary"
+          [onClick]="openFindTeamModal.bind(this)"></fv-button-outlined>
+      </div>
+    </div>
+  }
+</div>
+
+<div class="mt-12 text-on-background">
+  <h2>Sfide</h2>
+  <ul class="flex flex-col divide-y divide-neutral-800">
+    @if (eventSelected()?.id | check_exist_challenges: eventChallengeMap(); as challenges) {
+      @for (challenge of challenges; track challenge.id) {
+        <li class="flex items-center gap-4 py-4">
+          <img class="h-4 w-4" [src]="'images/challenge/' + challenge.props.type + '.png'" alt="" />
+          <p class="truncate text-sm">{{ challenge.props.name }}</p>
+          <fv-rating [rating]="challenge.props.complexity"></fv-rating>
+        </li>
+      }
+    }
+  </ul>
+</div>
 
 <!-- Crea squadra -->
 @if (newTeamModalIsOpen()) {

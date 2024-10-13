@@ -1,10 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faCrown, faPeopleGroup } from '@fortawesome/free-solid-svg-icons';
+import { faCalendar, faCrown, faPeopleGroup } from '@fortawesome/free-solid-svg-icons';
 import { Doc } from '../../../model/firebase';
 import { Event } from '../../../model/event.model';
 import { FindTeamModel, FromMap, NewTeamModel } from '../../../model/form.model';
@@ -19,6 +20,12 @@ import { UserService } from '../../../service/user.service';
 import { FvFieldIconComponent } from '../../../components/fv-field-icon.component';
 import { FvButtonComponent } from '../../../components/fv-button.component';
 import { TitleComponent } from '../../../components/title/title.component';
+import { FvButtonOutlinedComponent } from '../../../components/fv-button-outlined.component';
+import { register } from 'swiper/element/bundle';
+import { ChallengeService } from '../../../service/challenge.service';
+import { CheckExistChallengesPipe } from '../../../pipe/check-exist-challenges.pipe';
+import { FvRatingComponent } from '../../../components/fv-rating.component';
+import { Challenge } from '../../../model/challenge.model';
 
 @Component({
   selector: 'app-event-list',
@@ -30,7 +37,10 @@ import { TitleComponent } from '../../../components/title/title.component';
     TitleComponent,
     FvFieldIconComponent,
     FvButtonComponent,
-    CheckExistTeamPipe
+    FvButtonOutlinedComponent,
+    FvRatingComponent,
+    CheckExistTeamPipe,
+    CheckExistChallengesPipe
   ],
   templateUrl: './event-list.component.html',
   styleUrls: ['./event-list.component.scss'],
@@ -45,6 +55,7 @@ import { TitleComponent } from '../../../components/title/title.component';
       ])
     ])
   ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EventListComponent implements OnInit {
@@ -54,13 +65,15 @@ export class EventListComponent implements OnInit {
   readonly userService = inject(UserService);
   readonly eventService = inject(EventService);
   readonly teamService = inject(TeamService);
+  readonly challengeService = inject(ChallengeService);
   readonly userEventTeamService = inject(UserEventTeamService);
   readonly logService = inject(LogService);
 
   /* Variables */
   events = signal<Doc<Event>[]>([]);
-  eventIdSelected = signal<string | undefined>(undefined);
+  eventSelected = signal<Doc<Event> | undefined>(undefined);
   userEventTeams = signal<Doc<UserEventTeam>[]>([]);
+  eventChallengeMap = signal<Map<string, Doc<Challenge>[]>>(new Map());
   newTeamModalIsOpen = signal<boolean>(false);
   findTeamModalIsOpen = signal<boolean>(false);
 
@@ -70,10 +83,6 @@ export class EventListComponent implements OnInit {
       nonNullable: true,
       validators: [Validators.required, Validators.maxLength(100)]
     })
-    // description: new FormControl('', {
-    //   nonNullable: true,
-    //   validators: [Validators.required, Validators.maxLength(500)]
-    // })
   });
   findTeamForm = new FormGroup<FromMap<FindTeamModel>>({
     code: new FormControl('', {
@@ -83,10 +92,15 @@ export class EventListComponent implements OnInit {
   });
 
   /* Icons */
+  ICON_CALENDAR = faCalendar;
   ICON_CROWN = faCrown;
   ICON_TEAM = faPeopleGroup;
 
   /* -------------------- Lifecycle hooks -------------------- */
+  constructor() {
+    register();
+  }
+
   async ngOnInit(): Promise<void> {
     const user = this.userService.user();
     if (!user) throw new Error('retry', { cause: 'retry' });
@@ -97,14 +111,21 @@ export class EventListComponent implements OnInit {
       this.userEventTeamService.getUserEventTeamByProp('userId', user.id)
     ]);
     this.events.set(events);
-    this.eventIdSelected.set(events[0].id);
+    this.eventSelected.set(events[0]);
     this.userEventTeams.set(userEventTeams);
+
+    if (events[0]) {
+      const challenges = await this.challengeService.getChallengesByEventChallengeRefs(
+        events[0].props.eventChallengeRefs
+      );
+      this.eventChallengeMap.set(new Map([[events[0].id, challenges]]));
+    }
   }
 
   /* -------------------- Methods: firebase -------------------- */
   protected async addTeam(): Promise<void> {
     const user = this.userService.user();
-    const eventId = this.eventIdSelected();
+    const eventId = this.eventSelected()?.id;
     if (!user || !eventId) throw new Error('retry', { cause: 'retry' });
 
     /* Aggiungo Team al DB */
@@ -140,7 +161,7 @@ export class EventListComponent implements OnInit {
 
   protected async findTeam(): Promise<void> {
     const user = this.userService.user();
-    const eventId = this.eventIdSelected();
+    const eventId = this.eventSelected()?.id;
     if (!user || !eventId) throw new Error('retry', { cause: 'retry' });
 
     const form = this.findTeamForm.getRawValue();
@@ -177,6 +198,22 @@ export class EventListComponent implements OnInit {
   }
 
   /* -------------------- Methods: utils -------------------- */
+  protected async onSlideChange(event: any): Promise<void> {
+    /* Aggiorna evento selezionato */
+    const index = event.detail[0].activeIndex;
+    const eventSelected = this.events()[index];
+    this.eventSelected.set(eventSelected);
+
+    /* Aggiorna sfide associate */
+    if (this.eventChallengeMap().has(eventSelected.id)) return;
+    if (eventSelected) {
+      const challenges = await this.challengeService.getChallengesByEventChallengeRefs(
+        eventSelected.props.eventChallengeRefs
+      );
+      this.eventChallengeMap.set(new Map([...this.eventChallengeMap(), [eventSelected.id, challenges]]));
+    }
+  }
+
   protected openNewTeamModal(): void {
     this.newTeamModalIsOpen.set(true);
   }

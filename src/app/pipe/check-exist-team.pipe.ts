@@ -1,5 +1,4 @@
-import { inject, Pipe, type PipeTransform } from '@angular/core';
-import { UserService } from '../service/user.service';
+import { Pipe, type PipeTransform } from '@angular/core';
 import { Doc } from '../model/firebase';
 import { UserEventTeam } from '../model/user-event-team.model';
 
@@ -8,9 +7,6 @@ import { UserEventTeam } from '../model/user-event-team.model';
   standalone: true
 })
 export class CheckExistTeamPipe implements PipeTransform {
-  /* Services */
-  readonly userService = inject(UserService);
-
   transform(eventId: string | undefined, userEventTeams: Doc<UserEventTeam>[]): Doc<UserEventTeam> | undefined {
     return userEventTeams.find((x) => x.props.eventId === eventId);
   }
