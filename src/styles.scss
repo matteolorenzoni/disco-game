@@ -29,3 +29,14 @@ body {
   font-family: 'Roboto';
   color-scheme: dark;
 }
+
+/* Personalizzazione globale della scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #555e68; /* Colore grigio elegante */
+  border-radius: 10px;
+}

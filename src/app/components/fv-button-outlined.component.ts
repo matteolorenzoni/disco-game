@@ -9,7 +9,7 @@ type ButtonType = 'button' | 'submit';
   imports: [CommonModule],
   template: `
     <button
-      class="w-full rounded border-2 p-2 text-xs font-bold shadow disabled:bg-neutral-300 disabled:text-neutral-400"
+      class="w-full rounded border p-2 text-xs font-bold shadow disabled:bg-neutral-300 disabled:text-neutral-400"
       [ngClass]="[
         'border-' + twColor() + '-500',
         'hover:border-' + twColor() + '-600',
