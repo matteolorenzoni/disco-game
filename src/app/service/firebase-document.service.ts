@@ -84,6 +84,15 @@ export class FirebaseDocumentService {
     return docs;
   }
 
+  public async getDocumentsByRefs<T>(docRefString: string, converter: FirestoreDataConverter<T>): Promise<Doc<T>> {
+    const docRef = doc(this.firebaseService.getDb(), docRefString).withConverter(converter);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) throw new Error('noDocument', { cause: 'noDocument' });
+
+    const data = docSnap.data() as T;
+    return { id: docSnap.id, props: data };
+  }
+
   /* --------------------- Methods CREATE --------------------- */
   public createDocId(collectionName: string): string {
     // Ottieni un riferimento alla collezione
