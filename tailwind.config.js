@@ -7,7 +7,7 @@ module.exports = {
       variants: ['hover', 'active']
     },
     {
-      pattern: /border-(primary|secondary|rose)-(500|600|700)/,
+      pattern: /border-(primary|secondary|rose|amber)-(500|600|700)/,
       variants: ['hover', 'active', 'focus']
     },
     {
