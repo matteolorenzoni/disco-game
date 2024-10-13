@@ -9,7 +9,6 @@ export type Team = {
   status: TeamStatus; // Stato corrente della squadra, indica se è attiva, sospesa o bannata
   userEventTeamRefs: DocumentReference<UserEventTeam>[]; // Array di riferimenti ai documenti delle squadre a cui l'utente ha partecipato o creato nel tempo, utile per la gestione delle squadre
   isActive: boolean; // Flag per gestire la soft delete
-  createdAt: Date; // Data e ora di creazione della squadra, utile per tenere traccia della cronologia
   updatedAt: Date; // Data e ora dell'ultimo aggiornamento delle informazioni della squadra, per monitorare le modifiche
 };
 

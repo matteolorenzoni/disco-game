@@ -10,7 +10,6 @@ export type User = {
   role: UserRole; // Ruolo dell'utente nel sistema; determina i permessi e le funzionalità accessibili (USER o ADMIN)
   userEventTeamRefs: DocumentReference<UserEventTeam>[]; // Array di riferimenti ai documenti delle squadre a cui l'utente ha partecipato o creato nel tempo
   isActive: boolean; // Flag per gestire la soft delete
-  createdAt: Date; // Data e ora di creazione dell'account dell'utente
   updatedAt: Date; // Data e ora dell'ultimo aggiornamento delle informazioni dell'account
 };
 

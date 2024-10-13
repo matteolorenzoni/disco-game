@@ -12,6 +12,5 @@ export type Event = {
   userEventTeamRefs: DocumentReference<UserEventTeam>[]; // Array di riferimenti ai documenti delle squadre che hanno partecipato o sono state create per l'evento
   eventChallengeRefs: DocumentReference<EventChallenge>[]; // Array di riferimenti ai documenti delle sfide associate all'evento
   isActive: boolean; // Flag per gestire la soft delete
-  createdAt: Date; // Data e ora in cui l'evento è stato creato
   updatedAt: Date; // Data e ora dell'ultimo aggiornamento delle informazioni dell'evento
 };

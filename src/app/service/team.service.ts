@@ -83,7 +83,6 @@ export class TeamService {
         status: TeamStatus.ACTIVE,
         userEventTeamRefs: [],
         isActive: true,
-        createdAt: new Date(),
         updatedAt: new Date()
       });
 
@@ -94,10 +93,7 @@ export class TeamService {
   /* --------------------------- Update ---------------------------*/
   public async updateTeam(teamId: string, form: NewTeamModel): Promise<void> {
     return await this.httpService.execute(async () => {
-      await this.documentService.updateDocument<Team>(teamId, COL_TEAMS, {
-        ...form,
-        updatedAt: new Date()
-      });
+      await this.documentService.updateDocument<Team>(teamId, COL_TEAMS, form);
       this.logService.addLogConfirm('Squadra aggiornata');
     });
   }

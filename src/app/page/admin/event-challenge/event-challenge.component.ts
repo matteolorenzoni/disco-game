@@ -130,6 +130,7 @@ export class EventChallengeComponent implements OnInit {
     if (!eventId || !challengeActive) throw new Error('retry', { cause: 'retry' });
 
     /* Creo una nuova entry nel DB */
+    // TODO: capire perche gestito diverso dagli altri (unico updateAt non in service)
     const eventChallenge: EventChallenge = {
       eventId,
       challengeId: form.challengeId,
@@ -138,7 +139,8 @@ export class EventChallengeComponent implements OnInit {
       challengeStatus: form.challengeStatus,
       maxTimes: form.maxTimes,
       startDate: form.startDate ? new Date(form.startDate) : null,
-      endDate: form.endDate ? new Date(form.endDate) : null
+      endDate: form.endDate ? new Date(form.endDate) : null,
+      updatedAt: new Date()
     };
 
     let eventChallengeActiveId = this.eventChallengeActive()?.id;

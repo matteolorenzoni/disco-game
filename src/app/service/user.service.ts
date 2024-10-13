@@ -61,7 +61,6 @@ export class UserService {
         role: UserRole.USER,
         userEventTeamRefs: [],
         isActive: true,
-        createdAt: new Date(),
         updatedAt: new Date()
       });
       this.logService.addLogConfirm('Utente registrato');

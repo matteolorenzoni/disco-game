@@ -35,7 +35,6 @@ export const userConverter: FirestoreDataConverter<User> = {
       role: user.role,
       userEventTeamRefs: user.userEventTeamRefs.map((ref) => ref.path),
       isActive: user.isActive,
-      createdAt: user.createdAt,
       updatedAt: user.updatedAt
     };
   },
@@ -51,8 +50,7 @@ export const userConverter: FirestoreDataConverter<User> = {
       role: data['role'] as UserRole,
       userEventTeamRefs: data['userEventTeamRefs'],
       isActive: data['isActive'],
-      createdAt: data['createdAt'].toDate(),
-      updatedAt: data['updatedAt'].toDate()
+      updatedAt: timestampToDate(data['updatedAt'] as Timestamp)
     };
   }
 };
@@ -69,7 +67,6 @@ export const eventConverter: FirestoreDataConverter<Event> = {
       userEventTeamRefs: event.userEventTeamRefs.map((ref) => ref.path),
       eventChallengeRefs: event.eventChallengeRefs.map((ref) => ref.path),
       isActive: event.isActive,
-      createdAt: dateToString(event.createdAt),
       updatedAt: dateToString(event.updatedAt)
     };
   },
@@ -85,7 +82,6 @@ export const eventConverter: FirestoreDataConverter<Event> = {
       userEventTeamRefs: data['userEventTeamRefs'],
       eventChallengeRefs: data['eventChallengeRefs'],
       isActive: data['isActive'],
-      createdAt: timestampToDate(data['createdAt'] as Timestamp),
       updatedAt: timestampToDate(data['updatedAt'] as Timestamp)
     };
   }
@@ -102,7 +98,6 @@ export const challengeConverter: FirestoreDataConverter<Challenge> = {
       complexity: challenge.complexity,
       eventChallengeRefs: challenge.eventChallengeRefs.map((ref) => ref.path),
       isActive: challenge.isActive,
-      createdAt: dateToString(challenge.createdAt),
       updatedAt: dateToString(challenge.updatedAt)
     };
   },
@@ -118,7 +113,6 @@ export const challengeConverter: FirestoreDataConverter<Challenge> = {
       complexity: data['complexity'],
       eventChallengeRefs: data['eventChallengeRefs'],
       isActive: data['isActive'],
-      createdAt: timestampToDate(data['createdAt'] as Timestamp),
       updatedAt: timestampToDate(data['updatedAt'] as Timestamp)
     };
   }
@@ -134,7 +128,6 @@ export const teamConverter: FirestoreDataConverter<Team> = {
       status: team.status,
       userEventTeamRefs: team.userEventTeamRefs.map((ref) => ref.path),
       isActive: team.isActive,
-      createdAt: dateToString(team.createdAt),
       updatedAt: dateToString(team.updatedAt)
     };
   },
@@ -149,7 +142,6 @@ export const teamConverter: FirestoreDataConverter<Team> = {
       status: data['status'] as TeamStatus,
       userEventTeamRefs: data['userEventTeamRefs'],
       isActive: data['isActive'],
-      createdAt: timestampToDate(data['createdAt'] as Timestamp),
       updatedAt: timestampToDate(data['updatedAt'] as Timestamp)
     };
   }
@@ -165,7 +157,8 @@ export const userEventTeamConverter: FirestoreDataConverter<UserEventTeam> = {
       userName: game.userName,
       teamName: game.teamName,
       totalPoints: game.totalPoints,
-      userEventTeamChallengeRefs: game.userEventTeamChallengeRefs.map((ref) => ref.path)
+      userEventTeamChallengeRefs: game.userEventTeamChallengeRefs.map((ref) => ref.path),
+      updatedAt: game.updatedAt
     };
   },
 
@@ -179,7 +172,8 @@ export const userEventTeamConverter: FirestoreDataConverter<UserEventTeam> = {
       userName: data['userName'],
       teamName: data['teamName'],
       totalPoints: data['totalPoints'],
-      userEventTeamChallengeRefs: data['userEventTeamChallengeRefs']
+      userEventTeamChallengeRefs: data['userEventTeamChallengeRefs'],
+      updatedAt: timestampToDate(data['updatedAt'] as Timestamp)
     };
   }
 };
@@ -194,7 +188,8 @@ export const eventChallengeConverter: FirestoreDataConverter<EventChallenge> = {
       challengeStatus: eventChallenge.challengeStatus,
       maxTimes: eventChallenge.maxTimes,
       startDate: eventChallenge.startDate ? dateToString(eventChallenge.startDate) : null,
-      endDate: eventChallenge.endDate ? dateToString(eventChallenge.endDate) : null
+      endDate: eventChallenge.endDate ? dateToString(eventChallenge.endDate) : null,
+      updatedAt: eventChallenge.updatedAt
     };
   },
 
@@ -208,7 +203,8 @@ export const eventChallengeConverter: FirestoreDataConverter<EventChallenge> = {
       challengeStatus: data['challengeStatus'] as ChallengeStatus,
       maxTimes: data['maxTimes'] !== null ? Number(data['maxTimes']) : null,
       startDate: data['startDate'] ? timestampToDate(data['startDate'] as Timestamp) : null,
-      endDate: data['endDate'] ? timestampToDate(data['endDate'] as Timestamp) : null
+      endDate: data['endDate'] ? timestampToDate(data['endDate'] as Timestamp) : null,
+      updatedAt: timestampToDate(data['updatedAt'] as Timestamp)
     };
   }
 };

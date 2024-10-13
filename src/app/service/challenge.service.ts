@@ -65,7 +65,6 @@ export class ChallengeService {
         ...form,
         eventChallengeRefs: [],
         isActive: true,
-        createdAt: new Date(),
         updatedAt: new Date()
       });
       this.logService.addLogConfirm('Sfida aggiunta');
@@ -75,10 +74,7 @@ export class ChallengeService {
   /* --------------------------- Update ---------------------------*/
   public async updateChallenge(challengeId: string, form: ChallengeModel): Promise<void> {
     return await this.httpService.execute(async () => {
-      await this.documentService.updateDocument<Challenge>(challengeId, COL_CHALLENGES, {
-        ...form,
-        updatedAt: new Date()
-      });
+      await this.documentService.updateDocument<Challenge>(challengeId, COL_CHALLENGES, form);
       this.logService.addLogConfirm('Sfida aggiornata');
     });
   }

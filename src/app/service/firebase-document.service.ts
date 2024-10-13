@@ -126,17 +126,17 @@ export class FirebaseDocumentService {
   }
 
   /* --------------------- Methods UPDATE --------------------- */
-  public async updateDocument<T extends Record<string, any>>(
+  public async updateDocument<T extends Record<string, any> & { updatedAt: Date }>(
     id: string,
     collectionName: string,
     data: Partial<T>
   ): Promise<void> {
     const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
     const docRef = doc(collectionRef, id);
-    await updateDoc(docRef, data as any);
+    await updateDoc(docRef, { ...data, updatedAt: new Date() } as any);
   }
 
-  public async updateArrayPropReference<T extends Record<string, any>>(
+  public async updateArrayPropReference<T extends Record<string, any> & { updatedAt: Date }>(
     operation: 'add' | 'remove',
     propToUpdate: keyof T,
     docId: string,

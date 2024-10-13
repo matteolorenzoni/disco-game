@@ -9,6 +9,7 @@ export type EventChallenge = {
   maxTimes: number | null; // Numero di volte che una sfida può essere ripetuta
   startDate: Date | null; // Data e ora di inizio della sfida
   endDate: Date | null; // Data e ora di fine della sfida
+  updatedAt: Date; // Data e ora dell'ultimo aggiornamento della sfida
 };
 
 export enum ChallengeStatus {

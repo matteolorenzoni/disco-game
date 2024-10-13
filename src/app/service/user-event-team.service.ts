@@ -65,7 +65,8 @@ export class UserEventTeamService {
         userName,
         teamName,
         totalPoints: 0,
-        userEventTeamChallengeRefs: []
+        userEventTeamChallengeRefs: [],
+        updatedAt: new Date()
       });
     });
   }

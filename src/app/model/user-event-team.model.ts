@@ -10,4 +10,5 @@ export type UserEventTeam = {
   teamName: string; // Nome della squadra
   totalPoints: number; // Somma dei punti ottenuti nelle varie sfide
   userEventTeamChallengeRefs: DocumentReference<UserEventTeamChallenge>[]; // Elenco delle sfide completate dall'utente per quella squadra
+  updatedAt: Date; // Data e ora dell'ultimo aggiornamento della sfida
 };

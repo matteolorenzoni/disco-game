@@ -10,7 +10,6 @@ export type Challenge = {
   complexity: number; // Complessità della sfida, da 1 (facile) a 5 (difficile)
   eventChallengeRefs: DocumentReference<EventChallenge>[]; // Array di riferimenti ai documenti delle sfide associate all'evento
   isActive: boolean; // Per soft delete
-  createdAt: Date; // Data e ora in cui la sfida è stata creata
   updatedAt: Date; // Data e ora dell'ultimo aggiornamento della sfida
 };
 

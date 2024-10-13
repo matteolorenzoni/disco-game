@@ -45,7 +45,6 @@ export class EventService {
         userEventTeamRefs: [],
         eventChallengeRefs: [],
         isActive: true,
-        createdAt: new Date(),
         updatedAt: new Date()
       });
       this.logService.addLogConfirm('Evento aggiunto');
@@ -59,8 +58,7 @@ export class EventService {
       await this.documentService.updateDocument<Event>(eventId, COL_EVENTS, {
         ...form,
         startDate: new Date(form.startDate),
-        endDate: new Date(form.endDate),
-        updatedAt: new Date()
+        endDate: new Date(form.endDate)
       });
       this.logService.addLogConfirm('Evento aggiornato');
     });
@@ -68,10 +66,7 @@ export class EventService {
 
   public async updateEventImageUrl(eventId: string, imageUrl: string): Promise<void> {
     return await this.httpService.execute(async () => {
-      await this.documentService.updateDocument<Event>(eventId, COL_EVENTS, {
-        imageUrl,
-        updatedAt: new Date()
-      });
+      await this.documentService.updateDocument<Event>(eventId, COL_EVENTS, { imageUrl });
     });
   }
 
