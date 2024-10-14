@@ -1,6 +1,9 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ['./src/**/*.{html,ts}'],
+  future: {
+    hoverOnlyWhenSupported: true
+  },
   safelist: [
     {
       pattern: /bg-(primary|secondary|amber)-(500|600|700)/,
