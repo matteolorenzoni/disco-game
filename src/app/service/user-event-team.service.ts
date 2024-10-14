@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { DocumentData, DocumentReference } from 'firebase/firestore';
-import { environment } from '../../environments/environment.development';
+import { environment } from '../../environments/environment';
 import { Doc } from '../model/firebase';
 import { UserEventTeam } from '../model/user-event-team.model';
 import { userEventTeamConverter } from '../model/converter';

@@ -2,7 +2,7 @@ import { CommonModule, formatDate } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { environment } from '../../../../environments/environment.development';
+import { environment } from '../../../../environments/environment';
 import { Doc } from '../../../model/firebase';
 import { Event } from '../../../model/event.model';
 import { EventModel, FromMap } from '../../../model/form.model';

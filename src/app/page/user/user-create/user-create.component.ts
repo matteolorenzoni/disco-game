@@ -8,7 +8,7 @@ import { FromMap, UserModel } from '../../../model/form.model';
 import { FirebaseService } from '../../../service/firebase.service';
 import { StorageService } from '../../../service/storage.service';
 import { UserService } from '../../../service/user.service';
-import { environment } from '../../../../environments/environment.development';
+import { environment } from '../../../../environments/environment';
 import { FvFieldComponent } from '../../../components/fv-field.component';
 import { FvButtonComponent } from '../../../components/fv-button.component';
 import { HttpService } from '../../../service/http.service';

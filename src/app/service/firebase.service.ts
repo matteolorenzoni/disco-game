@@ -16,7 +16,7 @@ import {
 } from 'firebase/auth';
 import { Firestore, getFirestore } from 'firebase/firestore';
 import { FirebaseStorage, getStorage } from 'firebase/storage';
-import { environment } from '../../environments/environment.development';
+import { environment } from '../../environments/environment';
 import { LoginModel } from '../model/form.model';
 
 @Injectable({

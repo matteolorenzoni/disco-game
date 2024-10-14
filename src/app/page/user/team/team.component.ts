@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faCrown } from '@fortawesome/free-solid-svg-icons';
 import { StorageReference } from 'firebase/storage';
-import { environment } from '../../../../environments/environment.development';
+import { environment } from '../../../../environments/environment';
 import { Doc } from '../../../model/firebase';
 import { Event } from '../../../model/event.model';
 import { UserEventTeam } from '../../../model/user-event-team.model';

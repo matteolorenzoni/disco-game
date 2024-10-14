@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { FirebaseDocumentService } from './firebase-document.service';
-import { environment } from '../../environments/environment.development';
+import { environment } from '../../environments/environment';
 import { ChallengeModel } from '../model/form.model';
 import { challengeConverter, eventChallengeConverter } from '../model/converter';
 import { LogService } from './log.service';

@@ -1,5 +1,5 @@
 import { inject, Injectable, signal } from '@angular/core';
-import { environment } from '../../environments/environment.development';
+import { environment } from '../../environments/environment';
 import { User, UserRole } from '../model/user.model';
 import { Doc } from '../model/firebase';
 import { UserModel } from '../model/form.model';
