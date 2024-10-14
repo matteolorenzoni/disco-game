@@ -21,7 +21,6 @@ import { FvFieldIconComponent } from '../../../components/fv-field-icon.componen
 import { FvButtonComponent } from '../../../components/fv-button.component';
 import { TitleComponent } from '../../../components/title/title.component';
 import { FvButtonOutlinedComponent } from '../../../components/fv-button-outlined.component';
-import { register } from 'swiper/element/bundle';
 import { ChallengeService } from '../../../service/challenge.service';
 import { CheckExistChallengesPipe } from '../../../pipe/check-exist-challenges.pipe';
 import { FvRatingComponent } from '../../../components/fv-rating.component';
@@ -97,10 +96,6 @@ export class EventListComponent implements OnInit {
   ICON_TEAM = faPeopleGroup;
 
   /* -------------------- Lifecycle hooks -------------------- */
-  constructor() {
-    register();
-  }
-
   async ngOnInit(): Promise<void> {
     const user = this.userService.user();
     if (!user) throw new Error('retry', { cause: 'retry' });

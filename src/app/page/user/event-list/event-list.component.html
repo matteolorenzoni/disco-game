@@ -56,12 +56,12 @@
   }
 </div>
 
-<div class="mt-12 text-on-background">
-  <h2>Sfide</h2>
+<div class="mt-8 overflow-hidden rounded-lg bg-surface text-on-surface shadow">
+  <h2 class="p-2">Sfide</h2>
   <ul class="flex flex-col divide-y divide-neutral-800">
     @if (eventSelected()?.id | check_exist_challenges: eventChallengeMap(); as challenges) {
       @for (challenge of challenges; track challenge.id) {
-        <li class="flex items-center gap-4 py-4">
+        <li class="flex cursor-pointer items-center gap-4 p-2 py-4 hover:bg-neutral-950 active:bg-black">
           <img class="h-4 w-4" [src]="'images/challenge/' + challenge.props.type + '.png'" alt="" />
           <p class="truncate text-sm">{{ challenge.props.name }}</p>
           <fv-rating [rating]="challenge.props.complexity"></fv-rating>
