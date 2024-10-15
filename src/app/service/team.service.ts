@@ -81,6 +81,9 @@ export class TeamService {
         description: '',
         code,
         status: TeamStatus.ACTIVE,
+        totalPoints: 0,
+        currentPosition: 0,
+        lastPosition: 0,
         eventTeamUserRefs: [],
         isActive: true,
         updatedAt: new Date()

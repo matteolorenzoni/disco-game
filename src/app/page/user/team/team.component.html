@@ -5,17 +5,35 @@
   ]">
 </app-title>
 
-<div>
-  <h3 class="text-center text-3xl font-bold">{{ eventTeamUserActive()?.props?.teamName }}</h3>
-  <div class="fap-4 flex items-center justify-evenly">
-    <p class="text-center">
-      <span class="text-[60px]">{{ teamTotalPoints() }}</span>
-      <span class="text-sm">punti</span>
-    </p>
-    <div class="flex h-full items-center justify-center rounded-full border-2 border-cyan-600 bg-cyan-600/25 p-2">
-      <p class="text-sm">3° posto</p>
+<div class="flex h-32 flex-col justify-around">
+  @if (team(); as team) {
+    <h3 class="text-center text-3xl font-bold">{{ team.props.name }}</h3>
+    <div class="fap-4 flex items-center justify-evenly">
+      <p class="text-center">
+        <span class="text-[60px]">{{ team.props.totalPoints }}</span>
+        <span class="text-sm">punti</span>
+      </p>
+      <div class="flex items-center gap-4">
+        <div class="flex h-full items-center justify-center rounded-full border-2 border-cyan-600 bg-cyan-600/25 p-2">
+          <p class="text-sm">
+            {{ team.props.currentPosition > 0 ? team.props.currentPosition + '°' : 'Ultimo' }} posto
+          </p>
+        </div>
+        @if (team.props.lastPosition > 0) {
+          <div
+            class="flex gap-1"
+            [ngClass]="{
+              'text-red-600': diffPosition().value < 0,
+              'text-green-600': diffPosition().value > 0,
+              'text-on-background': diffPosition().value === 0
+            }">
+            <fa-icon [icon]="diffPosition().icon"></fa-icon>
+            <p>{{ diffPosition().value }}</p>
+          </div>
+        }
+      </div>
     </div>
-  </div>
+  }
 </div>
 
 @if (eventTeamUserActive(); as eventTeamUserActive) {

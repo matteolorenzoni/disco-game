@@ -126,6 +126,9 @@ export const teamConverter: FirestoreDataConverter<Team> = {
       description: team.description,
       code: team.code,
       status: team.status,
+      totalPoints: team.totalPoints,
+      currentPosition: team.currentPosition,
+      lastPosition: team.lastPosition,
       eventTeamUserRefs: team.eventTeamUserRefs.map((ref) => ref.path),
       isActive: team.isActive,
       updatedAt: dateToString(team.updatedAt)
@@ -140,6 +143,9 @@ export const teamConverter: FirestoreDataConverter<Team> = {
       description: data['description'],
       code: data['code'],
       status: data['status'] as TeamStatus,
+      totalPoints: data['totalPoints'],
+      currentPosition: data['currentPosition'],
+      lastPosition: data['lastPosition'],
       eventTeamUserRefs: data['eventTeamUserRefs'],
       isActive: data['isActive'],
       updatedAt: timestampToDate(data['updatedAt'] as Timestamp)

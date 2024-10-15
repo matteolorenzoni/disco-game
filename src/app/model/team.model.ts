@@ -7,6 +7,9 @@ export type Team = {
   description: string; // Descrizione della squadra, fornisce informazioni aggiuntive sulla squadra stessa
   code: string; // Codice unico di default per la creazione o la partecipazione a squadre; utilizzato per invitare altri membri
   status: TeamStatus; // Stato corrente della squadra, indica se è attiva, sospesa o bannata
+  totalPoints: number; // Punti della squadra
+  currentPosition: number; // Posizione attuale
+  lastPosition: number; // Posizione precedente
   eventTeamUserRefs: DocumentReference<EventTeamUser>[]; // Array di riferimenti ai documenti delle squadre a cui l'utente ha partecipato o creato nel tempo, utile per la gestione delle squadre
   isActive: boolean; // Flag per gestire la soft delete
   updatedAt: Date; // Data e ora dell'ultimo aggiornamento delle informazioni della squadra, per monitorare le modifiche

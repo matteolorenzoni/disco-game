@@ -26,7 +26,7 @@
       <p class="text-xxs uppercase">Squadra</p>
       <div class="flex items-end overflow-hidden">
         <p class="flex flex-1 gap-2 truncate text-xl leading-6">
-          @if (firebaseService.userFirebase()?.uid !== eventTeamUser.props.teamLeaderId) {
+          @if (firebaseService.userFirebase()?.uid === eventTeamUser.props.teamLeaderId) {
             <fa-icon [icon]="ICON_CROWN"></fa-icon>
           }
           <span> {{ eventTeamUser.props.teamName }} </span>
