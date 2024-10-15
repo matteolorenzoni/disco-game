@@ -21,20 +21,20 @@
 </swiper-container>
 
 <div class="mt-8 overflow-hidden">
-  @if (eventSelected()?.id | check_exist_team: eventTeamUsers(); as eventTeamUser) {
+  @if ((eventSelected()?.id | get_current_event: eventStorage()).team; as team) {
     <div class="flex flex-col gap-1 rounded-lg border border-yellow-400/50 bg-yellow-400/25 p-2">
       <p class="text-xxs uppercase">Squadra</p>
       <div class="flex items-end overflow-hidden">
         <p class="flex flex-1 gap-2 truncate text-xl leading-6">
-          @if (firebaseService.userFirebase()?.uid === eventTeamUser.props.teamLeaderId) {
+          @if (firebaseService.userFirebase()?.uid === team.props.leaderId) {
             <fa-icon [icon]="ICON_CROWN"></fa-icon>
           }
-          <span> {{ eventTeamUser.props.teamName }} </span>
+          <span> {{ team.props.name }} </span>
         </p>
         <fv-button
           label="Visualizza squadra"
           twColor="amber"
-          [onClick]="goToTeam.bind(this, eventTeamUser.props.eventId, eventTeamUser.props.teamId)">
+          [onClick]="onGoToTeam.bind(this, eventSelected()!.id, team.id)">
         </fv-button>
       </div>
     </div>
@@ -59,7 +59,7 @@
 <div class="-mx-4 -mb-4 mt-8 overflow-hidden rounded-t-3xl bg-surface p-2 text-on-surface shadow">
   <h2 class="p-2">Sfide</h2>
   <ul class="flex flex-col divide-y divide-neutral-800">
-    @if (eventSelected()?.id | check_exist_challenges: eventChallengeMap(); as challenges) {
+    @if ((eventSelected()?.id | get_current_event: eventStorage()).challenges; as challenges) {
       @for (challenge of challenges; track challenge.id) {
         <li class="flex cursor-pointer items-center gap-4 p-2 py-4 hover:bg-neutral-950 active:bg-black">
           <img class="h-4 w-4" [src]="'images/challenge/' + challenge.props.type + '.png'" alt="" />

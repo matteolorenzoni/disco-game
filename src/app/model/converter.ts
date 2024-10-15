@@ -159,10 +159,7 @@ export const eventTeamUserConverter: FirestoreDataConverter<EventTeamUser> = {
       eventId: game.eventId,
       teamId: game.teamId,
       userId: game.userId,
-      userName: game.userName,
       userTotalPoints: game.userTotalPoints,
-      teamName: game.teamName,
-      teamLeaderId: game.teamLeaderId,
       eventTeamUserChallengeRefs: game.eventTeamUserChallengeRefs.map((ref) => ref.path),
       updatedAt: game.updatedAt
     };
@@ -174,10 +171,7 @@ export const eventTeamUserConverter: FirestoreDataConverter<EventTeamUser> = {
       eventId: data['eventId'],
       teamId: data['teamId'],
       userId: data['userId'],
-      userName: data['userName'],
       userTotalPoints: data['userTotalPoints'],
-      teamName: data['teamName'],
-      teamLeaderId: data['teamLeaderId'],
       eventTeamUserChallengeRefs: data['eventTeamUserChallengeRefs'],
       updatedAt: timestampToDate(data['updatedAt'] as Timestamp)
     };

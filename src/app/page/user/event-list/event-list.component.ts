@@ -22,9 +22,10 @@ import { FvButtonComponent } from '../../../components/fv-button.component';
 import { TitleComponent } from '../../../components/title/title.component';
 import { FvButtonOutlinedComponent } from '../../../components/fv-button-outlined.component';
 import { ChallengeService } from '../../../service/challenge.service';
-import { CheckExistChallengesPipe } from '../../../pipe/check-exist-challenges.pipe';
+import { GetCurrentEvent } from '../../../pipe/get-current-event.pipe';
 import { FvRatingComponent } from '../../../components/fv-rating.component';
 import { Challenge } from '../../../model/challenge.model';
+import { Team } from '../../../model/team.model';
 
 @Component({
   selector: 'app-event-list',
@@ -39,7 +40,7 @@ import { Challenge } from '../../../model/challenge.model';
     FvButtonOutlinedComponent,
     FvRatingComponent,
     CheckExistTeamPipe,
-    CheckExistChallengesPipe
+    GetCurrentEvent
   ],
   templateUrl: './event-list.component.html',
   styleUrls: ['./event-list.component.scss'],
@@ -72,7 +73,7 @@ export class EventListComponent implements OnInit {
   events = signal<Doc<Event>[]>([]);
   eventSelected = signal<Doc<Event> | undefined>(undefined);
   eventTeamUsers = signal<Doc<EventTeamUser>[]>([]);
-  eventChallengeMap = signal<Map<string, Doc<Challenge>[]>>(new Map());
+  eventStorage = signal<Map<string, { team: Doc<Team> | undefined; challenges: Doc<Challenge>[] }>>(new Map());
   newTeamModalIsOpen = signal<boolean>(false);
   findTeamModalIsOpen = signal<boolean>(false);
 
@@ -109,12 +110,8 @@ export class EventListComponent implements OnInit {
     this.eventSelected.set(events[0]);
     this.eventTeamUsers.set(eventTeamUsers);
 
-    if (events[0]) {
-      const challenges = await this.challengeService.getChallengesByEventChallengeRefs(
-        events[0].props.eventChallengeRefs
-      );
-      this.eventChallengeMap.set(new Map([[events[0].id, challenges]]));
-    }
+    /* Aggiorna squadra e sfide associate */
+    if (events[0]) this.getEventStorage(events[0]);
   }
 
   /* -------------------- Methods: firebase -------------------- */
@@ -128,14 +125,7 @@ export class EventListComponent implements OnInit {
     const { teamId, teamCode } = await this.teamService.addTeam(user.id, eventId, form);
 
     /* Aggiungo EventTeamUser al DB */
-    const eventTeamUserRef = await this.eventTeamUserService.addEventTeamUser(
-      eventId,
-      teamId,
-      user.id,
-      user.props.userName,
-      form.name,
-      user.id
-    );
+    const eventTeamUserRef = await this.eventTeamUserService.addEventTeamUser(eventId, teamId, user.id);
 
     /* Aggiorno User (prop: eventTeamUserRefs) */
     await this.userService.updateEventTeamUser(user.id, eventTeamUserRef.id);
@@ -167,14 +157,7 @@ export class EventListComponent implements OnInit {
     }
 
     /* Aggiungo EventTeamUser al DB */
-    const eventTeamUserRef = await this.eventTeamUserService.addEventTeamUser(
-      eventId,
-      team.id,
-      user.id,
-      user.props.userName,
-      team.props.name,
-      team.props.leaderId
-    );
+    const eventTeamUserRef = await this.eventTeamUserService.addEventTeamUser(eventId, team.id, user.id);
 
     /* Aggiorno User (prop: eventTeamUserRefs) */
     await this.userService.updateEventTeamUser(user.id, eventTeamUserRef.id);
@@ -192,21 +175,16 @@ export class EventListComponent implements OnInit {
     this.resetModalsAndForms();
   }
 
-  /* -------------------- Methods: utils -------------------- */
+  /* -------------------- Methods: on event -------------------- */
   protected async onSlideChange(event: any): Promise<void> {
     /* Aggiorna evento selezionato */
     const index = event.detail[0].activeIndex;
     const eventSelected = this.events()[index];
     this.eventSelected.set(eventSelected);
 
-    /* Aggiorna sfide associate */
-    if (this.eventChallengeMap().has(eventSelected.id)) return;
-    if (eventSelected) {
-      const challenges = await this.challengeService.getChallengesByEventChallengeRefs(
-        eventSelected.props.eventChallengeRefs
-      );
-      this.eventChallengeMap.set(new Map([...this.eventChallengeMap(), [eventSelected.id, challenges]]));
-    }
+    /* Aggiorna squadra e sfide associate */
+    if (this.eventStorage().has(eventSelected.id)) return;
+    if (eventSelected) this.getEventStorage(eventSelected);
   }
 
   protected openNewTeamModal(): void {
@@ -224,14 +202,22 @@ export class EventListComponent implements OnInit {
     }
   }
 
+  protected async onGoToTeam(eventId: string, teamId: string): Promise<void> {
+    await this.router.navigate([`user/events/${eventId}/${teamId}`]);
+  }
+
+  /* -------------------- Methods: utils -------------------- */
+  private async getEventStorage(event: Doc<Event>): Promise<void> {
+    const currentTeam = this.eventTeamUsers().find((x) => x.props.eventId === event.id);
+    const team = currentTeam ? await this.teamService.getTeamById(currentTeam.props.teamId) : undefined;
+    const challenges = await this.challengeService.getChallengesByEventChallengeRefs(event.props.eventChallengeRefs);
+    this.eventStorage.set(new Map([...this.eventStorage(), [event.id, { team, challenges }]]));
+  }
+
   private resetModalsAndForms(): void {
     this.newTeamModalIsOpen.set(false);
     this.findTeamModalIsOpen.set(false);
     this.newTeamForm.reset();
     this.findTeamForm.reset();
-  }
-
-  protected async goToTeam(eventId: string, teamId: string): Promise<void> {
-    await this.router.navigate([`user/events/${eventId}/${teamId}`]);
   }
 }
