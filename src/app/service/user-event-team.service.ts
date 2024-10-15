@@ -34,7 +34,7 @@ export class UserEventTeamService {
     });
   }
 
-  public async getUserEventTeamByProp(
+  public async getUserEventTeamsByProp(
     prop: 'userId' | 'eventId' | 'teamId',
     value: string
   ): Promise<Doc<UserEventTeam>[]> {

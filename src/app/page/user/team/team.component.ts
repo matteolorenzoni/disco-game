@@ -1,12 +1,11 @@
 import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faCrown } from '@fortawesome/free-solid-svg-icons';
+import { faAngleRight, faCrown } from '@fortawesome/free-solid-svg-icons';
 import { StorageReference } from 'firebase/storage';
 import { environment } from '../../../../environments/environment';
 import { Doc } from '../../../model/firebase';
-import { Event } from '../../../model/event.model';
 import { UserEventTeam } from '../../../model/user-event-team.model';
 import { FirebaseService } from '../../../service/firebase.service';
 import { EventService } from '../../../service/event.service';
@@ -37,14 +36,15 @@ export class TeamComponent implements OnInit {
   readonly userEventTeamService = inject(UserEventTeamService);
 
   /* Variables */
-  event = signal<Doc<Event> | undefined>(undefined);
   teamId = signal<string | null>(null);
   teamUserImageRefs = signal<StorageReference[]>([]);
   userEventTeams = signal<Doc<UserEventTeam>[]>([]);
   userEventTeamActive = signal<Doc<UserEventTeam> | undefined>(undefined);
+  teamTotalPoints = computed<number>(() => this.userEventTeams().reduce((acc, cur) => acc + cur.props.totalPoints, 0));
 
   /* Icons */
   ICON_CROWN = faCrown;
+  ICON_RIGHT = faAngleRight;
 
   /* ------------------------ Lifecycle hooks ------------------------ */
   ngOnInit(): void {
@@ -57,12 +57,10 @@ export class TeamComponent implements OnInit {
           if (!eventId || !teamId) throw new Error('retry', { cause: 'retry' });
 
           const userId = this.firebaseService.userFirebase()?.uid;
-          const [userImageRefs, event, userGames] = await Promise.all([
+          const [userImageRefs, userGames] = await Promise.all([
             this.storageService.getImageRefsByCollection(COL_USERS),
-            this.eventService.getEventById(eventId),
-            this.userEventTeamService.getUserEventTeamByProp('teamId', teamId)
+            this.userEventTeamService.getUserEventTeamsByProp('teamId', teamId)
           ]);
-          this.event.set(event);
           this.userEventTeams.set(userGames.filter((x) => x.props.userId !== userId));
           this.userEventTeamActive.set(userGames.find((x) => x.props.userId === userId));
           this.teamUserImageRefs.set(userImageRefs.items);
