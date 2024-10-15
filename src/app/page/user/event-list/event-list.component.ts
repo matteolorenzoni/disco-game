@@ -168,12 +168,12 @@ export class EventListComponent implements OnInit {
 
     /* Aggiungo EventTeamUser al DB */
     const eventTeamUserRef = await this.eventTeamUserService.addEventTeamUser(
-      user.id,
       eventId,
       team.id,
-      team.props.leaderId,
+      user.id,
       user.props.userName,
-      team.props.name
+      team.props.name,
+      team.props.leaderId
     );
 
     /* Aggiorno User (prop: eventTeamUserRefs) */

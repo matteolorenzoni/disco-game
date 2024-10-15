@@ -9,7 +9,7 @@ import { Doc } from '../model/firebase';
 import { HttpService } from './http.service';
 
 const COL_EVENTS = environment.collection.EVENTS;
-const COL_USER_EVENT_TEAMS = environment.collection.USER_EVENT_TEAMS;
+const COL_EVENT_TEAM_USERS = environment.collection.EVENT_TEAM_USERS;
 const COL_EVENT_CHALLENGES = environment.collection.EVENT_CHALLENGES;
 
 @Injectable({
@@ -76,7 +76,7 @@ export class EventService {
         'add',
         'eventTeamUserRefs',
         `${COL_EVENTS}/${eventId}`,
-        `${COL_USER_EVENT_TEAMS}/${eventTeamUserId}`
+        `${COL_EVENT_TEAM_USERS}/${eventTeamUserId}`
       );
     });
   }

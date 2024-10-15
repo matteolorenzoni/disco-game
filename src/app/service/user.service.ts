@@ -10,7 +10,7 @@ import { FirebaseDocumentService } from './firebase-document.service';
 import { HttpService } from './http.service';
 
 const COL_USERS = environment.collection.USERS;
-const COL_USER_EVENT_TEAM = environment.collection.USER_EVENT_TEAMS;
+const COL_EVENT_TEAM_USERS = environment.collection.EVENT_TEAM_USERS;
 
 @Injectable({
   providedIn: 'root'
@@ -85,7 +85,7 @@ export class UserService {
         'add',
         'eventTeamUserRefs',
         `${COL_USERS}/${userId}`,
-        `${COL_USER_EVENT_TEAM}/${eventTeamUserId}`
+        `${COL_EVENT_TEAM_USERS}/${eventTeamUserId}`
       );
     });
   }

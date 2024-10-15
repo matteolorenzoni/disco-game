@@ -10,7 +10,7 @@ import { EventTeamUserService } from './event-team-user.service';
 import { HttpService } from './http.service';
 
 const COL_TEAMS = environment.collection.TEAMS;
-const COL_USER_EVENT_TEAM = environment.collection.USER_EVENT_TEAMS;
+const COL_EVENT_TEAM_USERS = environment.collection.EVENT_TEAM_USERS;
 
 @Injectable({
   providedIn: 'root'
@@ -107,7 +107,7 @@ export class TeamService {
         'add',
         'eventTeamUserRefs',
         `${COL_TEAMS}/${eventId}`,
-        `${COL_USER_EVENT_TEAM}/${eventTeamUserId}`
+        `${COL_EVENT_TEAM_USERS}/${eventTeamUserId}`
       );
     });
   }

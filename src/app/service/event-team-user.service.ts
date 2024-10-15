@@ -7,7 +7,7 @@ import { eventTeamUserConverter } from '../model/converter';
 import { FirebaseDocumentService } from './firebase-document.service';
 import { HttpService } from './http.service';
 
-const COL_USER_EVENT_TEAM = environment.collection.USER_EVENT_TEAMS;
+const COL_EVENT_TEAM_USERS = environment.collection.EVENT_TEAM_USERS;
 
 @Injectable({
   providedIn: 'root'
@@ -24,7 +24,7 @@ export class EventTeamUserService {
   ): Promise<Doc<EventTeamUser>[]> {
     return await this.httpService.execute(async () => {
       return await this.documentService.getDocumentsByProp<EventTeamUser>(
-        COL_USER_EVENT_TEAM,
+        COL_EVENT_TEAM_USERS,
         { [prop]: value },
         eventTeamUserConverter
       );
@@ -41,7 +41,7 @@ export class EventTeamUserService {
     teamLeaderId: string
   ): Promise<DocumentReference<DocumentData, DocumentData>> {
     return await this.httpService.execute(async () => {
-      return await this.documentService.addDocument<EventTeamUser>(COL_USER_EVENT_TEAM, {
+      return await this.documentService.addDocument<EventTeamUser>(COL_EVENT_TEAM_USERS, {
         eventId,
         teamId,
         userId,
