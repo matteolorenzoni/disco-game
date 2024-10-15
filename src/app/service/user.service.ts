@@ -7,7 +7,6 @@ import { userConverter } from '../model/converter';
 import { LogService } from './log.service';
 import { FirebaseService } from './firebase.service';
 import { FirebaseDocumentService } from './firebase-document.service';
-import { UserEventTeamService } from './user-event-team.service';
 import { HttpService } from './http.service';
 
 const COL_USERS = environment.collection.USERS;
@@ -21,7 +20,6 @@ export class UserService {
   readonly firebaseService = inject(FirebaseService);
   readonly documentService = inject(FirebaseDocumentService);
   readonly httpService = inject(HttpService);
-  readonly userGamesService = inject(UserEventTeamService);
   readonly logService = inject(LogService);
 
   /* Variables */
@@ -59,7 +57,7 @@ export class UserService {
         ...userModelForm,
         imageUrl,
         role: UserRole.USER,
-        userEventTeamRefs: [],
+        eventTeamUserRefs: [],
         isActive: true,
         updatedAt: new Date()
       });
@@ -81,13 +79,13 @@ export class UserService {
     });
   }
 
-  public async updateUserEventTeam(userId: string, userEventTeamId: string): Promise<void> {
+  public async updateEventTeamUser(userId: string, eventTeamUserId: string): Promise<void> {
     return await this.httpService.execute(async () => {
       await this.documentService.updateArrayPropReference<User>(
         'add',
-        'userEventTeamRefs',
+        'eventTeamUserRefs',
         `${COL_USERS}/${userId}`,
-        `${COL_USER_EVENT_TEAM}/${userEventTeamId}`
+        `${COL_USER_EVENT_TEAM}/${eventTeamUserId}`
       );
     });
   }

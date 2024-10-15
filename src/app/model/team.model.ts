@@ -1,5 +1,5 @@
 import { DocumentReference } from 'firebase/firestore';
-import { UserEventTeam } from './user-event-team.model';
+import { EventTeamUser } from './event-team-user.model';
 
 export type Team = {
   leaderId: string; // ID dell'utente che ha creato la squadra
@@ -7,7 +7,7 @@ export type Team = {
   description: string; // Descrizione della squadra, fornisce informazioni aggiuntive sulla squadra stessa
   code: string; // Codice unico di default per la creazione o la partecipazione a squadre; utilizzato per invitare altri membri
   status: TeamStatus; // Stato corrente della squadra, indica se è attiva, sospesa o bannata
-  userEventTeamRefs: DocumentReference<UserEventTeam>[]; // Array di riferimenti ai documenti delle squadre a cui l'utente ha partecipato o creato nel tempo, utile per la gestione delle squadre
+  eventTeamUserRefs: DocumentReference<EventTeamUser>[]; // Array di riferimenti ai documenti delle squadre a cui l'utente ha partecipato o creato nel tempo, utile per la gestione delle squadre
   isActive: boolean; // Flag per gestire la soft delete
   updatedAt: Date; // Data e ora dell'ultimo aggiornamento delle informazioni della squadra, per monitorare le modifiche
 };

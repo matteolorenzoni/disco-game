@@ -13,9 +13,10 @@
 
 <ul class="grid grid-cols-[repeat(auto-fill,minmax(6rem,1fr))] gap-4">
   @for (eventChallenge of eventChallenges(); track eventChallenge.id) {
-    <li class="shadwo flex flex-col items-center gap-2 rounded bg-surface p-2 text-on-surface">
+    <li
+      class="shadwo flex flex-col items-center gap-2 rounded-xl border-4 border-neutral-800 bg-surface p-2 text-on-surface">
       <img
-        class="h-20 w-20"
+        class="h-16 w-16"
         [src]="'images/challenge/' + eventChallenge.props.challengeType + '.png'"
         [alt]="'Immagine ' + eventChallenge.props.challengeName" />
       <div class="flex grow flex-col items-center justify-evenly gap-1">

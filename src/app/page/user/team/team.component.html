@@ -6,7 +6,7 @@
 </app-title>
 
 <div>
-  <h3 class="text-center text-3xl font-bold">{{ userEventTeamActive()?.props?.teamName }}</h3>
+  <h3 class="text-center text-3xl font-bold">{{ eventTeamUserActive()?.props?.teamName }}</h3>
   <div class="fap-4 flex items-center justify-evenly">
     <p class="text-center">
       <span class="text-[60px]">{{ teamTotalPoints() }}</span>
@@ -18,15 +18,15 @@
   </div>
 </div>
 
-@if (userEventTeamActive(); as userEventTeamActive) {
+@if (eventTeamUserActive(); as eventTeamUserActive) {
   <div class="mb-24 mt-4 flex flex-col gap-4 text-on-surface">
     <ul class="flex flex-col gap-6">
-      @for (userEventTeam of userEventTeams(); track userEventTeam.id) {
+      @for (eventTeamUser of eventTeamUsers(); track eventTeamUser.id) {
         <li class="relative cursor-pointer rounded-lg shadow transition duration-300">
           <button
             class="flex h-full w-full items-center rounded-lg bg-gradient-to-r from-neutral-800/25 from-15% to-neutral-800 p-2 pr-4 shadow-lg hover:to-primary-500/50 active:to-primary-500/75"
-            (click)="goToUserChallenges(userEventTeam.props.userId)">
-            @let imageUrl = userEventTeam.props.userId | user_image_url: teamUserImageRefs() | async;
+            (click)="goToUserChallenges(eventTeamUser.props.userId)">
+            @let imageUrl = eventTeamUser.props.userId | user_image_url: teamUserImageRefs() | async;
             <img
               class="absolute -top-2 h-16 w-16 rounded-3xl border-2 border-neutral-800 bg-[#8acff1] object-cover object-center shadow"
               [ngSrc]="imageUrl ?? 'images/profile-user-3.png'"
@@ -36,12 +36,12 @@
               alt="Immagine utente" />
             <div class="ml-20 flex h-full flex-col justify-around text-start">
               <p class="flex items-end gap-2 text-sm">
-                @if (userEventTeam.props.userId === userEventTeam.props.leaderId) {
+                @if (eventTeamUser.props.userId === eventTeamUser.props.teamLeaderId) {
                   <fa-icon [icon]="ICON_CROWN"></fa-icon>
                 }
-                <span class="font-semibold text-neutral-300">{{ userEventTeam.props.userName }}</span>
+                <span class="font-semibold text-neutral-300">{{ eventTeamUser.props.userName }}</span>
               </p>
-              <span class="text-2xl font-bold text-white">{{ userEventTeam.props.totalPoints }}</span>
+              <span class="text-2xl font-bold text-white">{{ eventTeamUser.props.userTotalPoints }}</span>
             </div>
             <fa-icon class="ml-auto" [icon]="ICON_RIGHT"></fa-icon>
           </button>
@@ -53,13 +53,13 @@
   <div class="fixed bottom-16 left-0 flex w-full flex-col gap-1 rounded-t px-4 py-2 text-on-surface">
     <button
       class="flex h-full w-full items-center rounded-lg bg-primary-500/25 p-2 pr-4 shadow-lg backdrop-blur-lg hover:to-primary-500/50 active:to-primary-500/15"
-      (click)="goToUserChallenges(userEventTeamActive.props.userId)">
+      (click)="goToUserChallenges(eventTeamUserActive.props.userId)">
       <div class="flex w-full items-end gap-2 text-base">
-        @if (firebaseService.userFirebase()?.uid === userEventTeamActive.props.leaderId) {
+        @if (firebaseService.userFirebase()?.uid === eventTeamUserActive.props.teamLeaderId) {
           <fa-icon [icon]="ICON_CROWN"></fa-icon>
         }
         <p class="font-semibold text-neutral-300">Mio punteggio</p>
-        <span class="font-bold text-white">{{ userEventTeamActive.props.totalPoints }}</span>
+        <span class="font-bold text-white">{{ eventTeamUserActive.props.userTotalPoints }}</span>
         <fa-icon class="ml-auto" [icon]="ICON_RIGHT"></fa-icon>
       </div>
     </button>

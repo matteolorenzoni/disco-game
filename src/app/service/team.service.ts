@@ -6,7 +6,7 @@ import { NewTeamModel } from '../model/form.model';
 import { Team, TeamStatus } from '../model/team.model';
 import { Doc } from '../model/firebase';
 import { teamConverter } from '../model/converter';
-import { UserEventTeamService } from './user-event-team.service';
+import { EventTeamUserService } from './event-team-user.service';
 import { HttpService } from './http.service';
 
 const COL_TEAMS = environment.collection.TEAMS;
@@ -19,7 +19,7 @@ export class TeamService {
   /* Services */
   readonly documentService = inject(FirebaseDocumentService);
   readonly httpService = inject(HttpService);
-  readonly userEventTeamService = inject(UserEventTeamService);
+  readonly eventTeamUserService = inject(EventTeamUserService);
   readonly logService = inject(LogService);
 
   /* --------------------------- Read ---------------------------*/
@@ -38,8 +38,8 @@ export class TeamService {
 
   public async getTeamsByEvent(eventId: string): Promise<Doc<Team>[]> {
     return await this.httpService.execute(async () => {
-      const userEventTeams = await this.userEventTeamService.getUserEventTeamsByProp('eventId', eventId);
-      const teamIds = userEventTeams.map((x) => x.props.teamId);
+      const eventTeamUsers = await this.eventTeamUserService.getEventTeamUsersByProp('eventId', eventId);
+      const teamIds = eventTeamUsers.map((x) => x.props.teamId);
       return await Promise.all(teamIds.map((x) => this.getTeamById(x)));
     });
   }
@@ -81,7 +81,7 @@ export class TeamService {
         description: '',
         code,
         status: TeamStatus.ACTIVE,
-        userEventTeamRefs: [],
+        eventTeamUserRefs: [],
         isActive: true,
         updatedAt: new Date()
       });
@@ -98,13 +98,13 @@ export class TeamService {
     });
   }
 
-  public async updateUserEventTeam(eventId: string, userEventTeamId: string): Promise<void> {
+  public async updateEventTeamUser(eventId: string, eventTeamUserId: string): Promise<void> {
     return await this.httpService.execute(async () => {
       await this.documentService.updateArrayPropReference<Team>(
         'add',
-        'userEventTeamRefs',
+        'eventTeamUserRefs',
         `${COL_TEAMS}/${eventId}`,
-        `${COL_USER_EVENT_TEAM}/${userEventTeamId}`
+        `${COL_USER_EVENT_TEAM}/${eventTeamUserId}`
       );
     });
   }

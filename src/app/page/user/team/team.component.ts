@@ -6,11 +6,11 @@ import { faAngleRight, faCrown } from '@fortawesome/free-solid-svg-icons';
 import { StorageReference } from 'firebase/storage';
 import { environment } from '../../../../environments/environment';
 import { Doc } from '../../../model/firebase';
-import { UserEventTeam } from '../../../model/user-event-team.model';
+import { EventTeamUser } from '../../../model/event-team-user.model';
 import { FirebaseService } from '../../../service/firebase.service';
 import { EventService } from '../../../service/event.service';
 import { StorageService } from '../../../service/storage.service';
-import { UserEventTeamService } from '../../../service/user-event-team.service';
+import { EventTeamUserService } from '../../../service/event-team-user.service';
 import { UserImageUrlPipe } from '../../../pipe/user-image-url.pipe';
 import { TitleComponent } from '../../../components/title/title.component';
 import { HttpService } from '../../../service/http.service';
@@ -33,14 +33,16 @@ export class TeamComponent implements OnInit {
   readonly storageService = inject(StorageService);
   readonly httpService = inject(HttpService);
   readonly eventService = inject(EventService);
-  readonly userEventTeamService = inject(UserEventTeamService);
+  readonly eventTeamUserService = inject(EventTeamUserService);
 
   /* Variables */
   teamId = signal<string | null>(null);
   teamUserImageRefs = signal<StorageReference[]>([]);
-  userEventTeams = signal<Doc<UserEventTeam>[]>([]);
-  userEventTeamActive = signal<Doc<UserEventTeam> | undefined>(undefined);
-  teamTotalPoints = computed<number>(() => this.userEventTeams().reduce((acc, cur) => acc + cur.props.totalPoints, 0));
+  eventTeamUsers = signal<Doc<EventTeamUser>[]>([]);
+  eventTeamUserActive = signal<Doc<EventTeamUser> | undefined>(undefined);
+  teamTotalPoints = computed<number>(() =>
+    this.eventTeamUsers().reduce((acc, cur) => acc + cur.props.userTotalPoints, 0)
+  );
 
   /* Icons */
   ICON_CROWN = faCrown;
@@ -57,12 +59,12 @@ export class TeamComponent implements OnInit {
           if (!eventId || !teamId) throw new Error('retry', { cause: 'retry' });
 
           const userId = this.firebaseService.userFirebase()?.uid;
-          const [userImageRefs, userGames] = await Promise.all([
+          const [userImageRefs, eventTeamUsers] = await Promise.all([
             this.storageService.getImageRefsByCollection(COL_USERS),
-            this.userEventTeamService.getUserEventTeamsByProp('teamId', teamId)
+            this.eventTeamUserService.getEventTeamUsersByProp('teamId', teamId)
           ]);
-          this.userEventTeams.set(userGames.filter((x) => x.props.userId !== userId));
-          this.userEventTeamActive.set(userGames.find((x) => x.props.userId === userId));
+          this.eventTeamUsers.set(eventTeamUsers.filter((x) => x.props.userId !== userId));
+          this.eventTeamUserActive.set(eventTeamUsers.find((x) => x.props.userId === userId));
           this.teamUserImageRefs.set(userImageRefs.items);
         })
     );

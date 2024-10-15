@@ -161,10 +161,10 @@ export class EventChallengeComponent implements OnInit {
       );
     }
 
-    /* Aggiorno Event (prop: userEventTeamRefs) */
+    /* Aggiorno Event (prop: eventTeamUserRefs) */
     await this.eventService.updateEventChallenge(eventId, eventChallengeActiveId);
 
-    /* Aggiorno Challenge (prop: userEventTeamRefs) */
+    /* Aggiorno Challenge (prop: eventTeamUserRefs) */
     await this.challengeService.updateEventChallenge(form.challengeId, eventChallengeActiveId);
 
     /* Log */

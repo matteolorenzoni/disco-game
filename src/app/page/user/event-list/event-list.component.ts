@@ -9,13 +9,13 @@ import { faCalendar, faCrown, faPeopleGroup } from '@fortawesome/free-solid-svg-
 import { Doc } from '../../../model/firebase';
 import { Event } from '../../../model/event.model';
 import { FindTeamModel, FromMap, NewTeamModel } from '../../../model/form.model';
-import { UserEventTeam } from '../../../model/user-event-team.model';
+import { EventTeamUser } from '../../../model/event-team-user.model';
 import { CheckExistTeamPipe } from '../../../pipe/check-exist-team.pipe';
 import { EventService } from '../../../service/event.service';
 import { FirebaseService } from '../../../service/firebase.service';
 import { LogService } from '../../../service/log.service';
 import { TeamService } from '../../../service/team.service';
-import { UserEventTeamService } from '../../../service/user-event-team.service';
+import { EventTeamUserService } from '../../../service/event-team-user.service';
 import { UserService } from '../../../service/user.service';
 import { FvFieldIconComponent } from '../../../components/fv-field-icon.component';
 import { FvButtonComponent } from '../../../components/fv-button.component';
@@ -65,13 +65,13 @@ export class EventListComponent implements OnInit {
   readonly eventService = inject(EventService);
   readonly teamService = inject(TeamService);
   readonly challengeService = inject(ChallengeService);
-  readonly userEventTeamService = inject(UserEventTeamService);
+  readonly eventTeamUserService = inject(EventTeamUserService);
   readonly logService = inject(LogService);
 
   /* Variables */
   events = signal<Doc<Event>[]>([]);
   eventSelected = signal<Doc<Event> | undefined>(undefined);
-  userEventTeams = signal<Doc<UserEventTeam>[]>([]);
+  eventTeamUsers = signal<Doc<EventTeamUser>[]>([]);
   eventChallengeMap = signal<Map<string, Doc<Challenge>[]>>(new Map());
   newTeamModalIsOpen = signal<boolean>(false);
   findTeamModalIsOpen = signal<boolean>(false);
@@ -100,14 +100,14 @@ export class EventListComponent implements OnInit {
     const user = this.userService.user();
     if (!user) throw new Error('retry', { cause: 'retry' });
 
-    /* Event e UserEventTeams */
-    const [events, userEventTeams] = await Promise.all([
+    /* Event e EventTeamUsers */
+    const [events, eventTeamUsers] = await Promise.all([
       this.eventService.getEvents(),
-      this.userEventTeamService.getUserEventTeamsByProp('userId', user.id)
+      this.eventTeamUserService.getEventTeamUsersByProp('userId', user.id)
     ]);
     this.events.set(events);
     this.eventSelected.set(events[0]);
-    this.userEventTeams.set(userEventTeams);
+    this.eventTeamUsers.set(eventTeamUsers);
 
     if (events[0]) {
       const challenges = await this.challengeService.getChallengesByEventChallengeRefs(
@@ -127,24 +127,24 @@ export class EventListComponent implements OnInit {
     const form = this.newTeamForm.getRawValue();
     const { teamId, teamCode } = await this.teamService.addTeam(user.id, eventId, form);
 
-    /* Aggiungo UserEventTeam al DB */
-    const userEventTeamRef = await this.userEventTeamService.addUserEventTeam(
-      user.id,
+    /* Aggiungo EventTeamUser al DB */
+    const eventTeamUserRef = await this.eventTeamUserService.addEventTeamUser(
       eventId,
       teamId,
       user.id,
       user.props.userName,
-      form.name
+      form.name,
+      user.id
     );
 
-    /* Aggiorno User (prop: userEventTeamRefs) */
-    await this.userService.updateUserEventTeam(user.id, userEventTeamRef.id);
+    /* Aggiorno User (prop: eventTeamUserRefs) */
+    await this.userService.updateEventTeamUser(user.id, eventTeamUserRef.id);
 
-    /* Aggiorno Event (prop: userEventTeamRefs) */
-    await this.eventService.updateUserEventTeam(eventId, userEventTeamRef.id);
+    /* Aggiorno Event (prop: eventTeamUserRefs) */
+    await this.eventService.updateEventTeamUser(eventId, eventTeamUserRef.id);
 
-    /* Aggiorno Team (prop: userEventTeamRefs) */
-    await this.teamService.updateUserEventTeam(teamId, userEventTeamRef.id);
+    /* Aggiorno Team (prop: eventTeamUserRefs) */
+    await this.teamService.updateEventTeamUser(teamId, eventTeamUserRef.id);
 
     /* Log */
     navigator.clipboard.writeText(teamCode);
@@ -166,8 +166,8 @@ export class EventListComponent implements OnInit {
       return;
     }
 
-    /* Aggiungo UserEventTeam al DB */
-    const userEventTeamRef = await this.userEventTeamService.addUserEventTeam(
+    /* Aggiungo EventTeamUser al DB */
+    const eventTeamUserRef = await this.eventTeamUserService.addEventTeamUser(
       user.id,
       eventId,
       team.id,
@@ -176,14 +176,14 @@ export class EventListComponent implements OnInit {
       team.props.name
     );
 
-    /* Aggiorno User (prop: userEventTeamRefs) */
-    await this.userService.updateUserEventTeam(user.id, userEventTeamRef.id);
+    /* Aggiorno User (prop: eventTeamUserRefs) */
+    await this.userService.updateEventTeamUser(user.id, eventTeamUserRef.id);
 
-    /* Aggiorno Event (prop: userEventTeamRefs) */
-    await this.eventService.updateUserEventTeam(eventId, userEventTeamRef.id);
+    /* Aggiorno Event (prop: eventTeamUserRefs) */
+    await this.eventService.updateEventTeamUser(eventId, eventTeamUserRef.id);
 
-    /* Aggiorno Team (prop: userEventTeamRefs) */
-    await this.teamService.updateUserEventTeam(team.id, userEventTeamRef.id);
+    /* Aggiorno Team (prop: eventTeamUserRefs) */
+    await this.teamService.updateEventTeamUser(team.id, eventTeamUserRef.id);
 
     /* Log */
     this.logService.addLogConfirm('Ora fai parte della squadra, buona fortuna');

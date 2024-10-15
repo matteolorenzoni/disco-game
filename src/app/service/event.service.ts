@@ -42,7 +42,7 @@ export class EventService {
         imageUrl,
         startDate: new Date(form.startDate),
         endDate: new Date(form.endDate),
-        userEventTeamRefs: [],
+        eventTeamUserRefs: [],
         eventChallengeRefs: [],
         isActive: true,
         updatedAt: new Date()
@@ -70,13 +70,13 @@ export class EventService {
     });
   }
 
-  public async updateUserEventTeam(eventId: string, userEventTeamId: string): Promise<void> {
+  public async updateEventTeamUser(eventId: string, eventTeamUserId: string): Promise<void> {
     return await this.httpService.execute(async () => {
       await this.documentService.updateArrayPropReference<Event>(
         'add',
-        'userEventTeamRefs',
+        'eventTeamUserRefs',
         `${COL_EVENTS}/${eventId}`,
-        `${COL_USER_EVENT_TEAMS}/${userEventTeamId}`
+        `${COL_USER_EVENT_TEAMS}/${eventTeamUserId}`
       );
     });
   }
