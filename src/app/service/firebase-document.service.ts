@@ -43,6 +43,24 @@ export class FirebaseDocumentService {
     return { id: docSnap.id, props: data };
   }
 
+  public async getDocumentsByIds<T>(
+    collectionName: string,
+    ids: string[],
+    converter: FirestoreDataConverter<T>
+  ): Promise<Doc<T>[]> {
+    const collectionRef = getCollection(this.firebaseService.getDb(), collectionName).withConverter(converter);
+    const docRefs = ids.map((id) => doc(collectionRef, id));
+    const docsSnap = await Promise.all(docRefs.map((ref) => getDoc(ref)));
+    const docs: Doc<T>[] = docsSnap.map((docSnap) => {
+      if (!docSnap.exists()) throw new Error('Uno o più documenti non esistono');
+      return {
+        id: docSnap.id,
+        props: docSnap.data() as T
+      };
+    });
+    return docs;
+  }
+
   public async getAllDocuments<T extends Record<string, any>>(
     collectionName: string,
     converter: FirestoreDataConverter<T>

@@ -32,15 +32,15 @@ export class UserService {
     });
   }
 
-  private async getUsers(): Promise<Doc<User>[]> {
+  public async getUsersByIds(userIds: string[]): Promise<Doc<User>[]> {
     return await this.httpService.execute(async () => {
-      return await this.documentService.getAllActiveDocuments<User>(COL_USERS, userConverter);
+      return await this.documentService.getDocumentsByIds<User>(COL_USERS, userIds, userConverter);
     });
   }
 
   public async checkUniqUsername(userName: string): Promise<boolean> {
     return await this.httpService.execute(async () => {
-      const userDocs = await this.getUsers();
+      const userDocs = await this.documentService.getAllActiveDocuments<User>(COL_USERS, userConverter);
       const usernames = userDocs.map((user) => user.props.userName);
       if (usernames.includes(userName.toLowerCase())) {
         this.logService.addLogConfirm("L'userName scelto non è disponibile, si prega di sceglierne un altro.");

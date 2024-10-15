@@ -1,5 +1,5 @@
 import { inject, Injectable, WritableSignal } from '@angular/core';
-import { deleteObject, getDownloadURL, listAll, ListResult, ref, uploadBytesResumable } from 'firebase/storage';
+import { deleteObject, getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import { LogService } from './log.service';
 import { FirebaseService } from './firebase.service';
 
@@ -12,14 +12,6 @@ export class StorageService {
   readonly logService = inject(LogService);
 
   /* --------------------------- Method Firebase --------------------------- */
-  public async getImageRefsByCollection(collection: string): Promise<ListResult> {
-    // Crea un riferimento alla cartella specificata in Firebase Storage
-    const folderRef = ref(this.firebaseService.getStorage(), collection);
-
-    // Recupera tutti i riferimenti delle immagini nella cartella specificata
-    return await listAll(folderRef);
-  }
-
   public async saveImage(image: File, collection: string, name: string): Promise<string> {
     // Crea un riferimento alla cartella specificata in Firebase Storage
     const imageRef = ref(this.firebaseService.getStorage(), `${collection}/${name}.jpg`);
