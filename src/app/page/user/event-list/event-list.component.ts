@@ -26,6 +26,7 @@ import { GetCurrentEvent } from '../../../pipe/get-current-event.pipe';
 import { FvRatingComponent } from '../../../components/fv-rating.component';
 import { Challenge } from '../../../model/challenge.model';
 import { Team } from '../../../model/team.model';
+import { register } from 'swiper/element/bundle';
 
 @Component({
   selector: 'app-event-list',
@@ -95,6 +96,11 @@ export class EventListComponent implements OnInit {
   ICON_CALENDAR = faCalendar;
   ICON_CROWN = faCrown;
   ICON_TEAM = faPeopleGroup;
+
+  /* -------------------- Constructor  -------------------- */
+  constructor() {
+    register();
+  }
 
   /* -------------------- Lifecycle hooks -------------------- */
   async ngOnInit(): Promise<void> {

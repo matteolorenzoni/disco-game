@@ -1,6 +1,11 @@
 <app-title [pages]="[{ path: '', label: 'Eventi' }]"></app-title>
 
-<swiper-container space-between="16" slides-per-view="auto" (swiperslidechange)="onSlideChange($event)">
+<swiper-container
+  style="--swiper-navigation-color: #424141; --swiper-pagination-color: #424141"
+  space-between="16"
+  navigation="true"
+  pagination="true"
+  (swiperslidechange)="onSlideChange($event)">
   @for (event of events(); track event.id) {
     <swiper-slide class="w-4/5 text-on-surface">
       <div
@@ -20,7 +25,7 @@
   }
 </swiper-container>
 
-<div class="mt-8 overflow-hidden">
+<div class="mt-4 overflow-hidden">
   @if ((eventSelected()?.id | get_current_event: eventStorage()).team; as team) {
     <div class="flex flex-col gap-1 rounded-lg border border-yellow-400/50 bg-yellow-400/25 p-2">
       <p class="text-xxs uppercase">Squadra</p>
