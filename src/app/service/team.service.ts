@@ -38,7 +38,9 @@ export class TeamService {
 
   public async getTeamsByEvent(eventId: string): Promise<Doc<Team>[]> {
     return await this.httpService.execute(async () => {
-      const eventTeamUsers = await this.eventTeamUserService.getEventTeamUsersByProp('eventId', eventId);
+      const eventTeamUsers = await this.eventTeamUserService.getEventTeamUsersByProp([
+        { key: 'eventId', value: eventId }
+      ]);
       const teamIds = eventTeamUsers.map((x) => x.props.teamId);
       return await Promise.all(teamIds.map((x) => this.getTeamById(x)));
     });

@@ -110,7 +110,7 @@ export class EventListComponent implements OnInit {
     /* Event e EventTeamUsers */
     const [events, eventTeamUsers] = await Promise.all([
       this.eventService.getEvents(),
-      this.eventTeamUserService.getEventTeamUsersByProp('userId', user.id)
+      this.eventTeamUserService.getEventTeamUsersByProp([{ key: 'userId', value: user.id }])
     ]);
     this.events.set(events);
     this.eventSelected.set(events[0]);

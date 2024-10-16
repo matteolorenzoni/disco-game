@@ -19,13 +19,12 @@ export class EventTeamUserService {
 
   /* --------------------------- Read ---------------------------*/
   public async getEventTeamUsersByProp(
-    prop: 'userId' | 'eventId' | 'teamId',
-    value: string
+    props: { key: 'userId' | 'eventId' | 'teamId'; value: string }[]
   ): Promise<Doc<EventTeamUser>[]> {
     return await this.httpService.execute(async () => {
       return await this.documentService.getDocumentsByProp<EventTeamUser>(
         COL_EVENT_TEAM_USERS,
-        { [prop]: value },
+        props.reduce((acc, { key, value }) => ({ ...acc, [key]: value }), {}),
         eventTeamUserConverter
       );
     });
@@ -42,8 +41,7 @@ export class EventTeamUserService {
         eventId,
         teamId,
         userId,
-        userTotalPoints: 0,
-        eventTeamUserChallengeRefs: [],
+        challenges: [],
         updatedAt: new Date()
       });
     });
