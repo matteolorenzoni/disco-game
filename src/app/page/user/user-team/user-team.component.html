@@ -7,22 +7,43 @@
 </app-title>
 
 <div class="mb-8 flex flex-col gap-1 text-center text-on-background">
-  <h3 class="text-3xl font-semibold text-white">{{ user()?.props?.name }} {{ user()?.props?.lastName }}</h3>
+  <h3 class="flex items-center justify-center gap-4">
+    <span class="text-3xl font-semibold text-white">{{ user()?.props?.name }} {{ user()?.props?.lastName }}</span>
+  </h3>
   <p class="text-sm">{{ user()?.props?.userName }}</p>
 </div>
 
 <ul class="grid grid-cols-[repeat(auto-fill,minmax(6rem,1fr))] gap-4">
-  @for (eventChallenge of eventChallenges(); track eventChallenge.id) {
+  @for (item of results(); track item.eventChallenge.id) {
     <li
-      class="shadwo flex flex-col items-center gap-2 rounded-xl border-4 border-neutral-800 bg-surface p-2 text-on-surface">
-      <img
-        class="h-16 w-16"
-        [src]="'images/challenge/' + eventChallenge.props.challengeType + '.png'"
-        [alt]="'Immagine ' + eventChallenge.props.challengeName" />
-      <div class="flex grow flex-col items-center justify-evenly gap-1">
-        <p class="text-center text-xs">{{ eventChallenge.props.challengeName }}</p>
-        <p class="text-center text-xs">85</p>
+      class="relative flex flex-col gap-1 rounded-xl bg-neutral-800 p-1 text-on-surface shadow"
+      [ngClass]="{
+        'filter grayscale opacity-50': item.eventChallenge.props.challengeStatus === CHALLENGE_STATUS.CANCELED
+      }">
+      <div class="flex w-full justify-center rounded-lg bg-surface p-2">
+        <img
+          class="h-16 w-16"
+          [src]="'images/challenge/' + item.eventChallenge.props.challengeType + '.png'"
+          [alt]="'Immagine ' + item.eventChallenge.props.challengeName" />
       </div>
+      <div class="flex flex-col gap-1 px-2 py-1 text-center">
+        <p class="truncate text-xxs text-on-surface">{{ item.eventChallenge.props.challengeName }}</p>
+        <p class="truncate text-sm font-semibold text-white">
+          <span>{{ item.eventTeamUser?.props?.challenges ?? [] | getUserTotalPoints: item.eventChallenge.id }}</span>
+          <span class="text-[8px]">pt</span>
+        </p>
+      </div>
+      @if (item.eventChallenge.props.challengeStatus === CHALLENGE_STATUS.LOCKED) {
+        <div class="absolute left-0 top-0 h-full w-full rounded-xl bg-black/25 backdrop-blur-sm"></div>
+        <fa-icon class="absolute -right-1 -top-2 text-xl text-white" [icon]="ICON_LOCKED"></fa-icon>
+      }
+      @if (item.eventChallenge.props.challengeStatus === CHALLENGE_STATUS.CANCELED) {
+        <fa-icon class="absolute -right-1 -top-2 text-xl text-white" [icon]="ICON_CANCELED"></fa-icon>
+      }
+      @if (item.eventChallenge.props.challengeStatus === CHALLENGE_STATUS.SUSPENDED) {
+        <div class="absolute left-0 top-0 h-full w-full rounded-xl bg-sky-400/25 backdrop-blur-sm"></div>
+        <fa-icon class="absolute -right-1 -top-2 text-xl text-white" [icon]="ICON_SUSPENDED"></fa-icon>
+      }
     </li>
   }
 </ul>

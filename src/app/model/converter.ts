@@ -159,9 +159,12 @@ export const eventTeamUserConverter: FirestoreDataConverter<EventTeamUser> = {
       eventId: game.eventId,
       teamId: game.teamId,
       userId: game.userId,
-      userTotalPoints: game.userTotalPoints,
-      eventTeamUserChallengeRefs: game.eventTeamUserChallengeRefs.map((ref) => ref.path),
-      updatedAt: game.updatedAt
+      challenges: game.challenges.map((challenge) => ({
+        eventChallengeId: challenge.eventChallengeId,
+        timestamps: challenge.timestamps.map((timestamp) => dateToString(timestamp)), // Convertiamo Date a Timestamp
+        totalPoints: challenge.totalPoints
+      })),
+      updatedAt: dateToString(game.updatedAt) // Anche qui convertiamo Date a Timestamp
     };
   },
 
@@ -171,8 +174,7 @@ export const eventTeamUserConverter: FirestoreDataConverter<EventTeamUser> = {
       eventId: data['eventId'],
       teamId: data['teamId'],
       userId: data['userId'],
-      userTotalPoints: data['userTotalPoints'],
-      eventTeamUserChallengeRefs: data['eventTeamUserChallengeRefs'],
+      challenges: data['challenges'],
       updatedAt: timestampToDate(data['updatedAt'] as Timestamp)
     };
   }

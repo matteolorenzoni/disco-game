@@ -22,11 +22,12 @@ import { Team } from '../../../model/team.model';
 import { TeamService } from '../../../service/team.service';
 import { User } from '../../../model/user.model';
 import { UserService } from '../../../service/user.service';
+import { GetUserTotalPointsPipe } from '../../../pipe/get-user-total-points.pipe';
 
 @Component({
   selector: 'app-team',
   standalone: true,
-  imports: [CommonModule, FaIconComponent, TitleComponent, NgOptimizedImage],
+  imports: [CommonModule, FaIconComponent, TitleComponent, GetUserTotalPointsPipe, NgOptimizedImage],
   templateUrl: './team.component.html',
   styleUrls: ['./team.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -75,7 +76,7 @@ export class TeamComponent implements OnInit {
 
           const [team, eventTeamUsers] = await Promise.all([
             this.teamService.getTeamById(teamId),
-            this.eventTeamUserService.getEventTeamUsersByProp('teamId', teamId)
+            this.eventTeamUserService.getEventTeamUsersByProp([{ key: 'teamId', value: teamId }])
           ]);
           this.team.set(team);
           const inTeamUsers = await this.userService.getUsersByIds(eventTeamUsers.map((x) => x.props.userId));

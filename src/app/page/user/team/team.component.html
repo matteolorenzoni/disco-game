@@ -11,7 +11,7 @@
     <div class="fap-4 flex items-center justify-evenly">
       <p class="text-center">
         <span class="text-[60px]">{{ team.props.totalPoints }}</span>
-        <span class="text-sm">punti</span>
+        <span class="text-sm">pt</span>
       </p>
       <div class="flex items-center gap-4">
         <div class="flex h-full items-center justify-center rounded-full border-2 border-cyan-600 bg-cyan-600/25 p-2">
@@ -44,7 +44,8 @@
           class="flex h-full w-full items-center rounded-lg bg-gradient-to-r from-neutral-800/25 from-15% to-neutral-800 p-2 pr-4 shadow-lg hover:to-primary-500/50 active:to-primary-500/75"
           (click)="goToUserChallenges(info.user.id)">
           <img
-            class="absolute -top-2 h-16 w-16 rounded-3xl border-2 border-neutral-800 bg-[#8acff1] object-cover object-center shadow"
+            class="absolute -top-2 h-16 w-16 rounded-3xl border-2 border-neutral-800 object-cover object-center shadow"
+            [ngClass]="{ 'bg-[#8acff1]': !info.user.props.imageUrl }"
             [ngSrc]="info.user.props.imageUrl ?? 'images/profile-user-3.png'"
             width="64"
             height="64"
@@ -57,7 +58,9 @@
               }
               <span class="font-semibold text-neutral-300">{{ info.user.props.userName }}</span>
             </p>
-            <span class="text-2xl font-bold text-white">{{ info.eventTeamUser.props.userTotalPoints }}</span>
+            <span class="text-2xl font-bold text-white">{{
+              info.eventTeamUser.props.challenges | getUserTotalPoints
+            }}</span>
           </div>
           <fa-icon class="ml-auto" [icon]="ICON_RIGHT"></fa-icon>
         </button>
@@ -76,7 +79,9 @@
           <fa-icon [icon]="ICON_CROWN"></fa-icon>
         }
         <p class="font-semibold text-neutral-300">Mio punteggio</p>
-        <span class="font-bold text-white">{{ infoUserActive.eventTeamUser.props.userTotalPoints }}</span>
+        <span class="font-bold text-white">{{
+          infoUserActive.eventTeamUser.props.challenges | getUserTotalPoints
+        }}</span>
         <fa-icon class="ml-auto" [icon]="ICON_RIGHT"></fa-icon>
       </div>
     </button>
