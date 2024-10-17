@@ -72,7 +72,7 @@ export class UserTeamComponent implements OnInit {
       /* Metto insieme i dati */
       const mergedResults = eventChallenges.map((eventChallenge) => {
         const eventTeamUser = eventTeamUsers.find((user) =>
-          user.props.challenges.some((challengeData) => challengeData.eventChallengeId === eventChallenge.id)
+          user.props.challenges.find((challengeData) => challengeData.eventChallengeId === eventChallenge.id)
         );
         return { eventChallenge, eventTeamUser };
       });

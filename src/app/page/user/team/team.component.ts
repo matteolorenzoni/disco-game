@@ -46,8 +46,8 @@ export class TeamComponent implements OnInit {
 
   /* Variables */
   team = signal<Doc<Team> | undefined>(undefined);
-  infoUsers = signal<{ user: Doc<User>; eventTeamUser: Doc<EventTeamUser> }[]>([]);
-  infoUserActive = signal<{ user: Doc<User>; eventTeamUser: Doc<EventTeamUser> } | undefined>(undefined);
+  results = signal<{ user: Doc<User>; eventTeamUser: Doc<EventTeamUser> }[]>([]);
+  resultActive = signal<{ user: Doc<User>; eventTeamUser: Doc<EventTeamUser> } | undefined>(undefined);
   diffPosition = computed<{ value: number; icon: IconDefinition }>(() => {
     const team = this.team();
     if (!team) return { value: 0, icon: this.ICON_EQUAL };
@@ -74,20 +74,30 @@ export class TeamComponent implements OnInit {
           const teamId = params.get('teamId');
           if (!eventId || !teamId) throw new Error('retry', { cause: 'retry' });
 
+          /* Ottengo l'evento */
+          /* Ottengo tutti gli utenti della squadra di questo evento */
           const [team, eventTeamUsers] = await Promise.all([
             this.teamService.getTeamById(teamId),
             this.eventTeamUserService.getEventTeamUsersByProp([{ key: 'teamId', value: teamId }])
           ]);
           this.team.set(team);
-          const inTeamUsers = await this.userService.getUsersByIds(eventTeamUsers.map((x) => x.props.userId));
-          inTeamUsers.forEach((user) => {
-            const item = { user, eventTeamUser: eventTeamUsers.find((x) => x.props.userId === user.id)! };
-            if (user.id === this.firebaseService.userFirebase()?.uid) {
-              this.infoUserActive.set(item);
-              return;
-            }
-            this.infoUsers.update((val) => [...val, item]);
-          });
+
+          /* Ottengo le informazioni degli utenti */
+          const users = await this.userService.getUsersByIds(eventTeamUsers.map((x) => x.props.userId));
+
+          /* Metto insieme i dati */
+          const mergedResults = eventTeamUsers.reduce(
+            (acc, cur) => {
+              const user = users.find((user) => user.id === cur.props.userId)!;
+              if (this.firebaseService.userFirebase()?.uid === user.id) {
+                this.resultActive.set({ user, eventTeamUser: cur });
+                return acc;
+              }
+              return [...acc, { user, eventTeamUser: cur }];
+            },
+            [] as { user: Doc<User>; eventTeamUser: Doc<EventTeamUser> }[]
+          );
+          this.results.set(mergedResults);
         })
     );
   }
