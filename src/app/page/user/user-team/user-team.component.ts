@@ -59,14 +59,14 @@ export class UserTeamComponent implements OnInit {
       this.user.set(user);
 
       /* Ottengo tutte le sfide superate per questo evento */
-      /* Ottengo tutte le info delle sfide*/
+      /* Ottengo tutte le info base + info correnti delle sfide */
       const [eventTeamUsers, eventChallenges] = await Promise.all([
         this.eventTeamUserService.getEventTeamUsersByProp([
           { key: 'eventId', value: eventId },
           { key: 'teamId', value: teamId },
           { key: 'userId', value: userId }
         ]),
-        this.eventChallengeService.getEventChallengesByEventId(eventId)
+        this.eventChallengeService.getEventChallengesByProp([{ key: 'eventId', value: eventId }])
       ]);
 
       /* Metto insieme i dati */

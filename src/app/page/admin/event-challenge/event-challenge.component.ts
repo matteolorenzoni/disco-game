@@ -115,8 +115,11 @@ export class EventChallengeComponent implements OnInit {
       this.challenges.set(challenges);
       this.challengesOptions.set(challenges.map((x) => ({ label: x.props.name, value: x.id })));
 
-      const eventChallenge = await this.eventChallengeService.getEventChallengesByEventId(eventId);
-      this.eventChallenges.set(eventChallenge);
+      // TODO: migliorare il sistema con merge date e promise all
+      const eventChallenges = await this.eventChallengeService.getEventChallengesByProp([
+        { key: 'eventId', value: eventId }
+      ]);
+      this.eventChallenges.set(eventChallenges);
     });
   }
 

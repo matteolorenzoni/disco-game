@@ -74,7 +74,7 @@ export class EventListComponent implements OnInit {
   events = signal<Doc<Event>[]>([]);
   eventSelected = signal<Doc<Event> | undefined>(undefined);
   eventTeamUsers = signal<Doc<EventTeamUser>[]>([]);
-  eventStorage = signal<Map<string, { team: Doc<Team> | undefined; challenges: Doc<Challenge>[] }>>(new Map());
+  eventMemory = signal<Map<string, { team: Doc<Team> | undefined; challenges: Doc<Challenge>[] }>>(new Map());
   newTeamModalIsOpen = signal<boolean>(false);
   findTeamModalIsOpen = signal<boolean>(false);
 
@@ -189,8 +189,9 @@ export class EventListComponent implements OnInit {
     this.eventSelected.set(eventSelected);
 
     /* Aggiorna squadra e sfide associate */
-    if (this.eventStorage().has(eventSelected.id)) return;
-    if (eventSelected) this.getEventStorage(eventSelected);
+    if (eventSelected && !this.eventMemory().has(eventSelected.id)) {
+      this.getEventStorage(eventSelected);
+    }
   }
 
   protected openNewTeamModal(): void {
@@ -217,7 +218,7 @@ export class EventListComponent implements OnInit {
     const currentTeam = this.eventTeamUsers().find((x) => x.props.eventId === event.id);
     const team = currentTeam ? await this.teamService.getTeamById(currentTeam.props.teamId) : undefined;
     const challenges = await this.challengeService.getChallengesByEventChallengeRefs(event.props.eventChallengeRefs);
-    this.eventStorage.set(new Map([...this.eventStorage(), [event.id, { team, challenges }]]));
+    this.eventMemory.set(new Map([...this.eventMemory(), [event.id, { team, challenges }]]));
   }
 
   private resetModalsAndForms(): void {

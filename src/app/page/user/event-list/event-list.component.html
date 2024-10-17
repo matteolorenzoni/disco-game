@@ -26,7 +26,7 @@
 </swiper-container>
 
 <div class="mt-4 overflow-hidden">
-  @if ((eventSelected()?.id | get_current_event: eventStorage()).team; as team) {
+  @if ((eventSelected()?.id | get_current_event: eventMemory()).team; as team) {
     <div class="flex flex-col gap-1 rounded-lg border border-yellow-400/50 bg-yellow-400/25 p-2">
       <p class="text-xxs uppercase">Squadra</p>
       <div class="flex items-end overflow-hidden">
@@ -64,7 +64,7 @@
 <div class="mt-8 overflow-hidden rounded-3xl border border-card-border bg-surface p-2 text-on-surface shadow">
   <h2 class="p-2">Sfide</h2>
   <ul class="flex flex-col divide-y divide-neutral-800">
-    @if ((eventSelected()?.id | get_current_event: eventStorage()).challenges; as challenges) {
+    @if ((eventSelected()?.id | get_current_event: eventMemory()).challenges; as challenges) {
       @for (challenge of challenges; track challenge.id) {
         <li class="flex cursor-pointer items-center gap-4 p-2 py-4 hover:bg-neutral-950 active:bg-black">
           <img class="h-4 w-4" [src]="'images/challenge/' + challenge.props.type + '.png'" alt="" />

@@ -17,11 +17,13 @@ export class EventChallengeService {
   readonly httpService = inject(HttpService);
 
   /* --------------------------- Read ---------------------------*/
-  public async getEventChallengesByEventId(eventId: string): Promise<Doc<EventChallenge>[]> {
+  public async getEventChallengesByProp(
+    props: { key: 'eventId' | 'challengeId'; value: string }[]
+  ): Promise<Doc<EventChallenge>[]> {
     return await this.httpService.execute(async () => {
       return await this.documentService.getDocumentsByProp<EventChallenge>(
         COL_EVENT_CHALLENGES,
-        { eventId },
+        props.reduce((acc, { key, value }) => ({ ...acc, [key]: value }), {}),
         eventChallengeConverter
       );
     });
