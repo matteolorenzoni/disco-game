@@ -57,8 +57,9 @@ export class ChallengeComponent implements OnInit {
         await this.httpService.execute(async () => {
           const userId = this.firebaseService.userFirebase()?.uid;
           const eventId = params.get('eventId');
+          const teamId = params.get('teamId');
           const challengeId = params.get('challengeId');
-          if (!userId || !eventId || !challengeId) throw new Error('retry', { cause: 'retry' });
+          if (!eventId || !teamId || !userId || !challengeId) throw new Error('retry', { cause: 'retry' });
 
           /* Ottengo i dati della sfida e quelli della sfida applicati a questo evento */
           const [challenge, eventChallenge] = await Promise.all([
@@ -69,7 +70,13 @@ export class ChallengeComponent implements OnInit {
           this.eventChallenge.set(eventChallenge);
 
           /* Genero qrcode */
-          const qrcode: EventTeamUserQrcode = { eventId, userId, challengeId, points: challenge.props.points };
+          const qrcode: EventTeamUserQrcode = {
+            eventId,
+            teamId,
+            userId,
+            challengeId,
+            points: challenge.props.points
+          };
           this.qrdata.set(JSON.stringify(qrcode));
         })
     );

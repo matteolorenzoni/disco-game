@@ -14,6 +14,7 @@ export type EventTeamUserChallenge = {
 
 export type EventTeamUserQrcode = {
   eventId: string;
+  teamId: string;
   userId: string;
   challengeId: string;
   points: number;

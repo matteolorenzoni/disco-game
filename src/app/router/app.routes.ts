@@ -134,10 +134,6 @@ export const routes: Routes = [
               import('../page/user/event-list/event-list.component').then((m) => m.EventListComponent)
           },
           {
-            path: ':eventId/challenges/:challengeId',
-            loadComponent: () => import('../page/user/challenge/challenge.component').then((m) => m.ChallengeComponent)
-          },
-          {
             path: ':eventId/:teamId/:userId',
             loadComponent: () => import('../page/user/user-team/user-team.component').then((m) => m.UserTeamComponent)
           },
@@ -146,6 +142,10 @@ export const routes: Routes = [
             loadComponent: () => import('../page/user/team/team.component').then((m) => m.TeamComponent)
           }
         ]
+      },
+      {
+        path: 'challenges/:eventId/:teamId/:challengeId',
+        loadComponent: () => import('../page/user/challenge/challenge.component').then((m) => m.ChallengeComponent)
       },
       {
         path: 'settings',

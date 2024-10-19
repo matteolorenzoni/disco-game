@@ -26,7 +26,7 @@
 </swiper-container>
 
 <div class="mt-4 overflow-hidden">
-  @if ((eventSelected()?.id | get_current_event: eventMemory()).team; as team) {
+  @if (current().team; as team) {
     <div class="flex flex-col gap-1 rounded-lg border border-yellow-400/50 bg-yellow-400/25 p-2">
       <p class="text-xxs uppercase">Squadra</p>
       <div class="flex items-end overflow-hidden">
@@ -36,11 +36,7 @@
           }
           <span> {{ team.props.name }} </span>
         </p>
-        <fv-button
-          label="Visualizza squadra"
-          twColor="amber"
-          [onClick]="onGoToTeam.bind(this, eventSelected()!.id, team.id)">
-        </fv-button>
+        <fv-button label="Visualizza squadra" twColor="amber" [onClick]="onGoToTeam.bind(this, team.id)"> </fv-button>
       </div>
     </div>
   } @else {
@@ -64,18 +60,14 @@
 <div class="mt-8 overflow-hidden rounded-3xl border border-card-border bg-surface p-2 text-on-surface shadow">
   <h2 class="p-2">Sfide</h2>
   <ul class="flex flex-col divide-y divide-neutral-800">
-    @if ((eventSelected()?.id | get_current_event: eventMemory()).challenges; as challenges) {
-      @for (challenge of challenges; track challenge.id) {
-        <li class="hover:rounded-xl hover:bg-neutral-950 active:rounded-xl active:bg-black">
-          <button
-            class="flex w-full items-center gap-4 p-2 py-4"
-            (click)="onGoToChallenge(eventSelected()!.id, challenge.id)">
-            <img class="h-4 w-4" [src]="'images/challenge/' + challenge.props.type + '.png'" alt="" />
-            <p class="truncate text-sm">{{ challenge.props.name }}</p>
-            <fv-rating [rating]="challenge.props.complexity"></fv-rating>
-          </button>
-        </li>
-      }
+    @for (challenge of current().challenges; track challenge.id) {
+      <li class="hover:rounded-xl hover:bg-neutral-950 active:rounded-xl active:bg-black">
+        <button class="flex w-full items-center gap-4 p-2 py-4" (click)="onGoToChallenge(challenge.id)">
+          <img class="h-4 w-4" [src]="'images/challenge/' + challenge.props.type + '.png'" alt="" />
+          <p class="truncate text-sm">{{ challenge.props.name }}</p>
+          <fv-rating [rating]="challenge.props.complexity"></fv-rating>
+        </button>
+      </li>
     }
   </ul>
 </div>

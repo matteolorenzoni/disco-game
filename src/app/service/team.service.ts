@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { FirebaseDocumentService } from './firebase-document.service';
 import { environment } from '../../environments/environment';
-import { LogService } from './log.service';
 import { NewTeamModel } from '../model/form.model';
 import { Team, TeamStatus } from '../model/team.model';
 import { Doc } from '../model/firebase';
@@ -21,7 +20,6 @@ export class TeamService {
   readonly documentService = inject(FirebaseDocumentService);
   readonly httpService = inject(HttpService);
   readonly eventTeamUserService = inject(EventTeamUserService);
-  readonly logService = inject(LogService);
 
   /* --------------------------- Read ---------------------------*/
   public async getTeamById(teamId: string): Promise<Doc<Team>> {
@@ -42,15 +40,14 @@ export class TeamService {
   }
 
   /* --------------------------- Create ---------------------------*/
-  public async addTeam(
-    userId: string,
-    eventId: string,
-    teamForm: NewTeamModel
-  ): Promise<{ teamId: string; teamCode: string }> {
+  public async addTeam(userId: string, eventId: string, teamForm: NewTeamModel): Promise<Doc<Team>> {
     return await this.httpService.execute(async () => {
+      /* Ottengo tutte le squadre che partecipano all'evento */
       const inEventTeams = await this.eventTeamUserService.getEventTeamUsersByProp([
         { key: 'eventId', value: eventId }
       ]);
+
+      /* Ottengo tutte le informazioni delle squadre che partecipano all'evento */
       const teams = await this.documentService.getDocumentsByIds<Team>(
         COL_TEAMS,
         inEventTeams.map((x) => x.props.teamId),
@@ -79,7 +76,7 @@ export class TeamService {
       }
 
       /* Aggiungo evento al DB */
-      const teamRef = await this.documentService.addDocument<Team>(COL_TEAMS, {
+      const props = {
         leaderId: userId,
         name: teamForm.name,
         description: '',
@@ -91,17 +88,18 @@ export class TeamService {
         eventTeamUserRefs: [],
         isActive: true,
         updatedAt: new Date()
-      });
+      };
+      const docRef = await this.documentService.addDocument<Team>(COL_TEAMS, props);
 
-      return { teamId: teamRef.id, teamCode: code };
+      /* Restituisco l'oggetto appena creato */
+      return { id: docRef.id, props };
     });
   }
 
   /* --------------------------- Update ---------------------------*/
-  public async updateTeam(teamId: string, form: NewTeamModel): Promise<void> {
+  public async updateTeamPoints(teamId: string, points: number): Promise<void> {
     return await this.httpService.execute(async () => {
-      await this.documentService.updateDocument<Team>(teamId, COL_TEAMS, form);
-      this.logService.addLogConfirm('Squadra aggiornata');
+      await this.documentService.incrementProp<Team>(teamId, COL_TEAMS, 'totalPoints', points);
     });
   }
 

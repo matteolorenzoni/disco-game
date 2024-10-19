@@ -14,7 +14,8 @@ import {
   setDoc,
   updateDoc,
   where,
-  collection as getCollection
+  collection as getCollection,
+  increment
 } from 'firebase/firestore';
 import { Doc } from '../model/firebase';
 import { FirebaseService } from './firebase.service';
@@ -129,6 +130,7 @@ export class FirebaseDocumentService {
     await updateDoc(docRef, { ...data, updatedAt: new Date() } as any);
   }
 
+  // TODO: vedere se si riesce ad eliminare
   public async updateArrayPropReference<T extends Record<string, any> & { updatedAt: Date }>(
     operation: 'add' | 'remove',
     propToUpdate: keyof T,
@@ -139,6 +141,20 @@ export class FirebaseDocumentService {
     const referencesRef = doc(this.firebaseService.getDb(), referenceId);
     await updateDoc(docRef, {
       [propToUpdate]: operation === 'add' ? arrayUnion(referencesRef) : arrayRemove(referencesRef),
+      updatedAt: new Date()
+    });
+  }
+
+  public async incrementProp<T extends Record<string, any> & { updatedAt: Date }>(
+    id: string,
+    collectionName: string,
+    prop: keyof T,
+    value: number
+  ): Promise<void> {
+    const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
+    const docRef = doc(collectionRef, id);
+    await updateDoc(docRef, {
+      [prop]: increment(value),
       updatedAt: new Date()
     });
   }

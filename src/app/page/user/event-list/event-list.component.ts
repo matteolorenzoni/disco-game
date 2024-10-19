@@ -9,7 +9,6 @@ import { faCalendar, faCrown, faPeopleGroup } from '@fortawesome/free-solid-svg-
 import { Doc } from '../../../model/firebase';
 import { Event } from '../../../model/event.model';
 import { FindTeamModel, FromMap, NewTeamModel } from '../../../model/form.model';
-import { EventTeamUser } from '../../../model/event-team-user.model';
 import { CheckExistTeamPipe } from '../../../pipe/check-exist-team.pipe';
 import { EventService } from '../../../service/event.service';
 import { FirebaseService } from '../../../service/firebase.service';
@@ -22,7 +21,6 @@ import { FvButtonComponent } from '../../../components/fv-button.component';
 import { TitleComponent } from '../../../components/title/title.component';
 import { FvButtonOutlinedComponent } from '../../../components/fv-button-outlined.component';
 import { ChallengeService } from '../../../service/challenge.service';
-import { GetCurrentEvent } from '../../../pipe/get-current-event.pipe';
 import { FvRatingComponent } from '../../../components/fv-rating.component';
 import { Challenge } from '../../../model/challenge.model';
 import { Team } from '../../../model/team.model';
@@ -40,8 +38,7 @@ import { register } from 'swiper/element/bundle';
     FvButtonComponent,
     FvButtonOutlinedComponent,
     FvRatingComponent,
-    CheckExistTeamPipe,
-    GetCurrentEvent
+    CheckExistTeamPipe
   ],
   templateUrl: './event-list.component.html',
   styleUrls: ['./event-list.component.scss'],
@@ -72,9 +69,14 @@ export class EventListComponent implements OnInit {
 
   /* Variables */
   events = signal<Doc<Event>[]>([]);
-  eventSelected = signal<Doc<Event> | undefined>(undefined);
-  eventTeamUsers = signal<Doc<EventTeamUser>[]>([]);
-  eventMemory = signal<Map<string, { team: Doc<Team> | undefined; challenges: Doc<Challenge>[] }>>(new Map());
+  eventsInfo = signal<Map<string, { team: Doc<Team> | undefined; challenges: Doc<Challenge>[] }>>(new Map());
+  current = signal<{
+    event: Doc<Event> | undefined;
+    team: Doc<Team> | undefined;
+    challenges: Doc<Challenge>[];
+  }>({ event: undefined, team: undefined, challenges: [] });
+
+  /* Variables modal */
   newTeamModalIsOpen = signal<boolean>(false);
   findTeamModalIsOpen = signal<boolean>(false);
 
@@ -107,44 +109,50 @@ export class EventListComponent implements OnInit {
     const user = this.userService.user();
     if (!user) throw new Error('retry', { cause: 'retry' });
 
-    /* Event e EventTeamUsers */
-    const [events, eventTeamUsers] = await Promise.all([
-      this.eventService.getEvents(),
-      this.eventTeamUserService.getEventTeamUsersByProp([{ key: 'userId', value: user.id }])
-    ]);
+    /* Ottengo tutti gli eventi attivi */
+    const events = await this.eventService.getEvents();
     this.events.set(events);
-    this.eventSelected.set(events[0]);
-    this.eventTeamUsers.set(eventTeamUsers);
 
-    /* Aggiorna squadra e sfide associate */
-    if (events[0]) this.getEventStorage(events[0]);
+    /* Aggiorna squadra e sfide associate del primo evento */
+    const event = events[0] as Doc<Event> | undefined;
+    if (event) {
+      /* Ottengo i dati associati all'evento (siccome prima volta) */
+      await this.getEventStorage(events[0]);
+
+      /* Aggiorno le informazioni correnti */
+      this.current.set({
+        event,
+        team: this.eventsInfo().get(event.id)?.team,
+        challenges: this.eventsInfo().get(event.id)?.challenges ?? []
+      });
+    }
   }
 
   /* -------------------- Methods: firebase -------------------- */
   protected async addTeam(): Promise<void> {
     const user = this.userService.user();
-    const eventId = this.eventSelected()?.id;
-    if (!user || !eventId) throw new Error('retry', { cause: 'retry' });
+    const event = this.current().event;
+    if (!user || !event) throw new Error('retry', { cause: 'retry' });
 
     /* Aggiungo Team al DB */
     const form = this.newTeamForm.getRawValue();
-    const { teamId, teamCode } = await this.teamService.addTeam(user.id, eventId, form);
+    const team = await this.teamService.addTeam(user.id, event.id, form);
 
     /* Aggiungo EventTeamUser al DB */
-    const eventTeamUserRef = await this.eventTeamUserService.addEventTeamUser(eventId, teamId, user.id);
+    const eventTeamUserRef = await this.eventTeamUserService.addEventTeamUser(event.id, team.id, user.id);
 
     /* Aggiorno User (prop: eventTeamUserRefs) */
     await this.userService.updateEventTeamUser(user.id, eventTeamUserRef.id);
 
     /* Aggiorno Event (prop: eventTeamUserRefs) */
-    await this.eventService.updateEventTeamUser(eventId, eventTeamUserRef.id);
+    await this.eventService.updateEventTeamUser(event.id, eventTeamUserRef.id);
 
     /* Aggiorno Team (prop: eventTeamUserRefs) */
-    await this.teamService.updateEventTeamUser(teamId, eventTeamUserRef.id);
+    await this.teamService.updateEventTeamUser(team.id, eventTeamUserRef.id);
 
     /* Log */
-    navigator.clipboard.writeText(teamCode);
-    this.logService.addLogConfirm(`Squadra creata! Codice ${teamCode} negli appunti`);
+    navigator.clipboard.writeText(team.props.code);
+    this.logService.addLogConfirm(`Squadra creata! Codice ${team.props.code} negli appunti`);
 
     /* Chiude modal e reset form */
     this.resetModalsAndForms();
@@ -152,8 +160,8 @@ export class EventListComponent implements OnInit {
 
   protected async findTeam(): Promise<void> {
     const user = this.userService.user();
-    const eventId = this.eventSelected()?.id;
-    if (!user || !eventId) throw new Error('retry', { cause: 'retry' });
+    const event = this.current().event;
+    if (!user || !event) throw new Error('retry', { cause: 'retry' });
 
     const form = this.findTeamForm.getRawValue();
     const team = await this.teamService.getTeamByCode(form.code);
@@ -163,13 +171,13 @@ export class EventListComponent implements OnInit {
     }
 
     /* Aggiungo EventTeamUser al DB */
-    const eventTeamUserRef = await this.eventTeamUserService.addEventTeamUser(eventId, team.id, user.id);
+    const eventTeamUserRef = await this.eventTeamUserService.addEventTeamUser(event.id, team.id, user.id);
 
     /* Aggiorno User (prop: eventTeamUserRefs) */
     await this.userService.updateEventTeamUser(user.id, eventTeamUserRef.id);
 
     /* Aggiorno Event (prop: eventTeamUserRefs) */
-    await this.eventService.updateEventTeamUser(eventId, eventTeamUserRef.id);
+    await this.eventService.updateEventTeamUser(event.id, eventTeamUserRef.id);
 
     /* Aggiorno Team (prop: eventTeamUserRefs) */
     await this.teamService.updateEventTeamUser(team.id, eventTeamUserRef.id);
@@ -182,16 +190,21 @@ export class EventListComponent implements OnInit {
   }
 
   /* -------------------- Methods: on event -------------------- */
-  protected async onSlideChange(event: any): Promise<void> {
+  protected async onSlideChange(e: any): Promise<void> {
     /* Aggiorna evento selezionato */
-    const index = event.detail[0].activeIndex;
-    const eventSelected = this.events()[index];
-    this.eventSelected.set(eventSelected);
+    const index = e.detail[0].activeIndex;
+    const event = this.events()[index] as Doc<Event> | undefined;
+    if (!event) throw new Error('retry', { cause: 'retry' });
 
-    /* Aggiorna squadra e sfide associate */
-    if (eventSelected && !this.eventMemory().has(eventSelected.id)) {
-      this.getEventStorage(eventSelected);
-    }
+    /* Ottengo i dati associati all'evento (se non ancora ottenuti la prima volta) */
+    if (!this.eventsInfo().has(event.id)) await this.getEventStorage(event);
+
+    /* Aggiorno le informazioni correnti */
+    this.current.set({
+      event,
+      team: this.eventsInfo().get(event.id)?.team,
+      challenges: this.eventsInfo().get(event.id)?.challenges ?? []
+    });
   }
 
   protected openNewTeamModal(): void {
@@ -209,20 +222,42 @@ export class EventListComponent implements OnInit {
     }
   }
 
-  protected async onGoToTeam(eventId: string, teamId: string): Promise<void> {
-    await this.router.navigate([`user/events/${eventId}/${teamId}`]);
+  protected async onGoToTeam(teamId: string): Promise<void> {
+    const event = this.current().event;
+    if (!event) return;
+
+    await this.router.navigate([`user/events/${event.id}/${teamId}`]);
   }
 
-  protected async onGoToChallenge(eventId: string, challengeId: string): Promise<void> {
-    await this.router.navigate([`user/events/${eventId}/challenges/${challengeId}`]);
+  protected async onGoToChallenge(challengeId: string): Promise<void> {
+    const event = this.current().event;
+    const team = this.current().team;
+    if (!event) return;
+
+    await this.router.navigate([`user/challenges/${event.id}/${team?.id ?? '_'}/${challengeId}`]);
   }
 
   /* -------------------- Methods: utils -------------------- */
   private async getEventStorage(event: Doc<Event>): Promise<void> {
-    const currentTeam = this.eventTeamUsers().find((x) => x.props.eventId === event.id);
-    const team = currentTeam ? await this.teamService.getTeamById(currentTeam.props.teamId) : undefined;
-    const challenges = await this.challengeService.getChallengesByEventChallengeRefs(event.props.eventChallengeRefs);
-    this.eventMemory.set(new Map([...this.eventMemory(), [event.id, { team, challenges }]]));
+    const user = this.userService.user();
+    if (!user) throw new Error('retry', { cause: 'retry' });
+
+    /* Ottengo le sfide e cerco se c'è una squadra */
+    const [challenges, challengeService] = await Promise.all([
+      this.challengeService.getChallengesByEventChallengeRefs(event.props.eventChallengeRefs),
+      this.eventTeamUserService.getEventTeamUsersByProp([
+        { key: 'eventId', value: event.id },
+        { key: 'userId', value: user.id }
+      ])
+    ]);
+
+    /* Se trova una squadra ottengo i suoi dati */
+    let team: Doc<Team> | undefined = undefined;
+    if (challengeService.length > 0) {
+      team = await this.teamService.getTeamById(challengeService[0].props.teamId);
+    }
+
+    this.eventsInfo.set(new Map([...this.eventsInfo(), [event.id, { team, challenges }]]));
   }
 
   private resetModalsAndForms(): void {

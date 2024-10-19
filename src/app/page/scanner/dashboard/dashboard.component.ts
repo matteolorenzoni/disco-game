@@ -17,6 +17,7 @@ import { EventTeamUserService } from '../../../service/event-team-user.service';
 import { Event } from '../../../model/event.model';
 import { Doc } from '../../../model/firebase';
 import { isEventTeamUserQrCode } from '../../../util/type.util';
+import { TeamService } from '../../../service/team.service';
 
 type ScanError = {
   message: string;
@@ -47,6 +48,7 @@ export class DashboardComponent implements OnInit {
   readonly firebaseService = inject(FirebaseService);
   readonly eventService = inject(EventService);
   readonly eventTeamUserService = inject(EventTeamUserService);
+  readonly teamService = inject(TeamService);
   readonly lsService = inject(LocalStorageService);
   readonly logService = inject(LogService);
 
@@ -145,6 +147,7 @@ export class DashboardComponent implements OnInit {
     if (!isEventTeamUserQrCode(value)) return;
 
     await this.eventTeamUserService.updateChallengePoints(value);
+    await this.teamService.updateTeamPoints(value.teamId, value.points);
     this.logService.addLogConfirm('Sfida confermata');
   }
 
