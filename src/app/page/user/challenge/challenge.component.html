@@ -13,16 +13,14 @@
 
       <div class="flex flex-col items-center gap-2">
         <p
-          class="flex h-24 w-24 items-center justify-center rounded-full border-4 border-purple-500/75 bg-primary-500/25 text-center shadow-md">
-          <span class="text-[60px] font-extrabold text-purple-500">{{ challenge.props.points }}</span>
-          <span class="text-xs font-semibold text-gray-500">pt</span>
+          class="h-24 min-w-24 rounded-full border-4 border-purple-500/75 bg-primary-500/25 p-2 text-[60px] font-bold text-purple-500 shadow flex-center">
+          {{ challenge.props.points }}
         </p>
         <fv-rating [rating]="challenge.props.complexity"></fv-rating>
       </div>
 
       <!-- Info su  eventChallenge-->
-      <div
-        class="flex h-20 justify-center divide-x divide-neutral-700 rounded-xl bg-neutral-800 py-2 text-on-surface shadow">
+      <div class="flex h-16 justify-center divide-x divide-neutral-700 rounded-xl bg-neutral-800 py-2 text-on-surface">
         <div class="flex flex-1 flex-col gap-1 px-2">
           <p class="rounded bg-neutral-700 p-1 text-center text-xxs uppercase text-on-background">Orario inizio</p>
           <fv-countdown class="flex-1 flex-center" [date]="eventChallenge.props.startDate"></fv-countdown>
@@ -46,8 +44,8 @@
 
       <!-- Sezione Descrizione -->
       <div class="relative -m-2 p-2">
-        <h2 class="mb-2 text-xl font-semibold text-on-background">Descrizione</h2>
-        <p class="text-lg leading-relaxed text-on-surface">{{ challenge.props.description }}</p>
+        <h2 class="text-lg font-semibold text-on-background">Descrizione</h2>
+        <p class="text-sm leading-relaxed text-on-surface">{{ challenge.props.description }}</p>
         <fv-challenge-status
           [type]="'effect'"
           [challengeStatus]="eventChallenge.props.challengeStatus"></fv-challenge-status>
@@ -55,14 +53,29 @@
 
       <!-- Sezione Regole -->
       <div class="relative -m-2 p-2">
-        <h2 class="mb-2 text-xl font-semibold text-on-background">Regole</h2>
-        <p class="whitespace-pre-line leading-relaxed text-on-surface">
+        <h2 class="text-lg font-semibold text-on-background">Regole</h2>
+        <p class="whitespace-pre-line text-sm leading-relaxed text-on-surface">
           {{ challenge.props.rules }}
         </p>
         <fv-challenge-status
           [type]="'effect'"
           [challengeStatus]="eventChallenge.props.challengeStatus"></fv-challenge-status>
       </div>
+
+      @if (qrdata(); as qrdata) {
+        <div class="relative mx-auto flex w-fit flex-col rounded-xl bg-white p-2 shadow">
+          <p class="text-sm font-bold text-neutral-800">Scansiona</p>
+          <div class="relative -mx-2 h-8">
+            <div class="absolute -left-6 top-0 z-10 h-8 w-8 rounded-full bg-surface"></div>
+            <div class="absolute left-0 right-0 top-1/2 h-2 border-t border-dashed border-black bg-transparent"></div>
+            <div class="absolute -right-6 top-0 z-10 h-8 w-8 rounded-full bg-surface"></div>
+          </div>
+          <qrcode [qrdata]="qrdata" [width]="256" [errorCorrectionLevel]="'M'"></qrcode>
+          @if (eventChallenge.props.challengeStatus !== 'ACTIVE') {
+            <div class="absolute left-0 top-0 h-full w-full rounded-xl bg-black/50 backdrop-blur"></div>
+          }
+        </div>
+      }
     </div>
   }
 }

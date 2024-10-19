@@ -13,6 +13,8 @@ import { FvChallengeStatusComponent } from '../../../components/fv-challenge-sta
 import { FvCountdownComponent } from '../../../components/fv-countdown.component';
 import { FvRatingComponent } from '../../../components/fv-rating.component';
 import { TitleComponent } from '../../../components/title/title.component';
+import { QRCodeModule } from 'angularx-qrcode';
+import { FirebaseService } from '../../../service/firebase.service';
 
 @Component({
   selector: 'app-challenge',
@@ -23,7 +25,8 @@ import { TitleComponent } from '../../../components/title/title.component';
     FaIconComponent,
     FvCountdownComponent,
     FvChallengeStatusComponent,
-    FvRatingComponent
+    FvRatingComponent,
+    QRCodeModule
   ],
   templateUrl: './challenge.component.html',
   styleUrls: ['./challenge.component.scss'],
@@ -32,13 +35,15 @@ import { TitleComponent } from '../../../components/title/title.component';
 export class ChallengeComponent implements OnInit {
   /* Services */
   readonly route = inject(ActivatedRoute);
+  readonly httpService = inject(HttpService);
+  readonly firebaseService = inject(FirebaseService);
   readonly challengeService = inject(ChallengeService);
   readonly eventChallengeService = inject(EventChallengeService);
-  readonly httpService = inject(HttpService);
 
   /* Variables */
   challenge = signal<Doc<Challenge> | undefined>(undefined);
   eventChallenge = signal<Doc<EventChallenge> | undefined>(undefined);
+  qrdata = signal<string | undefined>('');
 
   /* Icons */
   ICON_INFINITY = faInfinity;
@@ -49,18 +54,22 @@ export class ChallengeComponent implements OnInit {
     this.route.paramMap.subscribe(
       async (params) =>
         await this.httpService.execute(async () => {
+          const userId = this.firebaseService.userFirebase()?.uid;
           const eventId = params.get('eventId');
           const challengeId = params.get('challengeId');
-          if (!eventId || !challengeId) throw new Error('retry', { cause: 'retry' });
+          if (!userId || !eventId || !challengeId) throw new Error('retry', { cause: 'retry' });
 
+          /* Ottengo i dati della sfida e quelli della sfida applicati a questo evento */
           const [challenge, eventChallenge] = await Promise.all([
             this.challengeService.getChallengeById(challengeId),
             this.eventChallengeService.getEventChallengeByIds(eventId, challengeId)
           ]);
           this.challenge.set(challenge);
           this.eventChallenge.set(eventChallenge);
-          console.log(challenge);
-          console.log(eventChallenge);
+
+          /* Genero qrcode */
+          const qrcode = { eventId, challengeId, userId };
+          this.qrdata.set(JSON.stringify(qrcode));
         })
     );
   }
