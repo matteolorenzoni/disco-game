@@ -66,10 +66,14 @@
   <ul class="flex flex-col divide-y divide-neutral-800">
     @if ((eventSelected()?.id | get_current_event: eventMemory()).challenges; as challenges) {
       @for (challenge of challenges; track challenge.id) {
-        <li class="flex cursor-pointer items-center gap-4 p-2 py-4 hover:bg-neutral-950 active:bg-black">
-          <img class="h-4 w-4" [src]="'images/challenge/' + challenge.props.type + '.png'" alt="" />
-          <p class="truncate text-sm">{{ challenge.props.name }}</p>
-          <fv-rating [rating]="challenge.props.complexity"></fv-rating>
+        <li class="hover:rounded-xl hover:bg-neutral-950 active:rounded-xl active:bg-black">
+          <button
+            class="flex w-full items-center gap-4 p-2 py-4"
+            (click)="onGoToChallenge(eventSelected()!.id, challenge.id)">
+            <img class="h-4 w-4" [src]="'images/challenge/' + challenge.props.type + '.png'" alt="" />
+            <p class="truncate text-sm">{{ challenge.props.name }}</p>
+            <fv-rating [rating]="challenge.props.complexity"></fv-rating>
+          </button>
         </li>
       }
     }

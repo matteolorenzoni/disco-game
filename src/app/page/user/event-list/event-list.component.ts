@@ -213,6 +213,10 @@ export class EventListComponent implements OnInit {
     await this.router.navigate([`user/events/${eventId}/${teamId}`]);
   }
 
+  protected async onGoToChallenge(eventId: string, challengeId: string): Promise<void> {
+    await this.router.navigate([`user/events/${eventId}/challenges/${challengeId}`]);
+  }
+
   /* -------------------- Methods: utils -------------------- */
   private async getEventStorage(event: Doc<Event>): Promise<void> {
     const currentTeam = this.eventTeamUsers().find((x) => x.props.eventId === event.id);

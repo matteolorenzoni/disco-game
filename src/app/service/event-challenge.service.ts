@@ -29,6 +29,17 @@ export class EventChallengeService {
     });
   }
 
+  public async getEventChallengeByIds(eventId: string, challengeId: string): Promise<Doc<EventChallenge> | undefined> {
+    return await this.httpService.execute(async () => {
+      const eventChallenges = await this.documentService.getDocumentsByProp<EventChallenge>(
+        COL_EVENT_CHALLENGES,
+        { eventId, challengeId },
+        eventChallengeConverter
+      );
+      return eventChallenges.length ? eventChallenges[0] : undefined;
+    });
+  }
+
   /* --------------------------- Create ---------------------------*/
   public async addEventChallenge(newEventChallenge: EventChallenge): Promise<string> {
     return await this.httpService.execute(async () => {
