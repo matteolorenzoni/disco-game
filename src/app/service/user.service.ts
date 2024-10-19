@@ -40,7 +40,7 @@ export class UserService {
 
   public async checkUniqUsername(userName: string): Promise<boolean> {
     return await this.httpService.execute(async () => {
-      const userDocs = await this.documentService.getDocumentsByProp<User>(
+      const userDocs = await this.documentService.getDocumentsByProps<User>(
         COL_USERS,
         { role: UserRole.USER, isActive: true },
         userConverter

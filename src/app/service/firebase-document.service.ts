@@ -64,7 +64,7 @@ export class FirebaseDocumentService {
     return docs;
   }
 
-  public async getDocumentsByProp<T extends Record<string, any>>(
+  public async getDocumentsByProps<T extends Record<string, any>>(
     collectionName: string,
     queryParams: Partial<T>,
     converter: FirestoreDataConverter<T>

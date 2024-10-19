@@ -22,7 +22,7 @@ export class EventTeamUserService {
     props: { key: 'userId' | 'eventId' | 'teamId'; value: string }[]
   ): Promise<Doc<EventTeamUser>[]> {
     return await this.httpService.execute(async () => {
-      return await this.documentService.getDocumentsByProp<EventTeamUser>(
+      return await this.documentService.getDocumentsByProps<EventTeamUser>(
         COL_EVENT_TEAM_USERS,
         props.reduce((acc, { key, value }) => ({ ...acc, [key]: value }), {}),
         eventTeamUserConverter

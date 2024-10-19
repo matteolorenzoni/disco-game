@@ -25,7 +25,7 @@ export class EventService {
   /* --------------------------- Read ---------------------------*/
   public async getEvents(): Promise<Doc<Event>[]> {
     return await this.httpService.execute(async () => {
-      return await this.documentService.getDocumentsByProp<Event>(COL_EVENTS, { isActive: true }, eventConverter);
+      return await this.documentService.getDocumentsByProps<Event>(COL_EVENTS, { isActive: true }, eventConverter);
     });
   }
 

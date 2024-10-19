@@ -25,7 +25,7 @@ export class ChallengeService {
   /* --------------------------- Read ---------------------------*/
   public async getChallenges(): Promise<Doc<Challenge>[]> {
     return await this.httpService.execute(async () => {
-      return await this.documentService.getDocumentsByProp<Challenge>(
+      return await this.documentService.getDocumentsByProps<Challenge>(
         COL_CHALLENGES,
         { isActive: true },
         challengeConverter

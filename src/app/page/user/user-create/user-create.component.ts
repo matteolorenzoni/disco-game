@@ -87,10 +87,6 @@ export class UserCreateComponent implements OnInit {
 
   private async addUser(userModelForm: UserModel): Promise<void> {
     await this.httpService.execute(async () => {
-      /* Controllo userName univoco */
-      const checkUsername = await this.userService.checkUniqUsername(userModelForm.userName);
-      if (!checkUsername) return;
-
       /* Creazione utente */
       const userCredential = await this.firebaseService.signUp(userModelForm.email, userModelForm.password);
 

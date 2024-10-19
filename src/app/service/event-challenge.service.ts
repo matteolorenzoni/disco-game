@@ -21,7 +21,7 @@ export class EventChallengeService {
     props: { key: 'eventId' | 'challengeId'; value: string }[]
   ): Promise<Doc<EventChallenge>[]> {
     return await this.httpService.execute(async () => {
-      return await this.documentService.getDocumentsByProp<EventChallenge>(
+      return await this.documentService.getDocumentsByProps<EventChallenge>(
         COL_EVENT_CHALLENGES,
         props.reduce((acc, { key, value }) => ({ ...acc, [key]: value }), {}),
         eventChallengeConverter
@@ -31,7 +31,7 @@ export class EventChallengeService {
 
   public async getEventChallengeByIds(eventId: string, challengeId: string): Promise<Doc<EventChallenge> | undefined> {
     return await this.httpService.execute(async () => {
-      const eventChallenges = await this.documentService.getDocumentsByProp<EventChallenge>(
+      const eventChallenges = await this.documentService.getDocumentsByProps<EventChallenge>(
         COL_EVENT_CHALLENGES,
         { eventId, challengeId },
         eventChallengeConverter

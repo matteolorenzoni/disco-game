@@ -32,7 +32,7 @@ export class TeamService {
 
   public async getTeamByCode(code: string): Promise<Doc<Team> | undefined> {
     return await this.httpService.execute(async () => {
-      const teams = await this.documentService.getDocumentsByProp<Team>(
+      const teams = await this.documentService.getDocumentsByProps<Team>(
         COL_TEAMS,
         { code, isActive: true },
         teamConverter
