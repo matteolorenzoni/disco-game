@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { DocumentData, DocumentReference } from 'firebase/firestore';
 import { environment } from '../../environments/environment';
 import { Doc } from '../model/firebase';
-import { EventTeamUser } from '../model/event-team-user.model';
+import { EventTeamUser, EventTeamUserQrcode } from '../model/event-team-user.model';
 import { eventTeamUserConverter } from '../model/converter';
 import { FirebaseDocumentService } from './firebase-document.service';
 import { HttpService } from './http.service';
@@ -43,6 +43,32 @@ export class EventTeamUserService {
         userId,
         challenges: [],
         updatedAt: new Date()
+      });
+    });
+  }
+
+  /* --------------------------- Update ---------------------------*/
+  public async updateChallengePoints(qrcode: EventTeamUserQrcode): Promise<void> {
+    return await this.httpService.execute(async () => {
+      /* Cerco la partecipazione per vedere se la sfida è da aggiungere o da aggiornare */
+      const eventTeamUser = await this.documentService.getDocumentsByProps<EventTeamUser>(
+        COL_EVENT_TEAM_USERS,
+        { eventId: qrcode.eventId, userId: qrcode.userId },
+        eventTeamUserConverter
+      );
+      if (eventTeamUser.length === 0) throw new Error('noDocument', { cause: 'noDocument' });
+
+      /* Aggiungo o aggiorno la nuova sfida superata */
+      const challenges = eventTeamUser[0].props.challenges;
+      const challenge = challenges.find((x) => x.challengeId === qrcode.challengeId);
+      if (!challenge) {
+        challenges.push({ challengeId: qrcode.challengeId, totalPoints: qrcode.points, timestamps: [new Date()] });
+      } else {
+        challenge.totalPoints += qrcode.points;
+        challenge.timestamps.push(new Date());
+      }
+      await this.documentService.updateDocument<EventTeamUser>(eventTeamUser[0].id, COL_EVENT_TEAM_USERS, {
+        challenges
       });
     });
   }

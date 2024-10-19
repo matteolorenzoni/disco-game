@@ -1,126 +1,38 @@
-<app-title [pages]="[{ path: '', label: 'Scanner' }]"> </app-title>
+export type EventTeamUser = {
+  eventId: string; // ID evento
+  teamId: string; // ID squadra
+  userId: string; // ID utente
+  challenges: EventTeamUserChallenge[];
+  updatedAt: Date; // Data e ora dell'ultimo aggiornamento della sfida
+};
 
-@if (event(); as event) {
-  <div class="mb-12 flex items-center justify-center gap-4">
-    <p class="text-center text-3xl font-bold text-on-background">{{ event.props.name }}</p>
-    <button class="h-8 w-8 rounded-full bg-surface p-1 hover:bg-neutral-700" (click)="onEventRemove()">
-      <fa-icon [icon]="ICON_CHANGE"></fa-icon>
-    </button>
-  </div>
+export type EventTeamUserChallenge = {
+  challengeId: string;
+  timestamps: Date[];
+  totalPoints: number;
+};
 
-  <div class="mb-4 flex gap-4 overflow-hidden">
-    <select class="basis-3/4 focus:border-purple-500" (change)="onCameraChange($event.target)">
-      @for (camera of cameras(); track camera.deviceId) {
-        <option [value]="camera.deviceId">
-          {{ camera.label || 'Camera ' + (cameras().indexOf(camera) + 1) }}
-        </option>
-      }
-    </select>
-    <fv-button class="basis-1/4" type="button" [label]="'Chiudi'" (onClick)="onCameraClose.bind(this)"></fv-button>
-  </div>
+export type EventTeamUserQrcode = {
+  eventId: string;
+  userId: string;
+  challengeId: string;
+  points: number;
+};
+  teamId: string; // ID squadra
+  userId: string; // ID utente
+  challenges: EventTeamUserChallenge[];
+  updatedAt: Date; // Data e ora dell'ultimo aggiornamento della sfida
+};
 
-  <zxing-scanner
-    class="h-[350px] w-[350px] rounded"
-    [enable]="!!cameraSelected()"
-    [formats]="ALLOWED_FORMATS"
-    [device]="cameraSelected()"
-    (camerasFound)="handleCamerasFound($event)"
-    (scanSuccess)="handleScanSuccess($event)"
-    (scanError)="handleScanError($event)"></zxing-scanner>
-} @else {
-  <div class="flex flex-col gap-4 rounded-md bg-neutral-800 p-4">
-    <h1>Inserisci codice evento</h1>
-    <form [formGroup]="eventForm" (submit)="onGetEvent()">
-      <fv-field-icon name="code" label="Codice" [icon]="ICON_EVENT"></fv-field-icon>
-      <fv-button class="mt-2" type="submit" [label]="'Cerca'" [disabled]="eventForm.invalid"></fv-button>
-    </form>
-  </div>
-}
+export type EventTeamUserChallenge = {
+  challengeId: string;
+  timestamps: Date[];
+  totalPoints: number;
+};
 
-<!-- @if (errorMessage() === null) {
-
-} @else if (errorMessage() !== undefined ) {
-  <div class="rounded-lg bg-surface p-6 text-on-surface shadow-md">
-    @switch (errorMessage()) {
-      @case ('NO_CAMERA') {
-        <p class="text-center text-xl">
-          Nessuna fotocamera disponibile. Per favore, collega un dispositivo con una fotocamera
-        </p>
-      }
-      @default {
-        <p class="text-center text-xl font-bold">Attivazione dei Permessi della Fotocamera</p>
-
-        <p class="mt-4 text-on-background">
-          Se stai riscontrando problemi nell'accesso alla fotocamera, segui queste istruzioni in base a come stai
-          utilizzando l'app (nel browser o come applicazione installata):
-        </p>
-
-        <div class="mt-6">
-          <p class="text-lg font-semibold">Dispositivi iPhone (Safari o App Installata):</p>
-          <ol class="mt-2 list-inside list-decimal pl-6 text-on-background">
-            <li>
-              Se stai utilizzando l'app come <strong>app installata</strong>:
-              <ul class="mt-1 list-disc pl-6">
-                <li>Vai in <strong>Impostazioni</strong> > <strong>Privacy</strong> > <strong>Fotocamera</strong>.</li>
-                <li>Verifica che l'app sia autorizzata ad accedere alla fotocamera.</li>
-              </ul>
-            </li>
-            <li>
-              Se stai usando l'app in <strong>Safari</strong>:
-              <ul class="mt-1 list-disc pl-6">
-                <li>
-                  Vai in <strong>Impostazioni</strong> > <strong>Safari</strong> >
-                  <strong>Impostazioni per i siti web</strong> > <strong>Fotocamera</strong>.
-                </li>
-                <li>Assicurati che l'opzione sia impostata su <strong>Consenti</strong> o <strong>Chiedi</strong>.</li>
-              </ul>
-            </li>
-            <li>
-              Controlla che <strong>JavaScript</strong> sia abilitato in <strong>Safari</strong> >
-              <strong>Avanzate</strong>.
-            </li>
-          </ol>
-        </div>
-
-        <div class="mt-6">
-          <p class="text-lg font-semibold">Dispositivi Android (Chrome o App Installata):</p>
-          <ol class="mt-2 list-inside list-decimal pl-6 text-on-background">
-            <li>
-              Se stai usando l'app come <strong>app installata</strong>:
-              <ul class="mt-1 list-disc pl-6">
-                <li>Vai nelle <strong>Impostazioni</strong> del dispositivo.</li>
-                <li>Scorri fino a <strong>App</strong> e cerca l'app installata.</li>
-                <li>Assicurati che il permesso per la <strong>Fotocamera</strong> sia attivo.</li>
-              </ul>
-            </li>
-            <li>
-              Se stai usando l'app in <strong>Chrome</strong>:
-              <ul class="mt-1 list-disc pl-6">
-                <li>
-                  Apri <strong>Chrome</strong>, vai nel menu a tre puntini e seleziona <strong>Impostazioni</strong>.
-                </li>
-                <li>
-                  Scorri fino a <strong>Impostazioni sito</strong> > <strong>Fotocamera</strong> e assicurati che sia
-                  abilitata.
-                </li>
-              </ul>
-            </li>
-          </ol>
-        </div>
-
-        <div class="mt-6">
-          <p class="text-lg font-semibold">Browser Desktop (Chrome, Firefox, Safari):</p>
-          <ol class="mt-2 list-inside list-decimal pl-6 text-on-background">
-            <li>Controlla l'icona della fotocamera nella barra degli indirizzi e clicca per concedere i permessi.</li>
-            <li>In caso di blocco, vai nelle impostazioni del browser per attivare l'accesso alla fotocamera.</li>
-          </ol>
-        </div>
-
-        <p class="mt-4 text-on-background">
-          Se i problemi persistono, prova a riavviare il browser o il dispositivo e assicurati che la fotocamera non sia
-          già utilizzata da un'altra applicazione.
-        </p>
-      }
-    }
-  </div>
-} -->
+export type EventTeamUserQrCode = {
+  eventId: string;
+  userId: string;
+  challengeId: string;
+  points: number;
+};

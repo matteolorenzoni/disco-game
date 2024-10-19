@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { EventTeamUserQrCode } from '../model/event-team-user.model';
+import { EventTeamUserQrcode } from '../model/event-team-user.model';
 
-export const isEventTeamUserQrCode = (obj: any): obj is EventTeamUserQrCode => {
+export const isEventTeamUserQrCode = (obj: any): obj is EventTeamUserQrcode => {
   return (
     typeof obj === 'object' &&
     obj !== null &&

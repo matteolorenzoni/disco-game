@@ -143,6 +143,9 @@ export class DashboardComponent implements OnInit {
     alert(result);
     const value = JSON.parse(result);
     if (!isEventTeamUserQrCode(value)) return;
+
+    await this.eventTeamUserService.updateChallengePoints(value);
+    this.logService.addLogConfirm('Sfida confermata');
   }
 
   protected handleScanError(error: ScanError): void {

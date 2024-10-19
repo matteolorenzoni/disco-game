@@ -11,3 +11,10 @@ export type EventTeamUserChallenge = {
   timestamps: Date[];
   totalPoints: number;
 };
+
+export type EventTeamUserQrcode = {
+  eventId: string;
+  userId: string;
+  challengeId: string;
+  points: number;
+};
