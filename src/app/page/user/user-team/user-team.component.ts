@@ -1,5 +1,4 @@
 import { EventTeamUser } from './../../../model/event-team-user.model';
-import { ChallengeStatus } from './../../../model/event-challenge.model';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { EventChallenge } from '../../../model/event-challenge.model';
@@ -9,15 +8,14 @@ import { EventChallengeService } from '../../../service/event-challenge.service'
 import { User } from '../../../model/user.model';
 import { UserService } from '../../../service/user.service';
 import { TitleComponent } from '../../../components/title/title.component';
-import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faCirclePause, faLock, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { EventTeamUserService } from '../../../service/event-team-user.service';
 import { GetUserTotalPointsPipe } from '../../../pipe/get-user-total-points.pipe';
+import { FvChallengeStatusComponent } from '../../../components/fv-challenge-status.component';
 
 @Component({
   selector: 'app-user-team',
   standalone: true,
-  imports: [CommonModule, TitleComponent, FaIconComponent, GetUserTotalPointsPipe],
+  imports: [CommonModule, TitleComponent, FvChallengeStatusComponent, GetUserTotalPointsPipe],
   templateUrl: './user-team.component.html',
   styleUrls: ['./user-team.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -33,14 +31,6 @@ export class UserTeamComponent implements OnInit {
   teamId = signal<string | undefined>(undefined);
   user = signal<Doc<User> | undefined>(undefined);
   results = signal<{ eventChallenge: Doc<EventChallenge>; eventTeamUser: Doc<EventTeamUser> | undefined }[]>([]);
-
-  /* Icons */
-  ICON_LOCKED = faLock;
-  ICON_CANCELED = faTrash;
-  ICON_SUSPENDED = faCirclePause;
-
-  /* Enum */
-  CHALLENGE_STATUS = ChallengeStatus;
 
   /* -------------------- Lifecycle hooks -------------------- */
   async ngOnInit(): Promise<void> {

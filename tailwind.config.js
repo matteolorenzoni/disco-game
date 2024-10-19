@@ -28,6 +28,7 @@ module.exports = {
         xxs: ['0.625rem', { lineHeight: '0.75rem' }]
       },
       colors: {
+        // Definizioni personalizzate dei colori
         'neutral-50': '#fbfcfe',
         'neutral-100': '#f0f4f8',
         'neutral-200': '#dde7ee',
@@ -73,14 +74,20 @@ module.exports = {
 
         'card-background': '#0b0d0e', // fv-neutral-900
         'card-border': '#32383e99' // fv-neutral-700, 60%
-      },
-      scale: {
-        975: '0.975'
       }
     }
   },
   darkMode: 'class',
-  plugins: []
+  plugins: [
+    function ({ addUtilities }) {
+      const newUtilities = {
+        '.flex-center': {
+          display: 'flex',
+          'align-items': 'center',
+          'justify-content': 'center'
+        }
+      };
+      addUtilities(newUtilities);
+    }
+  ]
 };
-
-// background: #121212, #1C1C1E, #0D1B2A
