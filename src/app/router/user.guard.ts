@@ -31,7 +31,7 @@ export const userGuard: CanActivateFn = async (route, state) => {
 
     httpService.updateHttpCount(-1);
 
-    // Ottiene il tipo di utente (es. ADMIN, USER)
+    // Ottiene il tipo di utente (ADMIN, SCANNER o USER)
     const currentUserType = user?.props.role;
 
     // Controlla se l'utente è già loggato e ridireziona in base al tipo di utente
@@ -41,6 +41,9 @@ export const userGuard: CanActivateFn = async (route, state) => {
       switch (currentUserType) {
         case UserRole.ADMIN:
           await router.navigate(['/admin']);
+          break;
+        case UserRole.SCANNER:
+          await router.navigate(['/scanner']);
           break;
         case UserRole.USER:
           await router.navigate(['/user']);
@@ -52,6 +55,12 @@ export const userGuard: CanActivateFn = async (route, state) => {
 
     // Controllo di accesso per la sezione /admin (solo per admin)
     if (state.url.startsWith('/admin') && currentUserType !== UserRole.ADMIN) {
+      await router.navigate(['/unauthorized']);
+      return false;
+    }
+
+    // Controllo di accesso per la sezione /scanner (solo per chi deve scannerizzare qrcode)
+    if (state.url.startsWith('/scanner') && currentUserType !== UserRole.SCANNER) {
       await router.navigate(['/unauthorized']);
       return false;
     }

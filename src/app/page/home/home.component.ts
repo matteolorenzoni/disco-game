@@ -3,7 +3,9 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@ang
 import { Router, RouterOutlet } from '@angular/router';
 import { FvBottomNavigationComponent } from '../../components/fv-bottom-navigation.component';
 import { MenuItem } from '../../model/type';
-import { faCalendarDays, faGamepad, faGears } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarDays, faGamepad, faGears, faHome } from '@fortawesome/free-solid-svg-icons';
+import { UserService } from '../../service/user.service';
+import { UserRole } from '../../model/user.model';
 
 @Component({
   selector: 'app-home',
@@ -16,6 +18,7 @@ import { faCalendarDays, faGamepad, faGears } from '@fortawesome/free-solid-svg-
 export class HomeComponent implements OnInit {
   /* Services */
   readonly router = inject(Router);
+  readonly userService = inject(UserService);
 
   /* Variables */
   menu = signal<MenuItem[]>([]);
@@ -42,6 +45,21 @@ export class HomeComponent implements OnInit {
     }
   ];
 
+  MENU_SCANNER: MenuItem[] = [
+    {
+      id: 0,
+      label: 'Dashboard',
+      icon: faHome,
+      path: 'dashboard'
+    },
+    {
+      id: 1,
+      label: 'Impostazioni',
+      icon: faGears,
+      path: 'settings'
+    }
+  ];
+
   MENU_USER: MenuItem[] = [
     {
       id: 0,
@@ -59,7 +77,22 @@ export class HomeComponent implements OnInit {
 
   /* ----------------- Lifecycle hooks ----------------- */
   ngOnInit(): void {
-    const isAdmin = this.router.url.includes('admin');
-    this.menu.set(isAdmin ? this.MENU_ADMIN : this.MENU_USER);
+    const user = this.userService.user()!;
+    if (!user) {
+      this.menu.set([]);
+      return;
+    }
+
+    switch (user.props.role) {
+      case UserRole.ADMIN:
+        this.menu.set(this.MENU_ADMIN);
+        break;
+      case UserRole.SCANNER:
+        this.menu.set(this.MENU_SCANNER);
+        break;
+      default:
+        this.menu.set(this.MENU_USER);
+        break;
+    }
   }
 }

@@ -80,6 +80,9 @@ export class LoginComponent {
         case UserRole.ADMIN:
           await this.router.navigate(['/admin/dashboard']);
           break;
+        case UserRole.SCANNER:
+          await this.router.navigate(['/scanner/scanner']);
+          break;
         case UserRole.USER:
           await this.router.navigate(['/user/dashboard']);
           break;

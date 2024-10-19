@@ -91,6 +91,32 @@ export const routes: Routes = [
     ]
   },
   {
+    path: 'scanner',
+    canActivate: [userGuard],
+    loadComponent: () => import('../page/home/home.component').then((m) => m.HomeComponent),
+    children: [
+      {
+        path: 'dashboard',
+        loadComponent: () => import('../page/scanner/dashboard/dashboard.component').then((m) => m.DashboardComponent)
+      },
+      {
+        path: 'settings',
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('../page/settings/settings.component').then((m) => m.SettingsComponent)
+          },
+          {
+            path: 'profile',
+            loadComponent: () => import('../page/sign-up/sign-up.component').then((m) => m.SignUpComponent)
+          }
+        ]
+      },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: '**', redirectTo: 'dashboard' }
+    ]
+  },
+  {
     path: 'user',
     canActivate: [userGuard],
     loadComponent: () => import('../page/home/home.component').then((m) => m.HomeComponent),
