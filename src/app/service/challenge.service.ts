@@ -23,15 +23,19 @@ export class ChallengeService {
   readonly logService = inject(LogService);
 
   /* --------------------------- Read ---------------------------*/
-  public async getChallengeById(challengeId: string): Promise<Doc<Challenge>> {
+  public async getChallenges(): Promise<Doc<Challenge>[]> {
     return await this.httpService.execute(async () => {
-      return await this.documentService.getDocumentById<Challenge>(COL_CHALLENGES, challengeId, challengeConverter);
+      return await this.documentService.getDocumentsByProp<Challenge>(
+        COL_CHALLENGES,
+        { isActive: true },
+        challengeConverter
+      );
     });
   }
 
-  public async getChallenges(): Promise<Doc<Challenge>[]> {
+  public async getChallengeById(challengeId: string): Promise<Doc<Challenge>> {
     return await this.httpService.execute(async () => {
-      return await this.documentService.getAllActiveDocuments<Challenge>(COL_CHALLENGES, challengeConverter);
+      return await this.documentService.getDocumentById<Challenge>(COL_CHALLENGES, challengeId, challengeConverter);
     });
   }
 

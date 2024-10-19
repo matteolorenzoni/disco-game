@@ -29,7 +29,7 @@ export class FirebaseDocumentService {
   readonly logService = inject(LogService);
 
   /* --------------------- Methods READ --------------------- */
-  public async getDocumentById<T>(
+  public async getDocumentById<T extends Record<string, any> & { isActive: boolean }>(
     collectionName: string,
     id: string,
     converter: FirestoreDataConverter<T>
@@ -37,13 +37,13 @@ export class FirebaseDocumentService {
     const collectionRef = getCollection(this.firebaseService.getDb(), collectionName).withConverter(converter);
     const docRef = doc(collectionRef, id);
     const docSnap = await getDoc(docRef);
-    if (!docSnap.exists()) throw new Error('noDocument', { cause: 'noDocument' });
+    if (!docSnap.exists() || !docSnap.data().isActive) throw new Error('noDocument', { cause: 'noDocument' });
 
     const data = docSnap.data() as T;
     return { id: docSnap.id, props: data };
   }
 
-  public async getDocumentsByIds<T>(
+  public async getDocumentsByIds<T extends Record<string, any> & { isActive: boolean }>(
     collectionName: string,
     ids: string[],
     converter: FirestoreDataConverter<T>
@@ -51,28 +51,17 @@ export class FirebaseDocumentService {
     const collectionRef = getCollection(this.firebaseService.getDb(), collectionName).withConverter(converter);
     const docRefs = ids.map((id) => doc(collectionRef, id));
     const docsSnap = await Promise.all(docRefs.map((ref) => getDoc(ref)));
-    const docs: Doc<T>[] = docsSnap.map((docSnap) => {
-      if (!docSnap.exists()) throw new Error('Uno o più documenti non esistono');
-      return {
-        id: docSnap.id,
-        props: docSnap.data() as T
-      };
-    });
+    const docs: Doc<T>[] = docsSnap.reduce(
+      (acc, docSnap) => {
+        if (!docSnap.exists()) return [];
+
+        const data = docSnap.data();
+        if (!data.isActive) return acc;
+        return [...acc, { id: docSnap.id, props: docSnap.data() as T }];
+      },
+      [] as { id: string; props: T }[]
+    );
     return docs;
-  }
-
-  public async getAllDocuments<T extends Record<string, any>>(
-    collectionName: string,
-    converter: FirestoreDataConverter<T>
-  ): Promise<Doc<T>[]> {
-    return await this.getDocumentsByProp(collectionName, {}, converter);
-  }
-
-  public async getAllActiveDocuments<T extends Record<string, any> & { isActive: boolean }>(
-    collectionName: string,
-    converter: FirestoreDataConverter<T>
-  ): Promise<Doc<T>[]> {
-    return await this.getActiveDocumentsByProp(collectionName, {}, converter);
   }
 
   public async getDocumentsByProp<T extends Record<string, any>>(
@@ -83,20 +72,6 @@ export class FirebaseDocumentService {
     const collectionRef = getCollection(this.firebaseService.getDb(), collectionName).withConverter(converter);
     const queryConstraints = Object.entries(queryParams).map(([key, value]) => where(key, '==', value));
     const q = query(collectionRef, ...queryConstraints);
-    const querySnapshot = await getDocs(q);
-    const docs = querySnapshot.docs.map((doc) => ({ id: doc.id, props: doc.data() as T }));
-    return docs;
-  }
-
-  public async getActiveDocumentsByProp<T extends Record<string, any> & { isActive: boolean }>(
-    collectionName: string,
-    queryParams: Partial<T>,
-    converter: FirestoreDataConverter<T>
-  ): Promise<Doc<T>[]> {
-    const collectionRef = getCollection(this.firebaseService.getDb(), collectionName).withConverter(converter);
-    const queryConstraints = Object.entries(queryParams).map(([key, value]) => where(key, '==', value));
-    const isActiveConstraint = where('isActive', '==', true);
-    const q = query(collectionRef, ...queryConstraints, isActiveConstraint);
     const querySnapshot = await getDocs(q);
     const docs = querySnapshot.docs.map((doc) => ({ id: doc.id, props: doc.data() as T }));
     return docs;

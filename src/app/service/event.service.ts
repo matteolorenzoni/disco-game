@@ -23,6 +23,12 @@ export class EventService {
   readonly logService = inject(LogService);
 
   /* --------------------------- Read ---------------------------*/
+  public async getEvents(): Promise<Doc<Event>[]> {
+    return await this.httpService.execute(async () => {
+      return await this.documentService.getDocumentsByProp<Event>(COL_EVENTS, { isActive: true }, eventConverter);
+    });
+  }
+
   public async getEventById(eventId: string): Promise<Doc<Event>> {
     return await this.httpService.execute(async () => {
       return await this.documentService.getDocumentById<Event>(COL_EVENTS, eventId, eventConverter);

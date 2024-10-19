@@ -40,7 +40,11 @@ export class UserService {
 
   public async checkUniqUsername(userName: string): Promise<boolean> {
     return await this.httpService.execute(async () => {
-      const userDocs = await this.documentService.getAllActiveDocuments<User>(COL_USERS, userConverter);
+      const userDocs = await this.documentService.getDocumentsByProp<User>(
+        COL_USERS,
+        { role: UserRole.USER, isActive: true },
+        userConverter
+      );
       const usernames = userDocs.map((user) => user.props.userName);
       if (usernames.includes(userName.toLowerCase())) {
         this.logService.addLogConfirm("L'userName scelto non è disponibile, si prega di sceglierne un altro.");

@@ -32,18 +32,12 @@ export class TeamService {
 
   public async getTeamByCode(code: string): Promise<Doc<Team> | undefined> {
     return await this.httpService.execute(async () => {
-      const teams = await this.documentService.getActiveDocumentsByProp<Team>(COL_TEAMS, { code }, teamConverter);
+      const teams = await this.documentService.getDocumentsByProp<Team>(
+        COL_TEAMS,
+        { code, isActive: true },
+        teamConverter
+      );
       return teams[0];
-    });
-  }
-
-  public async getTeamsByEvent(eventId: string): Promise<Doc<Team>[]> {
-    return await this.httpService.execute(async () => {
-      const eventTeamUsers = await this.eventTeamUserService.getEventTeamUsersByProp([
-        { key: 'eventId', value: eventId }
-      ]);
-      const teamIds = eventTeamUsers.map((x) => x.props.teamId);
-      return await Promise.all(teamIds.map((x) => this.getTeamById(x)));
     });
   }
 
@@ -54,8 +48,15 @@ export class TeamService {
     teamForm: NewTeamModel
   ): Promise<{ teamId: string; teamCode: string }> {
     return await this.httpService.execute(async () => {
-      const teamsDocs = await this.getTeamsByEvent(eventId);
-      const { names, codes } = teamsDocs.reduce(
+      const inEventTeams = await this.eventTeamUserService.getEventTeamUsersByProp([
+        { key: 'eventId', value: eventId }
+      ]);
+      const teams = await this.documentService.getDocumentsByIds<Team>(
+        COL_TEAMS,
+        inEventTeams.map((x) => x.props.teamId),
+        teamConverter
+      );
+      const { names, codes } = teams.reduce(
         (acc, cur) => ({
           names: [...acc.names, cur.props.name.toLowerCase()],
           codes: [...acc.codes, cur.props.code]
