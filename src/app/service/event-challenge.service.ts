@@ -29,14 +29,16 @@ export class EventChallengeService {
     });
   }
 
-  public async getEventChallengeByIds(eventId: string, challengeId: string): Promise<Doc<EventChallenge> | undefined> {
+  public async getEventChallengeById(eventId: string, challengeId: string): Promise<Doc<EventChallenge>> {
     return await this.httpService.execute(async () => {
       const eventChallenges = await this.documentService.getDocumentsByProps<EventChallenge>(
         COL_EVENT_CHALLENGES,
         { eventId, challengeId },
         eventChallengeConverter
       );
-      return eventChallenges.length ? eventChallenges[0] : undefined;
+      if (eventChallenges.length === 0) throw new Error('noDocument', { cause: 'noDocument' });
+
+      return eventChallenges[0];
     });
   }
 

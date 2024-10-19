@@ -38,22 +38,6 @@ export class UserService {
     });
   }
 
-  public async checkUniqUsername(userName: string): Promise<boolean> {
-    return await this.httpService.execute(async () => {
-      const userDocs = await this.documentService.getDocumentsByProps<User>(
-        COL_USERS,
-        { role: UserRole.USER, isActive: true },
-        userConverter
-      );
-      const usernames = userDocs.map((user) => user.props.userName);
-      if (usernames.includes(userName.toLowerCase())) {
-        this.logService.addLogConfirm("L'userName scelto non è disponibile, si prega di sceglierne un altro.");
-        return false;
-      }
-      return true;
-    });
-  }
-
   /* --------------------------- Create ---------------------------*/
   public async addUserById(userId: string, userModelForm: UserModel, imageUrl: string | null): Promise<void> {
     return await this.httpService.execute(async () => {

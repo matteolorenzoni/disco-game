@@ -35,9 +35,14 @@ export class EventService {
     });
   }
 
-  public async getEvents(): Promise<Doc<Event>[]> {
+  public async getEventByCode(code: string): Promise<Doc<Event> | null> {
     return await this.httpService.execute(async () => {
-      return await this.documentService.getAllActiveDocuments<Event>(COL_EVENTS, eventConverter);
+      const events = await this.documentService.getDocumentsByProps<Event>(
+        COL_EVENTS,
+        { code, isActive: true },
+        eventConverter
+      );
+      return events.length ? events[0] : null;
     });
   }
 

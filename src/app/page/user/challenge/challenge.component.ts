@@ -15,6 +15,7 @@ import { FvRatingComponent } from '../../../components/fv-rating.component';
 import { TitleComponent } from '../../../components/title/title.component';
 import { QRCodeModule } from 'angularx-qrcode';
 import { FirebaseService } from '../../../service/firebase.service';
+import { EventTeamUserQrCode } from '../../../model/event-team-user.model';
 
 @Component({
   selector: 'app-challenge',
@@ -62,13 +63,13 @@ export class ChallengeComponent implements OnInit {
           /* Ottengo i dati della sfida e quelli della sfida applicati a questo evento */
           const [challenge, eventChallenge] = await Promise.all([
             this.challengeService.getChallengeById(challengeId),
-            this.eventChallengeService.getEventChallengeByIds(eventId, challengeId)
+            this.eventChallengeService.getEventChallengeById(eventId, challengeId)
           ]);
           this.challenge.set(challenge);
           this.eventChallenge.set(eventChallenge);
 
           /* Genero qrcode */
-          const qrcode = { eventId, challengeId, userId };
+          const qrcode: EventTeamUserQrCode = { eventId, userId, challengeId, points: challenge.props.points };
           this.qrdata.set(JSON.stringify(qrcode));
         })
     );

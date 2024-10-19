@@ -30,14 +30,14 @@ export class TeamService {
     });
   }
 
-  public async getTeamByCode(code: string): Promise<Doc<Team> | undefined> {
+  public async getTeamByCode(code: string): Promise<Doc<Team> | null> {
     return await this.httpService.execute(async () => {
       const teams = await this.documentService.getDocumentsByProps<Team>(
         COL_TEAMS,
         { code, isActive: true },
         teamConverter
       );
-      return teams[0];
+      return teams.length ? teams[0] : null;
     });
   }
 

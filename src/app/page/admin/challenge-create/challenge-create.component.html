@@ -31,7 +31,13 @@
 
   <fv-field name="points" label="Punti" type="number"></fv-field>
 
-  <fv-field name="complexity" label="Complessità" type="number" [min]="1" [max]="5" [step]="'.1'"></fv-field>
+  <fv-field
+    name="complexity"
+    label="Complessità (da 1.0 a 5.0)"
+    type="number"
+    [min]="1"
+    [max]="5"
+    [step]="'.1'"></fv-field>
 
   <fv-button
     class="mt-12"
