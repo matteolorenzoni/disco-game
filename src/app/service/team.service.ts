@@ -8,6 +8,7 @@ import { Doc } from '../model/firebase';
 import { teamConverter } from '../model/converter';
 import { EventTeamUserService } from './event-team-user.service';
 import { HttpService } from './http.service';
+import { generateRandomCode } from '../util/utils';
 
 const COL_TEAMS = environment.collection.TEAMS;
 const COL_EVENT_TEAM_USERS = environment.collection.EVENT_TEAM_USERS;
@@ -71,9 +72,9 @@ export class TeamService {
       if (codes.length > 2_000_000) {
         throw new Error('tooManyTeams', { cause: 'tooManyTeams' });
       }
-      let code = this.generateRandomCode(6);
+      let code = generateRandomCode(6);
       while (codes.includes(code)) {
-        code = this.generateRandomCode(6);
+        code = generateRandomCode(6);
       }
 
       /* Aggiungo evento al DB */
@@ -112,16 +113,5 @@ export class TeamService {
         `${COL_EVENT_TEAM_USERS}/${eventTeamUserId}`
       );
     });
-  }
-
-  /* --------------------------- Utils ---------------------------*/
-  private generateRandomCode(length: number): string {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let result = '';
-    for (let i = 0; i < length; i++) {
-      const randomIndex = Math.floor(Math.random() * chars.length);
-      result += chars[randomIndex];
-    }
-    return result;
   }
 }

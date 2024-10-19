@@ -64,6 +64,7 @@ export const eventConverter: FirestoreDataConverter<Event> = {
       imageUrl: event.imageUrl,
       startDate: dateToString(event.startDate),
       endDate: dateToString(event.endDate),
+      code: event.code,
       eventTeamUserRefs: event.eventTeamUserRefs.map((ref) => ref.path),
       eventChallengeRefs: event.eventChallengeRefs.map((ref) => ref.path),
       isActive: event.isActive,
@@ -80,6 +81,7 @@ export const eventConverter: FirestoreDataConverter<Event> = {
       startDate: timestampToDate(data['startDate'] as Timestamp),
       endDate: timestampToDate(data['endDate'] as Timestamp),
       eventTeamUserRefs: data['eventTeamUserRefs'],
+      code: data['code'],
       eventChallengeRefs: data['eventChallengeRefs'],
       isActive: data['isActive'],
       updatedAt: timestampToDate(data['updatedAt'] as Timestamp)

@@ -7,6 +7,7 @@ import { eventConverter } from '../model/converter';
 import { LogService } from './log.service';
 import { Doc } from '../model/firebase';
 import { HttpService } from './http.service';
+import { generateRandomCode } from '../util/utils';
 
 const COL_EVENTS = environment.collection.EVENTS;
 const COL_EVENT_TEAM_USERS = environment.collection.EVENT_TEAM_USERS;
@@ -37,6 +38,18 @@ export class EventService {
   /* --------------------------- Create ---------------------------*/
   public async addEventById(eventId: string, form: EventModel, imageUrl: string): Promise<string> {
     return await this.httpService.execute(async () => {
+      const events = await this.getEvents();
+      const codes = events.map((x) => x.props.code);
+
+      /* Check codice univoco */
+      if (codes.length > 2_000_000) {
+        throw new Error('tooManyEvents', { cause: 'tooManyEvents' });
+      }
+      let code = generateRandomCode(6);
+      while (codes.includes(code)) {
+        code = generateRandomCode(6);
+      }
+
       const docRef = await this.documentService.addDocumentById<Event>(eventId, COL_EVENTS, {
         ...form,
         imageUrl,
@@ -44,6 +57,7 @@ export class EventService {
         endDate: new Date(form.endDate),
         eventTeamUserRefs: [],
         eventChallengeRefs: [],
+        code,
         isActive: true,
         updatedAt: new Date()
       });

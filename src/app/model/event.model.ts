@@ -9,6 +9,7 @@ export type Event = {
   imageUrl: string; // URL dell'immagine di copertura dell'evento
   startDate: Date; // Data e ora di inizio dell'evento
   endDate: Date; // Data e ora di fine dell'evento
+  code: string; // Codice unico di default per la parte scanner
   eventTeamUserRefs: DocumentReference<EventTeamUser>[]; // Array di riferimenti ai documenti delle squadre che hanno partecipato o sono state create per l'evento
   eventChallengeRefs: DocumentReference<EventChallenge>[]; // Array di riferimenti ai documenti delle sfide associate all'evento
   isActive: boolean; // Flag per gestire la soft delete
