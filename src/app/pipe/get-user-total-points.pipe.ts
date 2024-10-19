@@ -6,9 +6,9 @@ import { EventTeamUserChallenge } from '../model/event-team-user.model';
   standalone: true
 })
 export class GetUserTotalPointsPipe implements PipeTransform {
-  transform(challenges: EventTeamUserChallenge[], eventChallengeId?: string): number {
+  transform(challenges: EventTeamUserChallenge[], challengeId?: string): number {
     return challenges.reduce((acc, cur) => {
-      if (eventChallengeId && cur.eventChallengeId !== eventChallengeId) return acc;
+      if (challengeId && cur.challengeId !== challengeId) return acc;
       return acc + cur.totalPoints;
     }, 0);
   }

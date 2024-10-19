@@ -7,7 +7,7 @@ export type EventTeamUser = {
 };
 
 export type EventTeamUserChallenge = {
-  eventChallengeId: string;
+  challengeId: string;
   timestamps: Date[];
   totalPoints: number;
 };
