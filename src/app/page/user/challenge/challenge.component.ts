@@ -12,7 +12,7 @@ import { faInfinity } from '@fortawesome/free-solid-svg-icons';
 import { FvChallengeStatusComponent } from '../../../components/fv-challenge-status.component';
 import { FvCountdownComponent } from '../../../components/fv-countdown.component';
 import { FvRatingComponent } from '../../../components/fv-rating.component';
-import { TitleComponent } from '../../../components/title/title.component';
+import { TitleComponent, TitlePageItem } from '../../../components/title/title.component';
 import { QRCodeModule } from 'angularx-qrcode';
 import { FirebaseService } from '../../../service/firebase.service';
 import { EventTeamUserQrcode } from '../../../model/event-team-user.model';
@@ -42,10 +42,11 @@ export class ChallengeComponent implements OnInit {
   readonly eventChallengeService = inject(EventChallengeService);
 
   /* Variables */
-  challenge = signal<Doc<Challenge> | undefined>(undefined);
-  eventChallenge = signal<Doc<EventChallenge> | undefined>(undefined);
+  pages = signal<TitlePageItem[]>([]);
+  eventId = signal<string | undefined>(undefined);
   teamId = signal<string | undefined>(undefined);
-  qrdata = signal<string | undefined>('');
+  challengeMerged = signal<{ challenge: Doc<Challenge>; eventChallenge: Doc<EventChallenge> } | undefined>(undefined);
+  qrdata = signal<string | undefined>(undefined);
 
   /* Icons */
   ICON_INFINITY = faInfinity;
@@ -62,14 +63,25 @@ export class ChallengeComponent implements OnInit {
           const challengeId = params.get('challengeId');
           if (!eventId || !teamId || !userId || !challengeId) throw new Error('retry', { cause: 'retry' });
 
+          /* Pages */
+          this.pages.set([
+            { path: '../../../../events', label: 'Eventi' },
+            ...(teamId !== '_' ? [{ path: `../../../../events/${eventId}/${teamId}`, label: 'Squadra' }] : []),
+            { path: '', label: 'Sfida' }
+          ]);
+
+          /* Event */
+          this.eventId.set(eventId);
+
+          /* Team */
+          this.teamId.set(teamId === '_' ? undefined : teamId);
+
           /* Ottengo i dati della sfida e quelli della sfida applicati a questo evento */
           const [challenge, eventChallenge] = await Promise.all([
             this.challengeService.getChallengeById(challengeId),
             this.eventChallengeService.getEventChallengeById(eventId, challengeId)
           ]);
-          this.challenge.set(challenge);
-          this.eventChallenge.set(eventChallenge);
-          this.teamId.set(teamId === '_' ? undefined : teamId);
+          this.challengeMerged.set({ challenge, eventChallenge });
 
           /* Genero qrcode */
           const qrcode: EventTeamUserQrcode = {

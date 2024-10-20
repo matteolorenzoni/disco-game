@@ -1,87 +1,85 @@
-<app-title [pages]="[{ path: '', label: 'Sfida' }]"></app-title>
+<app-title [pages]="pages()"> </app-title>
 
-@if (challenge(); as challenge) {
-  @if (eventChallenge(); as eventChallenge) {
-    <div class="flex flex-col gap-8 rounded-lg bg-surface p-6 text-on-surface shadow-lg">
-      <div class="flex items-center justify-between gap-4">
-        <h1 class="text-center text-2xl font-bold text-on-background">{{ challenge.props.name }}</h1>
-        <img
-          class="h-28 w-28 rounded-lg shadow-md"
-          [src]="'images/challenge/' + challenge.props.type + '.png'"
-          alt="Icona sfida" />
-      </div>
-
-      <div class="flex flex-col items-center gap-2">
-        <p
-          class="h-24 min-w-24 rounded-full border-4 border-purple-500/75 bg-primary-500/25 p-2 text-[60px] font-bold text-purple-500 shadow flex-center">
-          {{ challenge.props.points }}
-        </p>
-        <fv-rating [rating]="challenge.props.complexity"></fv-rating>
-      </div>
-
-      <!-- Info su  eventChallenge-->
-      <div class="flex h-16 justify-center divide-x divide-neutral-700 rounded-xl bg-neutral-800 py-2 text-on-surface">
-        <div class="flex flex-1 flex-col gap-1 px-2">
-          <p class="rounded bg-neutral-700 p-1 text-center text-xxs uppercase text-on-background">Orario inizio</p>
-          <fv-countdown class="flex-1 flex-center" [date]="eventChallenge.props.startDate"></fv-countdown>
-        </div>
-        <div class="flex flex-1 flex-col gap-1 px-2">
-          <p class="rounded bg-neutral-700 p-1 text-center text-xxs uppercase text-on-background">N° massimo</p>
-          @if (eventChallenge.props.maxTimes; as maxTimes) {
-            <p class="flex-1 flex-center">{{ eventChallenge.props.maxTimes }}</p>
-          } @else {
-            <fa-icon class="flex-1 flex-center" [icon]="ICON_INFINITY"></fa-icon>
-          }
-        </div>
-        <div class="flex flex-1 flex-col gap-1 px-2">
-          <p class="rounded bg-neutral-700 p-1 text-center text-xxs uppercase text-on-background">Stato</p>
-          <fv-challenge-status
-            class="flex-1 text-white flex-center"
-            [type]="'icon'"
-            [challengeStatus]="eventChallenge.props.challengeStatus"></fv-challenge-status>
-        </div>
-      </div>
-
-      <!-- Sezione Descrizione -->
-      <div class="relative -m-2 p-2">
-        <h2 class="text-lg font-semibold text-on-background">Descrizione</h2>
-        <p class="text-sm leading-relaxed text-on-surface">{{ challenge.props.description }}</p>
-        <fv-challenge-status
-          [type]="'effect'"
-          [challengeStatus]="eventChallenge.props.challengeStatus"></fv-challenge-status>
-      </div>
-
-      <!-- Sezione Regole -->
-      <div class="relative -m-2 p-2">
-        <h2 class="text-lg font-semibold text-on-background">Regole</h2>
-        <p class="whitespace-pre-line text-sm leading-relaxed text-on-surface">
-          {{ challenge.props.rules }}
-        </p>
-        <fv-challenge-status
-          [type]="'effect'"
-          [challengeStatus]="eventChallenge.props.challengeStatus"></fv-challenge-status>
-      </div>
-
-      @if (qrdata(); as qrdata) {
-        <div class="relative mx-auto flex w-fit flex-col rounded-xl bg-white p-2 shadow">
-          <p class="text-sm font-bold text-neutral-800">Scansiona</p>
-          <div class="relative -mx-2 h-8">
-            <div class="absolute -left-6 top-0 z-10 h-8 w-8 rounded-full bg-surface"></div>
-            <div class="absolute left-0 right-0 top-1/2 h-2 border-t border-dashed border-black bg-transparent"></div>
-            <div class="absolute -right-6 top-0 z-10 h-8 w-8 rounded-full bg-surface"></div>
-          </div>
-          @if (teamId()) {
-            <qrcode [qrdata]="qrdata" [width]="256" [errorCorrectionLevel]="'M'"></qrcode>
-            @if (eventChallenge.props.challengeStatus !== 'ACTIVE') {
-              <div class="absolute left-0 top-0 h-full w-full rounded-xl backdrop-blur-sm"></div>
-            }
-          } @else {
-            <p class="h-[256px] w-[256px] text-center font-semibold text-neutral-700 flex-center">
-              Crea una squadra per poter partecipare
-            </p>
-          }
-        </div>
-      }
+@if (challengeMerged(); as cm) {
+  <div class="flex flex-col gap-8 rounded-lg bg-surface p-6 text-on-surface shadow-lg">
+    <div class="flex items-center justify-between gap-4">
+      <h1 class="text-center text-2xl font-bold text-on-background">{{ cm.challenge.props.name }}</h1>
+      <img
+        class="h-28 w-28 rounded-lg shadow-md"
+        [src]="'images/challenge/' + cm.challenge.props.type + '.png'"
+        alt="Icona sfida" />
     </div>
-  }
+
+    <div class="flex flex-col items-center gap-2">
+      <p
+        class="h-24 min-w-24 rounded-full border-4 border-purple-500/75 bg-primary-500/25 p-2 text-[60px] font-bold text-purple-500 shadow flex-center">
+        {{ cm.challenge.props.points }}
+      </p>
+      <fv-rating [rating]="cm.challenge.props.complexity"></fv-rating>
+    </div>
+
+    <!-- Info su  eventChallenge-->
+    <div class="flex h-16 justify-center divide-x divide-neutral-700 rounded-xl bg-neutral-800 py-2 text-on-surface">
+      <div class="flex flex-1 flex-col gap-1 px-2">
+        <p class="rounded bg-neutral-700 p-1 text-center text-xxs uppercase text-on-background">Orario inizio</p>
+        <fv-countdown class="flex-1 flex-center" [date]="cm.eventChallenge.props.startDate"></fv-countdown>
+      </div>
+      <div class="flex flex-1 flex-col gap-1 px-2">
+        <p class="rounded bg-neutral-700 p-1 text-center text-xxs uppercase text-on-background">N° massimo</p>
+        @if (cm.eventChallenge.props.maxTimes; as maxTimes) {
+          <p class="flex-1 flex-center">{{ cm.eventChallenge.props.maxTimes }}</p>
+        } @else {
+          <fa-icon class="flex-1 flex-center" [icon]="ICON_INFINITY"></fa-icon>
+        }
+      </div>
+      <div class="flex flex-1 flex-col gap-1 px-2">
+        <p class="rounded bg-neutral-700 p-1 text-center text-xxs uppercase text-on-background">Stato</p>
+        <fv-challenge-status
+          class="flex-1 text-white flex-center"
+          [type]="'icon'"
+          [challengeStatus]="cm.eventChallenge.props.challengeStatus"></fv-challenge-status>
+      </div>
+    </div>
+
+    <!-- Sezione Descrizione -->
+    <div class="relative -m-2 p-2">
+      <h2 class="text-lg font-semibold text-on-background">Descrizione</h2>
+      <p class="text-sm leading-relaxed text-on-surface">{{ cm.challenge.props.description }}</p>
+      <fv-challenge-status
+        [type]="'effect'"
+        [challengeStatus]="cm.eventChallenge.props.challengeStatus"></fv-challenge-status>
+    </div>
+
+    <!-- Sezione Regole -->
+    <div class="relative -m-2 p-2">
+      <h2 class="text-lg font-semibold text-on-background">Regole</h2>
+      <p class="whitespace-pre-line text-sm leading-relaxed text-on-surface">
+        {{ cm.challenge.props.rules }}
+      </p>
+      <fv-challenge-status
+        [type]="'effect'"
+        [challengeStatus]="cm.eventChallenge.props.challengeStatus"></fv-challenge-status>
+    </div>
+
+    @if (qrdata(); as qrdata) {
+      <div class="relative mx-auto flex w-fit flex-col rounded-xl bg-white p-2 shadow">
+        <p class="text-sm font-bold text-neutral-800">Scansiona</p>
+        <div class="relative -mx-2 h-8">
+          <div class="absolute -left-6 top-0 z-10 h-8 w-8 rounded-full bg-surface"></div>
+          <div class="absolute left-0 right-0 top-1/2 h-2 border-t border-dashed border-black bg-transparent"></div>
+          <div class="absolute -right-6 top-0 z-10 h-8 w-8 rounded-full bg-surface"></div>
+        </div>
+        @if (teamId()) {
+          <qrcode [qrdata]="qrdata" [width]="256" [errorCorrectionLevel]="'M'"></qrcode>
+          @if (cm.eventChallenge.props.challengeStatus !== 'ACTIVE') {
+            <div class="absolute left-0 top-0 h-full w-full rounded-xl backdrop-blur-sm"></div>
+          }
+        } @else {
+          <p class="h-[256px] w-[256px] text-center font-semibold text-neutral-700 flex-center">
+            Crea una squadra per poter partecipare
+          </p>
+        }
+      </div>
+    }
+  </div>
 }
