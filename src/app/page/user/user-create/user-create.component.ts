@@ -12,11 +12,7 @@ import { environment } from '../../../../environments/environment';
 import { FvFieldComponent } from '../../../components/fv-field.component';
 import { FvButtonComponent } from '../../../components/fv-button.component';
 import { HttpService } from '../../../service/http.service';
-import { Doc } from '../../../model/firebase';
 import { LocalStorageService } from '../../../service/local-storage.service';
-import { User } from '../../../model/user.model';
-
-const KEY_USER = 'USER';
 
 const COL_USERS = environment.collection.USERS;
 
@@ -68,16 +64,16 @@ export class UserCreateComponent implements OnInit {
 
   /* ------------- Lifecycle hooks ------------- */
   async ngOnInit(): Promise<void> {
-    const user = this.lsService.getItem<Doc<User>>(KEY_USER);
-    if (user) {
+    const lsUser = this.lsService.getUser();
+    if (lsUser) {
       this.signUpForm.setValue({
-        name: user.props.name,
-        lastName: user.props.lastName,
-        userName: user.props.userName,
-        email: user.props.email,
+        name: lsUser.props.name,
+        lastName: lsUser.props.lastName,
+        userName: lsUser.props.userName,
+        email: lsUser.props.email,
         password: '******'
       });
-      this.imagePreview.set(user.props.imageUrl); // Aggiorno immagine
+      this.imagePreview.set(lsUser.props.imageUrl); // Aggiorno immagine
       this.signUpForm.get('email')?.disable(); // Disabilito field email
       this.signUpForm.get('password')?.disable(); // Disabilito field password
     }
@@ -122,11 +118,11 @@ export class UserCreateComponent implements OnInit {
       await this.userService.updateUser(userId, userModelForm, imageUrl);
 
       /* Aggiorno local storage */
-      const user = this.lsService.getItem<Doc<User>>(KEY_USER);
-      if (user) {
-        user.props = { ...user.props, ...userModelForm };
-        if (this.imageFile()) user.props.imageUrl = imageUrl ?? null;
-        this.lsService.setItem(KEY_USER, user);
+      const lsUser = this.lsService.getUser();
+      if (lsUser) {
+        lsUser.props = { ...lsUser.props, ...userModelForm };
+        if (this.imageFile()) lsUser.props.imageUrl = imageUrl ?? null;
+        this.lsService.setUser(lsUser);
       }
     });
   }

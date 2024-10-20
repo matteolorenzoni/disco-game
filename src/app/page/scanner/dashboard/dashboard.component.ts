@@ -24,9 +24,6 @@ type ScanError = {
   code?: number; // codice d'errore facoltativo
 };
 
-const KEY_SCANNER_EVENT = 'SCANNER_EVENT';
-const KEY_SCANNER_DEVICE_ID = 'SCANNER_DEVICE_ID';
-
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -75,7 +72,7 @@ export class DashboardComponent implements OnInit {
   /* --------------------- Lifecycle hooks --------------------- */
   async ngOnInit(): Promise<void> {
     /* Recupera l'evento se è già stato cercato */
-    const lsEvent = this.lsService.getItem<Doc<Event>>(KEY_SCANNER_EVENT);
+    const lsEvent = this.lsService.getScannerEvent();
     this.event.set(lsEvent ?? undefined);
 
     /* Verifico se il dispositivo supporta la camera */
@@ -111,12 +108,12 @@ export class DashboardComponent implements OnInit {
 
     /* Memorizzo evento su locals storage */
     this.event.set(event);
-    this.lsService.setItem(KEY_SCANNER_EVENT, event);
+    this.lsService.setScannerEvent(event);
   }
 
   protected onEventRemove(): void {
     this.event.set(undefined);
-    this.lsService.removeItem(KEY_SCANNER_EVENT);
+    this.lsService.removeScannerEvent();
   }
 
   /* --------------------- Method camera --------------------- */
@@ -132,13 +129,13 @@ export class DashboardComponent implements OnInit {
     this.cameraSelected.set(newCamera);
 
     /* Aggiorno il local storage */
-    if (newCamera) this.lsService.setItem(KEY_SCANNER_DEVICE_ID, deviceId);
-    else this.lsService.removeItem(KEY_SCANNER_DEVICE_ID);
+    if (newCamera) this.lsService.setScannerDeviceId(deviceId);
+    else this.lsService.removeScannerDeviceId();
   }
 
   protected onCameraClose(): void {
     this.cameraSelected.set(undefined);
-    this.lsService.removeItem(KEY_SCANNER_DEVICE_ID);
+    this.lsService.removeScannerDeviceId();
   }
 
   protected async handleScanSuccess(result: string): Promise<void> {
@@ -160,7 +157,7 @@ export class DashboardComponent implements OnInit {
     this.cameras.set(cameras);
 
     /* Imposto la camera selezionata */
-    const deviceId = this.lsService.getItem<string>(KEY_SCANNER_DEVICE_ID);
+    const deviceId = this.lsService.getScannerDeviceId();
     const newCamera = this.cameras().find((x) => x.deviceId === deviceId);
     this.cameraSelected.set(newCamera);
   }

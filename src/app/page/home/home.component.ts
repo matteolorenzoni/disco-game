@@ -4,11 +4,8 @@ import { Router, RouterOutlet } from '@angular/router';
 import { FvBottomNavigationComponent } from '../../components/fv-bottom-navigation.component';
 import { MenuItem } from '../../model/type';
 import { faCalendarDays, faGamepad, faGears, faHome } from '@fortawesome/free-solid-svg-icons';
-import { User, UserRole } from '../../model/user.model';
-import { Doc } from '../../model/firebase';
+import { UserRole } from '../../model/user.model';
 import { LocalStorageService } from '../../service/local-storage.service';
-
-const KEY_USER = 'USER';
 
 @Component({
   selector: 'app-home',
@@ -80,13 +77,13 @@ export class HomeComponent implements OnInit {
 
   /* ----------------- Lifecycle hooks ----------------- */
   ngOnInit(): void {
-    const user = this.lsService.getItem<Doc<User>>(KEY_USER);
-    if (!user) {
+    const lsUser = this.lsService.getUser();
+    if (!lsUser) {
       this.menu.set([]);
       return;
     }
 
-    switch (user.props.role) {
+    switch (lsUser.props.role) {
       case UserRole.ADMIN:
         this.menu.set(this.MENU_ADMIN);
         break;

@@ -4,11 +4,8 @@ import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs/internal/operators/filter';
 import { FirebaseService } from '../service/firebase.service';
-import { User, UserRole } from '../model/user.model';
+import { UserRole } from '../model/user.model';
 import { LocalStorageService } from '../service/local-storage.service';
-import { Doc } from '../model/firebase';
-
-const KEY_USER = 'USER';
 
 export const userGuard: CanActivateFn = async (route, state) => {
   const router = inject(Router);
@@ -23,15 +20,15 @@ export const userGuard: CanActivateFn = async (route, state) => {
 
     // Recupero le informazioni dell'utente dal local storage
     // Se viene modificato diventa undefined quindi va in 'unauthorized
-    const user = lsService.getItem<Doc<User>>(KEY_USER);
+    const lsUser = lsService.getUser();
 
     // Ottiene il tipo di utente (ADMIN, SCANNER o USER)
-    const currentUserType = user?.props.role;
+    const currentUserType = lsUser?.props.role;
 
     // Controlla se l'utente è già loggato e ridireziona in base al tipo di utente
     if (state.url.startsWith('/login')) {
       if (!userFirebase) {
-        lsService.removeItem(KEY_USER);
+        lsService.removeUser();
         return true;
       }
 

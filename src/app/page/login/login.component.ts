@@ -14,8 +14,6 @@ import { FvButtonComponent } from '../../components/fv-button.component';
 import { HttpService } from '../../service/http.service';
 import { LocalStorageService } from '../../service/local-storage.service';
 
-const KEY_USER = 'USER';
-
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -80,7 +78,7 @@ export class LoginComponent {
     await this.httpService.execute(async () => {
       const userCredentials = await this.firebaseService.logIn(this.loginForm.getRawValue(), this.rememberMe());
       const user = await this.userService.getUserById(userCredentials.user.uid);
-      this.lsService.setItem(KEY_USER, user);
+      this.lsService.setUser(user);
 
       switch (user?.props.role) {
         case UserRole.ADMIN:
