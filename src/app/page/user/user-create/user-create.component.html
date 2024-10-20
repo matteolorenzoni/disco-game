@@ -39,6 +39,6 @@
   <fv-button
     class="mt-12"
     type="submit"
-    [label]="userService.user() ? 'Aggiorna' : 'Registrati'"
+    [label]="firebaseService.userFirebase() ? 'Aggiorna' : 'Registrati'"
     [disabled]="signUpForm.invalid"></fv-button>
 </form>

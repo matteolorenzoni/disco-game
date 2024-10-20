@@ -4,8 +4,11 @@ import { Router, RouterOutlet } from '@angular/router';
 import { FvBottomNavigationComponent } from '../../components/fv-bottom-navigation.component';
 import { MenuItem } from '../../model/type';
 import { faCalendarDays, faGamepad, faGears, faHome } from '@fortawesome/free-solid-svg-icons';
-import { UserService } from '../../service/user.service';
-import { UserRole } from '../../model/user.model';
+import { User, UserRole } from '../../model/user.model';
+import { Doc } from '../../model/firebase';
+import { LocalStorageService } from '../../service/local-storage.service';
+
+const KEY_USER = 'USER';
 
 @Component({
   selector: 'app-home',
@@ -18,7 +21,7 @@ import { UserRole } from '../../model/user.model';
 export class HomeComponent implements OnInit {
   /* Services */
   readonly router = inject(Router);
-  readonly userService = inject(UserService);
+  readonly lsService = inject(LocalStorageService);
 
   /* Variables */
   menu = signal<MenuItem[]>([]);
@@ -77,7 +80,7 @@ export class HomeComponent implements OnInit {
 
   /* ----------------- Lifecycle hooks ----------------- */
   ngOnInit(): void {
-    const user = this.userService.user()!;
+    const user = this.lsService.getItem<Doc<User>>(KEY_USER);
     if (!user) {
       this.menu.set([]);
       return;

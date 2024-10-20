@@ -12,6 +12,11 @@ import { environment } from '../../../../environments/environment';
 import { FvFieldComponent } from '../../../components/fv-field.component';
 import { FvButtonComponent } from '../../../components/fv-button.component';
 import { HttpService } from '../../../service/http.service';
+import { Doc } from '../../../model/firebase';
+import { LocalStorageService } from '../../../service/local-storage.service';
+import { User } from '../../../model/user.model';
+
+const KEY_USER = 'USER';
 
 const COL_USERS = environment.collection.USERS;
 
@@ -30,6 +35,7 @@ export class UserCreateComponent implements OnInit {
   readonly storageService = inject(StorageService);
   readonly httpService = inject(HttpService);
   readonly userService = inject(UserService);
+  readonly lsService = inject(LocalStorageService);
 
   /* Variables */
   imagePreview = signal<string | ArrayBuffer | null | undefined>(undefined);
@@ -62,7 +68,7 @@ export class UserCreateComponent implements OnInit {
 
   /* ------------- Lifecycle hooks ------------- */
   async ngOnInit(): Promise<void> {
-    const user = this.userService.user();
+    const user = this.lsService.getItem<Doc<User>>(KEY_USER);
     if (user) {
       this.signUpForm.setValue({
         name: user.props.name,
@@ -79,10 +85,10 @@ export class UserCreateComponent implements OnInit {
 
   /* ------------- Methods ------------- */
   protected async addOrUpdateUser(): Promise<void> {
-    const user = this.userService.user();
+    const userId = this.firebaseService.userFirebase()?.uid;
     const userModelForm = this.signUpForm.getRawValue();
-    if (user) await this.updateUser(user.id, userModelForm);
-    else await this.addUser(userModelForm);
+    if (!userId) await this.addUser(userModelForm);
+    else await this.updateUser(userId, userModelForm);
   }
 
   private async addUser(userModelForm: UserModel): Promise<void> {
@@ -114,6 +120,14 @@ export class UserCreateComponent implements OnInit {
 
       /* Creazione utente */
       await this.userService.updateUser(userId, userModelForm, imageUrl);
+
+      /* Aggiorno local storage */
+      const user = this.lsService.getItem<Doc<User>>(KEY_USER);
+      if (user) {
+        user.props = { ...user.props, ...userModelForm };
+        if (this.imageFile()) user.props.imageUrl = imageUrl ?? null;
+        this.lsService.setItem(KEY_USER, user);
+      }
     });
   }
 }

@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { User, UserRole } from '../model/user.model';
 import { Doc } from '../model/firebase';
@@ -21,9 +21,6 @@ export class UserService {
   readonly documentService = inject(FirebaseDocumentService);
   readonly httpService = inject(HttpService);
   readonly logService = inject(LogService);
-
-  /* Variables */
-  user = signal<Doc<User> | undefined>(undefined);
 
   /* --------------------------- Read ---------------------------*/
   public async getUserById(userId: string): Promise<Doc<User>> {

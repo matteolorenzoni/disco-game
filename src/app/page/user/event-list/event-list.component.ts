@@ -106,9 +106,6 @@ export class EventListComponent implements OnInit {
 
   /* -------------------- Lifecycle hooks -------------------- */
   async ngOnInit(): Promise<void> {
-    const user = this.userService.user();
-    if (!user) throw new Error('retry', { cause: 'retry' });
-
     /* Ottengo tutti gli eventi attivi */
     const events = await this.eventService.getEvents();
     this.events.set(events);
@@ -130,19 +127,19 @@ export class EventListComponent implements OnInit {
 
   /* -------------------- Methods: firebase -------------------- */
   protected async addTeam(): Promise<void> {
-    const user = this.userService.user();
+    const userId = this.firebaseService.userFirebase()?.uid;
     const event = this.current().event;
-    if (!user || !event) throw new Error('retry', { cause: 'retry' });
+    if (!userId || !event) throw new Error('retry', { cause: 'retry' });
 
     /* Aggiungo Team al DB */
     const form = this.newTeamForm.getRawValue();
-    const team = await this.teamService.addTeam(user.id, event.id, form);
+    const team = await this.teamService.addTeam(userId, event.id, form);
 
     /* Aggiungo EventTeamUser al DB */
-    const eventTeamUserRef = await this.eventTeamUserService.addEventTeamUser(event.id, team.id, user.id);
+    const eventTeamUserRef = await this.eventTeamUserService.addEventTeamUser(event.id, team.id, userId);
 
     /* Aggiorno User (prop: eventTeamUserRefs) */
-    await this.userService.updateEventTeamUser(user.id, eventTeamUserRef.id);
+    await this.userService.updateEventTeamUser(userId, eventTeamUserRef.id);
 
     /* Aggiorno Event (prop: eventTeamUserRefs) */
     await this.eventService.updateEventTeamUser(event.id, eventTeamUserRef.id);
@@ -159,22 +156,22 @@ export class EventListComponent implements OnInit {
   }
 
   protected async findTeam(): Promise<void> {
-    const user = this.userService.user();
+    const userId = this.firebaseService.userFirebase()?.uid;
     const event = this.current().event;
-    if (!user || !event) throw new Error('retry', { cause: 'retry' });
+    if (!userId || !event) throw new Error('retry', { cause: 'retry' });
 
     const form = this.findTeamForm.getRawValue();
     const team = await this.teamService.getTeamByCode(form.code);
     if (!team) {
-      this.logService.addLogError(user.id, 'Nessuna squadra trovata');
+      this.logService.addLogError(userId, 'Nessuna squadra trovata');
       return;
     }
 
     /* Aggiungo EventTeamUser al DB */
-    const eventTeamUserRef = await this.eventTeamUserService.addEventTeamUser(event.id, team.id, user.id);
+    const eventTeamUserRef = await this.eventTeamUserService.addEventTeamUser(event.id, team.id, userId);
 
     /* Aggiorno User (prop: eventTeamUserRefs) */
-    await this.userService.updateEventTeamUser(user.id, eventTeamUserRef.id);
+    await this.userService.updateEventTeamUser(userId, eventTeamUserRef.id);
 
     /* Aggiorno Event (prop: eventTeamUserRefs) */
     await this.eventService.updateEventTeamUser(event.id, eventTeamUserRef.id);
@@ -239,15 +236,15 @@ export class EventListComponent implements OnInit {
 
   /* -------------------- Methods: utils -------------------- */
   private async getEventStorage(event: Doc<Event>): Promise<void> {
-    const user = this.userService.user();
-    if (!user) throw new Error('retry', { cause: 'retry' });
+    const userId = this.firebaseService.userFirebase()?.uid;
+    if (!userId) throw new Error('retry', { cause: 'retry' });
 
     /* Ottengo le sfide e cerco se c'è una squadra */
     const [challenges, challengeService] = await Promise.all([
       this.challengeService.getChallengesByEventChallengeRefs(event.props.eventChallengeRefs),
       this.eventTeamUserService.getEventTeamUsersByProp([
         { key: 'eventId', value: event.id },
-        { key: 'userId', value: user.id }
+        { key: 'userId', value: userId }
       ])
     ]);
 

@@ -3,40 +3,37 @@ import { CanActivateFn, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs/internal/operators/filter';
-import { UserService } from '../service/user.service';
 import { FirebaseService } from '../service/firebase.service';
-import { UserRole } from '../model/user.model';
-import { HttpService } from '../service/http.service';
+import { User, UserRole } from '../model/user.model';
+import { LocalStorageService } from '../service/local-storage.service';
+import { Doc } from '../model/firebase';
+
+const KEY_USER = 'USER';
 
 export const userGuard: CanActivateFn = async (route, state) => {
   const router = inject(Router);
   const firebaseService = inject(FirebaseService);
-  const httpService = inject(HttpService);
-  const userService = inject(UserService);
+  const lsService = inject(LocalStorageService);
 
   try {
-    httpService.updateHttpCount(1);
-
     // Usa l'Observable di userFirebase e filtra i valori undefined
     const userFirebase = await firstValueFrom(
       toObservable(firebaseService.userFirebase).pipe(filter((user) => user !== undefined))
     );
 
-    // Verifica se l'utente è già presente nel sistema, altrimenti lo recupera
-    let user = userService.user();
-    if (!user && userFirebase) {
-      user = await userService.getUserById(userFirebase.uid);
-      userService.user.set(user);
-    }
-
-    httpService.updateHttpCount(-1);
+    // Recupero le informazioni dell'utente dal local storage
+    // Se viene modificato diventa undefined quindi va in 'unauthorized
+    const user = lsService.getItem<Doc<User>>(KEY_USER);
 
     // Ottiene il tipo di utente (ADMIN, SCANNER o USER)
     const currentUserType = user?.props.role;
 
     // Controlla se l'utente è già loggato e ridireziona in base al tipo di utente
     if (state.url.startsWith('/login')) {
-      if (!userFirebase) return true;
+      if (!userFirebase) {
+        lsService.removeItem(KEY_USER);
+        return true;
+      }
 
       switch (currentUserType) {
         case UserRole.ADMIN:
