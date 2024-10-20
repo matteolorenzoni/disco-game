@@ -6,7 +6,7 @@ import { ChallengeService } from '../../../service/challenge.service';
 import { EventChallengeService } from '../../../service/event-challenge.service';
 import { Doc } from '../../../model/firebase';
 import { Challenge } from '../../../model/challenge.model';
-import { EventChallenge } from '../../../model/event-challenge.model';
+import { EventChallenge, Qrcode } from '../../../model/event-challenge.model';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faInfinity } from '@fortawesome/free-solid-svg-icons';
 import { FvChallengeStatusComponent } from '../../../components/fv-challenge-status.component';
@@ -15,7 +15,6 @@ import { FvRatingComponent } from '../../../components/fv-rating.component';
 import { TitleComponent, TitlePageItem } from '../../../components/title/title.component';
 import { QRCodeModule } from 'angularx-qrcode';
 import { FirebaseService } from '../../../service/firebase.service';
-import { EventTeamUserQrcode } from '../../../model/event-team-user.model';
 
 @Component({
   selector: 'app-challenge',
@@ -84,7 +83,7 @@ export class ChallengeComponent implements OnInit {
           this.challengeMerged.set({ challenge, eventChallenge });
 
           /* Genero qrcode */
-          const qrcode: EventTeamUserQrcode = {
+          const qrcode: Qrcode = {
             eventId,
             teamId,
             userId,

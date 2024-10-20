@@ -2,10 +2,11 @@ import { inject, Injectable } from '@angular/core';
 import { DocumentData, DocumentReference } from 'firebase/firestore';
 import { environment } from '../../environments/environment';
 import { Doc } from '../model/firebase';
-import { EventTeamUser, EventTeamUserQrcode } from '../model/event-team-user.model';
+import { EventTeamUser } from '../model/event-team-user.model';
 import { eventTeamUserConverter } from '../model/converter';
 import { FirebaseDocumentService } from './firebase-document.service';
 import { HttpService } from './http.service';
+import { Qrcode } from '../model/event-challenge.model';
 
 const COL_EVENT_TEAM_USERS = environment.collection.EVENT_TEAM_USERS;
 
@@ -48,7 +49,7 @@ export class EventTeamUserService {
   }
 
   /* --------------------------- Update ---------------------------*/
-  public async updateChallengePoints(qrcode: EventTeamUserQrcode): Promise<void> {
+  public async updateChallengePoints(qrcode: Qrcode): Promise<void> {
     return await this.httpService.execute(async () => {
       /* Cerco la partecipazione per vedere se la sfida è da aggiungere o da aggiornare */
       const eventTeamUser = await this.documentService.getDocumentsByProps<EventTeamUser>(

@@ -16,8 +16,9 @@ import { LocalStorageService } from '../../../service/local-storage.service';
 import { EventTeamUserService } from '../../../service/event-team-user.service';
 import { Event } from '../../../model/event.model';
 import { Doc } from '../../../model/firebase';
-import { isEventTeamUserQrCode } from '../../../util/type.util';
+import { isEqualQrcode, isQrcode } from '../../../util/type.util';
 import { TeamService } from '../../../service/team.service';
+import { Qrcode } from '../../../model/event-challenge.model';
 
 type ScanError = {
   message: string;
@@ -51,6 +52,7 @@ export class DashboardComponent implements OnInit {
 
   /* Variables */
   event = signal<Doc<Event> | undefined>(undefined);
+  lasQrcode = signal<Qrcode | undefined>(undefined);
 
   /* Variables camera*/
   errorMessage = signal<'NO_CAMERA' | 'NO_PERMISSION' | null | undefined>(undefined);
@@ -118,47 +120,72 @@ export class DashboardComponent implements OnInit {
 
   /* --------------------- Method camera --------------------- */
   protected onCameraChange(event: EventTarget | null): void {
+    /* Se nessun evento, chiudo la camera a pulisco il local storage */
     if (!event) {
-      this.onCameraClose();
+      this.cameraSelected.set(undefined);
+      this.lsService.removeScannerDeviceId();
       return;
     }
 
     /* Imposto la camera selezionata */
     const deviceId = (event as HTMLSelectElement).value;
     const newCamera = this.cameras().find((x) => x.deviceId === deviceId);
-    this.cameraSelected.set(newCamera);
 
-    /* Aggiorno il local storage */
-    if (newCamera) this.lsService.setScannerDeviceId(deviceId);
-    else this.lsService.removeScannerDeviceId();
+    /* Verifico se la nuova camera esiste, aggiorno il local storage */
+    if (newCamera) {
+      this.cameraSelected.set(newCamera);
+      this.lsService.setScannerDeviceId(deviceId);
+    } else {
+      this.lsService.removeScannerDeviceId();
+    }
   }
 
-  protected onCameraClose(): void {
-    this.cameraSelected.set(undefined);
-    this.lsService.removeScannerDeviceId();
+  protected onToggleCamera(): void {
+    const lsScannerDeviceId = this.lsService.getScannerDeviceId();
+
+    /* Se presente la camera la chiudo, viceversa seleziono la prima tra quelle disponibili */
+    if (lsScannerDeviceId) {
+      this.cameraSelected.set(undefined);
+      this.lsService.removeScannerDeviceId();
+    } else {
+      const camera = this.cameras()[0] as MediaDeviceInfo | undefined;
+      if (!camera) return;
+      this.cameraSelected.set(camera);
+      this.lsService.setScannerDeviceId(camera.deviceId);
+    }
   }
 
   protected async handleScanSuccess(result: string): Promise<void> {
-    alert(result);
-    const value = JSON.parse(result);
-    if (!isEventTeamUserQrCode(value)) return;
+    /* Verifico che sia il qrcode giusto */
+    const qrcode = JSON.parse(result);
+    if (!isQrcode(qrcode)) return;
 
-    await this.eventTeamUserService.updateChallengePoints(value);
-    await this.teamService.updateTeamPoints(value.teamId, value.points);
+    /* Verifico che non sia lo stesso qrcode precedente */
+    if (isEqualQrcode(qrcode, this.lasQrcode())) return;
+
+    /* Memorizzo il qrcode per impedire piu scan con lo stesso valore */
+    this.lasQrcode.set(qrcode);
+
+    /* Aggiorno eventTeamUser e squadra associati */
+    await this.eventTeamUserService.updateChallengePoints(qrcode);
+    await this.teamService.updateTeamPoints(qrcode.teamId, qrcode.points);
     this.logService.addLogConfirm('Sfida confermata');
   }
 
   protected handleScanError(error: ScanError): void {
-    alert(error.message);
+    this.logService.addLogError(this.firebaseService.userFirebase()?.uid, error);
   }
 
   protected handleCamerasFound(cameras: MediaDeviceInfo[]): void {
     /* Imposto le camere trovate */
     this.cameras.set(cameras);
 
-    /* Imposto la camera selezionata */
+    /* Recupero l'ID della camera selezionata dal local storage e verifico se esiste */
     const deviceId = this.lsService.getScannerDeviceId();
     const newCamera = this.cameras().find((x) => x.deviceId === deviceId);
-    this.cameraSelected.set(newCamera);
+
+    /* Se esiste, imposta quella come camera selezionata, altrimenti seleziona la prima camera disponibile */
+    if (newCamera) this.cameraSelected.set(newCamera);
+    else if (cameras.length > 0) this.cameraSelected.set(cameras[0]);
   }
 }

@@ -18,3 +18,11 @@ export enum ChallengeStatus {
   CANCELED = 'CANCELED', // Sfida annullata
   SUSPENDED = 'SUSPENDED' // Sfida sospesa temporaneamente
 }
+
+export type Qrcode = {
+  eventId: string;
+  teamId: string;
+  userId: string;
+  challengeId: string;
+  points: number;
+};
