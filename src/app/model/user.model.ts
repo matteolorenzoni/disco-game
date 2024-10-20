@@ -8,6 +8,7 @@ export type User = {
   email: string; // Indirizzo email dell'utente, utilizzato per la registrazione e la comunicazione
   imageUrl: string | null; // URL dell'immagine del profilo dell'utente; può essere null se non è stato caricato nessun profilo
   role: UserRole; // Ruolo dell'utente nel sistema; determina i permessi e le funzionalità accessibili (ADMIN, USER o SCANNER)
+  code: string; // Codice unico di default per la parte scanner
   eventTeamUserRefs: DocumentReference<EventTeamUser>[]; // Array di riferimenti ai documenti delle squadre a cui l'utente ha partecipato o creato nel tempo
   isActive: boolean; // Flag per gestire la soft delete
   updatedAt: Date; // Data e ora dell'ultimo aggiornamento delle informazioni dell'account

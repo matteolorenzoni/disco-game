@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { User, UserRole } from '../model/user.model';
@@ -8,6 +9,7 @@ import { LogService } from './log.service';
 import { FirebaseService } from './firebase.service';
 import { FirebaseDocumentService } from './firebase-document.service';
 import { HttpService } from './http.service';
+import { generateUniqueCode } from '../util/utils';
 
 const COL_USERS = environment.collection.USERS;
 const COL_EVENT_TEAM_USERS = environment.collection.EVENT_TEAM_USERS;
@@ -29,6 +31,13 @@ export class UserService {
     });
   }
 
+  public async getUserByCode(code: string): Promise<Doc<User> | null> {
+    const users = await this.httpService.execute(async () => {
+      return await this.documentService.getDocumentsByProps<User>(COL_USERS, { code }, userConverter);
+    });
+    return users.length > 0 ? users[0] : null;
+  }
+
   public async getUsersByIds(userIds: string[]): Promise<Doc<User>[]> {
     return await this.httpService.execute(async () => {
       return await this.documentService.getDocumentsByIds<User>(COL_USERS, userIds, userConverter);
@@ -37,11 +46,18 @@ export class UserService {
 
   /* --------------------------- Create ---------------------------*/
   public async addUserById(userId: string, userModelForm: UserModel, imageUrl: string | null): Promise<void> {
-    return await this.httpService.execute(async () => {
+    return this.httpService.execute(async () => {
+      /* Check codice univoco */
+      const code = await generateUniqueCode(6, 100, this.getUserByCode.bind(this));
+
+      /* Escludi la password dal userModelForm */
+      const { password, ...userWithoutPassword } = userModelForm;
+
       await this.documentService.addDocumentById<User>(userId, COL_USERS, {
-        ...userModelForm,
+        ...userWithoutPassword,
         imageUrl,
         role: UserRole.USER,
+        code,
         eventTeamUserRefs: [],
         isActive: true,
         updatedAt: new Date()

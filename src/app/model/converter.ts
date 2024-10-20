@@ -33,6 +33,7 @@ export const userConverter: FirestoreDataConverter<User> = {
       email: user.email,
       imageUrl: user.imageUrl,
       role: user.role,
+      code: user.code,
       eventTeamUserRefs: user.eventTeamUserRefs.map((ref) => ref.path),
       isActive: user.isActive,
       updatedAt: user.updatedAt
@@ -48,6 +49,7 @@ export const userConverter: FirestoreDataConverter<User> = {
       email: data['email'],
       imageUrl: data['imageUrl'] || null,
       role: data['role'] as UserRole,
+      code: data['code'],
       eventTeamUserRefs: data['eventTeamUserRefs'],
       isActive: data['isActive'],
       updatedAt: timestampToDate(data['updatedAt'] as Timestamp)
