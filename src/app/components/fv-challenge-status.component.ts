@@ -29,7 +29,7 @@ import { faCheck, faCirclePause, faLock, faTrash } from '@fortawesome/free-solid
       @case ('effect') {
         @switch (challengeStatus()) {
           @case (CHALLENGE_STATUS.LOCKED) {
-            <div class="absolute left-0 top-0 h-full w-full rounded-xl bg-black/25 backdrop-blur"></div>
+            <div class="absolute left-0 top-0 h-full w-full rounded-xl bg-black/25 backdrop-blur-sm"></div>
             <fa-icon class="absolute -right-1 -top-2 text-xl text-white" [icon]="ICON_LOCKED"></fa-icon>
           }
           @case (CHALLENGE_STATUS.CANCELED) {

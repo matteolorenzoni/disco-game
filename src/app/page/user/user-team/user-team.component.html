@@ -14,28 +14,34 @@
 </div>
 
 <ul class="grid grid-cols-[repeat(auto-fill,minmax(6rem,1fr))] gap-4">
-  @for (item of results(); track item.eventChallenge.id) {
-    <li class="relative flex flex-col gap-1 rounded-xl bg-neutral-800 p-1 text-on-surface shadow">
-      <div class="flex w-full justify-center rounded-lg bg-surface p-2">
-        <img
-          class="h-16 w-16"
-          [src]="'images/challenge/' + item.eventChallenge.props.challengeType + '.png'"
-          [alt]="'Immagine ' + item.eventChallenge.props.challengeName" />
-      </div>
-      <div class="flex flex-col gap-1 px-2 py-1 text-center">
-        <p class="truncate text-xxs text-on-surface">{{ item.eventChallenge.props.challengeName }}</p>
-        <p class="truncate text-sm font-semibold text-white">
-          <span>
-            {{
-              item.eventTeamUser?.props?.challenges ?? [] | getUserTotalPoints: item.eventChallenge.props.challengeId
-            }}
-          </span>
-          <span class="text-[8px]">pt</span>
-        </p>
-      </div>
+  @for (challenge of mergedChallenges(); track challenge.eventChallenge.id) {
+    <li class="relative rounded-xl bg-neutral-800 text-on-surface shadow">
+      <button
+        class="flex h-full w-full flex-col items-center gap-2 rounded-xl p-1"
+        [disabled]="challenge.eventChallenge.props.challengeStatus === ChallengeStatus.LOCKED"
+        (click)="onGoToChallenge(challenge.eventChallenge.props.challengeId)">
+        <div class="w-full rounded-lg bg-surface p-2">
+          <img
+            class="mx-auto h-16 w-16"
+            [src]="'images/challenge/' + challenge.eventChallenge.props.challengeType + '.png'"
+            [alt]="'Immagine ' + challenge.eventChallenge.props.challengeName" />
+        </div>
+        <div class="flex w-full flex-col gap-1 px-1 text-center">
+          <p class="truncate text-xxs text-on-surface">{{ challenge.eventChallenge.props.challengeName }}</p>
+          <p class="truncate text-sm font-semibold text-white">
+            <span>
+              {{
+                challenge.eventTeamUser?.props?.challenges ?? []
+                  | getUserTotalPoints: challenge.eventChallenge.props.challengeId
+              }}
+            </span>
+            <span class="text-[8px]">pt</span>
+          </p>
+        </div>
+      </button>
       <fv-challenge-status
         [type]="'effect'"
-        [challengeStatus]="item.eventChallenge.props.challengeStatus"></fv-challenge-status>
+        [challengeStatus]="challenge.eventChallenge.props.challengeStatus"></fv-challenge-status>
     </li>
   }
 </ul>

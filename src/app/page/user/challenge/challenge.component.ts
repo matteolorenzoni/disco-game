@@ -44,6 +44,7 @@ export class ChallengeComponent implements OnInit {
   /* Variables */
   challenge = signal<Doc<Challenge> | undefined>(undefined);
   eventChallenge = signal<Doc<EventChallenge> | undefined>(undefined);
+  teamId = signal<string | undefined>(undefined);
   qrdata = signal<string | undefined>('');
 
   /* Icons */
@@ -55,9 +56,9 @@ export class ChallengeComponent implements OnInit {
     this.route.paramMap.subscribe(
       async (params) =>
         await this.httpService.execute(async () => {
-          const userId = this.firebaseService.userFirebase()?.uid;
           const eventId = params.get('eventId');
           const teamId = params.get('teamId');
+          const userId = this.firebaseService.userFirebase()?.uid;
           const challengeId = params.get('challengeId');
           if (!eventId || !teamId || !userId || !challengeId) throw new Error('retry', { cause: 'retry' });
 
@@ -68,6 +69,7 @@ export class ChallengeComponent implements OnInit {
           ]);
           this.challenge.set(challenge);
           this.eventChallenge.set(eventChallenge);
+          this.teamId.set(teamId === '_' ? undefined : teamId);
 
           /* Genero qrcode */
           const qrcode: EventTeamUserQrcode = {

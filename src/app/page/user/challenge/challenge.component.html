@@ -70,9 +70,15 @@
             <div class="absolute left-0 right-0 top-1/2 h-2 border-t border-dashed border-black bg-transparent"></div>
             <div class="absolute -right-6 top-0 z-10 h-8 w-8 rounded-full bg-surface"></div>
           </div>
-          <qrcode [qrdata]="qrdata" [width]="256" [errorCorrectionLevel]="'M'"></qrcode>
-          @if (eventChallenge.props.challengeStatus !== 'ACTIVE') {
-            <div class="absolute left-0 top-0 h-full w-full rounded-xl bg-black/50 backdrop-blur"></div>
+          @if (teamId()) {
+            <qrcode [qrdata]="qrdata" [width]="256" [errorCorrectionLevel]="'M'"></qrcode>
+            @if (eventChallenge.props.challengeStatus !== 'ACTIVE') {
+              <div class="absolute left-0 top-0 h-full w-full rounded-xl backdrop-blur-sm"></div>
+            }
+          } @else {
+            <p class="h-[256px] w-[256px] text-center font-semibold text-neutral-700 flex-center">
+              Crea una squadra per poter partecipare
+            </p>
           }
         </div>
       }
