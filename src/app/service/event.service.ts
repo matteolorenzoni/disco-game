@@ -7,7 +7,7 @@ import { eventConverter } from '../model/converter';
 import { LogService } from './log.service';
 import { Doc } from '../model/firebase';
 import { HttpService } from './http.service';
-import { generateRandomCode } from '../util/utils';
+import { generateUniqueCode } from '../util/utils';
 
 const COL_EVENTS = environment.collection.EVENTS;
 const COL_EVENT_TEAM_USERS = environment.collection.EVENT_TEAM_USERS;
@@ -25,13 +25,13 @@ export class EventService {
   /* --------------------------- Read ---------------------------*/
   public async getEvents(): Promise<Doc<Event>[]> {
     return await this.httpService.execute(async () => {
-      return await this.documentService.getDocumentsByProps<Event>(COL_EVENTS, { isActive: true }, eventConverter);
+      return this.documentService.getDocumentsByProps<Event>(COL_EVENTS, { isActive: true }, eventConverter);
     });
   }
 
   public async getEventById(eventId: string): Promise<Doc<Event>> {
     return await this.httpService.execute(async () => {
-      return await this.documentService.getDocumentById<Event>(COL_EVENTS, eventId, eventConverter);
+      return this.documentService.getDocumentById<Event>(COL_EVENTS, eventId, eventConverter);
     });
   }
 
@@ -49,17 +49,8 @@ export class EventService {
   /* --------------------------- Create ---------------------------*/
   public async addEventById(eventId: string, form: EventModel, imageUrl: string): Promise<string> {
     return await this.httpService.execute(async () => {
-      const events = await this.getEvents();
-      const codes = events.map((x) => x.props.code);
-
       /* Check codice univoco */
-      if (codes.length > 2_000_000) {
-        throw new Error('tooManyEvents', { cause: 'tooManyEvents' });
-      }
-      let code = generateRandomCode(6);
-      while (codes.includes(code)) {
-        code = generateRandomCode(6);
-      }
+      const code = await generateUniqueCode(6, 100, this.getEventByCode.bind(this));
 
       const docRef = await this.documentService.addDocumentById<Event>(eventId, COL_EVENTS, {
         ...form,

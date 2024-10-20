@@ -30,4 +30,10 @@
 
     <fv-button-outlined class="mt-12" label="Esci" twColor="rose" [onClick]="logout.bind(this)"></fv-button-outlined>
   }
+  @case ('code') {
+    <div class="mt-4 flex flex-col gap-2 rounded-lg border border-card-border bg-surface p-4">
+      <p class="text-base font-semibold text-on-surface">Codice utente univoco</p>
+      <p class="text-5xl text-neutral-400">{{ user()?.props?.code }}</p>
+    </div>
+  }
 }

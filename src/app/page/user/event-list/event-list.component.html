@@ -8,8 +8,7 @@
   (swiperslidechange)="onSlideChange($event)">
   @for (event of events(); track event.id) {
     <swiper-slide class="w-4/5 text-on-surface">
-      <div
-        class="flex cursor-pointer flex-col gap-4 overflow-hidden rounded-lg border border-card-border bg-card-background shadow backdrop-blur">
+      <div class="flex cursor-pointer flex-col gap-4 overflow-hidden rounded-lg bg-neutral-750/35 shadow backdrop-blur">
         <img class="aspect-video w-full text-white" [src]="event.props.imageUrl" alt="Immagine evento" />
         <div class="flex flex-col gap-2 p-2">
           <p class="truncate text-xl font-bold">{{ event.props.name }}</p>

@@ -4,10 +4,11 @@ import { environment } from '../../environments/environment';
 import { NewTeamModel } from '../model/form.model';
 import { Team, TeamStatus } from '../model/team.model';
 import { Doc } from '../model/firebase';
-import { teamConverter } from '../model/converter';
+import { eventTeamUserConverter, teamConverter } from '../model/converter';
 import { EventTeamUserService } from './event-team-user.service';
 import { HttpService } from './http.service';
-import { generateRandomCode } from '../util/utils';
+import { generateUniqueCode } from '../util/utils';
+import { EventTeamUser } from '../model/event-team-user.model';
 
 const COL_TEAMS = environment.collection.TEAMS;
 const COL_EVENT_TEAM_USERS = environment.collection.EVENT_TEAM_USERS;
@@ -28,6 +29,12 @@ export class TeamService {
     });
   }
 
+  public async getTeamsByName(name: string): Promise<Doc<Team>[]> {
+    return await this.httpService.execute(async () => {
+      return await this.documentService.getDocumentsByProps<Team>(COL_TEAMS, { name, isActive: true }, teamConverter);
+    });
+  }
+
   public async getTeamByCode(code: string): Promise<Doc<Team> | null> {
     return await this.httpService.execute(async () => {
       const teams = await this.documentService.getDocumentsByProps<Team>(
@@ -42,38 +49,17 @@ export class TeamService {
   /* --------------------------- Create ---------------------------*/
   public async addTeam(userId: string, eventId: string, teamForm: NewTeamModel): Promise<Doc<Team>> {
     return await this.httpService.execute(async () => {
-      /* Ottengo tutte le squadre che partecipano all'evento */
-      const inEventTeams = await this.eventTeamUserService.getEventTeamUsersByProp([
-        { key: 'eventId', value: eventId }
-      ]);
-
-      /* Ottengo tutte le informazioni delle squadre che partecipano all'evento */
-      const teams = await this.documentService.getDocumentsByIds<Team>(
-        COL_TEAMS,
-        inEventTeams.map((x) => x.props.teamId),
-        teamConverter
-      );
-      const { names, codes } = teams.reduce(
-        (acc, cur) => ({
-          names: [...acc.names, cur.props.name.toLowerCase()],
-          codes: [...acc.codes, cur.props.code]
-        }),
-        { names: [] as string[], codes: [] as string[] }
-      );
-
       /* Check nome univoco */
-      if (names.includes(teamForm.name.toLowerCase())) {
-        throw new Error('teamNameNotAvailable', { cause: 'teamNameNotAvailable' });
-      }
+      const teams = await this.getTeamsByName(teamForm.name);
+      const inEventTeams = await this.documentService.getDocumentsByIds<EventTeamUser>(
+        COL_EVENT_TEAM_USERS,
+        teams.map((x) => x.id),
+        eventTeamUserConverter
+      );
+      if (inEventTeams.length > 0) throw new Error('teamNameNotAvailable', { cause: 'teamNameNotAvailable' });
 
       /* Check codice univoco */
-      if (codes.length > 2_000_000) {
-        throw new Error('tooManyTeams', { cause: 'tooManyTeams' });
-      }
-      let code = generateRandomCode(6);
-      while (codes.includes(code)) {
-        code = generateRandomCode(6);
-      }
+      const code = await generateUniqueCode(6, 100, this.getTeamByCode.bind(this));
 
       /* Aggiungo evento al DB */
       const props = {

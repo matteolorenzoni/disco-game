@@ -10,6 +10,7 @@ const errorMessages: Record<string, string> = {
   noDocument: 'Documento non trovato. Contattare il supporto per assistenza.',
   tooManyEvents: "Troppi eventi creati, contattare l'assistenza.",
   tooManyTeams: "Troppe squadre create, contattare l'assistenza.",
+  usernameNotAvailable: "L'username scelto è già occupato, si prega di sceglierne un altro.",
   teamNameNotAvailable: 'Il nome scelto è già occupato, si prega di sceglierne un altro.'
 };
 

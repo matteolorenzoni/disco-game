@@ -27,26 +27,45 @@ export class UserService {
   /* --------------------------- Read ---------------------------*/
   public async getUserById(userId: string): Promise<Doc<User>> {
     return await this.httpService.execute(async () => {
-      return await this.documentService.getDocumentById<User>(COL_USERS, userId, userConverter);
+      return this.documentService.getDocumentById<User>(COL_USERS, userId, userConverter);
+    });
+  }
+
+  public async getUserByUsername(userName: string): Promise<Doc<User> | null> {
+    return await this.httpService.execute(async () => {
+      const users = await this.documentService.getDocumentsByProps<User>(
+        COL_USERS,
+        { userName, isActive: true },
+        userConverter
+      );
+      return users.length > 0 ? users[0] : null;
     });
   }
 
   public async getUserByCode(code: string): Promise<Doc<User> | null> {
-    const users = await this.httpService.execute(async () => {
-      return await this.documentService.getDocumentsByProps<User>(COL_USERS, { code }, userConverter);
+    return await this.httpService.execute(async () => {
+      const users = await this.documentService.getDocumentsByProps<User>(
+        COL_USERS,
+        { code, isActive: true },
+        userConverter
+      );
+      return users.length > 0 ? users[0] : null;
     });
-    return users.length > 0 ? users[0] : null;
   }
 
   public async getUsersByIds(userIds: string[]): Promise<Doc<User>[]> {
     return await this.httpService.execute(async () => {
-      return await this.documentService.getDocumentsByIds<User>(COL_USERS, userIds, userConverter);
+      return this.documentService.getDocumentsByIds<User>(COL_USERS, userIds, userConverter);
     });
   }
 
   /* --------------------------- Create ---------------------------*/
   public async addUserById(userId: string, userModelForm: UserModel, imageUrl: string | null): Promise<void> {
     return this.httpService.execute(async () => {
+      /* Check user name univoco */
+      const user = await this.getUserByUsername(userModelForm.userName);
+      if (user) throw new Error('usernameNotAvailable', { cause: 'usernameNotAvailable' });
+
       /* Check codice univoco */
       const code = await generateUniqueCode(6, 100, this.getUserByCode.bind(this));
 

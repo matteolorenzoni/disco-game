@@ -15,12 +15,31 @@ export const endDateValidator: ValidatorFn = (group: AbstractControl): Record<st
   return endDate < startDate ? { endBeforeStart: true } : null;
 };
 
-export const generateRandomCode = (length: number): string => {
+export const generateUniqueCode = async <T>(
+  length: number,
+  attempts: number,
+  checkUserExistence: (code: string) => Promise<T | null>
+): Promise<string> => {
+  if (attempts <= 0) {
+    throw new Error('Tentativo di creazione di codice univoco non riuscito, chiudere app e riprovare');
+  }
+
+  // Genera un codice casuale
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let result = '';
   for (let i = 0; i < length; i++) {
     const randomIndex = Math.floor(Math.random() * chars.length);
     result += chars[randomIndex];
   }
-  return result;
+
+  // Controlla se il codice esiste già
+  const existingUser = await checkUserExistence(result);
+
+  // Codice univoco trovato
+  if (existingUser === null) {
+    return result;
+  }
+
+  // Riprova con un numero di tentativi decrescente
+  return generateUniqueCode(length, attempts - 1, checkUserExistence);
 };

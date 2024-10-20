@@ -44,7 +44,7 @@ export class FirebaseDocumentService {
     return { id: docSnap.id, props: data };
   }
 
-  public async getDocumentsByIds<T extends Record<string, any> & { isActive: boolean }>(
+  public async getDocumentsByIds<T extends Record<string, any> & { isActive?: boolean }>(
     collectionName: string,
     ids: string[],
     converter: FirestoreDataConverter<T>
@@ -52,16 +52,17 @@ export class FirebaseDocumentService {
     const collectionRef = getCollection(this.firebaseService.getDb(), collectionName).withConverter(converter);
     const docRefs = ids.map((id) => doc(collectionRef, id));
     const docsSnap = await Promise.all(docRefs.map((ref) => getDoc(ref)));
-    const docs: Doc<T>[] = docsSnap.reduce(
-      (acc, docSnap) => {
-        if (!docSnap.exists()) return [];
+    const docs: Doc<T>[] = docsSnap.reduce((acc, docSnap) => {
+      if (!docSnap.exists()) return acc;
 
-        const data = docSnap.data();
-        if (!data.isActive) return acc;
-        return [...acc, { id: docSnap.id, props: docSnap.data() as T }];
-      },
-      [] as { id: string; props: T }[]
-    );
+      const data = docSnap.data() as T;
+
+      // Controlla se 'isActive' esiste e, se sì, se è falso (se non esiste allora è 'vero')
+      if (data.isActive === false) return acc;
+
+      return [...acc, { id: docSnap.id, props: data }];
+    }, [] as Doc<T>[]);
+
     return docs;
   }
 

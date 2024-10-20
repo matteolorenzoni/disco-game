@@ -50,7 +50,7 @@ export class LocalStorageService {
    * @param key La chiave sotto cui memorizzare il valore.
    * @param value Il valore da memorizzare. Sarà convertito in stringa e crittografato.
    */
-  public setItem<T>(key: string, value: T): void {
+  private setItem<T>(key: string, value: T): void {
     const jsonValue = JSON.stringify(value);
     const encryptedValue = this.encrypt(jsonValue);
     localStorage.setItem(this.createKey(key), encryptedValue);
@@ -61,7 +61,7 @@ export class LocalStorageService {
    * @param key La chiave da cui recuperare il valore.
    * @returns Il valore memorizzato, o null se non esiste.
    */
-  public getItem<T>(key: string): T | null | undefined {
+  private getItem<T>(key: string): T | null | undefined {
     try {
       const encryptedValue = localStorage.getItem(this.createKey(key));
       if (encryptedValue) {
@@ -79,7 +79,7 @@ export class LocalStorageService {
    * Rimuove un valore dal Local Storage.
    * @param key La chiave del valore da rimuovere.
    */
-  public removeItem(key: string): void {
+  private removeItem(key: string): void {
     localStorage.removeItem(this.createKey(key));
   }
 
@@ -88,14 +88,14 @@ export class LocalStorageService {
    * @param key La chiave da controllare.
    * @returns true se il valore esiste, altrimenti false.
    */
-  public hasItem(key: string): boolean {
+  private hasItem(key: string): boolean {
     return localStorage.getItem(this.createKey(key)) !== null;
   }
 
   /**
    * Rimuove solo gli elementi con il prefisso specificato.
    */
-  public clear(): void {
+  private clear(): void {
     const keysToRemove: string[] = [];
 
     // Scorri tutte le chiavi nel Local Storage
