@@ -3,30 +3,23 @@
 @import 'tailwindcss/utilities';
 
 @font-face {
-  font-family: 'Roboto';
-  src: url('/fonts/Roboto/Roboto-Regular.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
+  font-family: 'Inter';
+  src: url('/fonts/Inter/Inter-VariableFont_opsz\,wght.ttf') format('truetype');
+  font-weight: 100 900; /* Range di pesi */
+  font-style: normal; /* Stile normale */
 }
 
 @font-face {
-  font-family: 'Roboto';
-  src: url('/fonts/Roboto/Roboto-Bold.ttf') format('truetype');
-  font-weight: bold;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Roboto';
-  src: url('/fonts/Roboto/Roboto-Italic.ttf') format('truetype');
-  font-weight: normal;
-  font-style: italic;
+  font-family: 'Inter';
+  src: url('/fonts/Inter/Inter-Italic-VariableFont_opsz\,wght.ttf') format('truetype');
+  font-weight: 100 900; /* Range di pesi */
+  font-style: italic; /* Stile corsivo */
 }
 
 html,
 body {
   min-height: 100vh;
-  font-family: 'Roboto';
+  font-family: 'Inter', sans-serif;
   color-scheme: dark;
 }
 
