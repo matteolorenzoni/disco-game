@@ -51,12 +51,12 @@ export class TeamService {
     return await this.httpService.execute(async () => {
       /* Check nome univoco */
       const teams = await this.getTeamsByName(teamForm.name);
-      const inEventTeams = await this.documentService.getDocumentsByIds<EventTeamUser>(
+      const eventTeamUsers = await this.documentService.getDocumentsByIds<EventTeamUser>(
         COL_EVENT_TEAM_USERS,
         teams.map((x) => x.id),
         eventTeamUserConverter
       );
-      if (inEventTeams.length > 0) throw new Error('teamNameNotAvailable', { cause: 'teamNameNotAvailable' });
+      if (eventTeamUsers.length > 0) throw new Error('teamNameNotAvailable', { cause: 'teamNameNotAvailable' });
 
       /* Check codice univoco */
       const code = await generateUniqueCode(6, 100, this.getTeamByCode.bind(this));

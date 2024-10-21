@@ -5,24 +5,29 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { BarcodeFormat } from '@zxing/library';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faArrowsRotate, faCalendar } from '@fortawesome/free-solid-svg-icons';
+import { faArrowsRotate, faCalendar, faTrash, faUser } from '@fortawesome/free-solid-svg-icons';
 import { TitleComponent } from '../../../components/title/title.component';
 import { FvFieldIconComponent } from '../../../components/fv-field-icon.component';
 import { FvButtonComponent } from '../../../components/fv-button.component';
+import { FvFieldComponent } from '../../../components/fv-field.component';
 import { EventService } from '../../../service/event.service';
 import { LogService } from '../../../service/log.service';
 import { FirebaseService } from '../../../service/firebase.service';
 import { LocalStorageService } from '../../../service/local-storage.service';
 import { EventTeamUserService } from '../../../service/event-team-user.service';
+import { TeamService } from '../../../service/team.service';
+import { ChallengeService } from '../../../service/challenge.service';
+import { EventChallengeService } from '../../../service/event-challenge.service';
+import { UserService } from '../../../service/user.service';
 import { Event } from '../../../model/event.model';
 import { Doc } from '../../../model/firebase';
-import { isEqualQrcode, isQrcode } from '../../../util/type.util';
-import { TeamService } from '../../../service/team.service';
 import { Qrcode } from '../../../model/event-challenge.model';
+import { Challenge } from '../../../model/challenge.model';
+import { isEqualQrcode, isQrcode } from '../../../util/type.util';
 
 type ScanError = {
   message: string;
-  code?: number; // codice d'errore facoltativo
+  code?: number;
 };
 
 @Component({
@@ -33,6 +38,7 @@ type ScanError = {
     ReactiveFormsModule,
     TitleComponent,
     FvFieldIconComponent,
+    FvFieldComponent,
     FvButtonComponent,
     FaIconComponent,
     ZXingScannerModule
@@ -44,14 +50,18 @@ type ScanError = {
 export class DashboardComponent implements OnInit {
   /* Services */
   readonly firebaseService = inject(FirebaseService);
+  readonly userService = inject(UserService);
   readonly eventService = inject(EventService);
-  readonly eventTeamUserService = inject(EventTeamUserService);
   readonly teamService = inject(TeamService);
+  readonly challengeService = inject(ChallengeService);
+  readonly eventTeamUserService = inject(EventTeamUserService);
+  readonly eventChallengeService = inject(EventChallengeService);
   readonly lsService = inject(LocalStorageService);
   readonly logService = inject(LogService);
 
   /* Variables */
   event = signal<Doc<Event> | undefined>(undefined);
+  challenges = signal<Doc<Challenge>[]>(this.lsService.getScannerChallenges());
   lasQrcode = signal<Qrcode | undefined>(undefined);
 
   /* Variables camera*/
@@ -64,11 +74,20 @@ export class DashboardComponent implements OnInit {
 
   /* Icons */
   ICON_EVENT = faCalendar;
-  ICON_CHANGE = faArrowsRotate;
+  ICON_TRASH = faTrash;
+  ICON_USER = faUser;
+  ICON_REFRESH = faArrowsRotate;
 
   /* Form */
   eventForm = new FormGroup({
-    code: new FormControl('', { nonNullable: true, validators: [Validators.required] })
+    code: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] })
+  });
+  manualScanForm = new FormGroup({
+    challengeId: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
+    userCode: new FormControl<string>('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.minLength(6), Validators.maxLength(6)]
+    })
   });
 
   /* --------------------- Lifecycle hooks --------------------- */
@@ -96,7 +115,7 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  /* --------------------- Method event --------------------- */
+  /* --------------------- Method http --------------------- */
   protected async onGetEvent(): Promise<void> {
     if (this.eventForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
 
@@ -113,7 +132,60 @@ export class DashboardComponent implements OnInit {
     this.lsService.setScannerEvent(event);
   }
 
-  protected onEventRemove(): void {
+  protected async onGetChallenges(): Promise<void> {
+    const eventChallenges = await this.eventChallengeService.getEventChallengesByProp([
+      { key: 'eventId', value: this.event()!.id }
+    ]);
+    const challenges = await this.challengeService.getChallengesByIds(eventChallenges.map((x) => x.props.challengeId));
+    this.challenges.set(challenges);
+    this.lsService.setScannerChallenges(challenges);
+    this.logService.addLogConfirm('Sfide aggiornate');
+  }
+
+  protected async onManualScan() {
+    const { challengeId, userCode } = this.manualScanForm.getRawValue();
+
+    /* Ottengo l'user */
+    const user = await this.userService.getUserByCode(userCode);
+    if (!user) {
+      this.logService.addLogError(this.firebaseService.userFirebase()?.uid, 'Utente non trovato');
+      return;
+    }
+
+    /* Ottengo la partecipazione */
+    const eventTeamUsers = await this.eventTeamUserService.getEventTeamUsersByProp([
+      { key: 'eventId', value: this.event()!.id },
+      { key: 'userId', value: user.id }
+    ]);
+    if (eventTeamUsers.length !== 1) {
+      const error = "Il qrcode non può essere inserito manualmente, riprovare con la camera o contattare l'assistenza";
+      this.logService.addLogError(this.firebaseService.userFirebase()?.uid, error);
+      return;
+    }
+
+    /* Eseguo scan */
+    const qrcode: Qrcode = {
+      eventId: eventTeamUsers[0].props.eventId,
+      teamId: eventTeamUsers[0].props.teamId,
+      userId: eventTeamUsers[0].props.userId,
+      challengeId,
+      points: this.challenges().find((x) => x.id === challengeId)!.props.points
+    };
+    await this.scan(qrcode);
+  }
+
+  protected async scan(qrcode: Qrcode): Promise<void> {
+    /* Memorizzo il qrcode per impedire piu scan con lo stesso valore */
+    this.lasQrcode.set(qrcode);
+
+    /* Aggiorno eventTeamUser e squadra associati */
+    await this.eventTeamUserService.updateChallengePoints(qrcode);
+    await this.teamService.updateTeamPoints(qrcode.teamId, qrcode.points);
+    this.logService.addLogConfirm('Sfida confermata');
+  }
+
+  /* --------------------- Method event --------------------- */
+  protected onRemoveEvent(): void {
     this.event.set(undefined);
     this.lsService.removeScannerEvent();
   }
@@ -163,13 +235,8 @@ export class DashboardComponent implements OnInit {
     /* Verifico che non sia lo stesso qrcode precedente */
     if (isEqualQrcode(qrcode, this.lasQrcode())) return;
 
-    /* Memorizzo il qrcode per impedire piu scan con lo stesso valore */
-    this.lasQrcode.set(qrcode);
-
-    /* Aggiorno eventTeamUser e squadra associati */
-    await this.eventTeamUserService.updateChallengePoints(qrcode);
-    await this.teamService.updateTeamPoints(qrcode.teamId, qrcode.points);
-    this.logService.addLogConfirm('Sfida confermata');
+    /* Eseguo scan */
+    await this.scan(qrcode);
   }
 
   protected handleScanError(error: ScanError): void {
@@ -187,5 +254,28 @@ export class DashboardComponent implements OnInit {
     /* Se esiste, imposta quella come camera selezionata, altrimenti seleziona la prima camera disponibile */
     if (newCamera) this.cameraSelected.set(newCamera);
     else if (cameras.length > 0) this.cameraSelected.set(cameras[0]);
+  }
+
+  async confirm() {
+    const xxx: Qrcode = {
+      eventId: '2Koxu7MeHWC6Inc4E1si',
+      teamId: 'buzgXhyJhg15bDwnKlw7',
+      userId: 'QICMRUe2GnddM9spaeoWh1BpyKx1',
+      challengeId: 'w3ySm68plnGMYzL4aRgC',
+      points: 40
+    };
+
+    /* Verifico che sia il qrcode giusto */
+    const qrcode = JSON.parse(JSON.stringify(xxx));
+    if (!isQrcode(qrcode)) return;
+
+    /* Verifico che non sia lo stesso qrcode precedente */
+    if (isEqualQrcode(qrcode, this.lasQrcode())) return;
+
+    this.lasQrcode.set(qrcode);
+
+    // await this.eventTeamUserService.updateChallengePoints(qrcode);
+    // await this.teamService.updateTeamPoints(qrcode.teamId, qrcode.points);
+    this.logService.addLogConfirm('Sfida confermata');
   }
 }

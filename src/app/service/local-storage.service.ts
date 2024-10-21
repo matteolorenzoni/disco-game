@@ -4,12 +4,14 @@ import { environment } from '../../environments/environment';
 import { Doc } from '../model/firebase';
 import { User } from '../model/user.model';
 import { Event } from '../model/event.model';
+import { Challenge } from '../model/challenge.model';
 
 const PREFIX = 'FV';
 
 const KEY_USER = 'USER';
 const KEY_SCANNER_EVENT = 'SCANNER_EVENT';
 const KEY_SCANNER_DEVICE_ID = 'SCANNER_DEVICE_ID';
+const KEY_SCANNER_CHALLENGES = 'SCANNER_CHALLENGES';
 
 @Injectable({
   providedIn: 'root'
@@ -145,5 +147,17 @@ export class LocalStorageService {
 
   public removeScannerDeviceId(): void {
     return this.removeItem(KEY_SCANNER_DEVICE_ID);
+  }
+
+  public getScannerChallenges(): Doc<Challenge>[] {
+    return this.getItem<Doc<Challenge>[]>(KEY_SCANNER_CHALLENGES) ?? [];
+  }
+
+  public setScannerChallenges(challenges: Doc<Challenge>[]): void {
+    return this.setItem<Doc<Challenge>[]>(KEY_SCANNER_CHALLENGES, challenges);
+  }
+
+  public removeChallenges(): void {
+    return this.removeItem(KEY_SCANNER_CHALLENGES);
   }
 }

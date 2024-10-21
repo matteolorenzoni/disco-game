@@ -39,6 +39,12 @@ export class ChallengeService {
     });
   }
 
+  public async getChallengesByIds(userIds: string[]): Promise<Doc<Challenge>[]> {
+    return await this.httpService.execute(async () => {
+      return this.documentService.getDocumentsByIds<Challenge>(COL_CHALLENGES, userIds, challengeConverter);
+    });
+  }
+
   public async getChallengesByEventChallengeRefs(
     eventChallengeRefs: DocumentReference<EventChallenge>[]
   ): Promise<Doc<Challenge>[]> {

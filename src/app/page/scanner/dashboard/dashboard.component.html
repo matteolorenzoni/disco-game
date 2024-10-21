@@ -1,16 +1,16 @@
-<app-title [pages]="[{ path: '', label: 'Scanner 10' }]"> </app-title>
+<app-title [pages]="[{ path: '', label: 'Scanner' }]"> </app-title>
 
 @if (errorMessage() === null) {
   @if (event(); as event) {
     <div class="mb-12 flex items-center justify-center gap-4">
       <p class="text-center text-3xl font-bold text-on-background">{{ event.props.name }}</p>
-      <button class="h-8 w-8 rounded-full bg-surface p-1 hover:bg-neutral-700" (click)="onEventRemove()">
-        <fa-icon [icon]="ICON_CHANGE"></fa-icon>
+      <button class="h-8 w-8 rounded-full bg-surface p-1 hover:bg-neutral-700" (click)="onRemoveEvent()">
+        <fa-icon [icon]="ICON_TRASH"></fa-icon>
       </button>
     </div>
 
     <div class="mb-4 flex w-full gap-4 overflow-hidden">
-      <select class="shrink-1 basis-3/4 overflow-hidden focus:outline-none" (change)="onCameraChange($event.target)">
+      <select class="flex-1 overflow-hidden rounded outline-none" (change)="onCameraChange($event.target)">
         @for (camera of cameras(); track camera.deviceId) {
           <option [value]="camera.deviceId">
             {{ camera.label || 'Camera ' + (cameras().indexOf(camera) + 1) }}
@@ -18,13 +18,13 @@
         }
       </select>
       <fv-button
-        class="shrink-0 basis-1/4"
+        class="basis-1/4"
         type="button"
         [label]="cameraSelected() ? 'Chiudi' : 'Apri'"
         [onClick]="onToggleCamera.bind(this)"></fv-button>
     </div>
 
-    <div class="aspect-square w-full max-w-[450px] overflow-hidden rounded-lg border-2 border-card-border">
+    <div class="mb-8 aspect-square w-full max-w-[450px] overflow-hidden rounded-lg border-2 border-card-border">
       <zxing-scanner
         [enable]="!!cameraSelected()"
         [previewFitMode]="'contain'"
@@ -34,6 +34,33 @@
         (scanSuccess)="handleScanSuccess($event)"
         (scanError)="handleScanError($event)"></zxing-scanner>
     </div>
+
+    <form
+      class="flex flex-col gap-2 rounded-lg bg-surface p-4 text-on-background shadow"
+      [formGroup]="manualScanForm"
+      (ngSubmit)="onManualScan()">
+      <h1 class="mb-2">Scan manuale</h1>
+      <div class="flex h-8 gap-2">
+        <select class="h-full w-full flex-1 rounded outline-none" formControlName="challengeId">
+          @for (challenge of challenges(); track challenge.id) {
+            <option [value]="challenge.id">{{ challenge.props.name }}</option>
+          }
+        </select>
+        <button type="button" class="h-full basis-8 rounded bg-primary-500 text-on-surface" (click)="onGetChallenges()">
+          <fa-icon class="text-xs" [icon]="ICON_REFRESH"></fa-icon>
+        </button>
+        <fv-field-icon
+          class="ml-2 basis-24"
+          [name]="'userCode'"
+          [label]="'Codice'"
+          [type]="'text'"
+          [icon]="ICON_USER"
+          [min]="6"
+          [max]="6">
+        </fv-field-icon>
+      </div>
+      <fv-button type="submit" [label]="'SCAN'" [disabled]="manualScanForm.invalid"></fv-button>
+    </form>
   } @else {
     <div class="flex flex-col gap-4 rounded-md bg-neutral-800 p-4">
       <h1>Inserisci codice evento</h1>
