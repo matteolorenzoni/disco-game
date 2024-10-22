@@ -30,7 +30,7 @@ const inputModeMap: { [key in InputType]: string } = {
         [max]="max()"
         [step]="step()"
         autocomplete="off"
-        class="peer h-8 w-full rounded border border-field-border bg-field-background px-3 py-2 pl-8 text-xs text-field-color shadow focus:border-2 focus:outline-none disabled:bg-neutral-700 disabled:text-neutral-600"
+        class="peer h-8 w-full rounded border border-field-border bg-field-background/75 px-3 py-2 pl-8 text-xs text-field-color shadow backdrop-blur focus:border-2 focus:outline-none disabled:bg-neutral-700 disabled:text-neutral-600"
         [ngClass]="[
           'focus:border-' + twColor() + '-500',
           'focus:text-' + twColor() + '-200',

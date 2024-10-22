@@ -1,62 +1,88 @@
-<section class="relative flex min-h-screen flex-col overflow-hidden bg-neutral-800 p-4 text-on-surface">
-  <div class="mb-20 mt-auto">
-    <div class="flex flex-col gap-4">
-      <fv-button label="Entra" [onClick]="setPage.bind(this, 'login')"></fv-button>
-      <fv-button label="Registrati" twColor="secondary" [onClick]="onGoToRegistry.bind(this)"></fv-button>
-    </div>
+<section class="relative flex h-screen flex-col overflow-hidden p-4 text-on-surface">
+  <div class="flex flex-1 basis-1/3 items-center justify-center">
+    <img class="h-40 w-40" src="icons/icon-384x384.png" alt="Icona" />
   </div>
 
-  <div
-    id="container_form"
-    [@loginFormAnimation]="page() === 'login' ? 'center' : 'bottom'"
-    class="absolute -bottom-full left-0 flex w-full flex-col justify-center gap-8 rounded-t-3xl bg-background p-4 pb-20 text-on-background">
-    <div class="flex flex-col gap-1 text-center text-on-background">
-      <h3 class="text-3xl font-semibold text-white">Ben tornato!</h3>
-      <p class="text-sm">Accedi al tuo account</p>
+  <div class="-m-4 flex basis-2/3 flex-col">
+    <div class="relative inset-y-px">
+      <svg viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto" class="h-full w-full">
+        <defs>
+          <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
+        </defs>
+        <g class="parallax">
+          <use xlink:href="#gentle-wave" x="48" y="0" fill="hsl(280.56deg 32.13% 43.33% / 70%)" />
+          <use xlink:href="#gentle-wave" x="48" y="3" fill="hsl(280.56deg 32.13% 43.33% / 50%)" />
+          <use xlink:href="#gentle-wave" x="48" y="5" fill="hsl(280.56deg 32.13% 43.33% / 30%)" />
+          <use xlink:href="#gentle-wave" x="48" y="7" fill="hsl(280.56deg 32.13% 43.33% / 100%)" />
+        </g>
+      </svg>
     </div>
-
-    <form [formGroup]="loginForm" (ngSubmit)="login()" class="flex w-full max-w-2xl flex-col justify-between gap-2">
-      <fv-field-icon name="email" label="Email" [icon]="faUser" type="email"></fv-field-icon>
-
-      <fv-field-icon name="password" label="Password" [icon]="faLock" type="password"></fv-field-icon>
-
-      <div class="flex justify-between px-1">
-        <div class="inline-flex items-center">
-          <label class="relative flex cursor-pointer items-center" for="check">
-            <input
-              id="check"
-              type="checkbox"
-              [checked]="rememberMe()"
-              (change)="onRememberMeChange($event.target)"
-              class="peer h-5 w-5 cursor-pointer appearance-none rounded shadow transition-all checked:bg-primary-500" />
-            <span
-              class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform text-white opacity-0 peer-checked:opacity-100">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-3.5 w-3.5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                stroke="currentColor"
-                stroke-width="1">
-                <path
-                  fill-rule="evenodd"
-                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                  clip-rule="evenodd"></path>
-              </svg>
-            </span>
-          </label>
-          <label class="ml-2 cursor-pointer text-sm" for="check-2"> Ricordami </label>
-        </div>
-
-        <a href="./restore-password" class="text-sm font-bold hover:underline">Password dimentica?</a>
+    <div class="flex flex-1 flex-col justify-evenly bg-primary-500 p-8">
+      <p class="text-center text-xs italic">Frase ad effetto, magari il motto dell'applicazione</p>
+      <div class="flex flex-col gap-4">
+        <fv-button
+          label="Entra"
+          class="border border-primary-600 shadow-lg"
+          [onClick]="setPage.bind(this, 'login')"></fv-button>
+        <fv-button
+          label="Registrati"
+          class="border border-primary-600 shadow-lg"
+          [onClick]="onGoToRegistry.bind(this)"></fv-button>
       </div>
 
-      <fv-button type="submit" label="Login" [disabled]="loginForm.invalid"></fv-button>
-    </form>
+      <div
+        id="container_form"
+        [@loginFormAnimation]="page() === 'login' ? 'center' : 'bottom'"
+        class="absolute -bottom-full left-0 flex w-full flex-col justify-center gap-8 bg-primary-500 px-4 pb-20 pt-12 text-on-background">
+        <!-- <div class="flex flex-col gap-1 text-center text-on-background">
+          <h3 class="text-3xl font-semibold text-white">Ben tornato!</h3>
+          <p class="text-sm">Accedi al tuo account</p>
+        </div> -->
 
-    <p class="text-center text-sm">
-      Non hai un account?
-      <a href="./sign-up" class="font-bold text-primary-500 hover:underline">Registrati</a>
-    </p>
+        <form [formGroup]="loginForm" (ngSubmit)="login()" class="flex w-full max-w-2xl flex-col justify-between gap-2">
+          <fv-field-icon name="email" label="Email" [icon]="faUser" type="email"></fv-field-icon>
+
+          <fv-field-icon name="password" label="Password" [icon]="faLock" type="password"></fv-field-icon>
+
+          <div class="flex justify-between px-1">
+            <div class="inline-flex items-center">
+              <label class="relative flex cursor-pointer items-center" for="check">
+                <input
+                  id="check"
+                  type="checkbox"
+                  [checked]="rememberMe()"
+                  (change)="onRememberMeChange($event.target)"
+                  class="peer h-5 w-5 cursor-pointer appearance-none rounded shadow transition-all checked:bg-primary-700" />
+                <span
+                  class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform text-white opacity-0 peer-checked:opacity-100">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-3.5 w-3.5"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    stroke="currentColor"
+                    stroke-width="1">
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clip-rule="evenodd"></path>
+                  </svg>
+                </span>
+              </label>
+              <label class="ml-2 cursor-pointer text-sm" for="check-2"> Ricordami </label>
+            </div>
+
+            <a href="./restore-password" class="text-sm font-bold hover:underline">Password dimentica?</a>
+          </div>
+
+          <fv-button type="submit" label="Login" [disabled]="loginForm.invalid"></fv-button>
+        </form>
+
+        <p class="text-center text-sm">
+          Non hai un account?
+          <a href="./sign-up" class="font-bold text-primary-700 hover:underline">Registrati</a>
+        </p>
+      </div>
+    </div>
   </div>
 </section>
