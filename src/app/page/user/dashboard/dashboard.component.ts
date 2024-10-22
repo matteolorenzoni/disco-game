@@ -1,3 +1,4 @@
+import { LogService } from './../../../service/log.service';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -18,7 +19,7 @@ import { FvButtonComponent } from '../../../components/fv-button.component';
 import { FvCountdownComponent } from '../../../components/fv-countdown.component';
 import { FvRatingComponent } from '../../../components/fv-rating.component';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faCalendar, faCrown, faLocationPin } from '@fortawesome/free-solid-svg-icons';
+import { faCalendar, faClipboard, faCrown, faLocationPin } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-dashboard',
@@ -37,6 +38,7 @@ export class DashboardComponent implements OnInit {
   readonly teamService = inject(TeamService);
   readonly eventChallengeService = inject(EventChallengeService);
   readonly challengeService = inject(ChallengeService);
+  readonly logService = inject(LogService);
 
   /* Variables */
   eventTeamUser = signal<Doc<EventTeamUser> | null | undefined>(undefined);
@@ -52,6 +54,7 @@ export class DashboardComponent implements OnInit {
   ICON_CALENDAR = faCalendar;
   ICON_PLACE = faLocationPin;
   ICON_CROWN = faCrown;
+  ICON_CLIPBOARD = faClipboard;
 
   /* -------------------------- Lifecycle hooks --------------------------  */
   async ngOnInit(): Promise<void> {
@@ -96,5 +99,14 @@ export class DashboardComponent implements OnInit {
 
     const { eventId, teamId } = eventTeamUser.props;
     await this.router.navigate([`user/challenges/${eventId}/${teamId}/${challengeId}`]);
+  }
+
+  protected onCopyCodeToClipboard(): void {
+    const team = this.team();
+    if (!team) throw new Error('retry', { cause: 'retry' });
+
+    if (!navigator) return;
+    navigator.clipboard.writeText(team.props.code);
+    this.logService.addLogConfirm('Codice copiato negli appunti');
   }
 }

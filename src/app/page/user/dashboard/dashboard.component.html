@@ -17,7 +17,7 @@
       @if (team(); as team) {
         <div class="flex flex-col gap-2">
           <img
-            class="aspect-video w-full rounded-lg text-white shadow"
+            class="aspect-video w-full rounded-md text-white shadow"
             [src]="event.props.imageUrl"
             alt="Immagine evento" />
           <p class="truncate text-xl font-bold">{{ event.props.name }}</p>
@@ -34,41 +34,48 @@
         </div>
 
         @if (event.props.startDate.getTime() > NOW.getTime()) {
-          <div class="mx-auto mt-8 w-fit rounded bg-surface p-2 shadow">
-            <fv-countdown class="pt-20 text-center" [date]="event.props.startDate"></fv-countdown>
+          <div class="mt-12 flex flex-col items-center gap-1 py-8">
+            <p class="text-xxs uppercase text-gray-400">Tempo mancante</p>
+            <fv-countdown class="text-5xl text-on-background" [date]="event.props.startDate"></fv-countdown>
           </div>
         }
 
-        <div class="mt-8 flex flex-col gap-1 rounded-lg border border-primary-400/50 bg-primary-400/25 p-2">
-          <p class="text-xxs uppercase">Squadra</p>
-          <div class="flex items-end overflow-hidden">
-            <p class="flex flex-1 gap-2 truncate text-xl leading-6">
+        <h2 class="mt-12 text-xs uppercase text-primary-400/75">Squadra</h2>
+        <div
+          class="mt-1 flex items-end gap-4 overflow-hidden rounded-md border border-primary-400/50 bg-primary-400/25 p-2 text-primary-100">
+          <div class="flex flex-1 flex-col gap-1">
+            <p class="flex gap-2 truncate text-2xl">
               @if (firebaseService.userFirebase()?.uid === team.props.leaderId) {
                 <fa-icon [icon]="ICON_CROWN"></fa-icon>
               }
               <span> {{ team.props.name }} </span>
             </p>
-            <fv-button label="Visualizza" twColor="primary" [onClick]="onGoToTeam.bind(this)"> </fv-button>
+            <div class="flex items-end gap-3 text-xs leading-4">
+              <p class="truncate uppercase">Codice: {{ team.props.code }}</p>
+              <button (click)="onCopyCodeToClipboard()">
+                <fa-icon [icon]="ICON_CLIPBOARD"></fa-icon>
+              </button>
+            </div>
           </div>
+          <fv-button label="Visualizza" twColor="primary" [onClick]="onGoToTeam.bind(this)"> </fv-button>
         </div>
 
-        <div class="mt-8 overflow-hidden rounded-lg bg-surface/75 p-2 text-on-surface shadow backdrop-blur">
-          <h2 class="p-2">Sfide</h2>
-          <ul class="flex flex-col divide-y divide-neutral-800">
-            @for (challenge of challenges(); track challenge.id) {
-              <li class="hover:rounded-xl hover:bg-neutral-950 active:rounded-xl active:bg-black">
-                <button class="flex w-full flex-col gap-1 p-2 py-4" (click)="onGoToChallenge(challenge.id)">
-                  <div class="flex w-full items-center gap-4">
-                    <img class="h-4 w-4" [src]="'images/challenge/' + challenge.props.type + '.png'" alt="" />
-                    <p class="truncate text-base text-on-surface">{{ challenge.props.name }}</p>
-                    <fv-rating [rating]="challenge.props.complexity"></fv-rating>
-                  </div>
-                  <p class="w-full truncate text-start text-xs text-gray-500">{{ challenge.props.description }}</p>
-                </button>
-              </li>
-            }
-          </ul>
-        </div>
+        <h2 class="mt-12 text-xs uppercase">Sfide</h2>
+        <ul
+          class="mt-1 flex flex-col divide-y divide-neutral-800 overflow-hidden rounded-md bg-surface/75 p-2 text-on-surface shadow backdrop-blur">
+          @for (challenge of challenges(); track challenge.id) {
+            <li class="hover:rounded-md hover:bg-neutral-950 active:rounded-md active:bg-black">
+              <button class="flex w-full flex-col gap-1 p-2 py-4" (click)="onGoToChallenge(challenge.id)">
+                <div class="flex w-full items-center gap-4">
+                  <img class="h-4 w-4" [src]="'images/challenge/' + challenge.props.type + '.png'" alt="" />
+                  <p class="truncate text-base text-on-surface">{{ challenge.props.name }}</p>
+                  <fv-rating [rating]="challenge.props.complexity"></fv-rating>
+                </div>
+                <p class="w-full truncate text-start text-xs text-gray-500">{{ challenge.props.description }}</p>
+              </button>
+            </li>
+          }
+        </ul>
       }
     }
   }
