@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { MenuItem } from '../model/type';
+import { MenuItem } from '../page/home/home.component';
 import { RouterLinkActive, RouterModule } from '@angular/router';
 
 @Component({

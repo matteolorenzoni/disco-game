@@ -1,8 +1,3 @@
-import { IconDefinition } from '@fortawesome/free-solid-svg-icons';
-
-export type MenuItem = {
-  id: number;
-  label: string;
-  icon: IconDefinition;
-  path: string;
-};
+export type KeysOfType<T, U> = {
+  [K in keyof T]: T[K] extends U ? K : never;
+}[keyof T];

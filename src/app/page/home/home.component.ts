@@ -2,10 +2,16 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { FvBottomNavigationComponent } from '../../components/fv-bottom-navigation.component';
-import { MenuItem } from '../../model/type';
-import { faCalendarDays, faGamepad, faGears, faHome } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarDays, faGamepad, faGears, faHome, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 import { UserRole } from '../../model/user.model';
 import { LocalStorageService } from '../../service/local-storage.service';
+
+export type MenuItem = {
+  id: number;
+  label: string;
+  icon: IconDefinition;
+  path: string;
+};
 
 @Component({
   selector: 'app-home',
