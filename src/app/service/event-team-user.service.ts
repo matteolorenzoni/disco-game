@@ -35,7 +35,8 @@ export class EventTeamUserService {
   public async addEventTeamUser(
     eventId: string,
     teamId: string,
-    userId: string
+    userId: string,
+    eventStartDate: Date
   ): Promise<DocumentReference<DocumentData, DocumentData>> {
     return await this.httpService.execute(async () => {
       return await this.documentService.addDocument<EventTeamUser>(COL_EVENT_TEAM_USERS, {
@@ -43,6 +44,7 @@ export class EventTeamUserService {
         teamId,
         userId,
         challenges: [],
+        eventStartDate,
         updatedAt: new Date()
       });
     });

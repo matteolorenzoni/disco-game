@@ -136,7 +136,12 @@ export class EventListComponent implements OnInit {
     const team = await this.teamService.addTeam(userId, event.id, form);
 
     /* Aggiungo EventTeamUser al DB */
-    const eventTeamUserRef = await this.eventTeamUserService.addEventTeamUser(event.id, team.id, userId);
+    const eventTeamUserRef = await this.eventTeamUserService.addEventTeamUser(
+      event.id,
+      team.id,
+      userId,
+      event.props.startDate
+    );
 
     /* Aggiorno User (prop: eventTeamUserRefs) */
     await this.userService.updateEventTeamUser(userId, eventTeamUserRef.id);
@@ -168,7 +173,12 @@ export class EventListComponent implements OnInit {
     }
 
     /* Aggiungo EventTeamUser al DB */
-    const eventTeamUserRef = await this.eventTeamUserService.addEventTeamUser(event.id, team.id, userId);
+    const eventTeamUserRef = await this.eventTeamUserService.addEventTeamUser(
+      event.id,
+      team.id,
+      userId,
+      event.props.startDate
+    );
 
     /* Aggiorno User (prop: eventTeamUserRefs) */
     await this.userService.updateEventTeamUser(userId, eventTeamUserRef.id);

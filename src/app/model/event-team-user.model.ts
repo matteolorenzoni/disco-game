@@ -3,6 +3,7 @@ export type EventTeamUser = {
   teamId: string; // ID squadra
   userId: string; // ID utente
   challenges: EventTeamUserChallenge[];
+  eventStartDate: Date;
   updatedAt: Date; // Data e ora dell'ultimo aggiornamento della sfida
 };
 
