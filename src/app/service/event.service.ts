@@ -8,6 +8,7 @@ import { LogService } from './log.service';
 import { Doc } from '../model/firebase';
 import { HttpService } from './http.service';
 import { generateUniqueCode } from '../util/utils';
+import { orderBy, where } from 'firebase/firestore';
 
 const COL_EVENTS = environment.collection.EVENTS;
 const COL_EVENT_TEAM_USERS = environment.collection.EVENT_TEAM_USERS;
@@ -23,9 +24,16 @@ export class EventService {
   readonly logService = inject(LogService);
 
   /* --------------------------- Read ---------------------------*/
+  //! [INDEX]
   public async getEvents(): Promise<Doc<Event>[]> {
     return await this.httpService.execute(async () => {
-      return this.documentService.getDocumentsByProps<Event>(COL_EVENTS, { isActive: true }, eventConverter);
+      const valueConstraints = [where('isActive', '==', true)];
+      const orderConstraints = [orderBy('startDate', 'asc')];
+      return this.documentService.getDocumentsWithConstraints<Event>(
+        COL_EVENTS,
+        [...valueConstraints, ...orderConstraints],
+        eventConverter
+      );
     });
   }
 
@@ -37,12 +45,29 @@ export class EventService {
 
   public async getEventByCode(code: string): Promise<Doc<Event> | null> {
     return await this.httpService.execute(async () => {
-      const events = await this.documentService.getDocumentsByProps<Event>(
+      const valueConstraints = [where('code', '==', code), where('isActive', '==', true)];
+      const events = await this.documentService.getDocumentsWithConstraints<Event>(
         COL_EVENTS,
-        { code, isActive: true },
+        valueConstraints,
         eventConverter
       );
       return events.length ? events[0] : null;
+    });
+  }
+
+  //! [INDEX]
+  public async getEventsFromDate(): Promise<Doc<Event>[]> {
+    return await this.httpService.execute(async () => {
+      const date = new Date();
+      date.setHours(0, 0, 0, 0);
+      date.setDate(date.getDate() - 1);
+      const valueConstraints = [where('startDate', '>=', date), where('isActive', '==', true)];
+      const orderConstraints = [orderBy('startDate', 'asc')];
+      return this.documentService.getDocumentsWithConstraints<Event>(
+        COL_EVENTS,
+        [...valueConstraints, ...orderConstraints],
+        eventConverter
+      );
     });
   }
 

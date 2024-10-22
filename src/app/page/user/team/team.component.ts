@@ -78,7 +78,10 @@ export class TeamComponent implements OnInit {
           /* Ottengo tutti gli utenti della squadra di questo evento */
           const [team, eventTeamUsers] = await Promise.all([
             this.teamService.getTeamById(teamId),
-            this.eventTeamUserService.getEventTeamUsersByProp([{ key: 'teamId', value: teamId }])
+            this.eventTeamUserService.getEventTeamUsersByProp([
+              { key: 'eventId', value: eventId },
+              { key: 'teamId', value: teamId }
+            ])
           ]);
           this.team.set(team);
 

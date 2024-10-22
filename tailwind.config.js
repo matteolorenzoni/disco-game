@@ -14,7 +14,7 @@ module.exports = {
       variants: ['hover', 'active', 'focus']
     },
     {
-      pattern: /text-(primary|secondary|rose)-(200|500|600|700)/,
+      pattern: /text-(primary|secondary|amber|rose)-(200|500|600|700)/,
       variants: ['hover', 'active', 'peer-focus', 'focus']
     },
     {

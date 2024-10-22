@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { DocumentData, DocumentReference } from 'firebase/firestore';
+import { DocumentData, DocumentReference, limit, orderBy, where } from 'firebase/firestore';
 import { environment } from '../../environments/environment';
 import { Doc } from '../model/firebase';
 import { EventTeamUser } from '../model/event-team-user.model';
@@ -20,13 +20,17 @@ export class EventTeamUserService {
 
   /* --------------------------- Read ---------------------------*/
   //! [INDEX]
-  public async getMostRecentEventTeamUserByUserId(userId: string): Promise<Doc<EventTeamUser> | null> {
+  public async getFirstEventTeamUserByUserIdFromDate(userId: string): Promise<Doc<EventTeamUser> | null> {
     const eventTeamUsers = await this.httpService.execute(async () => {
-      return await this.documentService.getDocumentsByPropsAndMostRecent<EventTeamUser>(
+      const date = new Date();
+      date.setHours(0, 0, 0, 0);
+      date.setDate(date.getDate() - 1);
+      const valueConstraints = [where('userId', '==', userId), where('eventStartDate', '>=', date)];
+      const orderConstraints = [orderBy('eventStartDate', 'asc')];
+      const limitConstraints = [limit(1)];
+      return await this.documentService.getDocumentsWithConstraints<EventTeamUser>(
         COL_EVENT_TEAM_USERS,
-        { userId },
-        'eventStartDate',
-        1,
+        [...valueConstraints, ...orderConstraints, ...limitConstraints],
         eventTeamUserConverter
       );
     });
@@ -37,9 +41,10 @@ export class EventTeamUserService {
     props: { key: 'userId' | 'eventId' | 'teamId'; value: string }[]
   ): Promise<Doc<EventTeamUser>[]> {
     return await this.httpService.execute(async () => {
-      return await this.documentService.getDocumentsByProps<EventTeamUser>(
+      const valueConstraints = [...props.map((x) => where(x.key, '==', x.value))];
+      return await this.documentService.getDocumentsWithConstraints<EventTeamUser>(
         COL_EVENT_TEAM_USERS,
-        props.reduce((acc, { key, value }) => ({ ...acc, [key]: value }), {}),
+        valueConstraints,
         eventTeamUserConverter
       );
     });

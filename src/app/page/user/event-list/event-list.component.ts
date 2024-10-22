@@ -5,7 +5,7 @@ import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angula
 import { Router } from '@angular/router';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faCalendar, faCrown, faPeopleGroup } from '@fortawesome/free-solid-svg-icons';
+import { faCrown, faPeopleGroup } from '@fortawesome/free-solid-svg-icons';
 import { Doc } from '../../../model/firebase';
 import { Event } from '../../../model/event.model';
 import { FindTeamModel, FromMap, NewTeamModel } from '../../../model/form.model';
@@ -22,9 +22,7 @@ import { TitleComponent } from '../../../components/title/title.component';
 import { FvButtonOutlinedComponent } from '../../../components/fv-button-outlined.component';
 import { ChallengeService } from '../../../service/challenge.service';
 import { FvRatingComponent } from '../../../components/fv-rating.component';
-import { Challenge } from '../../../model/challenge.model';
-import { Team } from '../../../model/team.model';
-import { register } from 'swiper/element/bundle';
+import { EventTeamUser } from '../../../model/event-team-user.model';
 
 @Component({
   selector: 'app-event-list',
@@ -68,13 +66,8 @@ export class EventListComponent implements OnInit {
   readonly logService = inject(LogService);
 
   /* Variables */
-  events = signal<Doc<Event>[]>([]);
-  eventsInfo = signal<Map<string, { team: Doc<Team> | undefined; challenges: Doc<Challenge>[] }>>(new Map());
-  current = signal<{
-    event: Doc<Event> | undefined;
-    team: Doc<Team> | undefined;
-    challenges: Doc<Challenge>[];
-  }>({ event: undefined, team: undefined, challenges: [] });
+  mergedEvents = signal<{ event: Doc<Event>; eventTeamUser: Doc<EventTeamUser> | undefined }[]>([]);
+  eventIdSelected = signal<string | undefined>(undefined);
 
   /* Variables modal */
   newTeamModalIsOpen = signal<boolean>(false);
@@ -95,76 +88,58 @@ export class EventListComponent implements OnInit {
   });
 
   /* Icons */
-  ICON_CALENDAR = faCalendar;
   ICON_CROWN = faCrown;
   ICON_TEAM = faPeopleGroup;
 
-  /* -------------------- Constructor  -------------------- */
-  constructor() {
-    register();
-  }
-
   /* -------------------- Lifecycle hooks -------------------- */
   async ngOnInit(): Promise<void> {
-    /* Ottengo tutti gli eventi attivi */
-    const events = await this.eventService.getEvents();
-    this.events.set(events);
+    const userId = this.firebaseService.userFirebase()?.uid;
+    if (!userId) throw new Error('retry', { cause: 'retry' });
 
-    /* Aggiorna squadra e sfide associate del primo evento */
-    const event = events[0] as Doc<Event> | undefined;
-    if (event) {
-      /* Ottengo i dati associati all'evento (siccome prima volta) */
-      await this.getEventStorage(events[0]);
+    /* Ottengo gli eventi da ieri/oggi in poi */
+    /* Ottengo le varie partecipazioni dell'utente */
+    const [events, eventTeamUsers] = await Promise.all([
+      this.eventService.getEventsFromDate(),
+      this.eventTeamUserService.getEventTeamUsersByProp([{ key: 'userId', value: userId }])
+    ]);
 
-      /* Aggiorno le informazioni correnti */
-      this.current.set({
-        event,
-        team: this.eventsInfo().get(event.id)?.team,
-        challenges: this.eventsInfo().get(event.id)?.challenges ?? []
-      });
-    }
+    /* Metto insieme i dati */
+    const mergedEvents = events.map((event) => {
+      const eventTeamUser = eventTeamUsers.find((x) => x.props.eventId === event.id);
+      return { event, eventTeamUser };
+    });
+    this.mergedEvents.set(mergedEvents);
   }
 
   /* -------------------- Methods: firebase -------------------- */
   protected async addTeam(): Promise<void> {
     const userId = this.firebaseService.userFirebase()?.uid;
-    const event = this.current().event;
-    if (!userId || !event) throw new Error('retry', { cause: 'retry' });
+    const eventId = this.eventIdSelected();
+    if (!userId || !eventId) throw new Error('retry', { cause: 'retry' });
 
     /* Aggiungo Team al DB */
     const form = this.newTeamForm.getRawValue();
-    const team = await this.teamService.addTeam(userId, event.id, form);
+    const team = await this.teamService.addTeam(userId, eventId, form);
 
-    /* Aggiungo EventTeamUser al DB */
-    const eventTeamUserRef = await this.eventTeamUserService.addEventTeamUser(
-      event.id,
-      team.id,
-      userId,
-      event.props.startDate
-    );
+    /* Ottengo la data di inizio dell'evento */
+    const events = this.mergedEvents().map((x) => x.event);
+    const currentEvent = events.find((x) => x.id === eventId);
+    if (!currentEvent) throw new Error('retry', { cause: 'retry' });
 
-    /* Aggiorno User (prop: eventTeamUserRefs) */
-    await this.userService.updateEventTeamUser(userId, eventTeamUserRef.id);
-
-    /* Aggiorno Event (prop: eventTeamUserRefs) */
-    await this.eventService.updateEventTeamUser(event.id, eventTeamUserRef.id);
-
-    /* Aggiorno Team (prop: eventTeamUserRefs) */
-    await this.teamService.updateEventTeamUser(team.id, eventTeamUserRef.id);
+    /* Aggiungo partecipazione */
+    await this.addParticipation(eventId, team.id, userId);
 
     /* Log */
     navigator.clipboard.writeText(team.props.code);
     this.logService.addLogConfirm(`Squadra creata! Codice ${team.props.code} negli appunti`);
-
-    /* Chiude modal e reset form */
-    this.resetModalsAndForms();
   }
 
   protected async findTeam(): Promise<void> {
     const userId = this.firebaseService.userFirebase()?.uid;
-    const event = this.current().event;
-    if (!userId || !event) throw new Error('retry', { cause: 'retry' });
+    const eventId = this.eventIdSelected();
+    if (!userId || !eventId) throw new Error('retry', { cause: 'retry' });
 
+    /* Controllo se esiste una squadra con quel codice */
     const form = this.findTeamForm.getRawValue();
     const team = await this.teamService.getTeamByCode(form.code);
     if (!team) {
@@ -172,53 +147,21 @@ export class EventListComponent implements OnInit {
       return;
     }
 
-    /* Aggiungo EventTeamUser al DB */
-    const eventTeamUserRef = await this.eventTeamUserService.addEventTeamUser(
-      event.id,
-      team.id,
-      userId,
-      event.props.startDate
-    );
-
-    /* Aggiorno User (prop: eventTeamUserRefs) */
-    await this.userService.updateEventTeamUser(userId, eventTeamUserRef.id);
-
-    /* Aggiorno Event (prop: eventTeamUserRefs) */
-    await this.eventService.updateEventTeamUser(event.id, eventTeamUserRef.id);
-
-    /* Aggiorno Team (prop: eventTeamUserRefs) */
-    await this.teamService.updateEventTeamUser(team.id, eventTeamUserRef.id);
+    /* Aggiungo partecipazione */
+    await this.addParticipation(eventId, team.id, userId);
 
     /* Log */
     this.logService.addLogConfirm('Ora fai parte della squadra, buona fortuna');
-
-    /* reset form */
-    this.resetModalsAndForms();
   }
 
   /* -------------------- Methods: on event -------------------- */
-  protected async onSlideChange(e: any): Promise<void> {
-    /* Aggiorna evento selezionato */
-    const index = e.detail[0].activeIndex;
-    const event = this.events()[index] as Doc<Event> | undefined;
-    if (!event) throw new Error('retry', { cause: 'retry' });
-
-    /* Ottengo i dati associati all'evento (se non ancora ottenuti la prima volta) */
-    if (!this.eventsInfo().has(event.id)) await this.getEventStorage(event);
-
-    /* Aggiorno le informazioni correnti */
-    this.current.set({
-      event,
-      team: this.eventsInfo().get(event.id)?.team,
-      challenges: this.eventsInfo().get(event.id)?.challenges ?? []
-    });
-  }
-
-  protected openNewTeamModal(): void {
+  protected openNewTeamModal(eventId: string): void {
+    this.eventIdSelected.set(eventId);
     this.newTeamModalIsOpen.set(true);
   }
 
-  protected openFindTeamModal(): void {
+  protected openFindTeamModal(eventId: string): void {
+    this.eventIdSelected.set(eventId);
     this.findTeamModalIsOpen.set(true);
   }
 
@@ -229,45 +172,40 @@ export class EventListComponent implements OnInit {
     }
   }
 
-  protected async onGoToTeam(teamId: string): Promise<void> {
-    const event = this.current().event;
-    if (!event) return;
-
-    await this.router.navigate([`user/events/${event.id}/${teamId}`]);
-  }
-
-  protected async onGoToChallenge(challengeId: string): Promise<void> {
-    const event = this.current().event;
-    const team = this.current().team;
-    if (!event) return;
-
-    await this.router.navigate([`user/challenges/${event.id}/${team?.id ?? '_'}/${challengeId}`]);
+  protected async onGoToTeam(eventId: string, teamId: string): Promise<void> {
+    await this.router.navigate([`user/events/${eventId}/${teamId}`]);
   }
 
   /* -------------------- Methods: utils -------------------- */
-  private async getEventStorage(event: Doc<Event>): Promise<void> {
-    const userId = this.firebaseService.userFirebase()?.uid;
-    if (!userId) throw new Error('retry', { cause: 'retry' });
+  private async addParticipation(eventId: string, teamId: string, userId: string): Promise<void> {
+    /* Ottengo la data di inizio dell'evento */
+    const events = this.mergedEvents().map((x) => x.event);
+    const currentEvent = events.find((x) => x.id === eventId);
+    if (!currentEvent) throw new Error('retry', { cause: 'retry' });
 
-    /* Ottengo le sfide e cerco se c'è una squadra */
-    const [challenges, challengeService] = await Promise.all([
-      this.challengeService.getChallengesByEventChallengeRefs(event.props.eventChallengeRefs),
-      this.eventTeamUserService.getEventTeamUsersByProp([
-        { key: 'eventId', value: event.id },
-        { key: 'userId', value: userId }
-      ])
-    ]);
+    /* Aggiungo EventTeamUser al DB */
+    const eventTeamUserRef = await this.eventTeamUserService.addEventTeamUser(
+      eventId,
+      teamId,
+      userId,
+      currentEvent.props.startDate
+    );
 
-    /* Se trova una squadra ottengo i suoi dati */
-    let team: Doc<Team> | undefined = undefined;
-    if (challengeService.length > 0) {
-      team = await this.teamService.getTeamById(challengeService[0].props.teamId);
-    }
+    /* Aggiorno User (prop: eventTeamUserRefs) */
+    await this.userService.updateEventTeamUser(userId, eventTeamUserRef.id);
 
-    this.eventsInfo.set(new Map([...this.eventsInfo(), [event.id, { team, challenges }]]));
+    /* Aggiorno Event (prop: eventTeamUserRefs) */
+    await this.eventService.updateEventTeamUser(eventId, eventTeamUserRef.id);
+
+    /* Aggiorno Team (prop: eventTeamUserRefs) */
+    await this.teamService.updateEventTeamUser(teamId, eventTeamUserRef.id);
+
+    /* Chiude modal e reset form */
+    this.resetModalsAndForms();
   }
 
   private resetModalsAndForms(): void {
+    this.eventIdSelected.set(undefined);
     this.newTeamModalIsOpen.set(false);
     this.findTeamModalIsOpen.set(false);
     this.newTeamForm.reset();

@@ -59,7 +59,7 @@ export class DashboardComponent implements OnInit {
     if (!userId) throw new Error('retry', { cause: 'retry' });
 
     // Recupera le informazioni della partecipazione piu recente
-    const eventTeamUser = await this.eventTeamUserService.getMostRecentEventTeamUserByUserId(userId);
+    const eventTeamUser = await this.eventTeamUserService.getFirstEventTeamUserByUserIdFromDate(userId);
     this.eventTeamUser.set(eventTeamUser);
 
     // Se non è stato trovato alcun utente associato al team, termina l'operazione
