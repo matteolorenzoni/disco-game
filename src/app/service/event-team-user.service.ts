@@ -19,6 +19,20 @@ export class EventTeamUserService {
   readonly httpService = inject(HttpService);
 
   /* --------------------------- Read ---------------------------*/
+  //! [INDEX]
+  public async getMostRecentEventTeamUserByUserId(userId: string): Promise<Doc<EventTeamUser> | null> {
+    const eventTeamUsers = await this.httpService.execute(async () => {
+      return await this.documentService.getDocumentsByPropsAndMostRecent<EventTeamUser>(
+        COL_EVENT_TEAM_USERS,
+        { userId },
+        'eventStartDate',
+        1,
+        eventTeamUserConverter
+      );
+    });
+    return eventTeamUsers.length > 0 ? eventTeamUsers[0] : null;
+  }
+
   public async getEventTeamUsersByProp(
     props: { key: 'userId' | 'eventId' | 'teamId'; value: string }[]
   ): Promise<Doc<EventTeamUser>[]> {

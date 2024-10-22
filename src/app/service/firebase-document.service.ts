@@ -15,11 +15,15 @@ import {
   updateDoc,
   where,
   collection as getCollection,
-  increment
+  increment,
+  orderBy,
+  limit,
+  QueryConstraint
 } from 'firebase/firestore';
 import { Doc } from '../model/firebase';
 import { FirebaseService } from './firebase.service';
 import { LogService } from './log.service';
+import { KeysOfType } from '../model/type';
 
 @Injectable({
   providedIn: 'root'
@@ -75,6 +79,33 @@ export class FirebaseDocumentService {
     const queryConstraints = Object.entries(queryParams).map(([key, value]) => where(key, '==', value));
     const q = query(collectionRef, ...queryConstraints);
     const querySnapshot = await getDocs(q);
+    const docs = querySnapshot.docs.map((doc) => ({ id: doc.id, props: doc.data() as T }));
+    return docs;
+  }
+
+  public async getDocumentsByPropsAndMostRecent<T extends Record<string, any>>(
+    collectionName: string,
+    queryParams: Partial<T>,
+    datePropName: KeysOfType<T, Date>,
+    limitCount: number,
+    converter: FirestoreDataConverter<T>
+  ): Promise<Doc<T>[]> {
+    const collectionRef = getCollection(this.firebaseService.getDb(), collectionName).withConverter(converter);
+
+    // Crea i vincoli della query basati sui parametri di filtro
+    const queryConstraints: QueryConstraint[] = Object.entries(queryParams).map(([key, value]) =>
+      where(key, '==', value)
+    );
+
+    // Aggiungi l'ordinamento e il limite
+    queryConstraints.push(orderBy(datePropName as string, 'desc'));
+    queryConstraints.push(limit(limitCount));
+
+    // Esegui la query con i constraints
+    const q = query(collectionRef, ...queryConstraints);
+    const querySnapshot = await getDocs(q);
+
+    // Mappa i risultati
     const docs = querySnapshot.docs.map((doc) => ({ id: doc.id, props: doc.data() as T }));
     return docs;
   }

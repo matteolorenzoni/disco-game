@@ -69,12 +69,18 @@ export class HomeComponent implements OnInit {
   MENU_USER: MenuItem[] = [
     {
       id: 0,
+      label: 'Dashboard',
+      icon: faHome,
+      path: 'dashboard'
+    },
+    {
+      id: 1,
       label: 'Eventi',
       icon: faCalendarDays,
       path: 'events'
     },
     {
-      id: 1,
+      id: 2,
       label: 'Impostazioni',
       icon: faGears,
       path: 'settings'
