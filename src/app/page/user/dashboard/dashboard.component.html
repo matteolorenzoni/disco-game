@@ -44,20 +44,25 @@
         <div
           class="mt-1 flex items-end gap-4 overflow-hidden rounded-md border border-primary-400/50 bg-primary-400/25 p-2 text-primary-100">
           <div class="flex flex-1 flex-col gap-1">
-            <p class="flex gap-2 truncate text-2xl">
-              @if (firebaseService.userFirebase()?.uid === team.props.leaderId) {
-                <fa-icon [icon]="ICON_CROWN"></fa-icon>
-              }
-              <span> {{ team.props.name }} </span>
-            </p>
-            <div class="flex items-end gap-3 text-xs leading-4">
-              <p class="truncate uppercase">Codice: {{ team.props.code }}</p>
-              <button (click)="onCopyCodeToClipboard()">
-                <fa-icon [icon]="ICON_CLIPBOARD"></fa-icon>
-              </button>
+            <div class="flex justify-between gap-4">
+              <div class="flex flex-col">
+                <p class="flex gap-2 truncate text-2xl">
+                  @if (firebaseService.userFirebase()?.uid === team.props.leaderId) {
+                    <fa-icon [icon]="ICON_CROWN"></fa-icon>
+                  }
+                  <span> {{ team.props.name }} </span>
+                </p>
+                <div class="flex items-end gap-3 text-xs leading-4">
+                  <p class="truncate uppercase">Codice: {{ team.props.code }}</p>
+                  <button (click)="onCopyCodeToClipboard()">
+                    <fa-icon [icon]="ICON_CLIPBOARD"></fa-icon>
+                  </button>
+                </div>
+              </div>
+              <p class="p-1 text-5xl">{{ team.props.totalPoints }}<span class="text-xs text-primary-200">pt</span></p>
             </div>
+            <fv-button label="Visualizza" twColor="primary" [onClick]="onGoToTeam.bind(this)"> </fv-button>
           </div>
-          <fv-button label="Visualizza" twColor="primary" [onClick]="onGoToTeam.bind(this)"> </fv-button>
         </div>
 
         <h2 class="mt-12 text-xs uppercase">Sfide</h2>

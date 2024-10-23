@@ -88,8 +88,6 @@ export class DashboardComponent implements OnInit {
 
     // Recupera le informazioni dettagliate sulle sfide
     const challenges = await this.challengeService.getChallengesByIds(eventChallenges.map((x) => x.props.challengeId));
-
-    // Metto insieme le sfide e e le info relative all'evento
     const mergedChallenges = challenges.map((challenge) => {
       const eventChallenge = eventChallenges.find(
         (eventChallenge) => eventChallenge.props.challengeId === challenge.id
