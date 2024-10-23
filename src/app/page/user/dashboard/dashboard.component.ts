@@ -1,7 +1,8 @@
-import { LogService } from './../../../service/log.service';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import { faCalendar, faClipboard, faCrown, faLocationPin } from '@fortawesome/free-solid-svg-icons';
 import { Doc } from '../../../model/firebase';
 import { Event } from '../../../model/event.model';
 import { Challenge } from '../../../model/challenge.model';
@@ -18,13 +19,21 @@ import { TitleComponent } from '../../../components/title/title.component';
 import { FvButtonComponent } from '../../../components/fv-button.component';
 import { FvCountdownComponent } from '../../../components/fv-countdown.component';
 import { FvRatingComponent } from '../../../components/fv-rating.component';
-import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faCalendar, faClipboard, faCrown, faLocationPin } from '@fortawesome/free-solid-svg-icons';
+import { LogService } from './../../../service/log.service';
+import { FvChallengeStatusComponent } from '../../../components/fv-challenge-status.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, TitleComponent, FvButtonComponent, FvCountdownComponent, FvRatingComponent, FaIconComponent],
+  imports: [
+    CommonModule,
+    TitleComponent,
+    FvButtonComponent,
+    FvCountdownComponent,
+    FvRatingComponent,
+    FvChallengeStatusComponent,
+    FaIconComponent
+  ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -44,8 +53,7 @@ export class DashboardComponent implements OnInit {
   eventTeamUser = signal<Doc<EventTeamUser> | null | undefined>(undefined);
   event = signal<Doc<Event> | undefined>(undefined);
   team = signal<Doc<Team> | undefined>(undefined);
-  eventChallenges = signal<Doc<EventChallenge>[]>([]);
-  challenges = signal<Doc<Challenge>[]>([]);
+  mergedChallenges = signal<{ challenge: Doc<Challenge>; eventChallenge: Doc<EventChallenge> | undefined }[]>([]);
 
   /* Constants */
   NOW = new Date();
@@ -75,13 +83,20 @@ export class DashboardComponent implements OnInit {
       this.teamService.getTeamById(eventTeamUser.props.teamId)
     ]);
     this.event.set(event);
-    this.eventChallenges.set(eventChallenges);
     this.team.set(team);
     if (!event || !eventChallenges || !team) throw new Error('retry', { cause: 'retry' });
 
     // Recupera le informazioni dettagliate sulle sfide
     const challenges = await this.challengeService.getChallengesByIds(eventChallenges.map((x) => x.props.challengeId));
-    this.challenges.set(challenges);
+
+    // Metto insieme le sfide e e le info relative all'evento
+    const mergedChallenges = challenges.map((challenge) => {
+      const eventChallenge = eventChallenges.find(
+        (eventChallenge) => eventChallenge.props.challengeId === challenge.id
+      );
+      return { challenge, eventChallenge };
+    });
+    this.mergedChallenges.set(mergedChallenges);
   }
 
   /* -------------------------- Methods event--------------------------  */

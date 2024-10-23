@@ -28,7 +28,7 @@ export class FvCountdownComponent implements OnInit, OnDestroy {
     if (!date) return 0;
 
     const timeLeft = date.getTime() - this.currentDate().getTime();
-    return Math.floor((timeLeft / (1000 * 60 * 60)) % 24);
+    return Math.floor(timeLeft / (1000 * 60 * 60));
   });
   minutes = computed(() => {
     const date = this.date();
