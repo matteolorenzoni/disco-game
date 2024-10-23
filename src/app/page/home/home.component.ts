@@ -2,7 +2,14 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { FvBottomNavigationComponent } from '../../components/fv-bottom-navigation.component';
-import { faCalendarDays, faGamepad, faGears, faHome, IconDefinition } from '@fortawesome/free-solid-svg-icons';
+import {
+  faCalendarDays,
+  faGamepad,
+  faGears,
+  faHome,
+  faRankingStar,
+  IconDefinition
+} from '@fortawesome/free-solid-svg-icons';
 import { UserRole } from '../../model/user.model';
 import { LocalStorageService } from '../../service/local-storage.service';
 
@@ -81,6 +88,12 @@ export class HomeComponent implements OnInit {
     },
     {
       id: 2,
+      label: 'Classifiche',
+      icon: faRankingStar,
+      path: 'leaderboards'
+    },
+    {
+      id: 3,
       label: 'Impostazioni',
       icon: faGears,
       path: 'settings'

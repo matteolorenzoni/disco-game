@@ -1,0 +1,36 @@
+<app-title [pages]="[{ path: '', label: 'Classifiche' }]"></app-title>
+
+@if (eventSelected(); as eventSelected) {
+  <div class="flex w-full justify-between gap-4 p-2">
+    <button (click)="onArrowClick(-1)"><fa-icon [icon]="ICON_LEFT"></fa-icon></button>
+    <div>{{ eventSelected.props.name }}</div>
+    <button (click)="onArrowClick(+1)"><fa-icon [icon]="ICON_RIGHT"></fa-icon></button>
+  </div>
+}
+
+<div class="mt-2">
+  <div class="relative right-0">
+    <ul class="flex rounded-md bg-neutral-800 p-1" role="tablist">
+      <li class="flex-1">
+        <button
+          class="w-full rounded py-2 text-xs uppercase text-gray-400 transition-colors duration-300 ease-in-out focus:outline-none"
+          [ngClass]="{ 'bg-neutral-700 text-on-background font-bold': mode() === 'live' }"
+          (click)="mode.set('live')"
+          role="tab"
+          [attr.aria-selected]="mode() === 'live' ? 'true' : 'false'">
+          Live (top 10)
+        </button>
+      </li>
+      <li class="flex-1">
+        <button
+          class="w-full rounded py-2 text-xs uppercase text-gray-400 transition-colors duration-300 ease-in-out focus:outline-none"
+          [ngClass]="{ 'bg-neutral-700 text-on-background font-bold': mode() === 'general' }"
+          (click)="mode.set('general')"
+          role="tab"
+          [attr.aria-selected]="mode() === 'general' ? 'true' : 'false'">
+          Generale
+        </button>
+      </li>
+    </ul>
+  </div>
+</div>

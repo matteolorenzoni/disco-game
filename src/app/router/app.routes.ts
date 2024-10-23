@@ -121,10 +121,13 @@ export const routes: Routes = [
     canActivate: [userGuard],
     loadComponent: () => import('../page/home/home.component').then((m) => m.HomeComponent),
     children: [
+      // Dashboard
       {
         path: 'dashboard',
         loadComponent: () => import('../page/user/dashboard/dashboard.component').then((m) => m.DashboardComponent)
       },
+
+      // Eventi
       {
         path: 'events',
         children: [
@@ -143,10 +146,26 @@ export const routes: Routes = [
           }
         ]
       },
+
+      // Sfide (non nel bottom menu)
       {
         path: 'challenges/:eventId/:teamId/:challengeId',
         loadComponent: () => import('../page/user/challenge/challenge.component').then((m) => m.ChallengeComponent)
       },
+
+      // Classifiche
+      {
+        path: 'leaderboards',
+        loadComponent: () =>
+          import('../page/user/leaderboard/leaderboard.component').then((m) => m.LeaderboardComponent)
+      },
+
+      {
+        path: 'challenges/:eventId/:teamId/:challengeId',
+        loadComponent: () => import('../page/user/challenge/challenge.component').then((m) => m.ChallengeComponent)
+      },
+
+      // Impostazioni
       {
         path: 'settings',
         children: [
