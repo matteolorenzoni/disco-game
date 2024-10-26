@@ -7,7 +7,7 @@ import {
 } from 'firebase/firestore';
 import { Challenge, ChallengeType } from './challenge.model';
 import { Event } from './event.model';
-import { Team } from './team.model';
+import { Team, TeamUser } from './team.model';
 import { User, UserRole } from './user.model';
 import { ChallengeStatus, EventChallenge } from './event-challenge.model';
 
@@ -102,7 +102,12 @@ export const teamConverter: FirestoreDataConverter<Team> = {
       eventId: team.eventId,
       eventStartDate: team.eventStartDate,
       userIds: team.userIds,
-      users: team.users.map((user) => ({ id: user.id, challenges: user.challenges })),
+      users: team.users.map((user) => ({
+        id: user.id,
+        userName: user.userName,
+        imageUrl: user.imageUrl,
+        challenges: user.challenges
+      })),
       isActive: team.isActive,
       updatedAt: team.updatedAt
     };
@@ -119,9 +124,18 @@ export const teamConverter: FirestoreDataConverter<Team> = {
       eventId: data['eventId'],
       eventStartDate: timestampToDate(data['eventStartDate']),
       userIds: data['userIds'],
-      users: data['users'],
+      users: data['users'].map((user: TeamUser) => ({
+        id: user.id,
+        userName: user.userName,
+        imageUrl: user.imageUrl,
+        challenges: user.challenges.map((challenge) => ({
+          id: challenge.id,
+          timestamps: challenge.timestamps.map((timestamp) => timestampToDate(timestamp as unknown as Timestamp)),
+          totalPoints: challenge.totalPoints
+        }))
+      })),
       isActive: data['isActive'],
-      updatedAt: timestampToDate(data['updatedAt'])
+      updatedAt: timestampToDate(data['updatedAt'] as Timestamp)
     };
   }
 };

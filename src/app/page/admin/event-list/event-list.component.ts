@@ -10,6 +10,7 @@ import { faCalendar, faClock, faLocationPin } from '@fortawesome/free-solid-svg-
 import { FvButtonComponent } from '../../../components/fv-button.component';
 import { FvButtonOutlinedComponent } from '../../../components/fv-button-outlined.component';
 import { TitleComponent } from '../../../components/title/title.component';
+import { IndexedDbService } from '../../../service/indexed-db.service';
 
 @Component({
   selector: 'app-event-list',
@@ -30,9 +31,10 @@ export class EventListComponent implements OnInit {
   /* Services */
   readonly router = inject(Router);
   readonly eventService = inject(EventService);
+  readonly dbService = inject(IndexedDbService);
 
   /* Variables */
-  events = signal<Doc<Event>[]>([]);
+  events = signal<Doc<Event>[] | undefined>(undefined);
   eventIdSelected = signal<string | undefined>(undefined);
 
   /* Icons */
@@ -42,6 +44,19 @@ export class EventListComponent implements OnInit {
 
   /* -------------------- Lifecycle hooks -------------------- */
   async ngOnInit(): Promise<void> {
+    /* Inizializzazione indexedDB */
+    await this.initIndexedDb();
+
+    /* Inizializzazione http */
+    await this.initHttp();
+  }
+
+  /* -------------------------- Methods initialization --------------------------  */
+  private async initIndexedDb() {
+    this.events.set(await this.dbService.getEvents());
+  }
+
+  private async initHttp() {
     const events = await this.eventService.getAllEvents();
     this.events.set(events);
     this.eventIdSelected.set(events[0].id);

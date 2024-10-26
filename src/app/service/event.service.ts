@@ -18,9 +18,9 @@ const COL_EVENTS = environment.collection.EVENTS;
 })
 export class EventService {
   /* Services */
-  readonly documentService = inject(FirebaseDocumentService);
-  readonly httpService = inject(HttpService);
-  readonly logService = inject(LogService);
+  private readonly documentService = inject(FirebaseDocumentService);
+  private readonly httpService = inject(HttpService);
+  private readonly logService = inject(LogService);
 
   /* --------------------------- Read ---------------------------*/
   //! [INDEX]

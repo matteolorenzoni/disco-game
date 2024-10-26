@@ -7,7 +7,7 @@ import { Doc } from '../model/firebase';
 import { teamConverter } from '../model/converter';
 import { HttpService } from './http.service';
 import { generateUniqueCode } from '../util/utils';
-import { limit, where } from 'firebase/firestore';
+import { limit, QueryConstraint, where } from 'firebase/firestore';
 import { Event } from '../model/event.model';
 import { User } from '../model/user.model';
 import { dateYesterday } from '../util/type.util';
@@ -29,26 +29,24 @@ export class TeamService {
     });
   }
 
-  public async getActiveTeamsByUserId(userId: string, isFirst = false): Promise<Doc<Team>[]> {
+  public async getActiveTeamsByUserId(userId: string, constraints: QueryConstraint[] = []): Promise<Doc<Team>[]> {
     return await this.httpService.execute(async () => {
       const valueConstraints = [
         where('userIds', 'array-contains', userId),
         where('eventStartDate', '>=', dateYesterday())
       ];
-      const limitConstraints = [limit(1)];
-      const constraints = isFirst ? [...valueConstraints, ...limitConstraints] : [...limitConstraints];
-      const userTeams = await this.documentService.getDocumentsWithConstraints<Team>(
+      return this.documentService.getDocumentsWithConstraints<Team>(
         COL_TEAMS,
-        constraints,
+        [...valueConstraints, ...constraints],
         teamConverter
       );
-      return userTeams;
     });
   }
 
   public async getFirstActiveTeamByUserId(userId: string): Promise<Doc<Team> | null> {
     return await this.httpService.execute(async () => {
-      const teams = await this.getActiveTeamsByUserId(userId, true);
+      const limitConstraints = [limit(1)];
+      const teams = await this.getActiveTeamsByUserId(userId, limitConstraints);
       return teams.length !== 1 ? null : teams[0];
     });
   }

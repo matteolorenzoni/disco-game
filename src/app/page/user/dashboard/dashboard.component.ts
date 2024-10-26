@@ -5,9 +5,7 @@ import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faCalendar, faClipboard, faCrown, faLocationPin } from '@fortawesome/free-solid-svg-icons';
 import { Doc } from '../../../model/firebase';
 import { Event } from '../../../model/event.model';
-import { Challenge } from '../../../model/challenge.model';
 import { Team } from '../../../model/team.model';
-import { EventChallenge } from '../../../model/event-challenge.model';
 import { EventService } from '../../../service/event.service';
 import { FirebaseService } from '../../../service/firebase.service';
 import { TeamService } from '../../../service/team.service';
@@ -19,6 +17,9 @@ import { FvCountdownComponent } from '../../../components/fv-countdown.component
 import { FvRatingComponent } from '../../../components/fv-rating.component';
 import { LogService } from './../../../service/log.service';
 import { FvChallengeStatusComponent } from '../../../components/fv-challenge-status.component';
+import { IndexedDbService } from '../../../service/indexed-db.service';
+import { LocalStorageService } from '../../../service/local-storage.service';
+import { MergeChallenge, mergeChallenge } from '../../../util/merge.util';
 
 @Component({
   selector: 'app-dashboard',
@@ -44,12 +45,14 @@ export class DashboardComponent implements OnInit {
   readonly teamService = inject(TeamService);
   readonly eventChallengeService = inject(EventChallengeService);
   readonly challengeService = inject(ChallengeService);
+  readonly lsService = inject(LocalStorageService);
+  readonly dbService = inject(IndexedDbService);
   readonly logService = inject(LogService);
 
   /* Variables */
   event = signal<Doc<Event> | undefined>(undefined);
   team = signal<Doc<Team> | null | undefined>(undefined);
-  mergedChallenges = signal<{ challenge: Doc<Challenge>; eventChallenge: Doc<EventChallenge> | undefined }[]>([]);
+  mergedChallenges = signal<MergeChallenge[]>([]);
 
   /* Constants */
   NOW = new Date();
@@ -65,6 +68,38 @@ export class DashboardComponent implements OnInit {
     const userId = this.firebaseService.userFirebase()?.uid;
     if (!userId) throw new Error('retry', { cause: 'retry' });
 
+    /* Inizializzazione indexedDB */
+    await this.initIndexedDb();
+
+    /* Inizializzazione http */
+    await this.initHttp(userId);
+  }
+
+  /* -------------------------- Methods initialization --------------------------  */
+  private async initIndexedDb() {
+    // Recupera l'ID del team dall'archiviazione locale, se non è presente termina l'operazione
+    const lsTeamId = this.lsService.getUserDashboardTeamId();
+    if (!lsTeamId) return;
+
+    // Imposta nello stato il team corrispondente all'ID salvato in Local Storage.
+    const dbTeams = await this.dbService.getTeams();
+    const team = dbTeams.find((x) => x.id === lsTeamId);
+    this.team.set(team);
+    if (!team) return;
+
+    // Imposta nello stato l'evento associato al team corrente.
+    const dbEvents = await this.dbService.getEvents();
+    const event = dbEvents.find((x) => x.id === team.props.eventId);
+    this.event.set(event);
+    if (!event) return;
+
+    // Filtra e imposta nello stato le sfide dell'evento corrente.
+    const dbMergedChallenges = await this.dbService.getChallenges();
+    const mergedChallenges = dbMergedChallenges.filter((x) => x.eventId === event.id);
+    this.mergedChallenges.set(mergedChallenges);
+  }
+
+  private async initHttp(userId: string) {
     // Recupera le informazioni della partecipazione piu recente
     const team = await this.teamService.getFirstActiveTeamByUserId(userId);
 
@@ -78,17 +113,17 @@ export class DashboardComponent implements OnInit {
       this.eventChallengeService.getEventChallengesByProp([{ key: 'eventId', value: team.props.eventId }])
     ]);
     this.event.set(event);
-    if (!event || !eventChallenges) throw new Error('retry', { cause: 'retry' });
 
     // Recupera le informazioni dettagliate sulle sfide
     const challenges = await this.challengeService.getChallengesByIds(eventChallenges.map((x) => x.props.challengeId));
-    const mergedChallenges = challenges.map((challenge) => {
-      const eventChallenge = eventChallenges.find(
-        (eventChallenge) => eventChallenge.props.challengeId === challenge.id
-      );
-      return { challenge, eventChallenge };
-    });
+    const mergedChallenges = mergeChallenge(challenges, eventChallenges);
     this.mergedChallenges.set(mergedChallenges);
+
+    /* Aggiorno il local storage indexedDB */
+    this.lsService.setUserDashboardTeamId(team.id);
+    this.dbService.saveTeam(team);
+    this.dbService.saveEvent(event);
+    this.dbService.saveChallenges(mergedChallenges);
   }
 
   /* -------------------------- Methods event--------------------------  */
@@ -107,8 +142,8 @@ export class DashboardComponent implements OnInit {
   protected onCopyCodeToClipboard(): void {
     const team = this.team();
     if (!team) throw new Error('retry', { cause: 'retry' });
-
     if (!navigator) return;
+
     navigator.clipboard.writeText(team.props.code);
     this.logService.addLogConfirm('Codice copiato negli appunti');
   }

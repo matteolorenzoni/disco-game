@@ -9,6 +9,7 @@ import { Challenge } from '../model/challenge.model';
 const PREFIX = 'FV';
 
 const KEY_USER = 'USER';
+const KEY_USER_DASHBOARD_TEAM_ID = 'USER_TEAM_ID';
 const KEY_SCANNER_EVENT = 'SCANNER_EVENT';
 const KEY_SCANNER_DEVICE_ID = 'SCANNER_DEVICE_ID';
 const KEY_SCANNER_CHALLENGES = 'SCANNER_CHALLENGES';
@@ -52,10 +53,10 @@ export class LocalStorageService {
    * @param key La chiave sotto cui memorizzare il valore.
    * @param value Il valore da memorizzare. Sarà convertito in stringa e crittografato.
    */
-  private setItem<T>(key: string, value: T): void {
-    const jsonValue = JSON.stringify(value);
-    const encryptedValue = this.encrypt(jsonValue);
-    localStorage.setItem(this.createKey(key), encryptedValue);
+  private setItem<T>(key: string, value: T, encrypt = false): void {
+    const jsonValue = typeof value === 'string' ? value : JSON.stringify(value);
+    const lsValue = encrypt ? this.encrypt(jsonValue) : jsonValue;
+    localStorage.setItem(this.createKey(key), lsValue);
   }
 
   /**
@@ -63,18 +64,12 @@ export class LocalStorageService {
    * @param key La chiave da cui recuperare il valore.
    * @returns Il valore memorizzato, o null se non esiste.
    */
-  private getItem<T>(key: string): T | null | undefined {
-    try {
-      const encryptedValue = localStorage.getItem(this.createKey(key));
-      if (encryptedValue) {
-        const decryptedValue = this.decrypt(encryptedValue);
-        return JSON.parse(decryptedValue) as T;
-      }
-      return null;
-    } catch (error) {
-      console.error(error);
-      return undefined;
-    }
+  private getItem(key: string, decrypt = false): string | null {
+    const lsValue = localStorage.getItem(this.createKey(key));
+    if (!lsValue) return null;
+
+    const value = decrypt ? this.decrypt(lsValue) : lsValue;
+    return value;
   }
 
   /**
@@ -113,24 +108,43 @@ export class LocalStorageService {
   }
 
   /* ------------------------------ Method app  ------------------------------ */
-  public getUser(): Doc<User> | null | undefined {
-    return this.getItem<Doc<User>>(KEY_USER);
+  /* User */
+  public getUser(): Doc<User> | null {
+    const stringValue = this.getItem(KEY_USER, true);
+    if (!stringValue) return null;
+    return JSON.parse(stringValue) as Doc<User>;
   }
 
   public setUser(user: Doc<User>): void {
-    return this.setItem<Doc<User>>(KEY_USER, user);
+    this.setItem<Doc<User>>(KEY_USER, user, true);
   }
 
   public removeUser(): void {
     return this.removeItem(KEY_USER);
   }
 
+  /* User dashboard */
+  public getUserDashboardTeamId(): string | null | undefined {
+    return this.getItem(KEY_USER_DASHBOARD_TEAM_ID);
+  }
+
+  public setUserDashboardTeamId(teamId: string): void {
+    this.setItem<string>(KEY_USER_DASHBOARD_TEAM_ID, teamId);
+  }
+
+  public removeUserDashboardTeamId(): void {
+    return this.removeItem(KEY_USER_DASHBOARD_TEAM_ID);
+  }
+
+  /* Scanner */
   public getScannerEvent(): Doc<Event> | null | undefined {
-    return this.getItem<Doc<Event>>(KEY_SCANNER_EVENT);
+    const stringValue = this.getItem(KEY_SCANNER_EVENT);
+    if (!stringValue) return null;
+    return JSON.parse(stringValue) as Doc<Event>;
   }
 
   public setScannerEvent(event: Doc<Event>): void {
-    return this.setItem<Doc<Event>>(KEY_SCANNER_EVENT, event);
+    this.setItem<Doc<Event>>(KEY_SCANNER_EVENT, event);
   }
 
   public removeScannerEvent(): void {
@@ -138,11 +152,11 @@ export class LocalStorageService {
   }
 
   public getScannerDeviceId(): string | null | undefined {
-    return this.getItem<string>(KEY_SCANNER_DEVICE_ID);
+    return this.getItem(KEY_SCANNER_DEVICE_ID);
   }
 
   public setScannerDeviceId(deviceId: string): void {
-    return this.setItem<string>(KEY_SCANNER_DEVICE_ID, deviceId);
+    this.setItem<string>(KEY_SCANNER_DEVICE_ID, deviceId);
   }
 
   public removeScannerDeviceId(): void {
@@ -150,14 +164,16 @@ export class LocalStorageService {
   }
 
   public getScannerChallenges(): Doc<Challenge>[] {
-    return this.getItem<Doc<Challenge>[]>(KEY_SCANNER_CHALLENGES) ?? [];
+    const stringValue = this.getItem(KEY_SCANNER_CHALLENGES);
+    if (!stringValue) return [];
+    return JSON.parse(stringValue) as Doc<Challenge>[];
   }
 
   public setScannerChallenges(challenges: Doc<Challenge>[]): void {
-    return this.setItem<Doc<Challenge>[]>(KEY_SCANNER_CHALLENGES, challenges);
+    this.setItem<Doc<Challenge>[]>(KEY_SCANNER_CHALLENGES, challenges);
   }
 
-  public removeChallenges(): void {
+  public removeScannerChallenges(): void {
     return this.removeItem(KEY_SCANNER_CHALLENGES);
   }
 }

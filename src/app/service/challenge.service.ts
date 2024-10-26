@@ -15,9 +15,9 @@ const COL_CHALLENGES = environment.collection.CHALLENGES;
 })
 export class ChallengeService {
   /* Services */
-  readonly documentService = inject(FirebaseDocumentService);
-  readonly httpService = inject(HttpService);
-  readonly logService = inject(LogService);
+  private readonly documentService = inject(FirebaseDocumentService);
+  private readonly httpService = inject(HttpService);
+  private readonly logService = inject(LogService);
 
   /* --------------------------- Read ---------------------------*/
   public async getChallenges(): Promise<Doc<Challenge>[]> {

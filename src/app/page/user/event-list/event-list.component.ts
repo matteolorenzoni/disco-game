@@ -22,6 +22,7 @@ import { ChallengeService } from '../../../service/challenge.service';
 import { FvRatingComponent } from '../../../components/fv-rating.component';
 import { Team } from '../../../model/team.model';
 import { LocalStorageService } from '../../../service/local-storage.service';
+import { IndexedDbService } from '../../../service/indexed-db.service';
 
 @Component({
   selector: 'app-event-list',
@@ -61,6 +62,7 @@ export class EventListComponent implements OnInit {
   readonly teamService = inject(TeamService);
   readonly challengeService = inject(ChallengeService);
   readonly lsService = inject(LocalStorageService);
+  readonly dbService = inject(IndexedDbService);
   readonly logService = inject(LogService);
 
   /* Variables */
@@ -107,6 +109,10 @@ export class EventListComponent implements OnInit {
       return { event, team };
     });
     this.mergedEvents.set(mergedEvents);
+
+    /* Aggiorno il indexedDB */
+    this.dbService.saveEvents(events);
+    this.dbService.saveTeams(teams);
   }
 
   /* -------------------- Methods: firebase -------------------- */
