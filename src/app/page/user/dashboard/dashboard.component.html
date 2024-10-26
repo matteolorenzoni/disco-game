@@ -69,7 +69,7 @@
     <ul
       class="mt-1 flex flex-col divide-y divide-neutral-800 overflow-hidden rounded-md bg-surface/75 p-2 text-on-surface shadow backdrop-blur">
       @for (challenge of mergedChallenges(); track challenge.id) {
-        <li class="py-1">
+        <li class="py-2">
           <button
             class="relative flex w-full flex-col gap-1 p-2 hover:rounded-md hover:bg-neutral-950 active:rounded-md active:bg-black"
             (click)="onGoToChallenge(challenge.id)">
@@ -79,7 +79,7 @@
               <fv-rating [rating]="challenge.complexity"></fv-rating>
             </div>
             <p class="w-full truncate text-start text-xs text-gray-500">{{ challenge.description }}</p>
-            <fv-challenge-status type="effect" [challengeStatus]="challenge.status"></fv-challenge-status>
+            <fv-challenge-status type="effect" [status]="challenge.status"></fv-challenge-status>
           </button>
         </li>
       }

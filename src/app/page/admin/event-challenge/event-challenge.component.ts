@@ -92,7 +92,7 @@ export class EventChallengeComponent implements OnInit {
         nonNullable: true,
         validators: [Validators.required]
       }),
-      challengeStatus: new FormControl(ChallengeStatus.ACTIVE, {
+      status: new FormControl(ChallengeStatus.ACTIVE, {
         nonNullable: true,
         validators: [Validators.required]
       }),
@@ -139,7 +139,7 @@ export class EventChallengeComponent implements OnInit {
       challengeId: form.challengeId,
       challengeName: challengeActive.props.name,
       challengeType: challengeActive.props.type,
-      status: form.challengeStatus,
+      status: form.status,
       maxTimes: form.maxTimes,
       startDate: form.startDate ? new Date(form.startDate) : null,
       endDate: form.endDate ? new Date(form.endDate) : null,

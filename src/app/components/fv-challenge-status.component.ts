@@ -11,7 +11,7 @@ import { faCheck, faCirclePause, faLock, faTrash } from '@fortawesome/free-solid
   template: `
     @switch (type()) {
       @case ('icon') {
-        @switch (challengeStatus()) {
+        @switch (status()) {
           @case (CHALLENGE_STATUS.ACTIVE) {
             <fa-icon [icon]="ICON_ACTIVE"></fa-icon>
           }
@@ -27,7 +27,7 @@ import { faCheck, faCirclePause, faLock, faTrash } from '@fortawesome/free-solid
         }
       }
       @case ('effect') {
-        @switch (challengeStatus()) {
+        @switch (status()) {
           @case (CHALLENGE_STATUS.LOCKED) {
             <div class="absolute left-0 top-0 h-full w-full rounded-xl bg-black/25 backdrop-blur-sm"></div>
             <fa-icon class="absolute -right-1 -top-2 text-xl text-white" [icon]="ICON_LOCKED"></fa-icon>
@@ -50,7 +50,7 @@ import { faCheck, faCirclePause, faLock, faTrash } from '@fortawesome/free-solid
 export class FvChallengeStatusComponent {
   /* Input */
   type = input.required<'icon' | 'effect'>();
-  challengeStatus = input.required<ChallengeStatus>();
+  status = input.required<ChallengeStatus>();
 
   /* Enum */
   CHALLENGE_STATUS = ChallengeStatus;

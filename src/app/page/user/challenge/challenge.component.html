@@ -37,7 +37,7 @@
         <fv-challenge-status
           class="flex-1 text-white flex-center"
           [type]="'icon'"
-          [challengeStatus]="cm.eventChallenge.props.challengeStatus"></fv-challenge-status>
+          [status]="cm.eventChallenge.props.status"></fv-challenge-status>
       </div>
     </div>
 
@@ -45,9 +45,7 @@
     <div class="relative -m-2 p-2">
       <h2 class="text-lg font-semibold text-on-background">Descrizione</h2>
       <p class="text-sm leading-relaxed text-on-surface">{{ cm.challenge.props.description }}</p>
-      <fv-challenge-status
-        [type]="'effect'"
-        [challengeStatus]="cm.eventChallenge.props.challengeStatus"></fv-challenge-status>
+      <fv-challenge-status [type]="'effect'" [status]="cm.eventChallenge.props.status"></fv-challenge-status>
     </div>
 
     <!-- Sezione Regole -->
@@ -56,9 +54,7 @@
       <p class="whitespace-pre-line text-sm leading-relaxed text-on-surface">
         {{ cm.challenge.props.rules }}
       </p>
-      <fv-challenge-status
-        [type]="'effect'"
-        [challengeStatus]="cm.eventChallenge.props.challengeStatus"></fv-challenge-status>
+      <fv-challenge-status [type]="'effect'" [status]="cm.eventChallenge.props.status"></fv-challenge-status>
     </div>
 
     @if (qrdata(); as qrdata) {
@@ -71,7 +67,7 @@
         </div>
         @if (teamId()) {
           <qrcode [qrdata]="qrdata" [width]="256" [errorCorrectionLevel]="'M'"></qrcode>
-          @if (cm.eventChallenge.props.challengeStatus !== 'ACTIVE') {
+          @if (cm.eventChallenge.props.status !== 'ACTIVE') {
             <div class="absolute left-0 top-0 h-full w-full rounded-xl backdrop-blur-sm"></div>
           }
         } @else {

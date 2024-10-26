@@ -39,7 +39,7 @@ export type ChallengeModel = {
 
 export type EventChallengeModel = {
   challengeId: string;
-  challengeStatus: ChallengeStatus;
+  status: ChallengeStatus;
   maxTimes: number | null;
   startDate: string | null;
   endDate: string | null;
