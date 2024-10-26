@@ -2,7 +2,6 @@
 import { inject, Injectable } from '@angular/core';
 import {
   addDoc,
-  arrayRemove,
   arrayUnion,
   doc,
   DocumentData,
@@ -90,15 +89,6 @@ export class FirebaseDocumentService {
     return docs;
   }
 
-  public async getDocumentsByRefs<T>(docRefString: string, converter: FirestoreDataConverter<T>): Promise<Doc<T>> {
-    const docRef = doc(this.firebaseService.getDb(), docRefString).withConverter(converter);
-    const docSnap = await getDoc(docRef);
-    if (!docSnap.exists()) throw new Error('noDocument', { cause: 'noDocument' });
-
-    const data = docSnap.data() as T;
-    return { id: docSnap.id, props: data };
-  }
-
   /* --------------------- Methods CREATE --------------------- */
   public createDocId(collectionName: string): string {
     const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
@@ -150,21 +140,6 @@ export class FirebaseDocumentService {
     const docRef = doc(collectionRef, id);
     await updateDoc(docRef, {
       [arrayField]: arrayUnion(newValue),
-      updatedAt: new Date()
-    });
-  }
-
-  // TODO: vedere se si riesce ad eliminare
-  public async updateArrayPropReference<T extends Record<string, any> & { updatedAt: Date }>(
-    operation: 'add' | 'remove',
-    propToUpdate: keyof T,
-    docId: string,
-    referenceId: string
-  ): Promise<void> {
-    const docRef = doc(this.firebaseService.getDb(), docId);
-    const referencesRef = doc(this.firebaseService.getDb(), referenceId);
-    await updateDoc(docRef, {
-      [propToUpdate]: operation === 'add' ? arrayUnion(referencesRef) : arrayRemove(referencesRef),
       updatedAt: new Date()
     });
   }

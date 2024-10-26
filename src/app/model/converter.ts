@@ -67,7 +67,7 @@ export const eventConverter: FirestoreDataConverter<Event> = {
       startDate: event.startDate,
       endDate: event.endDate,
       teamIds: event.teamIds,
-      eventChallengeRefs: event.eventChallengeRefs.map((ref) => ref.path),
+      eventChallengeIds: event.eventChallengeIds,
       isActive: event.isActive,
       updatedAt: event.updatedAt
     };
@@ -84,7 +84,7 @@ export const eventConverter: FirestoreDataConverter<Event> = {
       startDate: timestampToDate(data['startDate']),
       endDate: timestampToDate(data['endDate']),
       teamIds: data['teamIds'],
-      eventChallengeRefs: data['eventChallengeRefs'],
+      eventChallengeIds: data['eventChallengeIds'],
       isActive: data['isActive'],
       updatedAt: timestampToDate(data['updatedAt'])
     };
@@ -135,7 +135,7 @@ export const challengeConverter: FirestoreDataConverter<Challenge> = {
       type: challenge.type,
       points: challenge.points,
       complexity: challenge.complexity,
-      eventChallengeRefs: challenge.eventChallengeRefs.map((ref) => ref.path),
+      eventChallengeIds: challenge.eventChallengeIds,
       isActive: challenge.isActive,
       updatedAt: dateToString(challenge.updatedAt)
     };
@@ -150,7 +150,7 @@ export const challengeConverter: FirestoreDataConverter<Challenge> = {
       type: data['type'],
       points: data['points'],
       complexity: data['complexity'],
-      eventChallengeRefs: data['eventChallengeRefs'],
+      eventChallengeIds: data['eventChallengeIds'],
       isActive: data['isActive'],
       updatedAt: timestampToDate(data['updatedAt'] as Timestamp)
     };

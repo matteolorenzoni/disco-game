@@ -12,7 +12,6 @@ import { orderBy, where } from 'firebase/firestore';
 import { dateYesterday } from '../util/type.util';
 
 const COL_EVENTS = environment.collection.EVENTS;
-const COL_EVENT_CHALLENGES = environment.collection.EVENT_CHALLENGES;
 
 @Injectable({
   providedIn: 'root'
@@ -25,7 +24,7 @@ export class EventService {
 
   /* --------------------------- Read ---------------------------*/
   //! [INDEX]
-  public async getEvents(): Promise<Doc<Event>[]> {
+  public async getAllEvents(): Promise<Doc<Event>[]> {
     return await this.httpService.execute(async () => {
       const orderConstraints = [orderBy('startDate', 'asc')];
       return this.documentService.getDocumentsWithConstraints<Event>(COL_EVENTS, orderConstraints, eventConverter);
@@ -75,7 +74,7 @@ export class EventService {
         startDate: new Date(form.startDate),
         endDate: new Date(form.endDate),
         teamIds: [],
-        eventChallengeRefs: [],
+        eventChallengeIds: [],
         code,
         isActive: true,
         updatedAt: new Date()
@@ -109,13 +108,13 @@ export class EventService {
     });
   }
 
-  public async updateEventChallenge(eventId: string, eventChallengeId: string): Promise<void> {
+  public async updateEventChallengeIds(eventId: string, newEventChallengeId: string): Promise<void> {
     return await this.httpService.execute(async () => {
-      await this.documentService.updateArrayPropReference<Event>(
-        'add',
-        'eventChallengeRefs',
-        `${COL_EVENTS}/${eventId}`,
-        `${COL_EVENT_CHALLENGES}/${eventChallengeId}`
+      await this.documentService.updateDocumentAddingToArray<Event, string>(
+        eventId,
+        COL_EVENTS,
+        'eventChallengeIds',
+        newEventChallengeId
       );
     });
   }

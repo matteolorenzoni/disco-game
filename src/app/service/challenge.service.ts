@@ -2,16 +2,13 @@ import { inject, Injectable } from '@angular/core';
 import { FirebaseDocumentService } from './firebase-document.service';
 import { environment } from '../../environments/environment';
 import { ChallengeModel } from '../model/form.model';
-import { challengeConverter, eventChallengeConverter } from '../model/converter';
+import { challengeConverter } from '../model/converter';
 import { LogService } from './log.service';
 import { Challenge } from '../model/challenge.model';
 import { Doc } from '../model/firebase';
 import { HttpService } from './http.service';
-import { DocumentReference } from 'firebase/firestore';
-import { EventChallenge } from '../model/event-challenge.model';
 
 const COL_CHALLENGES = environment.collection.CHALLENGES;
-const COL_EVENT_CHALLENGES = environment.collection.EVENT_CHALLENGES;
 
 @Injectable({
   providedIn: 'root'
@@ -39,32 +36,9 @@ export class ChallengeService {
     });
   }
 
-  public async getChallengesByIds(userIds: string[]): Promise<Doc<Challenge>[]> {
+  public async getChallengesByIds(challengeIds: string[]): Promise<Doc<Challenge>[]> {
     return await this.httpService.execute(async () => {
-      return this.documentService.getDocumentsByIds<Challenge>(COL_CHALLENGES, userIds, challengeConverter);
-    });
-  }
-
-  public async getChallengesByEventChallengeRefs(
-    eventChallengeRefs: DocumentReference<EventChallenge>[]
-  ): Promise<Doc<Challenge>[]> {
-    return await this.httpService.execute(async () => {
-      /* EventChallenge */
-      const eventChallengePromises = eventChallengeRefs.map(
-        async (ref) => await this.documentService.getDocumentsByRefs<EventChallenge>(ref.path, eventChallengeConverter)
-      );
-      const eventChallenge = await Promise.all(eventChallengePromises);
-
-      /* Challenge */
-      const challengePromises = eventChallenge.map(
-        async (doc) =>
-          await this.documentService.getDocumentById<Challenge>(
-            COL_CHALLENGES,
-            doc.props.challengeId,
-            challengeConverter
-          )
-      );
-      return await Promise.all(challengePromises);
+      return this.documentService.getDocumentsByIds<Challenge>(COL_CHALLENGES, challengeIds, challengeConverter);
     });
   }
 
@@ -73,7 +47,7 @@ export class ChallengeService {
     return await this.httpService.execute(async () => {
       await this.documentService.addDocument<Challenge>(COL_CHALLENGES, {
         ...form,
-        eventChallengeRefs: [],
+        eventChallengeIds: [],
         isActive: true,
         updatedAt: new Date()
       });
@@ -89,13 +63,13 @@ export class ChallengeService {
     });
   }
 
-  public async updateEventChallenge(eventId: string, eventChallengeId: string): Promise<void> {
+  public async updateEventChallengeIds(challengeId: string, newEventChallengeId: string): Promise<void> {
     return await this.httpService.execute(async () => {
-      await this.documentService.updateArrayPropReference<Challenge>(
-        'add',
-        'eventChallengeRefs',
-        `${COL_CHALLENGES}/${eventId}`,
-        `${COL_EVENT_CHALLENGES}/${eventChallengeId}`
+      await this.documentService.updateDocumentAddingToArray<Challenge, string>(
+        challengeId,
+        COL_CHALLENGES,
+        'eventChallengeIds',
+        newEventChallengeId
       );
     });
   }

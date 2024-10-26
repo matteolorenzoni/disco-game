@@ -1,6 +1,3 @@
-import { DocumentReference } from 'firebase/firestore';
-import { EventChallenge } from './event-challenge.model';
-
 export type Event = {
   name: string;
   description: string;
@@ -10,7 +7,7 @@ export type Event = {
   startDate: Date;
   endDate: Date;
   teamIds: string[];
-  eventChallengeRefs: DocumentReference<EventChallenge>[];
+  eventChallengeIds: string[];
   isActive: boolean;
   updatedAt: Date;
 };

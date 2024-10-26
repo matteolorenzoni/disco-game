@@ -42,7 +42,7 @@ export class EventListComponent implements OnInit {
 
   /* -------------------- Lifecycle hooks -------------------- */
   async ngOnInit(): Promise<void> {
-    const events = await this.eventService.getEvents();
+    const events = await this.eventService.getAllEvents();
     this.events.set(events);
     this.eventIdSelected.set(events[0].id);
   }
