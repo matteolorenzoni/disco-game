@@ -137,20 +137,23 @@ export class EventListComponent implements OnInit {
   }
 
   protected async findTeam(): Promise<void> {
-    const userId = this.firebaseService.userFirebase()?.uid;
+    const user = this.lsService.getUser();
     const eventId = this.eventIdSelected();
-    if (!userId || !eventId) throw new Error('retry', { cause: 'retry' });
+    if (!user || !eventId) throw new Error('retry', { cause: 'retry' });
 
     /* Controllo se esiste una squadra con quel codice */
     const form = this.findTeamForm.getRawValue();
     const team = await this.teamService.getTeamByCode(form.code);
     if (!team) {
-      this.logService.addLogError(userId, 'Nessuna squadra trovata');
+      this.logService.addLogError(user.id, 'Nessuna squadra trovata');
       return;
     }
 
+    /* Aggiungo user al team */
+    await this.teamService.updateUsers(team, user);
+
     /* Aggiungo partecipazione */
-    await this.addParticipation(eventId, team.id, userId);
+    await this.addParticipation(eventId, team.id, user.id);
 
     /* Log */
     this.logService.addLogConfirm('Ora fai parte della squadra, buona fortuna');

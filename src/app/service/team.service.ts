@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { FirebaseDocumentService } from './firebase-document.service';
 import { environment } from '../../environments/environment';
 import { NewTeamModel } from '../model/form.model';
-import { Team, TeamStatus, TeamUser } from '../model/team.model';
+import { Team, TeamStatus } from '../model/team.model';
 import { Doc } from '../model/firebase';
 import { teamConverter } from '../model/converter';
 import { HttpService } from './http.service';
@@ -119,7 +119,23 @@ export class TeamService {
   }
 
   /* --------------------------- Update ---------------------------*/
-  public async updateTeamPoints(team: Doc<Team>, userId: string, challengeId: string, points: number): Promise<void> {
+  public async updateUsers(team: Doc<Team>, user: Doc<User>): Promise<void> {
+    return await this.httpService.execute(async () => {
+      team.props.userIds = [...team.props.userIds, user.id];
+      team.props.users = [
+        ...team.props.users,
+        {
+          id: user.id,
+          userName: user.props.userName,
+          imageUrl: user.props.imageUrl,
+          challenges: []
+        }
+      ];
+      await this.documentService.updateDocument<Team>(team.id, COL_TEAMS, team.props);
+    });
+  }
+
+  public async updatePoints(team: Doc<Team>, userId: string, challengeId: string, points: number): Promise<void> {
     return await this.httpService.execute(async () => {
       // Aggiorno la squadra
       team.props.totalPoints += points;
@@ -134,12 +150,6 @@ export class TeamService {
         user.challenges.push({ id: challengeId, timestamps: [new Date()], totalPoints: points });
       }
       await this.documentService.updateDocument<Team>(team.id, COL_TEAMS, team.props);
-    });
-  }
-
-  public async updateTeams(userId: string, user: TeamUser): Promise<void> {
-    return await this.httpService.execute(async () => {
-      await this.documentService.updateDocumentAddingToArray<Team, TeamUser>(userId, COL_TEAMS, 'users', user);
     });
   }
 }

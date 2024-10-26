@@ -180,7 +180,7 @@ export class DashboardComponent implements OnInit {
     }
 
     /* Aggiorno il punteggio totale di squadra e del singolo user */
-    await this.teamService.updateTeamPoints(team, qrcode.userId, qrcode.challengeId, qrcode.points);
+    await this.teamService.updatePoints(team, qrcode.userId, qrcode.challengeId, qrcode.points);
     this.logService.addLogConfirm('Sfida confermata');
   }
 
