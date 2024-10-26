@@ -1,58 +1,62 @@
 <app-title [pages]="[{ path: '', label: 'Eventi' }]"></app-title>
 
-@if (mergedEvents() && !mergedEvents()!.length) {
-  <div class="absolute left-0 top-0 -z-10 h-screen p-8 flex-center">
-    <div class="flex-col rounded-lg bg-surface p-4 text-gray-200 shadow backdrop-blur">
-      <h2 class="mb-2 text-lg font-bold">Nessun evento trovato</h2>
-      <p class="text-sm">
-        Al momento non ci sono eventi disponibili. Torna più avanti per scoprire nuovi eventi e competere con il tuo
-        team!
-      </p>
-      <p class="mt-2 text-sm">
-        Crea o unisciti a una squadra per essere pronto a partecipare quando saranno disponibili nuove sfide!
-      </p>
-    </div>
-  </div>
-}
-
-<ul class="flex flex-col gap-6 overflow-hidden">
-  @for (event of mergedEvents(); track event.id) {
-    <li class="relative overflow-hidden rounded-lg shadow">
-      <img class="aspect-video w-full" [src]="event.imageUrl" alt="Immagine evento" />
-      <div class="h-16 w-full"></div>
-      <div class="absolute inset-0 flex h-full w-full bg-gradient-to-b from-transparent from-30% to-black to-70%"></div>
-      <div class="absolute inset-0 flex h-full w-full flex-col gap-2 p-2">
-        <div
-          class="ml-auto flex h-12 w-12 flex-col items-center justify-center rounded bg-white/80 text-black shadow-md backdrop-blur">
-          <p class="text-lg font-bold">{{ event.startDate | date: 'dd' }}</p>
-          <p class="text-xs uppercase text-gray-700">
-            {{ (event.startDate | date: 'MMMM')!.substring(0, 3) }}
-          </p>
-        </div>
-        <div class="mt-auto flex flex-col overflow-hidden rounded-lg border border-black/50 p-2 shadow backdrop-blur">
-          <p class="truncate text-xxs text-gray-400">{{ event.location }}</p>
-          <p class="mb-2 truncate text-xl font-bold text-on-background">{{ event.name }}</p>
-          @if (event.teamId) {
-            <fv-button-outlined
-              class="flex-1"
-              label="Visualizza squadra"
-              twColor="amber"
-              [onClick]="onGoToTeam.bind(this, event.id, event.teamId)">
-            </fv-button-outlined>
-          } @else {
-            <div class="flex gap-2">
-              <fv-button class="flex-1" label="Crea" [onClick]="openNewTeamModal.bind(this, event.id)"></fv-button>
-              <fv-button-outlined
-                class="flex-1"
-                label="Trova"
-                [onClick]="openFindTeamModal.bind(this, event.id)"></fv-button-outlined>
-            </div>
-          }
-        </div>
+@if (mergedEvents(); as mergedEvents) {
+  @if (!mergedEvents.length) {
+    <div class="absolute left-0 top-0 -z-10 h-screen p-8 flex-center">
+      <div class="flex-col rounded-lg bg-surface p-4 text-gray-200 shadow backdrop-blur">
+        <h2 class="mb-2 text-lg font-bold">Nessun evento trovato</h2>
+        <p class="text-sm">
+          Al momento non ci sono eventi disponibili. Torna più avanti per scoprire nuovi eventi e competere con il tuo
+          team!
+        </p>
+        <p class="mt-2 text-sm">
+          Crea o unisciti a una squadra per essere pronto a partecipare quando saranno disponibili nuove sfide!
+        </p>
       </div>
-    </li>
+    </div>
+  } @else {
+    <ul class="flex flex-col gap-6 overflow-hidden">
+      @for (event of mergedEvents; track event.id) {
+        <li class="relative overflow-hidden rounded-lg shadow">
+          <img class="aspect-video w-full" [src]="event.imageUrl" alt="Immagine evento" />
+          <div class="h-16 w-full"></div>
+          <div
+            class="absolute inset-0 flex h-full w-full bg-gradient-to-b from-transparent from-30% to-black to-70%"></div>
+          <div class="absolute inset-0 flex h-full w-full flex-col gap-2 p-2">
+            <div
+              class="ml-auto flex h-12 w-12 flex-col items-center justify-center rounded bg-white/80 text-black shadow-md backdrop-blur">
+              <p class="text-lg font-bold">{{ event.startDate | date: 'dd' }}</p>
+              <p class="text-xs uppercase text-gray-700">
+                {{ (event.startDate | date: 'MMMM')!.substring(0, 3) }}
+              </p>
+            </div>
+            <div
+              class="mt-auto flex flex-col overflow-hidden rounded-lg border border-black/50 p-2 shadow backdrop-blur">
+              <p class="truncate text-xxs text-gray-400">{{ event.location }}</p>
+              <p class="mb-2 truncate text-xl font-bold text-on-background">{{ event.name }}</p>
+              @if (event.teamId) {
+                <fv-button-outlined
+                  class="flex-1"
+                  label="Visualizza squadra"
+                  twColor="amber"
+                  [onClick]="onGoToTeam.bind(this, event.id, event.teamId)">
+                </fv-button-outlined>
+              } @else {
+                <div class="flex gap-2">
+                  <fv-button class="flex-1" label="Crea" [onClick]="openNewTeamModal.bind(this, event.id)"></fv-button>
+                  <fv-button-outlined
+                    class="flex-1"
+                    label="Trova"
+                    [onClick]="openFindTeamModal.bind(this, event.id)"></fv-button-outlined>
+                </div>
+              }
+            </div>
+          </div>
+        </li>
+      }
+    </ul>
   }
-</ul>
+}
 
 <!-- Crea squadra -->
 @if (newTeamModalIsOpen()) {

@@ -19,6 +19,7 @@ import { FirebaseStorage, getStorage } from 'firebase/storage';
 import { environment } from '../../environments/environment';
 import { LoginModel } from '../model/form.model';
 import { LocalStorageService } from './local-storage.service';
+import { IndexedDbService } from './indexed-db.service';
 
 @Injectable({
   providedIn: 'root'
@@ -27,6 +28,7 @@ export class FirebaseService {
   /* Variables */
   readonly router = inject(Router);
   readonly lsService = inject(LocalStorageService);
+  readonly dbService = inject(IndexedDbService);
 
   /* Variables */
   private app: FirebaseApp;
@@ -68,7 +70,8 @@ export class FirebaseService {
 
   public async logout(): Promise<void> {
     await signOut(this.auth);
-    this.lsService.removeUser();
+    this.lsService.clearAll();
+    await this.dbService.clearAll();
   }
 
   public async signUp(email: string, password: string): Promise<UserCredential> {

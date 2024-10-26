@@ -40,6 +40,18 @@ export class IndexedDbService {
   }
 
   /* ---------------------------------- Event ---------------------------------- */
+  public async clearAll(): Promise<void> {
+    if (!this.db) await this.initDB();
+
+    const tx = this.db.transaction(['events', 'teams', 'challenges'], 'readwrite');
+    await Promise.all([
+      tx.objectStore('events').clear(),
+      tx.objectStore('teams').clear(),
+      tx.objectStore('challenges').clear()
+    ]);
+    await tx.done;
+  }
+  /* ---------------------------------- Event ---------------------------------- */
   public async saveEvent(event: Doc<Event>): Promise<void> {
     if (!this.db) await this.initDB();
 

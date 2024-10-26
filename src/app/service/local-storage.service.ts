@@ -92,7 +92,7 @@ export class LocalStorageService {
   /**
    * Rimuove solo gli elementi con il prefisso specificato.
    */
-  private clear(): void {
+  public clearAll(): void {
     const keysToRemove: string[] = [];
 
     // Scorri tutte le chiavi nel Local Storage
