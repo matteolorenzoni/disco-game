@@ -12,7 +12,7 @@ export type MergeChallenge = { id: string } & Pick<
   Challenge,
   'name' | 'description' | 'rules' | 'type' | 'points' | 'complexity'
 > &
-  Pick<EventChallenge, 'eventId' | 'challengeStatus' | 'maxTimes' | 'startDate' | 'endDate'>;
+  Pick<EventChallenge, 'eventId' | 'status' | 'maxTimes' | 'startDate' | 'endDate'>;
 
 export const mergeEvents = (events: Doc<Event>[], teams: Doc<Team>[]): MergeEvent[] => {
   return events.reduce<MergeEvent[]>((acc, event) => {
@@ -46,7 +46,7 @@ export const mergeChallenges = (
         points: matchingChallenge.props.points,
         complexity: matchingChallenge.props.complexity,
         eventId: eventChallenge.props.eventId,
-        challengeStatus: eventChallenge.props.challengeStatus,
+        status: eventChallenge.props.status,
         maxTimes: eventChallenge.props.maxTimes,
         startDate: eventChallenge.props.startDate,
         endDate: eventChallenge.props.endDate

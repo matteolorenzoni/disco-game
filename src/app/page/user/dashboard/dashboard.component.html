@@ -71,7 +71,7 @@
       @for (challenge of mergedChallenges(); track challenge.id) {
         <li class="py-1">
           <button
-            class="relative flex w-full flex-col gap-1 p-2 py-4 hover:rounded-md hover:bg-neutral-950 active:rounded-md active:bg-black"
+            class="relative flex w-full flex-col gap-1 p-2 hover:rounded-md hover:bg-neutral-950 active:rounded-md active:bg-black"
             (click)="onGoToChallenge(challenge.id)">
             <div class="flex w-full items-center gap-4">
               <img class="h-4 w-4" [src]="'images/challenge/' + challenge.type + '.png'" alt="" />
@@ -79,7 +79,7 @@
               <fv-rating [rating]="challenge.complexity"></fv-rating>
             </div>
             <p class="w-full truncate text-start text-xs text-gray-500">{{ challenge.description }}</p>
-            <fv-challenge-status type="effect" [challengeStatus]="challenge.challengeStatus"></fv-challenge-status>
+            <fv-challenge-status type="effect" [challengeStatus]="challenge.status"></fv-challenge-status>
           </button>
         </li>
       }

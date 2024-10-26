@@ -139,7 +139,7 @@ export class EventChallengeComponent implements OnInit {
       challengeId: form.challengeId,
       challengeName: challengeActive.props.name,
       challengeType: challengeActive.props.type,
-      challengeStatus: form.challengeStatus,
+      status: form.challengeStatus,
       maxTimes: form.maxTimes,
       startDate: form.startDate ? new Date(form.startDate) : null,
       endDate: form.endDate ? new Date(form.endDate) : null,
