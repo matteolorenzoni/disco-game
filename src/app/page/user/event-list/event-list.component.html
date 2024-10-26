@@ -1,5 +1,20 @@
 <app-title [pages]="[{ path: '', label: 'Eventi' }]"></app-title>
 
+@if (mergedEvents() && !mergedEvents()!.length) {
+  <div class="absolute left-0 top-0 -z-10 h-screen p-8 flex-center">
+    <div class="flex-col rounded-lg bg-surface p-4 text-gray-200 shadow backdrop-blur">
+      <h2 class="mb-2 text-lg font-bold">Nessun evento trovato</h2>
+      <p class="text-sm">
+        Al momento non ci sono eventi disponibili. Torna più avanti per scoprire nuovi eventi e competere con il tuo
+        team!
+      </p>
+      <p class="mt-2 text-sm">
+        Crea o unisciti a una squadra per essere pronto a partecipare quando saranno disponibili nuove sfide!
+      </p>
+    </div>
+  </div>
+}
+
 <ul class="flex flex-col gap-6 overflow-hidden">
   @for (item of mergedEvents(); track item.event.id) {
     <li class="relative overflow-hidden rounded-lg shadow">

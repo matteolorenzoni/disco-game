@@ -1,90 +1,90 @@
 <app-title [pages]="[{ path: '', label: 'Dashboard' }]"></app-title>
 
-@if (team() !== undefined) {
-  @if (team(); as team) {
-    @if (event(); as event) {
-      <div class="flex flex-col gap-2">
-        <img
-          class="aspect-video w-full rounded-md text-white shadow"
-          [src]="event.props.imageUrl"
-          alt="Immagine evento" />
-        <p class="truncate text-2xl font-bold">{{ event.props.name }}</p>
-        <p class="flex gap-2 text-xs text-neutral-400">
-          <fa-icon class="basis-4" [icon]="ICON_PLACE"></fa-icon>
-          <span>{{ event.props.location }}</span>
-        </p>
-        <p class="flex gap-2 text-xs text-neutral-400">
-          <fa-icon class="basis-4" [icon]="ICON_CALENDAR"></fa-icon>
-          <span>{{ event.props.startDate | date: 'dd/MM/yyyy HH:mm' }}</span>
-          <span>{{ event.props.endDate | date: 'dd/MM/yyyy HH:mm' }}</span>
-        </p>
-        <p class="text-md italic">{{ event.props.description }}</p>
+@if (team() === null) {
+  <div class="absolute left-0 top-0 -z-10 h-screen p-8 flex-center">
+    <div class="flex-col rounded-lg bg-surface p-4 text-gray-200 shadow backdrop-blur">
+      <h2 class="mb-2 text-lg font-bold">Nessuna squadra trovata</h2>
+      <p class="text-sm">
+        Al momento non sei associato a nessuna squadra. Unisciti a noi per partecipare a eventi emozionanti e vivere
+        nuove esperienze!
+      </p>
+      <p class="mt-2 text-sm">Crea una squadra o unisciti a una già esistente per iniziare la tua avventura!</p>
+    </div>
+  </div>
+}
+
+@if (team(); as team) {
+  @if (event(); as event) {
+    <div class="flex flex-col gap-2">
+      <img
+        class="aspect-video w-full rounded-md text-white shadow"
+        [src]="event.props.imageUrl"
+        alt="Immagine evento" />
+      <p class="truncate text-2xl font-bold">{{ event.props.name }}</p>
+      <p class="flex gap-2 text-xs text-neutral-400">
+        <fa-icon class="basis-4" [icon]="ICON_PLACE"></fa-icon>
+        <span>{{ event.props.location }}</span>
+      </p>
+      <p class="flex gap-2 text-xs text-neutral-400">
+        <fa-icon class="basis-4" [icon]="ICON_CALENDAR"></fa-icon>
+        <span>{{ event.props.startDate | date: 'dd/MM/yyyy HH:mm' }}</span>
+        <span>{{ event.props.endDate | date: 'dd/MM/yyyy HH:mm' }}</span>
+      </p>
+      <p class="text-md italic">{{ event.props.description }}</p>
+    </div>
+
+    @if (event.props.startDate.getTime() > NOW.getTime()) {
+      <div class="mt-12 flex flex-col items-center gap-1 py-8">
+        <p class="text-xxs uppercase text-gray-400">Tempo mancante</p>
+        <fv-countdown class="text-5xl text-on-background" [date]="event.props.startDate"></fv-countdown>
       </div>
-
-      @if (event.props.startDate.getTime() > NOW.getTime()) {
-        <div class="mt-12 flex flex-col items-center gap-1 py-8">
-          <p class="text-xxs uppercase text-gray-400">Tempo mancante</p>
-          <fv-countdown class="text-5xl text-on-background" [date]="event.props.startDate"></fv-countdown>
-        </div>
-      }
-
-      <h2 class="mt-12 text-xs uppercase text-primary-400/75">Squadra</h2>
-      <div
-        class="mt-1 flex items-end gap-4 overflow-hidden rounded-md border border-primary-400/50 bg-primary-400/25 p-2 text-primary-100">
-        <div class="flex flex-1 flex-col gap-1">
-          <div class="flex justify-between gap-4">
-            <div class="flex flex-col">
-              <p class="flex gap-2 truncate text-2xl">
-                @if (firebaseService.userFirebase()?.uid === team.props.leaderId) {
-                  <fa-icon [icon]="ICON_CROWN"></fa-icon>
-                }
-                <span> {{ team.props.name }} </span>
-              </p>
-              <div class="flex items-end gap-3 text-xs leading-4">
-                <p class="truncate uppercase">Codice: {{ team.props.code }}</p>
-                <button (click)="onCopyCodeToClipboard()">
-                  <fa-icon [icon]="ICON_CLIPBOARD"></fa-icon>
-                </button>
-              </div>
-            </div>
-            <p class="p-1 text-5xl">{{ team.props.totalPoints }}<span class="text-xs text-primary-200">pt</span></p>
-          </div>
-          <fv-button label="Visualizza" twColor="primary" [onClick]="onGoToTeam.bind(this)"> </fv-button>
-        </div>
-      </div>
-
-      <h2 class="mt-12 text-xs uppercase">Sfide</h2>
-      <ul
-        class="mt-1 flex flex-col divide-y divide-neutral-800 overflow-hidden rounded-md bg-surface/75 p-2 text-on-surface shadow backdrop-blur">
-        @for (item of mergedChallenges(); track item.challenge.id) {
-          <li class="py-1">
-            <button
-              class="relative flex w-full flex-col gap-1 p-2 py-4 hover:rounded-md hover:bg-neutral-950 active:rounded-md active:bg-black"
-              (click)="onGoToChallenge(item.challenge.id)">
-              <div class="flex w-full items-center gap-4">
-                <img class="h-4 w-4" [src]="'images/challenge/' + item.challenge.props.type + '.png'" alt="" />
-                <p class="truncate text-base text-on-surface">{{ item.challenge.props.name }}</p>
-                <fv-rating [rating]="item.challenge.props.complexity"></fv-rating>
-              </div>
-              <p class="w-full truncate text-start text-xs text-gray-500">{{ item.challenge.props.description }}</p>
-              <fv-challenge-status
-                type="effect"
-                [challengeStatus]="item.eventChallenge!.props.challengeStatus"></fv-challenge-status>
-            </button>
-          </li>
-        }
-      </ul>
     }
-  } @else {
-    <div class="absolute left-0 top-0 -z-10 h-screen p-8 flex-center">
-      <div class="flex-col rounded-lg bg-surface p-4 text-gray-200 shadow backdrop-blur">
-        <h2 class="mb-2 text-lg font-bold">Nessuna squadra trovata</h2>
-        <p class="text-sm">
-          Al momento non sei associato a nessuna squadra. Unisciti a noi per partecipare a eventi emozionanti e vivere
-          nuove esperienze!
-        </p>
-        <p class="mt-2 text-sm">Crea una squadra o unisciti a una già esistente per iniziare la tua avventura!</p>
+
+    <h2 class="mt-12 text-xs uppercase text-primary-400/75">Squadra</h2>
+    <div
+      class="mt-1 flex items-end gap-4 overflow-hidden rounded-md border border-primary-400/50 bg-primary-400/25 p-2 text-primary-100">
+      <div class="flex flex-1 flex-col gap-1">
+        <div class="flex justify-between gap-4">
+          <div class="flex flex-col">
+            <p class="flex gap-2 truncate text-2xl">
+              @if (firebaseService.userFirebase()?.uid === team.props.leaderId) {
+                <fa-icon [icon]="ICON_CROWN"></fa-icon>
+              }
+              <span> {{ team.props.name }} </span>
+            </p>
+            <div class="flex items-end gap-3 text-xs leading-4">
+              <p class="truncate uppercase">Codice: {{ team.props.code }}</p>
+              <button (click)="onCopyCodeToClipboard()">
+                <fa-icon [icon]="ICON_CLIPBOARD"></fa-icon>
+              </button>
+            </div>
+          </div>
+          <p class="p-1 text-5xl">{{ team.props.totalPoints }}<span class="text-xs text-primary-200">pt</span></p>
+        </div>
+        <fv-button label="Visualizza" twColor="primary" [onClick]="onGoToTeam.bind(this)"> </fv-button>
       </div>
     </div>
+
+    <h2 class="mt-12 text-xs uppercase">Sfide</h2>
+    <ul
+      class="mt-1 flex flex-col divide-y divide-neutral-800 overflow-hidden rounded-md bg-surface/75 p-2 text-on-surface shadow backdrop-blur">
+      @for (item of mergedChallenges(); track item.challenge.id) {
+        <li class="py-1">
+          <button
+            class="relative flex w-full flex-col gap-1 p-2 py-4 hover:rounded-md hover:bg-neutral-950 active:rounded-md active:bg-black"
+            (click)="onGoToChallenge(item.challenge.id)">
+            <div class="flex w-full items-center gap-4">
+              <img class="h-4 w-4" [src]="'images/challenge/' + item.challenge.props.type + '.png'" alt="" />
+              <p class="truncate text-base text-on-surface">{{ item.challenge.props.name }}</p>
+              <fv-rating [rating]="item.challenge.props.complexity"></fv-rating>
+            </div>
+            <p class="w-full truncate text-start text-xs text-gray-500">{{ item.challenge.props.description }}</p>
+            <fv-challenge-status
+              type="effect"
+              [challengeStatus]="item.eventChallenge!.props.challengeStatus"></fv-challenge-status>
+          </button>
+        </li>
+      }
+    </ul>
   }
 }

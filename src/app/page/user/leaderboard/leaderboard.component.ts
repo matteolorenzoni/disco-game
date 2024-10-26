@@ -21,7 +21,7 @@ export class LeaderboardComponent implements OnInit {
 
   /* Variable */
   mode = signal<'live' | 'general'>('live');
-  events = signal<Doc<Event>[]>([]);
+  events = signal<Doc<Event>[] | undefined>(undefined);
   eventSelected = signal<Doc<Event> | undefined>(undefined);
   eventIndex = signal<number>(0);
 
@@ -43,10 +43,10 @@ export class LeaderboardComponent implements OnInit {
 
   /* -------------------- Methods event -------------------- */
   protected onArrowClick(index: -1 | 1): void {
-    const length = this.events().length;
+    const events = this.events()!;
     this.eventIndex.update((currentIndex) => {
-      const newIndex = (currentIndex + index + length) % length;
-      this.eventSelected.set(this.events()[newIndex]);
+      const newIndex = (currentIndex + index + events.length) % events.length;
+      this.eventSelected.set(events[newIndex]);
       return newIndex;
     });
   }

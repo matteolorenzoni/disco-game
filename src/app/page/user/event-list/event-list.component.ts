@@ -64,7 +64,7 @@ export class EventListComponent implements OnInit {
   readonly logService = inject(LogService);
 
   /* Variables */
-  mergedEvents = signal<{ event: Doc<Event>; team: Doc<Team> | undefined }[]>([]);
+  mergedEvents = signal<{ event: Doc<Event>; team: Doc<Team> | undefined }[] | undefined>(undefined);
   eventIdSelected = signal<string | undefined>(undefined);
 
   /* Variables modal */
@@ -112,7 +112,7 @@ export class EventListComponent implements OnInit {
   /* -------------------- Methods: firebase -------------------- */
   protected async addTeam(): Promise<void> {
     const user = this.lsService.getUser();
-    const item = this.mergedEvents().find((x) => x.event.id === this.eventIdSelected());
+    const item = this.mergedEvents()!.find((x) => x.event.id === this.eventIdSelected());
     if (!user || !item) throw new Error('retry', { cause: 'retry' });
 
     /* Aggiungo Team al DB */
