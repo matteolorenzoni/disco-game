@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -36,7 +36,6 @@ import { MergeEvent, mergeEvents } from '../../../util/merge.util';
   ],
   templateUrl: './event-list.component.html',
   styleUrls: ['./event-list.component.scss'],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EventListComponent implements OnInit {
@@ -82,6 +81,22 @@ export class EventListComponent implements OnInit {
     const userId = this.firebaseService.userFirebase()?.uid;
     if (!userId) throw new Error('retry', { cause: 'retry' });
 
+    /* Inizializzazione indexedDB */
+    await this.initIndexedDb();
+
+    /* Inizializzazione http */
+    await this.initHttp(userId);
+  }
+
+  /* -------------------------- Methods initialization --------------------------  */
+  private async initIndexedDb() {
+    const events = await this.dbService.getEvents();
+    const teams = await this.dbService.getTeams();
+    const mergedEvents = mergeEvents(events, teams);
+    this.mergedEvents.set(mergedEvents);
+  }
+
+  private async initHttp(userId: string) {
     /* Ottengo gli eventi da ieri/oggi in poi */
     /* Ottengo le varie partecipazioni dell'utente */
     const [events, teams] = await Promise.all([

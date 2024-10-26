@@ -5,6 +5,7 @@ import { environment } from '../../environments/environment';
 import { eventChallengeConverter } from '../model/converter';
 import { Doc } from '../model/firebase';
 import { HttpService } from './http.service';
+import { orderBy, where } from 'firebase/firestore';
 
 const COL_EVENT_CHALLENGES = environment.collection.EVENT_CHALLENGES;
 
@@ -21,9 +22,11 @@ export class EventChallengeService {
     props: { key: 'eventId' | 'challengeId'; value: string }[]
   ): Promise<Doc<EventChallenge>[]> {
     return await this.httpService.execute(async () => {
-      return await this.documentService.getDocumentsByProps<EventChallenge>(
+      const valueConstraints = props.map((x) => where(x.key, '==', x.value));
+      const orderConstraints = [orderBy('challengeName', 'asc')];
+      return await this.documentService.getDocumentsWithConstraints<EventChallenge>(
         COL_EVENT_CHALLENGES,
-        props.reduce((acc, { key, value }) => ({ ...acc, [key]: value }), {}),
+        [...valueConstraints, ...orderConstraints],
         eventChallengeConverter
       );
     });
@@ -36,8 +39,7 @@ export class EventChallengeService {
         { eventId, challengeId },
         eventChallengeConverter
       );
-      if (eventChallenges.length === 0) throw new Error('noDocument', { cause: 'noDocument' });
-
+      if (eventChallenges.length !== 1) throw new Error('noDocument', { cause: 'noDocument' });
       return eventChallenges[0];
     });
   }

@@ -61,6 +61,7 @@ export class IndexedDbService {
     if (!this.db) await this.initDB();
 
     const dbEvents = await this.db.getAll('events');
+    dbEvents.sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
     return dbEvents.map(({ id, ...props }) => ({ id, props }));
   }
 
@@ -86,6 +87,7 @@ export class IndexedDbService {
     if (!this.db) await this.initDB();
 
     const dbTeams = await this.db.getAll('teams');
+    dbTeams.sort((a, b) => a.eventStartDate.getTime() - b.eventStartDate.getTime());
     return dbTeams.map(({ id, ...props }) => ({ id, props }));
   }
 
@@ -110,6 +112,7 @@ export class IndexedDbService {
     if (!this.db) await this.initDB();
 
     const dbChallenges = await this.db.getAll('challenges');
+    dbChallenges.sort((a, b) => a.name.localeCompare(b.name));
     return dbChallenges;
   }
 }

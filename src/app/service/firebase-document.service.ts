@@ -76,13 +76,13 @@ export class FirebaseDocumentService {
     return docs;
   }
 
-  public async getDocumentsWithConstraints<T extends Record<string, any> & { isActive: boolean }>(
+  public async getDocumentsWithConstraints<T extends Record<string, any>>(
     collectionName: string,
     queryConstraints: QueryConstraint[],
     converter: FirestoreDataConverter<T>
   ): Promise<Doc<T>[]> {
     const collectionRef = getCollection(this.firebaseService.getDb(), collectionName).withConverter(converter);
-    queryConstraints.push(where('isActive', '==', true));
+    if ('isActive' in ({} as T)) queryConstraints.push(where('isActive', '==', true));
     const q = query(collectionRef, ...queryConstraints);
     const querySnapshot = await getDocs(q);
     const docs = querySnapshot.docs.map((doc) => ({ id: doc.id, props: doc.data() as T }));

@@ -53,7 +53,8 @@ export class EventListComponent implements OnInit {
 
   /* -------------------------- Methods initialization --------------------------  */
   private async initIndexedDb() {
-    this.events.set(await this.dbService.getEvents());
+    const events = await this.dbService.getEvents();
+    this.events.set(events);
   }
 
   private async initHttp() {
