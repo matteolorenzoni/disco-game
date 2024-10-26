@@ -1,14 +1,14 @@
 import { Pipe, type PipeTransform } from '@angular/core';
-import { EventTeamUserChallenge } from '../model/event-team-user.model';
+import { TeamUserChallenge } from '../model/team.model';
 
 @Pipe({
   name: 'getUserTotalPoints',
   standalone: true
 })
 export class GetUserTotalPointsPipe implements PipeTransform {
-  transform(challenges: EventTeamUserChallenge[], challengeId?: string): number {
+  transform(challenges: TeamUserChallenge[], challengeId?: string): number {
     return challenges.reduce((acc, cur) => {
-      if (challengeId && cur.challengeId !== challengeId) return acc;
+      if (challengeId && cur.id !== challengeId) return acc;
       return acc + cur.totalPoints;
     }, 0);
   }

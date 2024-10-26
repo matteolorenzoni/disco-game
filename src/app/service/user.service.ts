@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { User, UserRole } from '../model/user.model';
+import { User, UserParticipation, UserRole } from '../model/user.model';
 import { Doc } from '../model/firebase';
 import { UserModel } from '../model/form.model';
 import { userConverter } from '../model/converter';
@@ -12,7 +12,6 @@ import { HttpService } from './http.service';
 import { generateUniqueCode } from '../util/utils';
 
 const COL_USERS = environment.collection.USERS;
-const COL_EVENT_TEAM_USERS = environment.collection.EVENT_TEAM_USERS;
 
 @Injectable({
   providedIn: 'root'
@@ -77,7 +76,7 @@ export class UserService {
         imageUrl,
         role: UserRole.USER,
         code,
-        eventTeamUserRefs: [],
+        participations: [],
         isActive: true,
         updatedAt: new Date()
       });
@@ -99,13 +98,13 @@ export class UserService {
     });
   }
 
-  public async updateEventTeamUser(userId: string, eventTeamUserId: string): Promise<void> {
+  public async updateEventsAndTeams(eventId: string, teamId: string, userId: string): Promise<void> {
     return await this.httpService.execute(async () => {
-      await this.documentService.updateArrayPropReference<User>(
-        'add',
-        'eventTeamUserRefs',
-        `${COL_USERS}/${userId}`,
-        `${COL_EVENT_TEAM_USERS}/${eventTeamUserId}`
+      await this.documentService.updateDocumentAddingToArray<User, UserParticipation>(
+        userId,
+        COL_USERS,
+        'participations',
+        { eventId, teamId }
       );
     });
   }

@@ -9,12 +9,10 @@ import { faCrown, faPeopleGroup } from '@fortawesome/free-solid-svg-icons';
 import { Doc } from '../../../model/firebase';
 import { Event } from '../../../model/event.model';
 import { FindTeamModel, FromMap, NewTeamModel } from '../../../model/form.model';
-import { CheckExistTeamPipe } from '../../../pipe/check-exist-team.pipe';
 import { EventService } from '../../../service/event.service';
 import { FirebaseService } from '../../../service/firebase.service';
 import { LogService } from '../../../service/log.service';
 import { TeamService } from '../../../service/team.service';
-import { EventTeamUserService } from '../../../service/event-team-user.service';
 import { UserService } from '../../../service/user.service';
 import { FvFieldIconComponent } from '../../../components/fv-field-icon.component';
 import { FvButtonComponent } from '../../../components/fv-button.component';
@@ -22,7 +20,8 @@ import { TitleComponent } from '../../../components/title/title.component';
 import { FvButtonOutlinedComponent } from '../../../components/fv-button-outlined.component';
 import { ChallengeService } from '../../../service/challenge.service';
 import { FvRatingComponent } from '../../../components/fv-rating.component';
-import { EventTeamUser } from '../../../model/event-team-user.model';
+import { Team } from '../../../model/team.model';
+import { LocalStorageService } from '../../../service/local-storage.service';
 
 @Component({
   selector: 'app-event-list',
@@ -35,8 +34,7 @@ import { EventTeamUser } from '../../../model/event-team-user.model';
     FvFieldIconComponent,
     FvButtonComponent,
     FvButtonOutlinedComponent,
-    FvRatingComponent,
-    CheckExistTeamPipe
+    FvRatingComponent
   ],
   templateUrl: './event-list.component.html',
   styleUrls: ['./event-list.component.scss'],
@@ -62,11 +60,11 @@ export class EventListComponent implements OnInit {
   readonly eventService = inject(EventService);
   readonly teamService = inject(TeamService);
   readonly challengeService = inject(ChallengeService);
-  readonly eventTeamUserService = inject(EventTeamUserService);
+  readonly lsService = inject(LocalStorageService);
   readonly logService = inject(LogService);
 
   /* Variables */
-  mergedEvents = signal<{ event: Doc<Event>; eventTeamUser: Doc<EventTeamUser> | undefined }[]>([]);
+  mergedEvents = signal<{ event: Doc<Event>; team: Doc<Team> | undefined }[]>([]);
   eventIdSelected = signal<string | undefined>(undefined);
 
   /* Variables modal */
@@ -98,36 +96,36 @@ export class EventListComponent implements OnInit {
 
     /* Ottengo gli eventi da ieri/oggi in poi */
     /* Ottengo le varie partecipazioni dell'utente */
-    const [events, eventTeamUsers] = await Promise.all([
-      this.eventService.getEventsFromDate(),
-      this.eventTeamUserService.getEventTeamUsersByProp([{ key: 'userId', value: userId }])
+    const [events, teams] = await Promise.all([
+      this.eventService.getActiveEvents(),
+      this.teamService.getActiveTeamsByUserId(userId)
     ]);
 
     /* Metto insieme i dati */
     const mergedEvents = events.map((event) => {
-      const eventTeamUser = eventTeamUsers.find((x) => x.props.eventId === event.id);
-      return { event, eventTeamUser };
+      const team = teams.find((team) => team.props.eventId === event.id);
+      return { event, team };
     });
     this.mergedEvents.set(mergedEvents);
   }
 
   /* -------------------- Methods: firebase -------------------- */
   protected async addTeam(): Promise<void> {
-    const userId = this.firebaseService.userFirebase()?.uid;
-    const eventId = this.eventIdSelected();
-    if (!userId || !eventId) throw new Error('retry', { cause: 'retry' });
+    const user = this.lsService.getUser();
+    const item = this.mergedEvents().find((x) => x.event.id === this.eventIdSelected());
+    if (!user || !item) throw new Error('retry', { cause: 'retry' });
 
     /* Aggiungo Team al DB */
     const form = this.newTeamForm.getRawValue();
-    const team = await this.teamService.addTeam(userId, eventId, form);
-
-    /* Ottengo la data di inizio dell'evento */
-    const events = this.mergedEvents().map((x) => x.event);
-    const currentEvent = events.find((x) => x.id === eventId);
-    if (!currentEvent) throw new Error('retry', { cause: 'retry' });
+    const team = await this.teamService.addTeam(user, item.event, form);
+    if (!team) {
+      const msg = 'Nome già esistente, sceglierne uno nuovo';
+      this.logService.addLogError(this.firebaseService.userFirebase()?.uid, msg);
+      return;
+    }
 
     /* Aggiungo partecipazione */
-    await this.addParticipation(eventId, team.id, userId);
+    await this.addParticipation(item.event.id, team.id, user.id);
 
     /* Log */
     navigator.clipboard.writeText(team.props.code);
@@ -178,27 +176,11 @@ export class EventListComponent implements OnInit {
 
   /* -------------------- Methods: utils -------------------- */
   private async addParticipation(eventId: string, teamId: string, userId: string): Promise<void> {
-    /* Ottengo la data di inizio dell'evento */
-    const events = this.mergedEvents().map((x) => x.event);
-    const currentEvent = events.find((x) => x.id === eventId);
-    if (!currentEvent) throw new Error('retry', { cause: 'retry' });
+    /* Aggiorno User (prop: eventIds e teamIds) */
+    await this.userService.updateEventsAndTeams(eventId, teamId, userId);
 
-    /* Aggiungo EventTeamUser al DB */
-    const eventTeamUserRef = await this.eventTeamUserService.addEventTeamUser(
-      eventId,
-      teamId,
-      userId,
-      currentEvent.props.startDate
-    );
-
-    /* Aggiorno User (prop: eventTeamUserRefs) */
-    await this.userService.updateEventTeamUser(userId, eventTeamUserRef.id);
-
-    /* Aggiorno Event (prop: eventTeamUserRefs) */
-    await this.eventService.updateEventTeamUser(eventId, eventTeamUserRef.id);
-
-    /* Aggiorno Team (prop: eventTeamUserRefs) */
-    await this.teamService.updateEventTeamUser(teamId, eventTeamUserRef.id);
+    /* Aggiorno Event (prop: teamIds) */
+    await this.eventService.updateTeams(eventId, teamId);
 
     /* Chiude modal e reset form */
     this.resetModalsAndForms();

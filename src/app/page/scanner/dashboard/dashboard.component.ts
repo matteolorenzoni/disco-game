@@ -14,7 +14,6 @@ import { EventService } from '../../../service/event.service';
 import { LogService } from '../../../service/log.service';
 import { FirebaseService } from '../../../service/firebase.service';
 import { LocalStorageService } from '../../../service/local-storage.service';
-import { EventTeamUserService } from '../../../service/event-team-user.service';
 import { TeamService } from '../../../service/team.service';
 import { ChallengeService } from '../../../service/challenge.service';
 import { EventChallengeService } from '../../../service/event-challenge.service';
@@ -54,7 +53,6 @@ export class DashboardComponent implements OnInit {
   readonly eventService = inject(EventService);
   readonly teamService = inject(TeamService);
   readonly challengeService = inject(ChallengeService);
-  readonly eventTeamUserService = inject(EventTeamUserService);
   readonly eventChallengeService = inject(EventChallengeService);
   readonly lsService = inject(LocalStorageService);
   readonly logService = inject(LogService);
@@ -142,7 +140,7 @@ export class DashboardComponent implements OnInit {
     this.logService.addLogConfirm('Sfide aggiornate');
   }
 
-  protected async onManualScan() {
+  protected async onManualScan(eventId: string) {
     const { challengeId, userCode } = this.manualScanForm.getRawValue();
 
     /* Ottengo l'user */
@@ -152,22 +150,18 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    /* Ottengo la partecipazione */
-    const eventTeamUsers = await this.eventTeamUserService.getEventTeamUsersByProp([
-      { key: 'eventId', value: this.event()!.id },
-      { key: 'userId', value: user.id }
-    ]);
-    if (eventTeamUsers.length !== 1) {
-      const error = "Il qrcode non può essere inserito manualmente, riprovare con la camera o contattare l'assistenza";
-      this.logService.addLogError(this.firebaseService.userFirebase()?.uid, error);
+    /* Cerco prima se l'user ha una squadra per questo evento */
+    const team = await this.teamService.getActiveTeamByUserAndEventId(user.id, eventId);
+    if (!team) {
+      this.logService.addLogError('', "Squadra non trovata, l'utente non partecipa all'evento");
       return;
     }
 
     /* Eseguo scan */
     const qrcode: Qrcode = {
-      eventId: eventTeamUsers[0].props.eventId,
-      teamId: eventTeamUsers[0].props.teamId,
-      userId: eventTeamUsers[0].props.userId,
+      eventId,
+      teamId: team.id,
+      userId: user.id,
       challengeId,
       points: this.challenges().find((x) => x.id === challengeId)!.props.points
     };
@@ -178,9 +172,15 @@ export class DashboardComponent implements OnInit {
     /* Memorizzo il qrcode per impedire piu scan con lo stesso valore */
     this.lasQrcode.set(qrcode);
 
-    /* Aggiorno eventTeamUser e squadra associati */
-    await this.eventTeamUserService.updateChallengePoints(qrcode);
-    await this.teamService.updateTeamPoints(qrcode.teamId, qrcode.points);
+    /* Cerco prima se l'user ha una squadra per questo evento */
+    const team = await this.teamService.getActiveTeamByUserAndEventId(qrcode.userId, qrcode.eventId);
+    if (!team) {
+      this.logService.addLogError('', "Squadra non trovata, l'utente non partecipa all'evento");
+      return;
+    }
+
+    /* Aggiorno il punteggio totale di squadra e del singolo user */
+    await this.teamService.updateTeamPoints(team, qrcode.userId, qrcode.challengeId, qrcode.points);
     this.logService.addLogConfirm('Sfida confermata');
   }
 
@@ -254,28 +254,5 @@ export class DashboardComponent implements OnInit {
     /* Se esiste, imposta quella come camera selezionata, altrimenti seleziona la prima camera disponibile */
     if (newCamera) this.cameraSelected.set(newCamera);
     else if (cameras.length > 0) this.cameraSelected.set(cameras[0]);
-  }
-
-  async confirm() {
-    const xxx: Qrcode = {
-      eventId: '2Koxu7MeHWC6Inc4E1si',
-      teamId: 'buzgXhyJhg15bDwnKlw7',
-      userId: 'QICMRUe2GnddM9spaeoWh1BpyKx1',
-      challengeId: 'w3ySm68plnGMYzL4aRgC',
-      points: 40
-    };
-
-    /* Verifico che sia il qrcode giusto */
-    const qrcode = JSON.parse(JSON.stringify(xxx));
-    if (!isQrcode(qrcode)) return;
-
-    /* Verifico che non sia lo stesso qrcode precedente */
-    if (isEqualQrcode(qrcode, this.lasQrcode())) return;
-
-    this.lasQrcode.set(qrcode);
-
-    // await this.eventTeamUserService.updateChallengePoints(qrcode);
-    // await this.teamService.updateTeamPoints(qrcode.teamId, qrcode.points);
-    this.logService.addLogConfirm('Sfida confermata');
   }
 }

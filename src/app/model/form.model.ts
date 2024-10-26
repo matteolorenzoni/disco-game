@@ -47,7 +47,6 @@ export type EventChallengeModel = {
 
 export type NewTeamModel = {
   name: string;
-  // description: string;
 };
 
 export type FindTeamModel = {

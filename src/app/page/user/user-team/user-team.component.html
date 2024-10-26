@@ -8,9 +8,11 @@
 
 <div class="mb-8 flex flex-col gap-1 text-center text-on-background">
   <h3 class="flex items-center justify-center gap-4">
-    <span class="text-3xl font-semibold text-white">{{ user()?.props?.name }} {{ user()?.props?.lastName }}</span>
+    <span class="text-3xl font-semibold text-white">
+      {{ teammate()?.props?.name }} {{ teammate()?.props?.lastName }}
+    </span>
   </h3>
-  <p class="text-sm">{{ user()?.props?.userName }}</p>
+  <p class="text-sm">{{ teammate()?.props?.userName }}</p>
 </div>
 
 <ul class="grid grid-cols-[repeat(auto-fill,minmax(6rem,1fr))] gap-4">
@@ -31,8 +33,7 @@
           <p class="truncate text-sm font-semibold text-white">
             <span>
               {{
-                challenge.eventTeamUser?.props?.challenges ?? []
-                  | getUserTotalPoints: challenge.eventChallenge.props.challengeId
+                challenge.teamUser?.challenges ?? [] | getUserTotalPoints: challenge.eventChallenge.props.challengeId
               }}
             </span>
             <span class="text-[8px]">pt</span>

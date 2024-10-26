@@ -137,7 +137,7 @@ export const routes: Routes = [
               import('../page/user/event-list/event-list.component').then((m) => m.EventListComponent)
           },
           {
-            path: ':eventId/:teamId/:userId',
+            path: ':eventId/:teamId/:teammateId',
             loadComponent: () => import('../page/user/user-team/user-team.component').then((m) => m.UserTeamComponent)
           },
           {

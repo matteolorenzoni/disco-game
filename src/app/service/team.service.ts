@@ -2,25 +2,25 @@ import { Injectable, inject } from '@angular/core';
 import { FirebaseDocumentService } from './firebase-document.service';
 import { environment } from '../../environments/environment';
 import { NewTeamModel } from '../model/form.model';
-import { Team, TeamStatus } from '../model/team.model';
+import { Team, TeamStatus, TeamUser } from '../model/team.model';
 import { Doc } from '../model/firebase';
-import { eventTeamUserConverter, teamConverter } from '../model/converter';
-import { EventTeamUserService } from './event-team-user.service';
+import { teamConverter } from '../model/converter';
 import { HttpService } from './http.service';
 import { generateUniqueCode } from '../util/utils';
-import { EventTeamUser } from '../model/event-team-user.model';
+import { limit, where } from 'firebase/firestore';
+import { Event } from '../model/event.model';
+import { User } from '../model/user.model';
+import { dateYesterday } from '../util/type.util';
 
 const COL_TEAMS = environment.collection.TEAMS;
-const COL_EVENT_TEAM_USERS = environment.collection.EVENT_TEAM_USERS;
 
 @Injectable({
   providedIn: 'root'
 })
 export class TeamService {
   /* Services */
-  readonly documentService = inject(FirebaseDocumentService);
-  readonly httpService = inject(HttpService);
-  readonly eventTeamUserService = inject(EventTeamUserService);
+  private readonly documentService = inject(FirebaseDocumentService);
+  private readonly httpService = inject(HttpService);
 
   /* --------------------------- Read ---------------------------*/
   public async getTeamById(teamId: string): Promise<Doc<Team>> {
@@ -29,9 +29,43 @@ export class TeamService {
     });
   }
 
-  public async getTeamsByName(name: string): Promise<Doc<Team>[]> {
+  public async getActiveTeamsByUserId(userId: string, isFirst = false): Promise<Doc<Team>[]> {
     return await this.httpService.execute(async () => {
-      return await this.documentService.getDocumentsByProps<Team>(COL_TEAMS, { name, isActive: true }, teamConverter);
+      const valueConstraints = [
+        where('userIds', 'array-contains', userId),
+        where('eventStartDate', '>=', dateYesterday())
+      ];
+      const limitConstraints = [limit(1)];
+      const constraints = isFirst ? [...valueConstraints, ...limitConstraints] : [...limitConstraints];
+      const userTeams = await this.documentService.getDocumentsWithConstraints<Team>(
+        COL_TEAMS,
+        constraints,
+        teamConverter
+      );
+      return userTeams;
+    });
+  }
+
+  public async getFirstActiveTeamByUserId(userId: string): Promise<Doc<Team> | null> {
+    return await this.httpService.execute(async () => {
+      const teams = await this.getActiveTeamsByUserId(userId, true);
+      return teams.length !== 1 ? null : teams[0];
+    });
+  }
+
+  public async getActiveTeamByUserAndEventId(userId: string, eventId: string): Promise<Doc<Team> | null> {
+    return await this.httpService.execute(async () => {
+      const valueConstraints = [
+        where('eventId', '==', eventId),
+        where('userIds', 'array-contains', userId),
+        where('eventStartDate', '>=', dateYesterday())
+      ];
+      const teams = await this.documentService.getDocumentsWithConstraints<Team>(
+        COL_TEAMS,
+        valueConstraints,
+        teamConverter
+      );
+      return teams.length !== 1 ? null : teams[0];
     });
   }
 
@@ -42,36 +76,36 @@ export class TeamService {
         { code, isActive: true },
         teamConverter
       );
-      return teams.length ? teams[0] : null;
+      return teams.length !== 1 ? null : teams[0];
     });
   }
 
   /* --------------------------- Create ---------------------------*/
-  public async addTeam(userId: string, eventId: string, teamForm: NewTeamModel): Promise<Doc<Team>> {
+  public async addTeam(user: Doc<User>, event: Doc<Event>, teamForm: NewTeamModel): Promise<Doc<Team> | undefined> {
     return await this.httpService.execute(async () => {
       /* Check nome univoco */
-      const teams = await this.getTeamsByName(teamForm.name);
-      const eventTeamUsers = await this.documentService.getDocumentsByIds<EventTeamUser>(
-        COL_EVENT_TEAM_USERS,
-        teams.map((x) => x.id),
-        eventTeamUserConverter
+      const valueConstraints = [where('eventId', '==', event.id), where('name', '==', teamForm.name)];
+      const teamsWithName = await this.documentService.getDocumentsWithConstraints<Team>(
+        COL_TEAMS,
+        valueConstraints,
+        teamConverter
       );
-      if (eventTeamUsers.length > 0) throw new Error('teamNameNotAvailable', { cause: 'teamNameNotAvailable' });
+      if (teamsWithName.length > 0) return; // Nome già esistente
 
       /* Check codice univoco */
       const code = await generateUniqueCode(6, 100, this.getTeamByCode.bind(this));
 
       /* Aggiungo evento al DB */
-      const props = {
-        leaderId: userId,
+      const props: Team = {
+        leaderId: user.id,
         name: teamForm.name,
-        description: '',
         code,
         status: TeamStatus.ACTIVE,
         totalPoints: 0,
-        currentPosition: 0,
-        lastPosition: 0,
-        eventTeamUserRefs: [],
+        eventId: event.id,
+        eventStartDate: event.props.startDate,
+        userIds: [user.id],
+        users: [{ id: user.id, userName: user.props.userName, imageUrl: user.props.imageUrl, challenges: [] }],
         isActive: true,
         updatedAt: new Date()
       };
@@ -83,20 +117,27 @@ export class TeamService {
   }
 
   /* --------------------------- Update ---------------------------*/
-  public async updateTeamPoints(teamId: string, points: number): Promise<void> {
+  public async updateTeamPoints(team: Doc<Team>, userId: string, challengeId: string, points: number): Promise<void> {
     return await this.httpService.execute(async () => {
-      await this.documentService.incrementProp<Team>(teamId, COL_TEAMS, 'totalPoints', points);
+      // Aggiorno la squadra
+      team.props.totalPoints += points;
+
+      // Aggiorno l'user
+      const user = team.props.users.find((user) => user.id === userId)!;
+      const userChallenge = user.challenges.find((challenge) => challenge.id === challengeId);
+      if (userChallenge) {
+        userChallenge.totalPoints += points;
+        userChallenge.timestamps.push(new Date());
+      } else {
+        user.challenges.push({ id: challengeId, timestamps: [new Date()], totalPoints: points });
+      }
+      await this.documentService.updateDocument<Team>(team.id, COL_TEAMS, team.props);
     });
   }
 
-  public async updateEventTeamUser(eventId: string, eventTeamUserId: string): Promise<void> {
+  public async updateTeams(userId: string, user: TeamUser): Promise<void> {
     return await this.httpService.execute(async () => {
-      await this.documentService.updateArrayPropReference<Team>(
-        'add',
-        'eventTeamUserRefs',
-        `${COL_TEAMS}/${eventId}`,
-        `${COL_EVENT_TEAM_USERS}/${eventTeamUserId}`
-      );
+      await this.documentService.updateDocumentAddingToArray<Team, TeamUser>(userId, COL_TEAMS, 'users', user);
     });
   }
 }

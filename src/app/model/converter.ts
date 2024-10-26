@@ -7,10 +7,9 @@ import {
 } from 'firebase/firestore';
 import { Challenge, ChallengeType } from './challenge.model';
 import { Event } from './event.model';
-import { Team, TeamStatus } from './team.model';
+import { Team } from './team.model';
 import { User, UserRole } from './user.model';
 import { ChallengeStatus, EventChallenge } from './event-challenge.model';
-import { EventTeamUser } from './event-team-user.model';
 
 /* ---------------------- Utils ---------------------- */
 // Funzione per convertire stringa ISO in oggetto Date
@@ -34,7 +33,7 @@ export const userConverter: FirestoreDataConverter<User> = {
       imageUrl: user.imageUrl,
       role: user.role,
       code: user.code,
-      eventTeamUserRefs: user.eventTeamUserRefs.map((ref) => ref.path),
+      participations: user.participations,
       isActive: user.isActive,
       updatedAt: user.updatedAt
     };
@@ -50,7 +49,7 @@ export const userConverter: FirestoreDataConverter<User> = {
       imageUrl: data['imageUrl'] || null,
       role: data['role'] as UserRole,
       code: data['code'],
-      eventTeamUserRefs: data['eventTeamUserRefs'],
+      participations: data['participations'],
       isActive: data['isActive'],
       updatedAt: timestampToDate(data['updatedAt'] as Timestamp)
     };
@@ -62,31 +61,67 @@ export const eventConverter: FirestoreDataConverter<Event> = {
     return {
       name: event.name,
       description: event.description,
+      code: event.code,
       location: event.location,
       imageUrl: event.imageUrl,
-      startDate: dateToString(event.startDate),
-      endDate: dateToString(event.endDate),
-      code: event.code,
-      eventTeamUserRefs: event.eventTeamUserRefs.map((ref) => ref.path),
+      startDate: event.startDate,
+      endDate: event.endDate,
+      teamIds: event.teamIds,
       eventChallengeRefs: event.eventChallengeRefs.map((ref) => ref.path),
       isActive: event.isActive,
-      updatedAt: dateToString(event.updatedAt)
+      updatedAt: event.updatedAt
     };
   },
+
   fromFirestore(snapshot: QueryDocumentSnapshot<DocumentData>, options: SnapshotOptions): Event {
     const data = snapshot.data(options)!;
     return {
       name: data['name'],
       description: data['description'],
+      code: data['code'],
       location: data['location'],
       imageUrl: data['imageUrl'],
-      startDate: timestampToDate(data['startDate'] as Timestamp),
-      endDate: timestampToDate(data['endDate'] as Timestamp),
-      eventTeamUserRefs: data['eventTeamUserRefs'],
-      code: data['code'],
+      startDate: timestampToDate(data['startDate']),
+      endDate: timestampToDate(data['endDate']),
+      teamIds: data['teamIds'],
       eventChallengeRefs: data['eventChallengeRefs'],
       isActive: data['isActive'],
-      updatedAt: timestampToDate(data['updatedAt'] as Timestamp)
+      updatedAt: timestampToDate(data['updatedAt'])
+    };
+  }
+};
+
+export const teamConverter: FirestoreDataConverter<Team> = {
+  toFirestore(team: Team): DocumentData {
+    return {
+      name: team.name,
+      code: team.code,
+      leaderId: team.leaderId,
+      status: team.status,
+      totalPoints: team.totalPoints,
+      eventId: team.eventId,
+      eventStartDate: team.eventStartDate,
+      userIds: team.userIds,
+      users: team.users.map((user) => ({ id: user.id, challenges: user.challenges })),
+      isActive: team.isActive,
+      updatedAt: team.updatedAt
+    };
+  },
+
+  fromFirestore(snapshot: QueryDocumentSnapshot<DocumentData>, options: SnapshotOptions): Team {
+    const data = snapshot.data(options)!;
+    return {
+      name: data['name'],
+      code: data['code'],
+      leaderId: data['leaderId'],
+      status: data['status'],
+      totalPoints: data['totalPoints'],
+      eventId: data['eventId'],
+      eventStartDate: timestampToDate(data['eventStartDate']),
+      userIds: data['userIds'],
+      users: data['users'],
+      isActive: data['isActive'],
+      updatedAt: timestampToDate(data['updatedAt'])
     };
   }
 };
@@ -117,70 +152,6 @@ export const challengeConverter: FirestoreDataConverter<Challenge> = {
       complexity: data['complexity'],
       eventChallengeRefs: data['eventChallengeRefs'],
       isActive: data['isActive'],
-      updatedAt: timestampToDate(data['updatedAt'] as Timestamp)
-    };
-  }
-};
-
-export const teamConverter: FirestoreDataConverter<Team> = {
-  toFirestore(team: Team): DocumentData {
-    return {
-      leaderId: team.leaderId,
-      name: team.name,
-      description: team.description,
-      code: team.code,
-      status: team.status,
-      totalPoints: team.totalPoints,
-      currentPosition: team.currentPosition,
-      lastPosition: team.lastPosition,
-      eventTeamUserRefs: team.eventTeamUserRefs.map((ref) => ref.path),
-      isActive: team.isActive,
-      updatedAt: dateToString(team.updatedAt)
-    };
-  },
-
-  fromFirestore(snapshot: QueryDocumentSnapshot<DocumentData>, options: SnapshotOptions): Team {
-    const data = snapshot.data(options)!;
-    return {
-      leaderId: data['leaderId'],
-      name: data['name'],
-      description: data['description'],
-      code: data['code'],
-      status: data['status'] as TeamStatus,
-      totalPoints: data['totalPoints'],
-      currentPosition: data['currentPosition'],
-      lastPosition: data['lastPosition'],
-      eventTeamUserRefs: data['eventTeamUserRefs'],
-      isActive: data['isActive'],
-      updatedAt: timestampToDate(data['updatedAt'] as Timestamp)
-    };
-  }
-};
-
-export const eventTeamUserConverter: FirestoreDataConverter<EventTeamUser> = {
-  toFirestore(game: EventTeamUser): DocumentData {
-    return {
-      eventId: game.eventId,
-      teamId: game.teamId,
-      userId: game.userId,
-      challenges: game.challenges.map((challenge) => ({
-        challengeId: challenge.challengeId,
-        timestamps: challenge.timestamps.map((timestamp) => dateToString(timestamp)),
-        totalPoints: challenge.totalPoints
-      })),
-      eventStartDate: dateToString(game.eventStartDate),
-      updatedAt: dateToString(game.updatedAt)
-    };
-  },
-
-  fromFirestore(snapshot: QueryDocumentSnapshot<DocumentData>, options: SnapshotOptions): EventTeamUser {
-    const data = snapshot.data(options)!;
-    return {
-      eventId: data['eventId'],
-      teamId: data['teamId'],
-      userId: data['userId'],
-      challenges: data['challenges'],
-      eventStartDate: timestampToDate(data['eventStartDate'] as Timestamp),
       updatedAt: timestampToDate(data['updatedAt'] as Timestamp)
     };
   }

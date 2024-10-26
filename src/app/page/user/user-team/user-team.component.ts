@@ -1,4 +1,3 @@
-import { EventTeamUser } from './../../../model/event-team-user.model';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { ChallengeStatus, EventChallenge } from '../../../model/event-challenge.model';
@@ -8,9 +7,10 @@ import { EventChallengeService } from '../../../service/event-challenge.service'
 import { User } from '../../../model/user.model';
 import { UserService } from '../../../service/user.service';
 import { TitleComponent } from '../../../components/title/title.component';
-import { EventTeamUserService } from '../../../service/event-team-user.service';
 import { GetUserTotalPointsPipe } from '../../../pipe/get-user-total-points.pipe';
 import { FvChallengeStatusComponent } from '../../../components/fv-challenge-status.component';
+import { TeamService } from '../../../service/team.service';
+import { TeamUser } from '../../../model/team.model';
 
 @Component({
   selector: 'app-user-team',
@@ -25,16 +25,14 @@ export class UserTeamComponent implements OnInit {
   readonly router = inject(Router);
   readonly route = inject(ActivatedRoute);
   readonly userService = inject(UserService);
-  readonly eventTeamUserService = inject(EventTeamUserService);
+  readonly teamService = inject(TeamService);
   readonly eventChallengeService = inject(EventChallengeService);
 
   /* Variables */
   eventId = signal<string | undefined>(undefined);
   teamId = signal<string | undefined>(undefined);
-  user = signal<Doc<User> | undefined>(undefined);
-  mergedChallenges = signal<{ eventChallenge: Doc<EventChallenge>; eventTeamUser: Doc<EventTeamUser> | undefined }[]>(
-    []
-  );
+  teammate = signal<Doc<User> | undefined>(undefined);
+  mergedChallenges = signal<{ eventChallenge: Doc<EventChallenge>; teamUser: TeamUser | undefined }[]>([]);
 
   /* Enum */
   ChallengeStatus = ChallengeStatus;
@@ -45,8 +43,8 @@ export class UserTeamComponent implements OnInit {
     this.route.paramMap.subscribe(async (params) => {
       const eventId = params.get('eventId');
       const teamId = params.get('teamId');
-      const userId = params.get('userId');
-      if (!eventId || !teamId || !userId) throw new Error('retry', { cause: 'retry' });
+      const teammateId = params.get('teammateId');
+      if (!eventId || !teamId || !teammateId) throw new Error('retry', { cause: 'retry' });
 
       /* Evento */
       this.eventId.set(eventId);
@@ -55,26 +53,22 @@ export class UserTeamComponent implements OnInit {
       this.teamId.set(teamId);
 
       /* Compagno */
-      const user = await this.userService.getUserById(userId);
-      this.user.set(user);
+      const teammate = await this.userService.getUserById(teammateId);
+      this.teammate.set(teammate);
 
       /* Ottengo tutte le sfide di questo evento */
       /* Ottengo ottengo le sfide superate dall'utente per questo evento */
-      const [eventChallenges, eventTeamUsers] = await Promise.all([
-        this.eventChallengeService.getEventChallengesByProp([{ key: 'eventId', value: eventId }]),
-        this.eventTeamUserService.getEventTeamUsersByProp([
-          { key: 'eventId', value: eventId },
-          { key: 'teamId', value: teamId },
-          { key: 'userId', value: userId }
-        ])
+      const [team, eventChallenges] = await Promise.all([
+        this.teamService.getTeamById(teamId),
+        this.eventChallengeService.getEventChallengesByProp([{ key: 'eventId', value: eventId }])
       ]);
 
       /* Metto insieme i dati */
       const mergedChallenges = eventChallenges.map((eventChallenge) => {
-        const eventTeamUser = eventTeamUsers.find((user) =>
-          user.props.challenges.find((challengeData) => challengeData.challengeId === eventChallenge.props.challengeId)
+        const teamUser = Array.from(team.props.users.values()).find((user) =>
+          user.challenges.some((challengeData) => challengeData.id === eventChallenge.props.challengeId)
         );
-        return { eventChallenge, eventTeamUser };
+        return { eventChallenge, teamUser };
       });
       this.mergedChallenges.set(mergedChallenges);
     });

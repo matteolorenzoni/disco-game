@@ -38,7 +38,7 @@
     <form
       class="flex flex-col gap-2 rounded-lg bg-surface p-4 text-on-background shadow"
       [formGroup]="manualScanForm"
-      (ngSubmit)="onManualScan()">
+      (ngSubmit)="onManualScan(event.id)">
       <h1 class="mb-2">Scan manuale</h1>
       <div class="flex h-8 gap-2">
         <select class="h-full w-full flex-1 rounded outline-none" formControlName="challengeId">

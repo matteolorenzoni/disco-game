@@ -17,12 +17,12 @@
         <div class="mt-auto flex flex-col overflow-hidden rounded-lg border border-black/50 p-2 shadow backdrop-blur">
           <p class="truncate text-xxs text-gray-400">{{ item.event.props.location }}</p>
           <p class="mb-2 truncate text-xl font-bold text-on-background">{{ item.event.props.name }}</p>
-          @if (item.eventTeamUser) {
+          @if (item.team) {
             <fv-button-outlined
               class="flex-1"
               label="Visualizza squadra"
               twColor="amber"
-              [onClick]="onGoToTeam.bind(this, item.eventTeamUser.props.eventId, item.eventTeamUser.props.teamId)">
+              [onClick]="onGoToTeam.bind(this, item.event.id, item.team.id)">
             </fv-button-outlined>
           } @else {
             <div class="flex gap-2">

@@ -1,4 +1,3 @@
-import { EventTeamUserService } from './../../../service/event-team-user.service';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { TitleComponent } from '../../../components/title/title.component';
@@ -19,7 +18,6 @@ import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 export class LeaderboardComponent implements OnInit {
   /* Services */
   private readonly eventService = inject(EventService);
-  private readonly eventTeamUserService = inject(EventTeamUserService);
 
   /* Variable */
   mode = signal<'live' | 'general'>('live');
@@ -33,7 +31,7 @@ export class LeaderboardComponent implements OnInit {
 
   /* -------------------- Lifecycle hooks -------------------- */
   async ngOnInit(): Promise<void> {
-    const events = await this.eventService.getEventsFromDate();
+    const events = await this.eventService.getActiveEvents();
     this.events.set(events);
     this.eventSelected.set(events[0]);
   }

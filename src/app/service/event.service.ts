@@ -9,9 +9,9 @@ import { Doc } from '../model/firebase';
 import { HttpService } from './http.service';
 import { generateUniqueCode } from '../util/utils';
 import { orderBy, where } from 'firebase/firestore';
+import { dateYesterday } from '../util/type.util';
 
 const COL_EVENTS = environment.collection.EVENTS;
-const COL_EVENT_TEAM_USERS = environment.collection.EVENT_TEAM_USERS;
 const COL_EVENT_CHALLENGES = environment.collection.EVENT_CHALLENGES;
 
 @Injectable({
@@ -27,13 +27,8 @@ export class EventService {
   //! [INDEX]
   public async getEvents(): Promise<Doc<Event>[]> {
     return await this.httpService.execute(async () => {
-      const valueConstraints = [where('isActive', '==', true)];
       const orderConstraints = [orderBy('startDate', 'asc')];
-      return this.documentService.getDocumentsWithConstraints<Event>(
-        COL_EVENTS,
-        [...valueConstraints, ...orderConstraints],
-        eventConverter
-      );
+      return this.documentService.getDocumentsWithConstraints<Event>(COL_EVENTS, orderConstraints, eventConverter);
     });
   }
 
@@ -45,7 +40,7 @@ export class EventService {
 
   public async getEventByCode(code: string): Promise<Doc<Event> | null> {
     return await this.httpService.execute(async () => {
-      const valueConstraints = [where('code', '==', code), where('isActive', '==', true)];
+      const valueConstraints = [where('code', '==', code)];
       const events = await this.documentService.getDocumentsWithConstraints<Event>(
         COL_EVENTS,
         valueConstraints,
@@ -56,12 +51,9 @@ export class EventService {
   }
 
   //! [INDEX]
-  public async getEventsFromDate(): Promise<Doc<Event>[]> {
+  public async getActiveEvents(): Promise<Doc<Event>[]> {
     return await this.httpService.execute(async () => {
-      const date = new Date();
-      date.setHours(0, 0, 0, 0);
-      date.setDate(date.getDate() - 1);
-      const valueConstraints = [where('startDate', '>=', date), where('isActive', '==', true)];
+      const valueConstraints = [where('startDate', '>=', dateYesterday())];
       const orderConstraints = [orderBy('startDate', 'asc')];
       return this.documentService.getDocumentsWithConstraints<Event>(
         COL_EVENTS,
@@ -82,7 +74,7 @@ export class EventService {
         imageUrl,
         startDate: new Date(form.startDate),
         endDate: new Date(form.endDate),
-        eventTeamUserRefs: [],
+        teamIds: [],
         eventChallengeRefs: [],
         code,
         isActive: true,
@@ -111,14 +103,9 @@ export class EventService {
     });
   }
 
-  public async updateEventTeamUser(eventId: string, eventTeamUserId: string): Promise<void> {
+  public async updateTeams(eventId: string, teamId: string): Promise<void> {
     return await this.httpService.execute(async () => {
-      await this.documentService.updateArrayPropReference<Event>(
-        'add',
-        'eventTeamUserRefs',
-        `${COL_EVENTS}/${eventId}`,
-        `${COL_EVENT_TEAM_USERS}/${eventTeamUserId}`
-      );
+      await this.documentService.updateDocumentAddingToArray<Event, string>(eventId, COL_EVENTS, 'teamIds', teamId);
     });
   }
 

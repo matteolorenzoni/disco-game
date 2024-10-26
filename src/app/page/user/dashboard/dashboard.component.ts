@@ -8,8 +8,6 @@ import { Event } from '../../../model/event.model';
 import { Challenge } from '../../../model/challenge.model';
 import { Team } from '../../../model/team.model';
 import { EventChallenge } from '../../../model/event-challenge.model';
-import { EventTeamUser } from '../../../model/event-team-user.model';
-import { EventTeamUserService } from '../../../service/event-team-user.service';
 import { EventService } from '../../../service/event.service';
 import { FirebaseService } from '../../../service/firebase.service';
 import { TeamService } from '../../../service/team.service';
@@ -42,7 +40,6 @@ export class DashboardComponent implements OnInit {
   /* Services */
   readonly router = inject(Router);
   readonly firebaseService = inject(FirebaseService);
-  readonly eventTeamUserService = inject(EventTeamUserService);
   readonly eventService = inject(EventService);
   readonly teamService = inject(TeamService);
   readonly eventChallengeService = inject(EventChallengeService);
@@ -50,9 +47,8 @@ export class DashboardComponent implements OnInit {
   readonly logService = inject(LogService);
 
   /* Variables */
-  eventTeamUser = signal<Doc<EventTeamUser> | null | undefined>(undefined);
   event = signal<Doc<Event> | undefined>(undefined);
-  team = signal<Doc<Team> | undefined>(undefined);
+  team = signal<Doc<Team> | null | undefined>(undefined);
   mergedChallenges = signal<{ challenge: Doc<Challenge>; eventChallenge: Doc<EventChallenge> | undefined }[]>([]);
 
   /* Constants */
@@ -70,21 +66,19 @@ export class DashboardComponent implements OnInit {
     if (!userId) throw new Error('retry', { cause: 'retry' });
 
     // Recupera le informazioni della partecipazione piu recente
-    const eventTeamUser = await this.eventTeamUserService.getFirstEventTeamUserByUserIdFromDate(userId);
-    this.eventTeamUser.set(eventTeamUser);
+    const team = await this.teamService.getFirstActiveTeamByUserId(userId);
 
     // Se non è stato trovato alcun utente associato al team, termina l'operazione
-    if (!eventTeamUser) return;
+    this.team.set(team);
+    if (!team) return;
 
-    // Recupera l'evento, le sfide associate all'evento e il team a cui l'utente è associato in parallelo
-    const [event, eventChallenges, team] = await Promise.all([
-      this.eventService.getEventById(eventTeamUser.props.eventId),
-      this.eventChallengeService.getEventChallengesByProp([{ key: 'eventId', value: eventTeamUser.props.eventId }]),
-      this.teamService.getTeamById(eventTeamUser.props.teamId)
+    // Recupera l'evento e le sfide associate all'evento in parallelo
+    const [event, eventChallenges] = await Promise.all([
+      this.eventService.getEventById(team.props.eventId),
+      this.eventChallengeService.getEventChallengesByProp([{ key: 'eventId', value: team.props.eventId }])
     ]);
     this.event.set(event);
-    this.team.set(team);
-    if (!event || !eventChallenges || !team) throw new Error('retry', { cause: 'retry' });
+    if (!event || !eventChallenges) throw new Error('retry', { cause: 'retry' });
 
     // Recupera le informazioni dettagliate sulle sfide
     const challenges = await this.challengeService.getChallengesByIds(eventChallenges.map((x) => x.props.challengeId));
@@ -99,19 +93,15 @@ export class DashboardComponent implements OnInit {
 
   /* -------------------------- Methods event--------------------------  */
   protected async onGoToTeam(): Promise<void> {
-    const eventTeamUser = this.eventTeamUser();
-    if (!eventTeamUser) throw new Error('retry', { cause: 'retry' });
-
-    const { eventId, teamId } = eventTeamUser.props;
-    await this.router.navigate([`user/events/${eventId}/${teamId}`]);
+    const team = this.team();
+    if (!team) throw new Error('retry', { cause: 'retry' });
+    await this.router.navigate([`user/events/${team.props.eventId}/${team.id}`]);
   }
 
   protected async onGoToChallenge(challengeId: string): Promise<void> {
-    const eventTeamUser = this.eventTeamUser();
-    if (!eventTeamUser) throw new Error('retry', { cause: 'retry' });
-
-    const { eventId, teamId } = eventTeamUser.props;
-    await this.router.navigate([`user/challenges/${eventId}/${teamId}/${challengeId}`]);
+    const team = this.team();
+    if (!team) throw new Error('retry', { cause: 'retry' });
+    await this.router.navigate([`user/challenges/${team.props.eventId}/${team.id}/${challengeId}`]);
   }
 
   protected onCopyCodeToClipboard(): void {

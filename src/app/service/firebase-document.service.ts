@@ -15,7 +15,6 @@ import {
   updateDoc,
   where,
   collection as getCollection,
-  increment,
   QueryConstraint
 } from 'firebase/firestore';
 import { Doc } from '../model/firebase';
@@ -57,8 +56,6 @@ export class FirebaseDocumentService {
       if (!docSnap.exists()) return acc;
 
       const data = docSnap.data() as T;
-
-      // Controlla se 'isActive' esiste e, se sì, se è falso (se non esiste allora è 'vero')
       if (data.isActive === false) return acc;
 
       return [...acc, { id: docSnap.id, props: data }];
@@ -80,13 +77,13 @@ export class FirebaseDocumentService {
     return docs;
   }
 
-  public async getDocumentsWithConstraints<T extends Record<string, any>>(
+  public async getDocumentsWithConstraints<T extends Record<string, any> & { isActive: boolean }>(
     collectionName: string,
     queryConstraints: QueryConstraint[],
     converter: FirestoreDataConverter<T>
   ): Promise<Doc<T>[]> {
     const collectionRef = getCollection(this.firebaseService.getDb(), collectionName).withConverter(converter);
-    if ('isActive' in ({} as T)) queryConstraints.push(where('isActive', '==', true));
+    queryConstraints.push(where('isActive', '==', true));
     const q = query(collectionRef, ...queryConstraints);
     const querySnapshot = await getDocs(q);
     const docs = querySnapshot.docs.map((doc) => ({ id: doc.id, props: doc.data() as T }));
@@ -104,13 +101,8 @@ export class FirebaseDocumentService {
 
   /* --------------------- Methods CREATE --------------------- */
   public createDocId(collectionName: string): string {
-    // Ottieni un riferimento alla collezione
     const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
-
-    // Genera un nuovo riferimento al documento
     const newDocRef = doc(collectionRef);
-
-    // Restituisci l'ID generato
     return newDocRef.id;
   }
 
@@ -125,7 +117,7 @@ export class FirebaseDocumentService {
     return docRef;
   }
 
-  public async addDocument<T extends Record<string, any>>(
+  public async addDocument<T extends Record<string, any> & { updatedAt: Date }>(
     collectionName: string,
     data: T
   ): Promise<DocumentReference<DocumentData, DocumentData>> {
@@ -142,7 +134,24 @@ export class FirebaseDocumentService {
   ): Promise<void> {
     const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
     const docRef = doc(collectionRef, id);
-    await updateDoc(docRef, { ...data, updatedAt: new Date() } as any);
+    await updateDoc(docRef, {
+      ...data,
+      updatedAt: new Date()
+    });
+  }
+
+  public async updateDocumentAddingToArray<T extends Record<string, any> & { updatedAt: Date }, K>(
+    id: string,
+    collectionName: string,
+    arrayField: keyof T,
+    newValue: K
+  ): Promise<void> {
+    const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
+    const docRef = doc(collectionRef, id);
+    await updateDoc(docRef, {
+      [arrayField]: arrayUnion(newValue),
+      updatedAt: new Date()
+    });
   }
 
   // TODO: vedere se si riesce ad eliminare
@@ -156,20 +165,6 @@ export class FirebaseDocumentService {
     const referencesRef = doc(this.firebaseService.getDb(), referenceId);
     await updateDoc(docRef, {
       [propToUpdate]: operation === 'add' ? arrayUnion(referencesRef) : arrayRemove(referencesRef),
-      updatedAt: new Date()
-    });
-  }
-
-  public async incrementProp<T extends Record<string, any> & { updatedAt: Date }>(
-    id: string,
-    collectionName: string,
-    prop: keyof T,
-    value: number
-  ): Promise<void> {
-    const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
-    const docRef = doc(collectionRef, id);
-    await updateDoc(docRef, {
-      [prop]: increment(value),
       updatedAt: new Date()
     });
   }
