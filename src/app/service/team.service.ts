@@ -8,7 +8,6 @@ import { teamConverter } from '../model/converter';
 import { HttpService } from './http.service';
 import { generateUniqueCode } from '../util/utils';
 import { limit, QueryConstraint, where } from 'firebase/firestore';
-import { Event } from '../model/event.model';
 import { User } from '../model/user.model';
 import { dateYesterday } from '../util/type.util';
 
@@ -79,10 +78,15 @@ export class TeamService {
   }
 
   /* --------------------------- Create ---------------------------*/
-  public async addTeam(user: Doc<User>, event: Doc<Event>, teamForm: NewTeamModel): Promise<Doc<Team> | undefined> {
+  public async addTeam(
+    user: Doc<User>,
+    eventId: string,
+    eventStartDate: Date,
+    teamForm: NewTeamModel
+  ): Promise<Doc<Team> | undefined> {
     return await this.httpService.execute(async () => {
       /* Check nome univoco */
-      const valueConstraints = [where('eventId', '==', event.id), where('name', '==', teamForm.name)];
+      const valueConstraints = [where('eventId', '==', eventId), where('name', '==', teamForm.name)];
       const teamsWithName = await this.documentService.getDocumentsWithConstraints<Team>(
         COL_TEAMS,
         valueConstraints,
@@ -100,8 +104,8 @@ export class TeamService {
         code,
         status: TeamStatus.ACTIVE,
         totalPoints: 0,
-        eventId: event.id,
-        eventStartDate: event.props.startDate,
+        eventId,
+        eventStartDate,
         userIds: [user.id],
         users: [{ id: user.id, userName: user.props.userName, imageUrl: user.props.imageUrl, challenges: [] }],
         isActive: true,

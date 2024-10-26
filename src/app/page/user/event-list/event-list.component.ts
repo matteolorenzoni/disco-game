@@ -3,11 +3,8 @@ import { ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, inject, OnI
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { trigger, transition, style, animate } from '@angular/animations';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faCrown, faPeopleGroup } from '@fortawesome/free-solid-svg-icons';
-import { Doc } from '../../../model/firebase';
-import { Event } from '../../../model/event.model';
 import { FindTeamModel, FromMap, NewTeamModel } from '../../../model/form.model';
 import { EventService } from '../../../service/event.service';
 import { FirebaseService } from '../../../service/firebase.service';
@@ -20,9 +17,9 @@ import { TitleComponent } from '../../../components/title/title.component';
 import { FvButtonOutlinedComponent } from '../../../components/fv-button-outlined.component';
 import { ChallengeService } from '../../../service/challenge.service';
 import { FvRatingComponent } from '../../../components/fv-rating.component';
-import { Team } from '../../../model/team.model';
 import { LocalStorageService } from '../../../service/local-storage.service';
 import { IndexedDbService } from '../../../service/indexed-db.service';
+import { MergeEvent, mergeEvents } from '../../../util/merge.util';
 
 @Component({
   selector: 'app-event-list',
@@ -39,17 +36,6 @@ import { IndexedDbService } from '../../../service/indexed-db.service';
   ],
   templateUrl: './event-list.component.html',
   styleUrls: ['./event-list.component.scss'],
-  animations: [
-    trigger('liAnimation1', [
-      transition(':enter', [
-        style({ transform: 'scale(0.9)', opacity: 0 }), // Inizia con scale ridotto e opacità 0
-        animate('300ms ease-out', style({ transform: 'scale(1)', opacity: 1 })) // Ingrandisci a dimensione naturale
-      ]),
-      transition(':leave', [
-        animate('300ms ease-in', style({ transform: 'scale(0.9)', opacity: 0 })) // Rimpicciolisci a 0.9 e riduci opacità
-      ])
-    ])
-  ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -66,7 +52,7 @@ export class EventListComponent implements OnInit {
   readonly logService = inject(LogService);
 
   /* Variables */
-  mergedEvents = signal<{ event: Doc<Event>; team: Doc<Team> | undefined }[] | undefined>(undefined);
+  mergedEvents = signal<MergeEvent[] | undefined>(undefined);
   eventIdSelected = signal<string | undefined>(undefined);
 
   /* Variables modal */
@@ -104,10 +90,7 @@ export class EventListComponent implements OnInit {
     ]);
 
     /* Metto insieme i dati */
-    const mergedEvents = events.map((event) => {
-      const team = teams.find((team) => team.props.eventId === event.id);
-      return { event, team };
-    });
+    const mergedEvents = mergeEvents(events, teams);
     this.mergedEvents.set(mergedEvents);
 
     /* Aggiorno il indexedDB */
@@ -118,12 +101,12 @@ export class EventListComponent implements OnInit {
   /* -------------------- Methods: firebase -------------------- */
   protected async addTeam(): Promise<void> {
     const user = this.lsService.getUser();
-    const item = this.mergedEvents()!.find((x) => x.event.id === this.eventIdSelected());
-    if (!user || !item) throw new Error('retry', { cause: 'retry' });
+    const event = this.mergedEvents()!.find((x) => x.id === this.eventIdSelected());
+    if (!user || !event) throw new Error('retry', { cause: 'retry' });
 
     /* Aggiungo Team al DB */
     const form = this.newTeamForm.getRawValue();
-    const team = await this.teamService.addTeam(user, item.event, form);
+    const team = await this.teamService.addTeam(user, event.id, event.startDate, form);
     if (!team) {
       const msg = 'Nome già esistente, sceglierne uno nuovo';
       this.logService.addLogError(this.firebaseService.userFirebase()?.uid, msg);
@@ -131,7 +114,7 @@ export class EventListComponent implements OnInit {
     }
 
     /* Aggiungo partecipazione */
-    await this.addParticipation(item.event.id, team.id, user.id);
+    await this.addParticipation(event.id, team.id, user.id);
 
     /* Log */
     navigator.clipboard.writeText(team.props.code);

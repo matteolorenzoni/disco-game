@@ -68,20 +68,18 @@
     <h2 class="mt-12 text-xs uppercase">Sfide</h2>
     <ul
       class="mt-1 flex flex-col divide-y divide-neutral-800 overflow-hidden rounded-md bg-surface/75 p-2 text-on-surface shadow backdrop-blur">
-      @for (item of mergedChallenges(); track item.challenge.id) {
+      @for (challenge of mergedChallenges(); track challenge.id) {
         <li class="py-1">
           <button
             class="relative flex w-full flex-col gap-1 p-2 py-4 hover:rounded-md hover:bg-neutral-950 active:rounded-md active:bg-black"
-            (click)="onGoToChallenge(item.challenge.id)">
+            (click)="onGoToChallenge(challenge.id)">
             <div class="flex w-full items-center gap-4">
-              <img class="h-4 w-4" [src]="'images/challenge/' + item.challenge.props.type + '.png'" alt="" />
-              <p class="truncate text-base text-on-surface">{{ item.challenge.props.name }}</p>
-              <fv-rating [rating]="item.challenge.props.complexity"></fv-rating>
+              <img class="h-4 w-4" [src]="'images/challenge/' + challenge.type + '.png'" alt="" />
+              <p class="truncate text-base text-on-surface">{{ challenge.name }}</p>
+              <fv-rating [rating]="challenge.complexity"></fv-rating>
             </div>
-            <p class="w-full truncate text-start text-xs text-gray-500">{{ item.challenge.props.description }}</p>
-            <fv-challenge-status
-              type="effect"
-              [challengeStatus]="item.eventChallenge!.props.challengeStatus"></fv-challenge-status>
+            <p class="w-full truncate text-start text-xs text-gray-500">{{ challenge.description }}</p>
+            <fv-challenge-status type="effect" [challengeStatus]="challenge.challengeStatus"></fv-challenge-status>
           </button>
         </li>
       }

@@ -19,7 +19,7 @@ import { LogService } from './../../../service/log.service';
 import { FvChallengeStatusComponent } from '../../../components/fv-challenge-status.component';
 import { IndexedDbService } from '../../../service/indexed-db.service';
 import { LocalStorageService } from '../../../service/local-storage.service';
-import { MergeChallenge, mergeChallenge } from '../../../util/merge.util';
+import { MergeChallenge, mergeChallenges } from '../../../util/merge.util';
 
 @Component({
   selector: 'app-dashboard',
@@ -116,7 +116,7 @@ export class DashboardComponent implements OnInit {
 
     // Recupera le informazioni dettagliate sulle sfide
     const challenges = await this.challengeService.getChallengesByIds(eventChallenges.map((x) => x.props.challengeId));
-    const mergedChallenges = mergeChallenge(challenges, eventChallenges);
+    const mergedChallenges = mergeChallenges(challenges, eventChallenges);
     this.mergedChallenges.set(mergedChallenges);
 
     /* Aggiorno il local storage indexedDB */

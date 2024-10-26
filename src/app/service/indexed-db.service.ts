@@ -3,13 +3,13 @@ import { openDB, IDBPDatabase, DBSchema } from 'idb';
 import { Event } from '../model/event.model';
 import { Doc, IndexDB } from '../model/firebase';
 import { Team } from '../model/team.model';
-import { Challenge } from '../model/challenge.model';
+import { MergeChallenge } from '../util/merge.util';
 
 // Definizione dello schema per IndexedDB
 interface AppDB extends DBSchema {
   events: { key: string; value: IndexDB<Event> };
   teams: { key: string; value: IndexDB<Team> };
-  challenges: { key: string; value: IndexDB<Challenge> };
+  challenges: { key: string; value: MergeChallenge };
 }
 
 @Injectable({
@@ -90,14 +90,13 @@ export class IndexedDbService {
   }
 
   /* ---------------------------------- Challenge ---------------------------------- */
-  public async saveChallenge(challenge: Doc<Challenge>): Promise<void> {
+  public async saveChallenge(challenge: MergeChallenge): Promise<void> {
     if (!this.db) await this.initDB();
 
-    const challengeToSave: IndexDB<Challenge> = { id: challenge.id, ...challenge.props };
-    await this.db.put('challenges', challengeToSave);
+    await this.db.put('challenges', challenge);
   }
 
-  public async saveChallenges(items: Doc<Challenge>[]): Promise<void> {
+  public async saveChallenges(items: MergeChallenge[]): Promise<void> {
     if (!this.db) await this.initDB();
 
     const tx = this.db.transaction('challenges', 'readwrite');
@@ -107,10 +106,10 @@ export class IndexedDbService {
     await tx.done;
   }
 
-  public async getChallenges(): Promise<Doc<Challenge>[]> {
+  public async getChallenges(): Promise<MergeChallenge[]> {
     if (!this.db) await this.initDB();
 
     const dbChallenges = await this.db.getAll('challenges');
-    return dbChallenges.map(({ id, ...props }) => ({ id, props }));
+    return dbChallenges;
   }
 }
