@@ -1,11 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { TitleComponent } from '../../../components/title/title.component';
 import { Event } from '../../../model/event.model';
 import { Doc } from '../../../model/firebase';
 import { EventService } from '../../../service/event.service';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import { IndexedDbService } from '../../../service/indexed-db.service';
+import { LeaderboardService } from '../../../service/leadeboard.service';
+import { Team } from '../../../model/team.model';
+import { LogService } from '../../../service/log.service';
 
 @Component({
   selector: 'app-leaderboard',
@@ -15,39 +19,131 @@ import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
   styleUrls: ['./leaderboard.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LeaderboardComponent implements OnInit {
+export class LeaderboardComponent implements OnInit, OnDestroy {
   /* Services */
   private readonly eventService = inject(EventService);
+  private readonly leaderboardService = inject(LeaderboardService);
+  private readonly dbService = inject(IndexedDbService);
+  private readonly logService = inject(LogService);
 
   /* Variable */
   mode = signal<'live' | 'general'>('live');
   events = signal<Doc<Event>[] | undefined>(undefined);
   eventSelected = signal<Doc<Event> | undefined>(undefined);
-  eventIndex = signal<number>(0);
+  teamsTop10 = signal<Doc<Team>[]>([]);
+  teamsTotal = signal<Doc<Team>[]>([]);
+  teams = computed(() => (this.mode() === 'live' ? this.teamsTop10() : this.teamsTotal()));
+  secondsLeft = signal<number | undefined>(undefined);
+
+  /* Ref */
+  unsubscribe?: () => void;
+  timeout?: ReturnType<typeof setTimeout>;
 
   /* Icons */
   ICON_LEFT = faArrowLeft;
   ICON_RIGHT = faArrowRight;
 
+  /* ---------------------- Constructor ---------------------- */
+  constructor() {
+    /* Aggiorno ad ogni cambiamento di evento o mode */
+    effect(
+      async () => {
+        const eventSelected = this.eventSelected();
+        const mode = this.mode();
+        if (!eventSelected) return;
+
+        this.resetRefs();
+
+        if (mode === 'live') {
+          // Ottengo il live delle prime 10 squadre
+          this.subscribeLeaderboard(eventSelected.id);
+        } else {
+          // Ottengo tutte le squadre (una volta al minuto)
+          await this.getLeaderboardEveryMinute(eventSelected.id);
+        }
+      },
+      { allowSignalWrites: true }
+    );
+  }
+
   /* -------------------- Lifecycle hooks -------------------- */
   async ngOnInit(): Promise<void> {
+    /* Inizializzazione indexedDB */
+    await this.initIndexedDb();
+
+    /* Inizializzazione http */
+    await this.initHttp();
+  }
+
+  ngOnDestroy(): void {
+    this.resetRefs();
+  }
+
+  /* -------------------------- Methods initialization --------------------------  */
+  private async initIndexedDb() {
+    const events = await this.dbService.getEvents();
+    this.events.set(events);
+    this.eventSelected.set(events[0]);
+    if (!events[0]) return;
+
+    const leaderboard = await this.dbService.getLeaderboard();
+    this.teamsTotal.set(leaderboard.filter((x) => x.props.eventId === events[0].id));
+  }
+
+  private async initHttp() {
     const events = await this.eventService.getActiveEvents();
     this.events.set(events);
     this.eventSelected.set(events[0]);
+
+    /* Aggiorno il indexedDB */
+    this.dbService.saveEvents(events);
   }
 
   /* -------------------- Methods firebase -------------------- */
-  private async getLeaderboard(): Promise<void> {
-    // test
+  private async getLeaderboardEveryMinute(eventId: string): Promise<void> {
+    const leaderboard = await this.dbService.getLeaderboard();
+    this.teamsTotal.set(leaderboard.filter((x) => x.props.eventId === eventId));
+
+    // Attivo l'intervallo
+    this.timeout = setInterval(async () => {
+      const now = new Date();
+      const seconds = now.getSeconds();
+      this.secondsLeft.set(60 - seconds);
+      if (seconds !== 0) return;
+
+      const teams = await this.leaderboardService.getActiveTeamsByEventId(eventId);
+      this.teamsTotal.set(teams);
+      this.dbService.saveLeaderboard(teams); // Aggiorno il indexedDB
+      this.logService.addLogConfirm('Classifica aggiornata');
+    }, 1000);
+  }
+
+  private subscribeLeaderboard(eventId: string): void {
+    this.unsubscribe = this.leaderboardService.subscribeToActiveTeamsByEventIdTop10(eventId, (teams) => {
+      this.teamsTop10.set(teams);
+    });
   }
 
   /* -------------------- Methods event -------------------- */
   protected onArrowClick(index: -1 | 1): void {
+    this.resetTeams();
+
     const events = this.events()!;
-    this.eventIndex.update((currentIndex) => {
-      const newIndex = (currentIndex + index + events.length) % events.length;
-      this.eventSelected.set(events[newIndex]);
-      return newIndex;
-    });
+    const currentIndex = events.indexOf(this.eventSelected()!);
+    const newIndex = (currentIndex + index + events.length) % events.length;
+    this.eventSelected.set(events[newIndex]);
+  }
+
+  /* -------------------- Methods util -------------------- */
+  private resetTeams(): void {
+    this.teamsTop10.set([]);
+    this.teamsTotal.set([]);
+  }
+
+  private resetRefs(): void {
+    // Interrompo subscribe di liveTop10 e timer di general
+    if (this.unsubscribe) this.unsubscribe();
+    if (this.timeout) clearInterval(this.timeout);
+    this.secondsLeft.set(undefined);
   }
 }

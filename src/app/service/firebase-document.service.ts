@@ -14,7 +14,8 @@ import {
   updateDoc,
   where,
   collection as getCollection,
-  QueryConstraint
+  QueryConstraint,
+  onSnapshot
 } from 'firebase/firestore';
 import { Doc } from '../model/firebase';
 import { FirebaseService } from './firebase.service';
@@ -88,6 +89,26 @@ export class FirebaseDocumentService {
     const querySnapshot = await getDocs(q);
     const docs = querySnapshot.docs.map((doc) => ({ id: doc.id, props: doc.data() as T }));
     return docs;
+  }
+
+  /* --------------------- Methods READ subscribe --------------------- */
+  public subscribeToDocumentsWithConstraints<T extends Record<string, any>>(
+    collectionName: string,
+    queryConstraints: QueryConstraint[],
+    converter: FirestoreDataConverter<T>,
+    onUpdate: (documents: Doc<T>[]) => void,
+    isActiveConstraint = true
+  ): () => void {
+    const collectionRef = getCollection(this.firebaseService.getDb(), collectionName).withConverter(converter);
+    if (isActiveConstraint) queryConstraints.push(where('isActive', '==', true));
+    const q = query(collectionRef, ...queryConstraints);
+    return onSnapshot(q, (querySnapshot) => {
+      const documents: Doc<T>[] = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        props: doc.data() as T
+      }));
+      onUpdate(documents);
+    });
   }
 
   /* --------------------- Methods CREATE --------------------- */

@@ -10,6 +10,7 @@ interface AppDB extends DBSchema {
   events: { key: string; value: IndexDB<Event> };
   teams: { key: string; value: IndexDB<Team> };
   challenges: { key: string; value: MergeChallenge };
+  leaderboard: { key: string; value: IndexDB<Team> };
 }
 
 @Injectable({
@@ -35,6 +36,9 @@ export class IndexedDbService {
         if (!db.objectStoreNames.contains('challenges')) {
           db.createObjectStore('challenges', { keyPath: 'id' });
         }
+        if (!db.objectStoreNames.contains('leaderboard')) {
+          db.createObjectStore('leaderboard', { keyPath: 'id' });
+        }
       }
     });
   }
@@ -43,11 +47,12 @@ export class IndexedDbService {
   public async clearAll(): Promise<void> {
     if (!this.db) await this.initDB();
 
-    const tx = this.db.transaction(['events', 'teams', 'challenges'], 'readwrite');
+    const tx = this.db.transaction(['events', 'teams', 'challenges', 'leaderboard'], 'readwrite');
     await Promise.all([
       tx.objectStore('events').clear(),
       tx.objectStore('teams').clear(),
-      tx.objectStore('challenges').clear()
+      tx.objectStore('challenges').clear(),
+      tx.objectStore('leaderboard').clear()
     ]);
     await tx.done;
   }
@@ -126,5 +131,31 @@ export class IndexedDbService {
     const dbChallenges = await this.db.getAll('challenges');
     dbChallenges.sort((a, b) => a.name.localeCompare(b.name));
     return dbChallenges;
+  }
+
+  /* ---------------------------------- Leaderboard ---------------------------------- */
+  public async saveLeaderboard(items: Doc<Team>[]): Promise<void> {
+    if (!this.db) await this.initDB();
+
+    const tx = this.db.transaction('leaderboard', 'readwrite');
+    await tx.store.clear();
+    const savePromises = items.map((team) => {
+      const teamToSave: IndexDB<Team> = { id: team.id, ...team.props };
+      this.db.put('leaderboard', teamToSave);
+    });
+    await Promise.all(savePromises);
+    await tx.done;
+  }
+
+  public async getLeaderboard(): Promise<Doc<Team>[]> {
+    if (!this.db) await this.initDB();
+
+    const dbTeams = await this.db.getAll('leaderboard');
+    dbTeams.sort((a, b) => {
+      const pointsDiff = b.totalPoints - a.totalPoints;
+      if (pointsDiff !== 0) return pointsDiff;
+      return a.name.localeCompare(b.name);
+    });
+    return dbTeams.map(({ id, ...props }) => ({ id, props }));
   }
 }

@@ -17,9 +17,13 @@
 
 @if (eventSelected(); as eventSelected) {
   <div class="flex w-full justify-between gap-4 p-2">
-    <button (click)="onArrowClick(-1)"><fa-icon [icon]="ICON_LEFT"></fa-icon></button>
+    <button class="disabled:text-gray-800" (click)="onArrowClick(-1)" [disabled]="events()!.length === 1">
+      <fa-icon [icon]="ICON_LEFT"></fa-icon>
+    </button>
     <div>{{ eventSelected.props.name }}</div>
-    <button (click)="onArrowClick(+1)"><fa-icon [icon]="ICON_RIGHT"></fa-icon></button>
+    <button class="disabled:text-gray-800" (click)="onArrowClick(1)" [disabled]="events()!.length === 1">
+      <fa-icon [icon]="ICON_RIGHT"></fa-icon>
+    </button>
   </div>
 
   <div class="mt-2">
@@ -48,4 +52,23 @@
       </ul>
     </div>
   </div>
+
+  @if (mode() === 'general') {
+    <div class="mx-auto -mb-4 mt-2 h-6 w-fit min-w-20 rounded bg-white/10 px-2 py-1 shadow backdrop-blur">
+      @if (secondsLeft() !== undefined) {
+        <p class="animate-pulse text-center text-xs text-on-surface">{{ secondsLeft() }} secondi</p>
+      } @else {
+        <p class="animate-pulse text-center text-xs">...</p>
+      }
+    </div>
+  }
+
+  <ul class="mt-8 flex flex-col divide-y divide-neutral-800">
+    @for (team of teams(); track team.id) {
+      <li class="flex justify-between py-2 text-base">
+        <p>{{ team.props.name }}</p>
+        <p>{{ team.props.totalPoints }}<span class="text-xs text-gray-300">pt</span></p>
+      </li>
+    }
+  </ul>
 }
