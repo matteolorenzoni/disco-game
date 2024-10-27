@@ -28,6 +28,7 @@ export class TeamService {
     });
   }
 
+  //! [INDEX]
   public async getActiveTeamsByUserId(userId: string, constraints: QueryConstraint[] = []): Promise<Doc<Team>[]> {
     return await this.httpService.execute(async () => {
       const valueConstraints = [

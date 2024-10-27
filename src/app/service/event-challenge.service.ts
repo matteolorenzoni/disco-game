@@ -18,6 +18,7 @@ export class EventChallengeService {
   readonly httpService = inject(HttpService);
 
   /* --------------------------- Read ---------------------------*/
+  //! [INDEX]
   public async getEventChallengesByProp(
     props: { key: 'eventId' | 'challengeId'; value: string }[]
   ): Promise<Doc<EventChallenge>[]> {
