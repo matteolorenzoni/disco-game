@@ -124,8 +124,8 @@ export class DashboardComponent implements OnInit {
 
     /* Aggiorno il local storage indexedDB */
     this.lsService.setUserDashboardTeamId(team.id);
-    this.dbService.saveTeam(team);
-    this.dbService.saveEvent(event);
+    this.dbService.saveTeams([team]);
+    this.dbService.saveEvents([event]);
     this.dbService.saveChallenges(mergedChallenges);
   }
 

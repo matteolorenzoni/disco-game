@@ -57,19 +57,15 @@ export class IndexedDbService {
     await tx.done;
   }
   /* ---------------------------------- Event ---------------------------------- */
-  public async saveEvent(event: Doc<Event>): Promise<void> {
-    if (!this.db) await this.initDB();
-
-    const eventToSave: IndexDB<Event> = { id: event.id, ...event.props };
-    await this.db.put('events', eventToSave);
-  }
-
   public async saveEvents(items: Doc<Event>[]): Promise<void> {
     if (!this.db) await this.initDB();
 
     const tx = this.db.transaction('events', 'readwrite');
     await tx.store.clear();
-    const savePromises = items.map((item) => this.saveEvent(item));
+    const savePromises = items.map((event) => {
+      const eventToSave: IndexDB<Event> = { id: event.id, ...event.props };
+      this.db.put('events', eventToSave);
+    });
     await Promise.all(savePromises);
     await tx.done;
   }
@@ -83,19 +79,15 @@ export class IndexedDbService {
   }
 
   /* ---------------------------------- Team ---------------------------------- */
-  public async saveTeam(team: Doc<Team>): Promise<void> {
-    if (!this.db) await this.initDB();
-
-    const teamToSave: IndexDB<Team> = { id: team.id, ...team.props };
-    await this.db.put('teams', teamToSave);
-  }
-
   public async saveTeams(items: Doc<Team>[]): Promise<void> {
     if (!this.db) await this.initDB();
 
     const tx = this.db.transaction('teams', 'readwrite');
     await tx.store.clear();
-    const savePromises = items.map((item) => this.saveTeam(item));
+    const savePromises = items.map((team) => {
+      const teamToSave: IndexDB<Team> = { id: team.id, ...team.props };
+      this.db.put('teams', teamToSave);
+    });
     await Promise.all(savePromises);
     await tx.done;
   }
@@ -109,18 +101,14 @@ export class IndexedDbService {
   }
 
   /* ---------------------------------- Challenge ---------------------------------- */
-  public async saveChallenge(challenge: MergeChallenge): Promise<void> {
-    if (!this.db) await this.initDB();
-
-    await this.db.put('challenges', challenge);
-  }
-
   public async saveChallenges(items: MergeChallenge[]): Promise<void> {
     if (!this.db) await this.initDB();
 
     const tx = this.db.transaction('challenges', 'readwrite');
     await tx.store.clear();
-    const savePromises = items.map((item) => this.saveChallenge(item));
+    const savePromises = items.map((mergedChallenges) => {
+      this.db.put('challenges', mergedChallenges);
+    });
     await Promise.all(savePromises);
     await tx.done;
   }
