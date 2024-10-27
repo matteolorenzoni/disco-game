@@ -98,14 +98,27 @@ export class UserService {
     });
   }
 
-  public async updateEventsAndTeams(eventId: string, teamId: string, userId: string): Promise<void> {
+  public async updateEventsAndTeams(
+    operation: 'ADD' | 'REMOVE',
+    userId: string,
+    eventId: string,
+    teamId: string
+  ): Promise<void> {
     return await this.httpService.execute(async () => {
-      await this.documentService.updateDocumentAddingToArray<User, UserParticipation>(
-        userId,
-        COL_USERS,
-        'participations',
-        { eventId, teamId }
-      );
+      const user = await this.getUserById(userId);
+
+      if (operation === 'ADD') {
+        const participationExists = user.props.participations.some((x) => x.eventId === eventId && x.teamId === teamId);
+        if (participationExists) return;
+
+        user.props.participations = [...user.props.participations, { eventId, teamId }];
+      } else {
+        user.props.participations = user.props.participations.filter(
+          (x) => x.eventId !== eventId || x.teamId !== teamId
+        );
+      }
+
+      await this.documentService.updateDocument<User>(userId, COL_USERS, user.props);
     });
   }
 }

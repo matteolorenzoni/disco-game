@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faCalendar, faClipboard, faCrown, faLocationPin } from '@fortawesome/free-solid-svg-icons';
+import { faCalendar, faClipboard, faCrown, faLocationPin, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { Doc } from '../../../model/firebase';
 import { Event } from '../../../model/event.model';
 import { Team } from '../../../model/team.model';
@@ -20,6 +20,7 @@ import { FvChallengeStatusComponent } from '../../../components/fv-challenge-sta
 import { IndexedDbService } from '../../../service/indexed-db.service';
 import { LocalStorageService } from '../../../service/local-storage.service';
 import { MergeChallenge, mergeChallenges } from '../../../util/merge.util';
+import { UserService } from '../../../service/user.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -41,6 +42,7 @@ export class DashboardComponent implements OnInit {
   /* Services */
   readonly router = inject(Router);
   readonly firebaseService = inject(FirebaseService);
+  readonly userService = inject(UserService);
   readonly eventService = inject(EventService);
   readonly teamService = inject(TeamService);
   readonly eventChallengeService = inject(EventChallengeService);
@@ -62,6 +64,7 @@ export class DashboardComponent implements OnInit {
   ICON_PLACE = faLocationPin;
   ICON_CROWN = faCrown;
   ICON_CLIPBOARD = faClipboard;
+  ICON_TRASH = faTrash;
 
   /* -------------------------- Lifecycle hooks --------------------------  */
   async ngOnInit(): Promise<void> {
@@ -131,6 +134,25 @@ export class DashboardComponent implements OnInit {
     const team = this.team();
     if (!team) throw new Error('retry', { cause: 'retry' });
     await this.router.navigate([`user/events/${team.props.eventId}/${team.id}`]);
+  }
+
+  protected async onEscapeToTeam(): Promise<void> {
+    const userId = this.firebaseService.userFirebase()?.uid;
+    const event = this.event();
+    const team = this.team();
+    if (!userId || !event || !team) throw new Error('retry', { cause: 'retry' });
+
+    const userConfirm = confirm('Sei sicuro di voler uscire dalla squadra?');
+    if (!userConfirm) return;
+
+    /* Aggiorno squadra */
+    await this.teamService.deleteFromTeam(team, userId);
+
+    /* Aggiorno User (prop: eventIds e teamIds) */
+    await this.userService.updateEventsAndTeams('REMOVE', userId, event.id, team.id);
+
+    /* Log */
+    this.logService.addLogConfirm('Non fai piu parte della squadra');
   }
 
   protected async onGoToChallenge(challengeId: string): Promise<void> {

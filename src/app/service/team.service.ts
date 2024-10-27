@@ -153,4 +153,13 @@ export class TeamService {
       await this.documentService.updateDocument<Team>(team.id, COL_TEAMS, team.props);
     });
   }
+
+  /* --------------------------- Delete ---------------------------*/
+  public async deleteFromTeam(team: Doc<Team>, userId: string): Promise<void> {
+    return await this.httpService.execute(async () => {
+      team.props.userIds = team.props.userIds.filter((x) => x !== userId);
+      team.props.users = team.props.users.filter((x) => x.id !== userId);
+      await this.documentService.updateDocument<Team>(team.id, COL_TEAMS, team.props);
+    });
+  }
 }

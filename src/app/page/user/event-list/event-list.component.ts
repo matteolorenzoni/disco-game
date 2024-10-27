@@ -184,7 +184,7 @@ export class EventListComponent implements OnInit {
   /* -------------------- Methods: utils -------------------- */
   private async addParticipation(eventId: string, teamId: string, userId: string): Promise<void> {
     /* Aggiorno User (prop: eventIds e teamIds) */
-    await this.userService.updateEventsAndTeams(eventId, teamId, userId);
+    await this.userService.updateEventsAndTeams('ADD', userId, eventId, teamId);
 
     /* Aggiorno Event (prop: teamIds) */
     await this.eventService.updateTeams(eventId, teamId);
