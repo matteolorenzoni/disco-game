@@ -1,6 +1,3 @@
-/* Check type */
-export type HasIsActive<T> = T extends { isActive: boolean } ? true : false;
-
 /* Type */
 export interface Doc<T> {
   id: string;

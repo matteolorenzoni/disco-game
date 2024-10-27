@@ -16,7 +16,7 @@ import {
   collection as getCollection,
   QueryConstraint
 } from 'firebase/firestore';
-import { Doc, HasIsActive } from '../model/firebase';
+import { Doc } from '../model/firebase';
 import { FirebaseService } from './firebase.service';
 import { LogService } from './log.service';
 
@@ -79,10 +79,11 @@ export class FirebaseDocumentService {
   public async getDocumentsWithConstraints<T extends Record<string, any>>(
     collectionName: string,
     queryConstraints: QueryConstraint[],
-    converter: FirestoreDataConverter<T>
+    converter: FirestoreDataConverter<T>,
+    isActiveConstraint = true
   ): Promise<Doc<T>[]> {
     const collectionRef = getCollection(this.firebaseService.getDb(), collectionName).withConverter(converter);
-    if (true as HasIsActive<T>) queryConstraints.push(where('isActive', '==', true));
+    if (isActiveConstraint) queryConstraints.push(where('isActive', '==', true));
     const q = query(collectionRef, ...queryConstraints);
     const querySnapshot = await getDocs(q);
     const docs = querySnapshot.docs.map((doc) => ({ id: doc.id, props: doc.data() as T }));

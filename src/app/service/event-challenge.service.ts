@@ -28,7 +28,8 @@ export class EventChallengeService {
       return await this.documentService.getDocumentsWithConstraints<EventChallenge>(
         COL_EVENT_CHALLENGES,
         [...valueConstraints, ...orderConstraints],
-        eventChallengeConverter
+        eventChallengeConverter,
+        false
       );
     });
   }
