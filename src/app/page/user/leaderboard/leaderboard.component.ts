@@ -94,8 +94,8 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
     this.eventSelected.set(events[0]);
     if (!events[0]) return;
 
-    const leaderboard = await this.dbService.getLeaderboard();
-    this.teamsTotal.set(leaderboard.filter((x) => x.props.eventId === events[0].id));
+    const leaderboard = await this.dbService.getLeaderboardByEventId(events[0].id);
+    this.teamsTotal.set(leaderboard);
   }
 
   private async initHttp() {
@@ -109,8 +109,8 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
 
   /* -------------------- Methods firebase -------------------- */
   private async getLeaderboardEveryMinute(eventId: string): Promise<void> {
-    const leaderboard = await this.dbService.getLeaderboard();
-    this.teamsTotal.set(leaderboard.filter((x) => x.props.eventId === eventId));
+    const leaderboard = await this.dbService.getLeaderboardByEventId(eventId);
+    this.teamsTotal.set(leaderboard);
 
     // Attivo l'intervallo
     this.timeout = setInterval(async () => {
@@ -128,7 +128,7 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
 
   private subscribeLeaderboard(eventId: string): void {
     this.unsubscribe = this.leaderboardService.subscribeToActiveTeamsByEventIdTop10(eventId, (teams) => {
-      this.teamsTop10.set([...teams, ...teams, ...teams, ...teams, ...teams, ...teams, ...teams]);
+      this.teamsTop10.set(teams);
     });
   }
 

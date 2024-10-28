@@ -1,31 +1,36 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable } from '@angular/core';
-import { openDB, IDBPDatabase, DBSchema } from 'idb';
+import { openDB, DBSchema } from 'idb';
 import { Event } from '../model/event.model';
 import { Doc, IndexDB } from '../model/firebase';
 import { Team } from '../model/team.model';
 import { MergeChallenge } from '../util/merge.util';
+import { dateYesterday } from '../util/type.util';
+
+const DB_NAME = 'fv';
+const DB_VERSION = 1;
 
 // Definizione dello schema per IndexedDB
-interface AppDB extends DBSchema {
+interface FvDB1 extends DBSchema {
   events: { key: string; value: IndexDB<Event> };
   teams: { key: string; value: IndexDB<Team> };
   challenges: { key: string; value: MergeChallenge };
   leaderboard: { key: string; value: IndexDB<Team> };
 }
 
+type ObjectKey = 'events' | 'teams' | 'challenges' | 'leaderboard';
+
 @Injectable({
   providedIn: 'root'
 })
 export class IndexedDbService {
-  private db!: IDBPDatabase<AppDB>;
-
   constructor() {
     this.initDB();
   }
 
   // Inizializzazione del database
   private async initDB() {
-    this.db = await openDB<AppDB>('fv', 1, {
+    await openDB<FvDB1>(DB_NAME, DB_VERSION, {
       upgrade(db) {
         if (!db.objectStoreNames.contains('events')) {
           db.createObjectStore('events', { keyPath: 'id' });
@@ -37,17 +42,75 @@ export class IndexedDbService {
           db.createObjectStore('challenges', { keyPath: 'id' });
         }
         if (!db.objectStoreNames.contains('leaderboard')) {
-          db.createObjectStore('leaderboard', { keyPath: 'id' });
+          const store = db.createObjectStore('leaderboard', { keyPath: 'id' }) as unknown as IDBObjectStore;
+          store.createIndex('eventId', 'eventId', { unique: false });
         }
       }
     });
   }
 
   /* ---------------------------------- Event ---------------------------------- */
-  public async clearAll(): Promise<void> {
-    if (!this.db) await this.initDB();
+  public async getAllItems<T>(object: ObjectKey): Promise<IndexDB<T>[]> {
+    try {
+      const db = await openDB(DB_NAME, DB_VERSION);
+      const tx = db.transaction(object, 'readonly');
+      const store = tx.objectStore(object);
+      return await store.getAll();
+    } catch (error) {
+      console.error('Error indexedDB', error);
+      return [];
+    }
+  }
 
-    const tx = this.db.transaction(['events', 'teams', 'challenges', 'leaderboard'], 'readwrite');
+  public async getItemsByProp<T extends Record<string, any>>(
+    object: ObjectKey,
+    prop: { key: Extract<keyof T, string>; value: string }
+  ): Promise<IndexDB<T>[]> {
+    try {
+      const db = await openDB(DB_NAME, DB_VERSION);
+      const tx = db.transaction(object, 'readonly');
+      const store = tx.objectStore(object);
+      const index = store.index(prop.key);
+      return await index.getAll(IDBKeyRange.only(prop.value));
+    } catch (error) {
+      console.error('Error indexedDB', error);
+      return [];
+    }
+  }
+
+  public async saveItems<T extends Record<string, any> & { id: string }>(
+    object: ObjectKey,
+    items: T[]
+  ): Promise<IDBValidKey[] | undefined> {
+    try {
+      const db = await openDB(DB_NAME, DB_VERSION);
+      const tx = db.transaction(object, 'readwrite');
+      const store = tx.objectStore(object);
+      const promises = items.map((item) => store.put(item));
+      const results = await Promise.all(promises);
+      await tx.done;
+      return results;
+    } catch (error) {
+      console.error('Error indexedDB:', error);
+      return undefined;
+    }
+  }
+
+  public async deleteItems<T extends { id: string }>(object: ObjectKey, items: T[]): Promise<void> {
+    try {
+      const db = await openDB(DB_NAME, DB_VERSION);
+      const tx = db.transaction(object, 'readwrite');
+      const store = tx.objectStore(object);
+      await Promise.all(items.map((item) => store.delete(item.id)));
+      await tx.done;
+    } catch (error) {
+      console.error('Error indexedDB:', error);
+    }
+  }
+
+  public async clearAll(): Promise<void> {
+    const db = await openDB(DB_NAME, DB_VERSION);
+    const tx = db.transaction(['events', 'teams', 'challenges', 'leaderboard'], 'readwrite');
     await Promise.all([
       tx.objectStore('events').clear(),
       tx.objectStore('teams').clear(),
@@ -56,89 +119,79 @@ export class IndexedDbService {
     ]);
     await tx.done;
   }
+
   /* ---------------------------------- Event ---------------------------------- */
   public async saveEvents(items: Doc<Event>[]): Promise<void> {
-    if (!this.db) await this.initDB();
+    /* Salvo i nuovi items */
+    const indexedDbItems = items.map((x) => ({ id: x.id, ...x.props }));
+    await this.saveItems('events', indexedDbItems);
 
-    const tx = this.db.transaction('events', 'readwrite');
-    await tx.store.clear();
-    const savePromises = items.map((event) => {
-      const eventToSave: IndexDB<Event> = { id: event.id, ...event.props };
-      this.db.put('events', eventToSave);
-    });
-    await Promise.all(savePromises);
-    await tx.done;
+    /* Elimino item scaduti */
+    const events = await this.getEvents();
+    const eventsToDelete = events.filter((x) => x.props.startDate < dateYesterday());
+    this.deleteItems('events', eventsToDelete);
   }
 
   public async getEvents(): Promise<Doc<Event>[]> {
-    if (!this.db) await this.initDB();
-
-    const dbEvents = await this.db.getAll('events');
+    const dbEvents = await this.getAllItems<Event>('events');
     dbEvents.sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
     return dbEvents.map(({ id, ...props }) => ({ id, props }));
   }
 
   /* ---------------------------------- Team ---------------------------------- */
   public async saveTeams(items: Doc<Team>[]): Promise<void> {
-    if (!this.db) await this.initDB();
+    const indexedDbItems = items.map((x) => ({ id: x.id, ...x.props }));
+    await this.saveItems('teams', indexedDbItems);
 
-    const tx = this.db.transaction('teams', 'readwrite');
-    await tx.store.clear();
-    const savePromises = items.map((team) => {
-      const teamToSave: IndexDB<Team> = { id: team.id, ...team.props };
-      this.db.put('teams', teamToSave);
-    });
-    await Promise.all(savePromises);
-    await tx.done;
+    /* Elimino item scaduti */
+    const teams = await this.getTeams();
+    const teamsToDelete = teams.filter((x) => x.props.eventStartDate < dateYesterday());
+    this.deleteItems('teams', teamsToDelete);
   }
 
   public async getTeams(): Promise<Doc<Team>[]> {
-    if (!this.db) await this.initDB();
-
-    const dbTeams = await this.db.getAll('teams');
-    dbTeams.sort((a, b) => a.eventStartDate.getTime() - b.eventStartDate.getTime());
+    const dbTeams = await this.getAllItems<Team>('teams');
+    dbTeams.sort((a, b) => {
+      const pointsDiff = b.totalPoints - a.totalPoints;
+      if (pointsDiff !== 0) return pointsDiff;
+      return a.name.localeCompare(b.name);
+    });
     return dbTeams.map(({ id, ...props }) => ({ id, props }));
   }
 
   /* ---------------------------------- Challenge ---------------------------------- */
   public async saveChallenges(items: MergeChallenge[]): Promise<void> {
-    if (!this.db) await this.initDB();
+    await this.saveItems('challenges', items);
 
-    const tx = this.db.transaction('challenges', 'readwrite');
-    await tx.store.clear();
-    const savePromises = items.map((mergedChallenges) => {
-      this.db.put('challenges', mergedChallenges);
-    });
-    await Promise.all(savePromises);
-    await tx.done;
+    /* Elimino tutti gli item */
+    const challenges = await this.getChallenges();
+    this.deleteItems('challenges', challenges);
   }
 
   public async getChallenges(): Promise<MergeChallenge[]> {
-    if (!this.db) await this.initDB();
-
-    const dbChallenges = await this.db.getAll('challenges');
+    const dbChallenges = await this.getAllItems<MergeChallenge>('challenges');
     dbChallenges.sort((a, b) => a.name.localeCompare(b.name));
     return dbChallenges;
   }
 
   /* ---------------------------------- Leaderboard ---------------------------------- */
   public async saveLeaderboard(items: Doc<Team>[]): Promise<void> {
-    if (!this.db) await this.initDB();
+    const indexedDbItems = items.map((x) => ({ id: x.id, ...x.props }));
+    await this.saveItems('leaderboard', indexedDbItems);
 
-    const tx = this.db.transaction('leaderboard', 'readwrite');
-    await tx.store.clear();
-    const savePromises = items.map((team) => {
-      const teamToSave: IndexDB<Team> = { id: team.id, ...team.props };
-      this.db.put('leaderboard', teamToSave);
-    });
-    await Promise.all(savePromises);
-    await tx.done;
+    /* Elimino item scaduti */
+    const leaderboard = await this.getLeaderboard();
+    const teamsToDelete = leaderboard.filter((x) => x.props.eventStartDate < dateYesterday());
+    this.deleteItems('leaderboard', teamsToDelete);
   }
 
-  public async getLeaderboard(): Promise<Doc<Team>[]> {
-    if (!this.db) await this.initDB();
+  private async getLeaderboard(): Promise<Doc<Team>[]> {
+    const dbLeaderboard = await this.getAllItems<Team>('leaderboard');
+    return dbLeaderboard.map(({ id, ...props }) => ({ id, props }));
+  }
 
-    const dbTeams = await this.db.getAll('leaderboard');
+  public async getLeaderboardByEventId(eventId: string): Promise<Doc<Team>[]> {
+    const dbTeams = await this.getItemsByProp<Team>('leaderboard', { key: 'eventId', value: eventId });
     dbTeams.sort((a, b) => {
       const pointsDiff = b.totalPoints - a.totalPoints;
       if (pointsDiff !== 0) return pointsDiff;
