@@ -74,7 +74,6 @@ export class EventService {
         startDate: new Date(form.startDate),
         endDate: new Date(form.endDate),
         teamIds: [],
-        eventChallengeIds: [],
         code,
         isActive: true,
         updatedAt: new Date()
@@ -105,17 +104,6 @@ export class EventService {
   public async updateTeams(eventId: string, teamId: string): Promise<void> {
     return await this.httpService.execute(async () => {
       await this.documentService.updateDocumentAddingToArray<Event, string>(eventId, COL_EVENTS, 'teamIds', teamId);
-    });
-  }
-
-  public async updateEventChallengeIds(eventId: string, newEventChallengeId: string): Promise<void> {
-    return await this.httpService.execute(async () => {
-      await this.documentService.updateDocumentAddingToArray<Event, string>(
-        eventId,
-        COL_EVENTS,
-        'eventChallengeIds',
-        newEventChallengeId
-      );
     });
   }
 }

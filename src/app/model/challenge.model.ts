@@ -5,7 +5,6 @@ export type Challenge = {
   type: ChallengeType; // Tipo della sfida
   points: number; // Punti assegnati per il completamento della sfida
   complexity: number; // Complessità della sfida, da 1 (facile) a 5 (difficile)
-  eventChallengeIds: string[]; // Array di riferimenti ai documenti delle sfide associate all'evento
   isActive: boolean; // Per soft delete
   updatedAt: Date; // Data e ora dell'ultimo aggiornamento della sfida
 };

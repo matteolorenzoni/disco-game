@@ -34,9 +34,9 @@ export type SelectOption = {
 })
 export class ChallengeCreateComponent implements OnInit {
   /* Services */
-  readonly route = inject(ActivatedRoute);
-  readonly challengeService = inject(ChallengeService);
-  readonly logService = inject(LogService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly challengeService = inject(ChallengeService);
+  private readonly logService = inject(LogService);
 
   /* Constants */
   OPTIONS = ChallengeTypes as SelectOption[];
@@ -101,6 +101,8 @@ export class ChallengeCreateComponent implements OnInit {
     } else {
       await this.challengeService.addChallenge(form);
     }
+
+    this.logService.addLogConfirm(challengeId ? 'Sfida aggiornata' : 'Sfida aggiunta');
   }
 
   /* ------------------------ Methods: utils ------------------------ */

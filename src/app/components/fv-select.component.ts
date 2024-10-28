@@ -16,7 +16,7 @@ export type SelectOption<T> = {
       <select
         [id]="name()"
         [formControlName]="name()"
-        class="peer mt-6 w-full rounded border border-field-border bg-field-background px-3 py-2 text-xs text-field-color shadow-sm focus:border-2 focus:outline-none disabled:bg-neutral-700 disabled:text-neutral-600"
+        class="peer mt-6 h-8 w-full rounded border border-field-border bg-field-background text-xs text-field-color shadow-sm focus:border-2 focus:outline-none disabled:bg-neutral-700 disabled:text-neutral-600"
         [ngClass]="[
           'focus:border-' + twColor() + '-500',
           'focus:text-' + twColor() + '-200',

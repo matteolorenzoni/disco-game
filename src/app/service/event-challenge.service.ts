@@ -47,10 +47,10 @@ export class EventChallengeService {
   }
 
   /* --------------------------- Create ---------------------------*/
-  public async addEventChallenge(newEventChallenge: EventChallenge): Promise<string> {
+  public async addEventChallenge(newEventChallenge: EventChallenge): Promise<Doc<EventChallenge>> {
     return await this.httpService.execute(async () => {
       const docRef = await this.documentService.addDocument<EventChallenge>(COL_EVENT_CHALLENGES, newEventChallenge);
-      return docRef.id;
+      return { id: docRef.id, props: newEventChallenge };
     });
   }
 
@@ -62,6 +62,13 @@ export class EventChallengeService {
         startDate: form.startDate ? new Date(form.startDate) : null,
         endDate: form.endDate ? new Date(form.endDate) : null
       });
+    });
+  }
+
+  /* --------------------------- Delete ---------------------------*/
+  public async deleteEventChallenge(eventChallengeId: string): Promise<void> {
+    return await this.httpService.execute(async () => {
+      await this.documentService.deleteDocument(eventChallengeId, COL_EVENT_CHALLENGES);
     });
   }
 }

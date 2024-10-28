@@ -7,7 +7,6 @@ export type Event = {
   startDate: Date;
   endDate: Date;
   teamIds: string[];
-  eventChallengeIds: string[];
   isActive: boolean;
   updatedAt: Date;
 };

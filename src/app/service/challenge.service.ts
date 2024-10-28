@@ -3,7 +3,6 @@ import { FirebaseDocumentService } from './firebase-document.service';
 import { environment } from '../../environments/environment';
 import { ChallengeModel } from '../model/form.model';
 import { challengeConverter } from '../model/converter';
-import { LogService } from './log.service';
 import { Challenge } from '../model/challenge.model';
 import { Doc } from '../model/firebase';
 import { HttpService } from './http.service';
@@ -17,7 +16,6 @@ export class ChallengeService {
   /* Services */
   private readonly documentService = inject(FirebaseDocumentService);
   private readonly httpService = inject(HttpService);
-  private readonly logService = inject(LogService);
 
   /* --------------------------- Read ---------------------------*/
   public async getChallenges(): Promise<Doc<Challenge>[]> {
@@ -47,11 +45,9 @@ export class ChallengeService {
     return await this.httpService.execute(async () => {
       await this.documentService.addDocument<Challenge>(COL_CHALLENGES, {
         ...form,
-        eventChallengeIds: [],
         isActive: true,
         updatedAt: new Date()
       });
-      this.logService.addLogConfirm('Sfida aggiunta');
     });
   }
 
@@ -59,18 +55,6 @@ export class ChallengeService {
   public async updateChallenge(challengeId: string, form: ChallengeModel): Promise<void> {
     return await this.httpService.execute(async () => {
       await this.documentService.updateDocument<Challenge>(challengeId, COL_CHALLENGES, form);
-      this.logService.addLogConfirm('Sfida aggiornata');
-    });
-  }
-
-  public async updateEventChallengeIds(challengeId: string, newEventChallengeId: string): Promise<void> {
-    return await this.httpService.execute(async () => {
-      await this.documentService.updateDocumentAddingToArray<Challenge, string>(
-        challengeId,
-        COL_CHALLENGES,
-        'eventChallengeIds',
-        newEventChallengeId
-      );
     });
   }
 }

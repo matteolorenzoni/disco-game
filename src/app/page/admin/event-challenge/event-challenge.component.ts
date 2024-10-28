@@ -1,30 +1,24 @@
 import { CommonModule, formatDate } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import {
   faCalendar,
   faClock,
-  faHourglassEnd,
-  faHourglassStart,
   faInfinity,
   faLock,
   faMobileScreenButton,
   faPause,
-  faPen,
   faPlay,
-  faStopwatch20,
   faTrash
 } from '@fortawesome/free-solid-svg-icons';
-import { Challenge } from '../../../model/challenge.model';
 import { Doc } from '../../../model/firebase';
 import { EventChallenge, ChallengeStatus } from '../../../model/event-challenge.model';
 import { EventChallengeModel, FromMap } from '../../../model/form.model';
 import { endDateValidator } from '../../../util/utils';
 import { ChallengeService } from '../../../service/challenge.service';
 import { EventChallengeService } from '../../../service/event-challenge.service';
-import { EventService } from '../../../service/event.service';
 import { FvFloatingButtonComponent } from '../../../components/fv-floating-button.component';
 import EventChallengeStatus from './event-challenge-status.config.json';
 import { LogService } from '../../../service/log.service';
@@ -32,6 +26,8 @@ import { FvFieldComponent } from '../../../components/fv-field.component';
 import { FvSelectComponent, SelectOption } from '../../../components/fv-select.component';
 import { FvButtonComponent } from '../../../components/fv-button.component';
 import { TitleComponent } from '../../../components/title/title.component';
+import { FvButtonOutlinedComponent } from '../../../components/fv-button-outlined.component';
+import { Challenge } from '../../../model/challenge.model';
 
 @Component({
   selector: 'app-event-challenge',
@@ -43,6 +39,7 @@ import { TitleComponent } from '../../../components/title/title.component';
     TitleComponent,
     FvFieldComponent,
     FvSelectComponent,
+    FvButtonOutlinedComponent,
     FvButtonComponent,
     FvFloatingButtonComponent
   ],
@@ -52,18 +49,17 @@ import { TitleComponent } from '../../../components/title/title.component';
 })
 export class EventChallengeComponent implements OnInit {
   /* Services */
-  readonly route = inject(ActivatedRoute);
-  readonly eventService = inject(EventService);
-  readonly challengeService = inject(ChallengeService);
-  readonly eventChallengeService = inject(EventChallengeService);
-  readonly logService = inject(LogService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly challengeService = inject(ChallengeService);
+  private readonly eventChallengeService = inject(EventChallengeService);
+  private readonly logService = inject(LogService);
 
   /* Variables */
   eventId = signal<string | undefined>(undefined);
   challenges = signal<Doc<Challenge>[]>([]);
-  challengesOptions = signal<SelectOption<string>[]>([]);
   eventChallenges = signal<Doc<EventChallenge>[]>([]);
-  eventChallengeActive = signal<Doc<EventChallenge> | undefined>(undefined);
+  eventChallengeSelected = signal<Doc<EventChallenge> | undefined>(undefined);
+  challengesOptions = computed(() => this.challenges().map((x) => ({ label: x.props.name, value: x.id })));
   formModalIsOpen = signal<boolean>(false);
 
   /* Constants */
@@ -71,9 +67,6 @@ export class EventChallengeComponent implements OnInit {
 
   /* Icons */
   ICON_STATUS = faMobileScreenButton;
-  ICON_MAX_TIMES = faStopwatch20;
-  ICON_START = faHourglassStart;
-  ICON_END = faHourglassEnd;
   ICON_CALENDAR = faCalendar;
   ICON_CLOCK = faClock;
   ICON_STATUS_VALUE = {
@@ -82,20 +75,14 @@ export class EventChallengeComponent implements OnInit {
     CANCELED: faTrash,
     SUSPENDED: faPause
   };
-  ICON_INFINITE = faInfinity;
-  ICON_PEN = faPen;
+  ICON_INFINITY = faInfinity;
+  ICON_TRASH = faTrash;
 
   /* Form */
   eventChallengeForm = new FormGroup<FromMap<EventChallengeModel>>(
     {
-      challengeId: new FormControl('', {
-        nonNullable: true,
-        validators: [Validators.required]
-      }),
-      status: new FormControl(ChallengeStatus.ACTIVE, {
-        nonNullable: true,
-        validators: [Validators.required]
-      }),
+      challengeId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+      status: new FormControl(ChallengeStatus.ACTIVE, { nonNullable: true, validators: [Validators.required] }),
       maxTimes: new FormControl(null),
       startDate: new FormControl(null),
       endDate: new FormControl(null)
@@ -111,14 +98,12 @@ export class EventChallengeComponent implements OnInit {
       this.eventId.set(eventId ?? undefined);
       if (!eventId) throw new Error('retry', { cause: 'retry' });
 
-      const challenges = await this.challengeService.getChallenges();
-      this.challenges.set(challenges);
-      this.challengesOptions.set(challenges.map((x) => ({ label: x.props.name, value: x.id })));
-
-      // TODO: migliorare il sistema con merge date e promise all
-      const eventChallenges = await this.eventChallengeService.getEventChallengesByProp([
-        { key: 'eventId', value: eventId }
+      /* Ottengo le sfide per la combo e le eventChallenge da mostrare nella lista */
+      const [challenges, eventChallenges] = await Promise.all([
+        this.challengeService.getChallenges(),
+        this.eventChallengeService.getEventChallengesByProp([{ key: 'eventId', value: eventId }])
       ]);
+      this.challenges.set(challenges);
       this.eventChallenges.set(eventChallenges);
     });
   }
@@ -127,18 +112,18 @@ export class EventChallengeComponent implements OnInit {
   protected async addOrUpdateEventChallenge() {
     if (this.eventChallengeForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
 
+    /* Recupero le info della sfida selezionata */
     const form = this.eventChallengeForm.getRawValue();
     const eventId = this.eventId();
-    const challengeActive = this.challenges().find((x) => x.id === form.challengeId);
-    if (!eventId || !challengeActive) throw new Error('retry', { cause: 'retry' });
+    const challenge = this.challenges().find((x) => x.id === form.challengeId);
+    if (!eventId || !challenge) throw new Error('retry', { cause: 'retry' });
 
-    /* Creo una nuova entry nel DB */
-    // TODO: capire perche gestito diverso dagli altri (unico updateAt non in service)
+    /* Creo una nuova entry (sia per la creazione che per l'aggiornamento), i valori del form vengono messi qui */
     const eventChallenge: EventChallenge = {
       eventId,
       challengeId: form.challengeId,
-      challengeName: challengeActive.props.name,
-      challengeType: challengeActive.props.type,
+      challengeName: challenge.props.name,
+      challengeType: challenge.props.type,
       status: form.status,
       maxTimes: form.maxTimes,
       startDate: form.startDate ? new Date(form.startDate) : null,
@@ -146,45 +131,30 @@ export class EventChallengeComponent implements OnInit {
       updatedAt: new Date()
     };
 
-    let eventChallengeActiveId = this.eventChallengeActive()?.id;
-    if (!eventChallengeActiveId) {
+    let eventChallengeSelected = this.eventChallengeSelected();
+    if (!eventChallengeSelected) {
       /* Aggiungo a DB e aggiorno array */
-      eventChallengeActiveId = await this.eventChallengeService.addEventChallenge(eventChallenge);
-      this.eventChallenges.update((eventChallenges) => [
-        ...eventChallenges,
-        { id: eventChallengeActiveId!, props: eventChallenge }
-      ]);
+      eventChallengeSelected = await this.eventChallengeService.addEventChallenge(eventChallenge);
+      this.eventChallenges.update((eventChallenges) => [...eventChallenges, eventChallengeSelected!]);
     } else {
       /* Aggiorno DB e array */
-      await this.eventChallengeService.updateEventChallenge(eventChallengeActiveId, eventChallenge);
-      this.eventChallenges.update((eventChallenges) =>
-        eventChallenges.map((x) =>
-          x.id === eventChallengeActiveId ? { id: eventChallengeActiveId, props: eventChallenge } : x
-        )
-      );
+      await this.eventChallengeService.updateEventChallenge(eventChallengeSelected.id, eventChallenge);
+      eventChallengeSelected.props = eventChallenge;
     }
 
-    /* Aggiorno Event (prop: eventTeamUserRefs) */
-    await this.eventService.updateEventChallengeIds(eventId, eventChallengeActiveId);
-
-    /* Aggiorno Challenge (prop: eventTeamUserRefs) */
-    await this.challengeService.updateEventChallengeIds(form.challengeId, eventChallengeActiveId);
+    /* Chiudo il modal e resetto il form */
+    this.resetForm();
 
     /* Log */
-    this.logService.addLogConfirm(this.eventChallengeActive() ? 'Sfida aggiornata' : 'Sfida aggiunta');
-
-    /* Chiudo il modal e resetto il form */
-    this.formModalIsOpen.set(false);
-    this.eventChallengeForm.reset();
+    this.logService.addLogConfirm(this.eventChallengeSelected() ? 'Sfida aggiornata' : 'Sfida aggiunta');
   }
 
-  /* -------------------- Methods: utils -------------------- */
+  /* -------------------- Methods: event -------------------- */
   protected onBackdropClick(event: MouseEvent): void {
     const clickedElement = event.target as HTMLElement;
     if (clickedElement.dataset['dialogBackdrop'] === 'sign-in-modal') {
-      this.eventChallengeActive.set(undefined);
-      this.eventChallengeForm.reset();
-      this.formModalIsOpen.set(false);
+      /* Chiudo il modal e resetto il form */
+      this.resetForm();
     }
   }
 
@@ -192,22 +162,47 @@ export class EventChallengeComponent implements OnInit {
     this.formModalIsOpen.set(true);
   }
 
-  protected goToUpdateEventChallenge(eventChallengeId: string) {
-    const eventChallengeActive = this.eventChallenges().find((x) => x.id === eventChallengeId);
-    if (!eventChallengeActive) throw new Error('retry', { cause: 'retry' });
+  protected goToUpdateEventChallenge(eventChallengeId: string): void {
+    const eventChallengeSelected = this.eventChallenges().find((x) => x.id === eventChallengeId);
+    if (!eventChallengeSelected) throw new Error('retry', { cause: 'retry' });
 
     /* Setto l'id selezionato (add or update) */
-    this.eventChallengeActive.set(eventChallengeActive);
+    this.eventChallengeSelected.set(eventChallengeSelected);
 
     /* Aggiorno il form */
-    const { startDate, endDate } = eventChallengeActive.props;
+    const { startDate, endDate } = eventChallengeSelected.props;
     this.eventChallengeForm.patchValue({
-      ...eventChallengeActive.props,
+      ...eventChallengeSelected.props,
       startDate: startDate ? formatDate(startDate, 'yyyy-MM-dd HH:mm:ss', 'it') : null,
       endDate: endDate ? formatDate(endDate, 'yyyy-MM-dd HH:mm:ss', 'it') : null
     });
 
+    this.eventChallengeForm.get('challengeId')?.disable();
+
     /* Apro il modal */
     this.formModalIsOpen.set(true);
+  }
+
+  protected async deleteEventChallenge(eventChallengeId: string): Promise<void> {
+    const userConfirm = confirm("Sei sicuro di voler eliminare la sfida dall'evento?");
+    if (!userConfirm) return;
+
+    const eventId = this.eventId();
+    if (!eventId) throw new Error('retry', { cause: 'retry' });
+
+    /* Elimino il documento */
+    await this.eventChallengeService.deleteEventChallenge(eventChallengeId);
+    this.eventChallenges.update((eventChallenges) => eventChallenges.filter((x) => x.id !== eventChallengeId));
+
+    /* Log */
+    this.logService.addLogConfirm('Sfida eliminata');
+  }
+
+  /* -------------------- Methods: utils -------------------- */
+  private resetForm(): void {
+    this.formModalIsOpen.set(false);
+    this.eventChallengeSelected.set(undefined);
+    this.eventChallengeForm.reset();
+    this.eventChallengeForm.get('challengeId')?.enable();
   }
 }

@@ -31,7 +31,7 @@ export class ChallengeListComponent implements OnInit {
   }
 
   /* -------------------- Methods -------------------- */
-  protected async updateChallenge(challengeId: string): Promise<void> {
+  protected async goToUpdateChallenge(challengeId: string): Promise<void> {
     await this.router.navigateByUrl(`admin/challenges/${challengeId}`);
   }
 

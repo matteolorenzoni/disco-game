@@ -20,23 +20,23 @@
 
     <!-- Info su  eventChallenge-->
     <div
-      class="flex h-16 justify-center divide-x divide-neutral-700 rounded-xl bg-neutral-800 py-2 text-on-surface shadow">
-      <div class="flex flex-1 flex-col gap-1 px-2">
-        <p class="rounded bg-neutral-700 p-1 text-center text-xxs uppercase text-on-background">Orario inizio</p>
-        <fv-countdown class="flex-1 flex-center" [date]="cm.eventChallenge.props.startDate"></fv-countdown>
+      class="flex h-20 divide-x divide-neutral-700 overflow-x-auto rounded-xl bg-neutral-800 py-2 text-on-surface shadow">
+      <div class="flex min-w-20 shrink-0 basis-1/3 flex-col items-center gap-2 px-2">
+        <p class="w-full rounded bg-neutral-700 p-1 text-center text-xxs uppercase text-on-background">Orario inizio</p>
+        <fv-countdown class="my-auto text-sm" [date]="cm.eventChallenge.props.startDate"></fv-countdown>
       </div>
-      <div class="flex flex-1 flex-col gap-1 px-2">
-        <p class="rounded bg-neutral-700 p-1 text-center text-xxs uppercase text-on-background">N° massimo</p>
+      <div class="flex min-w-20 shrink-0 basis-1/3 flex-col items-center gap-2 px-2">
+        <p class="w-full rounded bg-neutral-700 p-1 text-center text-xxs uppercase text-on-background">N° massimo</p>
         @if (cm.eventChallenge.props.maxTimes; as maxTimes) {
-          <p class="flex-1 flex-center">{{ cm.eventChallenge.props.maxTimes }}</p>
+          <p class="my-auto">{{ cm.eventChallenge.props.maxTimes }}</p>
         } @else {
-          <fa-icon class="flex-1 flex-center" [icon]="ICON_INFINITY"></fa-icon>
+          <fa-icon class="my-auto" [icon]="ICON_INFINITY"></fa-icon>
         }
       </div>
-      <div class="flex flex-1 flex-col gap-1 px-2">
-        <p class="rounded bg-neutral-700 p-1 text-center text-xxs uppercase text-on-background">Stato</p>
+      <div class="flex min-w-20 shrink-0 basis-1/3 flex-col items-center gap-2 px-2">
+        <p class="w-full rounded bg-neutral-700 p-1 text-center text-xxs uppercase text-on-background">Stato</p>
         <fv-challenge-status
-          class="flex-1 text-white flex-center"
+          class="my-auto text-white"
           [type]="'icon'"
           [status]="cm.eventChallenge.props.status"></fv-challenge-status>
       </div>
@@ -44,15 +44,15 @@
 
     <!-- Sezione Descrizione -->
     <div class="relative -m-2 p-2">
-      <h2 class="text-lg font-semibold text-on-background">Descrizione</h2>
-      <p class="text-sm leading-relaxed text-on-surface">{{ cm.challenge.props.description }}</p>
+      <h2 class="text-lg font-semibold text-on-surface">Descrizione</h2>
+      <p class="text-sm leading-relaxed text-gray-400">{{ cm.challenge.props.description }}</p>
       <fv-challenge-status [type]="'effect'" [status]="cm.eventChallenge.props.status"></fv-challenge-status>
     </div>
 
     <!-- Sezione Regole -->
     <div class="relative -m-2 p-2">
-      <h2 class="text-lg font-semibold text-on-background">Regole</h2>
-      <p class="whitespace-pre-line text-sm leading-relaxed text-on-surface">
+      <h2 class="text-lg font-semibold text-on-surface">Regole</h2>
+      <p class="whitespace-pre-line text-sm leading-relaxed text-gray-400">
         {{ cm.challenge.props.rules }}
       </p>
       <fv-challenge-status [type]="'effect'" [status]="cm.eventChallenge.props.status"></fv-challenge-status>
