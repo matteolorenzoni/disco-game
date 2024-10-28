@@ -15,7 +15,8 @@ import {
   where,
   collection as getCollection,
   QueryConstraint,
-  onSnapshot
+  onSnapshot,
+  deleteDoc
 } from 'firebase/firestore';
 import { Doc } from '../model/firebase';
 import { FirebaseService } from './firebase.service';
@@ -164,5 +165,12 @@ export class FirebaseDocumentService {
       [arrayField]: arrayUnion(newValue),
       updatedAt: new Date()
     });
+  }
+
+  /* --------------------- Methods UPDATE --------------------- */
+  public async deleteDocument(id: string, collectionName: string): Promise<void> {
+    const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
+    const docRef = doc(collectionRef, id);
+    await deleteDoc(docRef);
   }
 }
