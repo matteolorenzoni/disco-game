@@ -33,7 +33,7 @@ export class LeaderboardService {
   public subscribeToActiveTeamsByEventIdTop10(eventId: string, onUpdate: (documents: Doc<Team>[]) => void): () => void {
     const valueConstraints = [where('eventId', '==', eventId)];
     const orderConstraints = [orderBy('totalPoints', 'desc'), orderBy('name')];
-    const limitConstraints = [limit(2)];
+    const limitConstraints = [limit(10)];
     return this.documentService.subscribeToDocumentsWithConstraints<Team>(
       COL_TEAMS,
       [...valueConstraints, ...orderConstraints, ...limitConstraints],

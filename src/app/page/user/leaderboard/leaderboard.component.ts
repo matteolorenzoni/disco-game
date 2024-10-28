@@ -32,7 +32,15 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
   eventSelected = signal<Doc<Event> | undefined>(undefined);
   teamsTop10 = signal<Doc<Team>[]>([]);
   teamsTotal = signal<Doc<Team>[]>([]);
-  teams = computed(() => (this.mode() === 'live' ? this.teamsTop10() : this.teamsTotal()));
+  teams = computed(() => {
+    const teams = this.mode() === 'live' ? this.teamsTop10() : this.teamsTotal();
+    const podium = teams.slice(0, 3);
+    const otherTeams = teams.slice(3);
+    return {
+      podium: { first: podium[0], second: podium[1], third: podium[2] },
+      otherTeams
+    };
+  });
   secondsLeft = signal<number | undefined>(undefined);
 
   /* Ref */
@@ -120,7 +128,7 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
 
   private subscribeLeaderboard(eventId: string): void {
     this.unsubscribe = this.leaderboardService.subscribeToActiveTeamsByEventIdTop10(eventId, (teams) => {
-      this.teamsTop10.set(teams);
+      this.teamsTop10.set([...teams, ...teams, ...teams, ...teams, ...teams, ...teams, ...teams]);
     });
   }
 
