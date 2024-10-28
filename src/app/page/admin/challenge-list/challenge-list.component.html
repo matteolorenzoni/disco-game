@@ -2,7 +2,7 @@
 
 <ul class="grid grid-cols-[repeat(auto-fill,minmax(20rem,1fr))] gap-4 text-on-surface">
   @for (challenge of challenges(); track challenge.id) {
-    <li class="cursor-pointer rounded border-2 border-neutral-800 bg-surface p-4 shadow hover:bg-neutral-800">
+    <li class="cursor-pointer rounded-md border-2 border-neutral-800 bg-surface p-4 shadow hover:bg-neutral-800">
       <button class="flex w-full flex-col gap-2" (click)="updateChallenge(challenge.id)">
         <div class="flex w-full gap-4">
           <img class="h-16 w-16" [src]="'images/challenge/' + challenge.props.type + '.png'" alt="" />
