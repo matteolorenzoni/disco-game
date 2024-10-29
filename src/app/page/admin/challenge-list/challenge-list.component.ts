@@ -7,6 +7,7 @@ import { Doc } from '../../../model/firebase';
 import { Challenge } from '../../../model/challenge.model';
 import { FvRatingComponent } from '../../../components/fv-rating.component';
 import { TitleComponent } from '../../../components/title/title.component';
+import { IndexedDbService } from '../../../service/indexed-db.service';
 
 @Component({
   selector: 'app-challenge-list',
@@ -18,8 +19,9 @@ import { TitleComponent } from '../../../components/title/title.component';
 })
 export class ChallengeListComponent implements OnInit {
   /* Services */
-  readonly router = inject(Router);
-  readonly challengeService = inject(ChallengeService);
+  private readonly router = inject(Router);
+  private readonly challengeService = inject(ChallengeService);
+  private readonly dbService = inject(IndexedDbService);
 
   /* Variables */
   challenges = signal<Doc<Challenge>[]>([]);
@@ -28,6 +30,7 @@ export class ChallengeListComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     const challenges = await this.challengeService.getAllChallenges();
     this.challenges.set(challenges);
+    await this.dbService.saveAdminChallenges(challenges);
   }
 
   /* -------------------- Methods -------------------- */

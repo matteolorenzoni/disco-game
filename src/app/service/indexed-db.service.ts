@@ -6,6 +6,7 @@ import { Doc, IndexDB } from '../model/firebase';
 import { Team } from '../model/team.model';
 import { MergeChallenge } from '../util/merge.util';
 import { dateYesterday } from '../util/type.util';
+import { Challenge } from '../model/challenge.model';
 
 const DB_NAME = 'fv';
 const DB_VERSION = 1;
@@ -16,9 +17,10 @@ interface FvDB1 extends DBSchema {
   teams: { key: string; value: IndexDB<Team> };
   challenges: { key: string; value: MergeChallenge };
   leaderboard: { key: string; value: IndexDB<Team> };
+  'admin-challenges': { key: string; value: IndexDB<Challenge> };
 }
 
-type ObjectKey = 'events' | 'teams' | 'challenges' | 'leaderboard';
+type ObjectKey = 'events' | 'teams' | 'challenges' | 'leaderboard' | 'admin-challenges';
 
 @Injectable({
   providedIn: 'root'
@@ -44,6 +46,9 @@ export class IndexedDbService {
         if (!db.objectStoreNames.contains('leaderboard')) {
           const store = db.createObjectStore('leaderboard', { keyPath: 'id' }) as unknown as IDBObjectStore;
           store.createIndex('eventId', 'eventId', { unique: false });
+        }
+        if (!db.objectStoreNames.contains('admin-challenges')) {
+          db.createObjectStore('admin-challenges', { keyPath: 'id' });
         }
       }
     });
@@ -161,11 +166,12 @@ export class IndexedDbService {
 
   /* ---------------------------------- Challenge ---------------------------------- */
   public async saveChallenges(items: MergeChallenge[]): Promise<void> {
-    await this.saveItems('challenges', items);
-
     /* Elimino tutti gli item */
     const challenges = await this.getChallenges();
     this.deleteItems('challenges', challenges);
+
+    /* Salvo i nuovi items */
+    await this.saveItems('challenges', items);
   }
 
   public async getChallenges(): Promise<MergeChallenge[]> {
@@ -198,5 +204,22 @@ export class IndexedDbService {
       return a.name.localeCompare(b.name);
     });
     return dbTeams.map(({ id, ...props }) => ({ id, props }));
+  }
+
+  /* ---------------------------------- Admin ---------------------------------- */
+  public async saveAdminChallenges(items: Doc<Challenge>[]): Promise<void> {
+    /* Elimino tutti gli items */
+    const challenges = await this.getAdminChallenges();
+    this.deleteItems('admin-challenges', challenges);
+
+    /* Salvo i nuovi items */
+    const indexedDbItems = items.map((x) => ({ id: x.id, ...x.props }));
+    await this.saveItems('admin-challenges', indexedDbItems);
+  }
+
+  public async getAdminChallenges(): Promise<Doc<Challenge>[]> {
+    const dbChallenges = await this.getAllItems<Challenge>('admin-challenges');
+    dbChallenges.sort((a, b) => a.name.localeCompare(b.name));
+    return dbChallenges.map(({ id, ...props }) => ({ id, props }));
   }
 }

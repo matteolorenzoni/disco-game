@@ -97,7 +97,12 @@
           class="flex w-full flex-col gap-6"
           (submit)="addOrUpdateEventChallenge()">
           <!-- Challenge -->
-          <fv-select name="challengeId" label="Sfida" [options]="challengesOptions()"></fv-select>
+          <div class="flex items-end gap-4">
+            <fv-select class="flex-1" name="challengeId" label="Sfida" [options]="challengesOptions()"></fv-select>
+            <button type="button" class="pb-[6px]" (click)="onRefreshChallenges()">
+              <fa-icon [icon]="ICON_REFRESH"></fa-icon>
+            </button>
+          </div>
 
           <!-- Status -->
           <fv-select name="status" label="Stato" [options]="OPTIONS"></fv-select>

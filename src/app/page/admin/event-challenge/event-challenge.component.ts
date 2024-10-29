@@ -29,6 +29,7 @@ import { FvButtonOutlinedComponent } from '../../../components/fv-button-outline
 import { TitleComponent } from '../../../components/title/title.component';
 import EventChallengeStatus from './event-challenge-status.config.json';
 import { endDateValidator } from '../../../util/utils';
+import { IndexedDbService } from '../../../service/indexed-db.service';
 
 @Component({
   selector: 'app-event-challenge',
@@ -53,6 +54,7 @@ export class EventChallengeComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly challengeService = inject(ChallengeService);
   private readonly eventChallengeService = inject(EventChallengeService);
+  private readonly dbService = inject(IndexedDbService);
   private readonly logService = inject(LogService);
 
   /* Variables */
@@ -78,6 +80,7 @@ export class EventChallengeComponent implements OnInit {
   };
   ICON_INFINITY = faInfinity;
   ICON_TRASH = faTrash;
+  ICON_REFRESH = faArrowsRotate;
 
   /* Form */
   eventChallengeForm = new FormGroup<FromMap<EventChallengeModel>>(
@@ -99,14 +102,16 @@ export class EventChallengeComponent implements OnInit {
       this.eventId.set(eventId ?? undefined);
       if (!eventId) throw new Error('retry', { cause: 'retry' });
 
-      /* Ottengo le sfide per la combo e le eventChallenge da mostrare nella lista */
-      const [challenges, eventChallenges] = await Promise.all([
-        this.challengeService.getAllChallenges(),
-        this.eventChallengeService.getEventChallengesByProp([{ key: 'eventId', value: eventId }])
+      /* Ottengo le sfide che fanno parte dell'evento */
+      const eventChallenges = await this.eventChallengeService.getEventChallengesByProp([
+        { key: 'eventId', value: eventId }
       ]);
-      this.challenges.set(challenges);
       this.eventChallenges.set(eventChallenges);
     });
+
+    /* Ottengo le sfide dal indexedDB per limitare il numero di letture */
+    const challenges = await this.dbService.getAdminChallenges();
+    this.challenges.set(challenges);
   }
 
   /* -------------------- Methods: firebase -------------------- */
@@ -154,6 +159,13 @@ export class EventChallengeComponent implements OnInit {
 
     /* Log */
     this.logService.addLogConfirm('Sfida eliminata');
+  }
+
+  protected async onRefreshChallenges(): Promise<void> {
+    const challenges = await this.challengeService.getAllChallenges();
+    this.challenges.set(challenges);
+    await this.dbService.saveAdminChallenges(challenges);
+    this.logService.addLogConfirm('Lista sfide aggiornata');
   }
 
   /* -------------------- Methods: event -------------------- */
