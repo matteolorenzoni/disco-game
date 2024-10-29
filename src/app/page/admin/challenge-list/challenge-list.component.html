@@ -1,6 +1,6 @@
 <app-title [pages]="[{ path: '', label: 'Sfide' }]"> </app-title>
 
-<ul class="grid grid-cols-[repeat(auto-fill,minmax(20rem,1fr))] gap-4 text-on-surface">
+<ul class="grid grid-cols-[repeat(auto-fit,minmax(20rem,1fr))] gap-4 text-on-surface">
   @for (challenge of challenges(); track challenge.id) {
     <li class="cursor-pointer rounded-md border-2 border-neutral-800 bg-surface p-4 shadow hover:bg-neutral-800">
       <button class="flex w-full flex-col gap-2" (click)="goToUpdateChallenge(challenge.id)">

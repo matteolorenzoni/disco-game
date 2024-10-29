@@ -1,16 +1,18 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { LogService } from '../../../service/log.service';
-import { ChallengeService } from '../../../service/challenge.service';
+import { ActivatedRoute } from '@angular/router';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { ChallengeModel, FromMap } from '../../../model/form.model';
 import { ChallengeType } from '../../../model/challenge.model';
-import ChallengeTypes from './challenge-type.config.json';
+import { ChallengeService } from '../../../service/challenge.service';
+import { LogService } from '../../../service/log.service';
+import { FvButtonComponent } from '../../../components/fv-button.component';
 import { FvFieldComponent } from '../../../components/fv-field.component';
 import { FvTextAeraComponent } from '../../../components/fv-text-area.component';
-import { FvButtonComponent } from '../../../components/fv-button.component';
 import { TitleComponent } from '../../../components/title/title.component';
+import ChallengeTypes from './challenge-type.config.json';
 
 export type SelectOption = {
   label: string;
@@ -23,6 +25,7 @@ export type SelectOption = {
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FaIconComponent,
     TitleComponent,
     FvFieldComponent,
     FvTextAeraComponent,
@@ -34,6 +37,7 @@ export type SelectOption = {
 })
 export class ChallengeCreateComponent implements OnInit {
   /* Services */
+  private readonly location = inject(Location);
   private readonly route = inject(ActivatedRoute);
   private readonly challengeService = inject(ChallengeService);
   private readonly logService = inject(LogService);
@@ -45,6 +49,9 @@ export class ChallengeCreateComponent implements OnInit {
   challengeId = signal<string | null>(null);
   challengeTypeModalIsOpen = signal<boolean>(false);
   challengeTypeActive = signal<SelectOption>(this.OPTIONS.find((x) => x.icon === ChallengeType.FROG)!);
+
+  /* Icons */
+  ICON_TRASH = faTrash;
 
   /* Form */
   challengeForm = new FormGroup<FromMap<ChallengeModel>>({
@@ -94,26 +101,43 @@ export class ChallengeCreateComponent implements OnInit {
   /* ------------------------ Methods: firebase ------------------------ */
   protected async addOrUpdateChallenge(): Promise<void> {
     if (this.challengeForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
+
+    /* Aggiungo o aggiorno il documento */
     const challengeId = this.challengeId();
     const form = this.challengeForm.getRawValue();
-    if (challengeId) {
-      await this.challengeService.updateChallenge(challengeId, form);
-    } else {
-      await this.challengeService.addChallenge(form);
-    }
+    if (challengeId) await this.challengeService.updateChallenge(challengeId, form);
+    else await this.challengeService.addChallenge(form);
 
+    /* Torno indietro */
+    this.location.back();
+
+    /* Log */
     this.logService.addLogConfirm(challengeId ? 'Sfida aggiornata' : 'Sfida aggiunta');
   }
 
+  protected async deleteChallenge(eventChallengeId: string): Promise<void> {
+    const userConfirm = confirm('Sei sicuro di voler eliminare la sfida?');
+    if (!userConfirm) return;
+
+    /* Elimino il documento */
+    await this.challengeService.softDeleteChallenge(eventChallengeId);
+
+    /* Torno indietro */
+    this.location.back();
+
+    /* Log */
+    this.logService.addLogConfirm('Sfida eliminata');
+  }
+
   /* ------------------------ Methods: utils ------------------------ */
-  protected onBackdropClick(event: MouseEvent): void {
+  protected onCloseModal(event: MouseEvent): void {
     const clickedElement = event.target as HTMLElement;
     if (clickedElement.dataset['dialogBackdrop'] === 'sign-in-modal') {
       this.challengeTypeModalIsOpen.set(false);
     }
   }
 
-  protected selectChallengeType(challengeType: ChallengeType): void {
+  protected onSelectType(challengeType: ChallengeType): void {
     this.challengeForm.controls.type.setValue(challengeType);
     this.challengeTypeModalIsOpen.set(false);
   }

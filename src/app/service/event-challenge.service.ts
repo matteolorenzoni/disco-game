@@ -36,9 +36,10 @@ export class EventChallengeService {
 
   public async getEventChallengeById(eventId: string, challengeId: string): Promise<Doc<EventChallenge>> {
     return await this.httpService.execute(async () => {
-      const eventChallenges = await this.documentService.getDocumentsByProps<EventChallenge>(
+      const valueConstraints = [where('eventId', '==', eventId), where('challengeId', '==', challengeId)];
+      const eventChallenges = await this.documentService.getDocumentsWithConstraints<EventChallenge>(
         COL_EVENT_CHALLENGES,
-        { eventId, challengeId },
+        valueConstraints,
         eventChallengeConverter
       );
       if (eventChallenges.length !== 1) throw new Error('noDocument', { cause: 'noDocument' });

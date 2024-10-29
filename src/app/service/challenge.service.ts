@@ -6,6 +6,7 @@ import { challengeConverter } from '../model/converter';
 import { Challenge } from '../model/challenge.model';
 import { Doc } from '../model/firebase';
 import { HttpService } from './http.service';
+import { orderBy } from 'firebase/firestore';
 
 const COL_CHALLENGES = environment.collection.CHALLENGES;
 
@@ -18,11 +19,13 @@ export class ChallengeService {
   private readonly httpService = inject(HttpService);
 
   /* --------------------------- Read ---------------------------*/
-  public async getChallenges(): Promise<Doc<Challenge>[]> {
+  //! [INDEX]
+  public async getAllChallenges(): Promise<Doc<Challenge>[]> {
     return await this.httpService.execute(async () => {
-      return await this.documentService.getDocumentsByProps<Challenge>(
+      const orderConstraints = [orderBy('name', 'asc')];
+      return this.documentService.getDocumentsWithConstraints<Challenge>(
         COL_CHALLENGES,
-        { isActive: true },
+        orderConstraints,
         challengeConverter
       );
     });
@@ -55,6 +58,13 @@ export class ChallengeService {
   public async updateChallenge(challengeId: string, form: ChallengeModel): Promise<void> {
     return await this.httpService.execute(async () => {
       await this.documentService.updateDocument<Challenge>(challengeId, COL_CHALLENGES, form);
+    });
+  }
+
+  /* --------------------------- Delete ---------------------------*/
+  public async softDeleteChallenge(challengeId: string): Promise<void> {
+    return await this.httpService.execute(async () => {
+      await this.documentService.updateDocument<Challenge>(challengeId, COL_CHALLENGES, { isActive: false });
     });
   }
 }

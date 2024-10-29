@@ -42,6 +42,8 @@ export class FirebaseDocumentService {
     if (!docSnap.exists() || !docSnap.data().isActive) throw new Error('noDocument', { cause: 'noDocument' });
 
     const data = docSnap.data() as T;
+    if (!data.isActive) throw new Error('documentNotActive', { cause: 'documentNotActive' });
+
     return { id: docSnap.id, props: data };
   }
 

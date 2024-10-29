@@ -26,7 +26,7 @@ export class ChallengeListComponent implements OnInit {
 
   /* -------------------- Lifecycle hooks -------------------- */
   async ngOnInit(): Promise<void> {
-    const challenges = await this.challengeService.getChallenges();
+    const challenges = await this.challengeService.getAllChallenges();
     this.challenges.set(challenges);
   }
 

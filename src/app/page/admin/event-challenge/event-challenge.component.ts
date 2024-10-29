@@ -4,6 +4,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import {
+  faArrowsRotate,
   faCalendar,
   faClock,
   faInfinity,
@@ -16,18 +17,18 @@ import {
 import { Doc } from '../../../model/firebase';
 import { EventChallenge, ChallengeStatus } from '../../../model/event-challenge.model';
 import { EventChallengeModel, FromMap } from '../../../model/form.model';
-import { endDateValidator } from '../../../util/utils';
 import { ChallengeService } from '../../../service/challenge.service';
 import { EventChallengeService } from '../../../service/event-challenge.service';
-import { FvFloatingButtonComponent } from '../../../components/fv-floating-button.component';
-import EventChallengeStatus from './event-challenge-status.config.json';
 import { LogService } from '../../../service/log.service';
+import { Challenge, ChallengeType } from '../../../model/challenge.model';
+import { FvFloatingButtonComponent } from '../../../components/fv-floating-button.component';
 import { FvFieldComponent } from '../../../components/fv-field.component';
 import { FvSelectComponent, SelectOption } from '../../../components/fv-select.component';
 import { FvButtonComponent } from '../../../components/fv-button.component';
-import { TitleComponent } from '../../../components/title/title.component';
 import { FvButtonOutlinedComponent } from '../../../components/fv-button-outlined.component';
-import { Challenge } from '../../../model/challenge.model';
+import { TitleComponent } from '../../../components/title/title.component';
+import EventChallengeStatus from './event-challenge-status.config.json';
+import { endDateValidator } from '../../../util/utils';
 
 @Component({
   selector: 'app-event-challenge',
@@ -100,7 +101,7 @@ export class EventChallengeComponent implements OnInit {
 
       /* Ottengo le sfide per la combo e le eventChallenge da mostrare nella lista */
       const [challenges, eventChallenges] = await Promise.all([
-        this.challengeService.getChallenges(),
+        this.challengeService.getAllChallenges(),
         this.eventChallengeService.getEventChallengesByProp([{ key: 'eventId', value: eventId }])
       ]);
       this.challenges.set(challenges);
@@ -112,54 +113,56 @@ export class EventChallengeComponent implements OnInit {
   protected async addOrUpdateEventChallenge() {
     if (this.eventChallengeForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
 
-    /* Recupero le info della sfida selezionata */
     const form = this.eventChallengeForm.getRawValue();
-    const eventId = this.eventId();
-    const challenge = this.challenges().find((x) => x.id === form.challengeId);
-    if (!eventId || !challenge) throw new Error('retry', { cause: 'retry' });
-
-    /* Creo una nuova entry (sia per la creazione che per l'aggiornamento), i valori del form vengono messi qui */
-    const eventChallenge: EventChallenge = {
-      eventId,
-      challengeId: form.challengeId,
-      challengeName: challenge.props.name,
-      challengeType: challenge.props.type,
-      status: form.status,
-      maxTimes: form.maxTimes,
-      startDate: form.startDate ? new Date(form.startDate) : null,
-      endDate: form.endDate ? new Date(form.endDate) : null,
-      updatedAt: new Date()
-    };
-
-    let eventChallengeSelected = this.eventChallengeSelected();
+    const eventChallengeSelected = this.eventChallengeSelected();
     if (!eventChallengeSelected) {
-      /* Aggiungo a DB e aggiorno array */
-      eventChallengeSelected = await this.eventChallengeService.addEventChallenge(eventChallenge);
-      this.eventChallenges.update((eventChallenges) => [...eventChallenges, eventChallengeSelected!]);
+      /* Aggiorno db */
+      const challenge = this.challenges().find((x) => x.id === form.challengeId);
+      const { name, type } = challenge!.props;
+      const eventChallenge = this.createChallenge(name, type, form);
+      const newEventChallenge = await this.eventChallengeService.addEventChallenge(eventChallenge);
+
+      /* Aggiorno app */
+      this.eventChallenges.update((eventChallenges) => [...eventChallenges, newEventChallenge]);
     } else {
-      /* Aggiorno DB e array */
+      /* Aggiorno db */
+      const { challengeName, challengeType } = eventChallengeSelected.props;
+      const eventChallenge = this.createChallenge(challengeName, challengeType, form);
       await this.eventChallengeService.updateEventChallenge(eventChallengeSelected.id, eventChallenge);
+
+      /* Aggiorno app */
       eventChallengeSelected.props = eventChallenge;
     }
 
+    /* Log */
+    this.logService.addLogConfirm(eventChallengeSelected ? 'Sfida aggiornata' : 'Sfida aggiunta');
+
     /* Chiudo il modal e resetto il form */
     this.resetForm();
+  }
+
+  protected async deleteEventChallenge(eventChallengeId: string): Promise<void> {
+    const userConfirm = confirm("Sei sicuro di voler eliminare la sfida dall'evento?");
+    if (!userConfirm) return;
+
+    const eventId = this.eventId();
+    if (!eventId) throw new Error('retry', { cause: 'retry' });
+
+    /* Elimino il documento */
+    await this.eventChallengeService.deleteEventChallenge(eventChallengeId);
+    this.eventChallenges.update((eventChallenges) => eventChallenges.filter((x) => x.id !== eventChallengeId));
 
     /* Log */
-    this.logService.addLogConfirm(this.eventChallengeSelected() ? 'Sfida aggiornata' : 'Sfida aggiunta');
+    this.logService.addLogConfirm('Sfida eliminata');
   }
 
   /* -------------------- Methods: event -------------------- */
-  protected onBackdropClick(event: MouseEvent): void {
+  protected onCloseModal(event: MouseEvent): void {
     const clickedElement = event.target as HTMLElement;
     if (clickedElement.dataset['dialogBackdrop'] === 'sign-in-modal') {
       /* Chiudo il modal e resetto il form */
       this.resetForm();
     }
-  }
-
-  protected executeFloatingButton(): void {
-    this.formModalIsOpen.set(true);
   }
 
   protected goToUpdateEventChallenge(eventChallengeId: string): void {
@@ -183,22 +186,33 @@ export class EventChallengeComponent implements OnInit {
     this.formModalIsOpen.set(true);
   }
 
-  protected async deleteEventChallenge(eventChallengeId: string): Promise<void> {
-    const userConfirm = confirm("Sei sicuro di voler eliminare la sfida dall'evento?");
-    if (!userConfirm) return;
-
-    const eventId = this.eventId();
-    if (!eventId) throw new Error('retry', { cause: 'retry' });
-
-    /* Elimino il documento */
-    await this.eventChallengeService.deleteEventChallenge(eventChallengeId);
-    this.eventChallenges.update((eventChallenges) => eventChallenges.filter((x) => x.id !== eventChallengeId));
-
-    /* Log */
-    this.logService.addLogConfirm('Sfida eliminata');
+  protected onExecuteFloatingButton(): void {
+    this.formModalIsOpen.set(true);
   }
 
   /* -------------------- Methods: utils -------------------- */
+  private createChallenge(
+    challengeName: string,
+    challengeType: ChallengeType,
+    form: EventChallengeModel
+  ): EventChallenge {
+    const eventId = this.eventId();
+    if (!eventId) throw new Error('retry', { cause: 'retry' });
+
+    const eventChallenge: EventChallenge = {
+      eventId,
+      challengeId: form.challengeId,
+      challengeName,
+      challengeType,
+      status: form.status,
+      maxTimes: form.maxTimes,
+      startDate: form.startDate ? new Date(form.startDate) : null,
+      endDate: form.endDate ? new Date(form.endDate) : null,
+      updatedAt: new Date()
+    };
+    return eventChallenge;
+  }
+
   private resetForm(): void {
     this.formModalIsOpen.set(false);
     this.eventChallengeSelected.set(undefined);
