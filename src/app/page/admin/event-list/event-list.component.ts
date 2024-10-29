@@ -5,62 +5,30 @@ import { Event } from '../../../model/event.model';
 import { Doc } from '../../../model/firebase';
 import { EventService } from '../../../service/event.service';
 import { FvFloatingButtonComponent } from '../../../components/fv-floating-button.component';
-import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faCalendar, faClock, faLocationPin } from '@fortawesome/free-solid-svg-icons';
 import { FvButtonComponent } from '../../../components/fv-button.component';
 import { FvButtonOutlinedComponent } from '../../../components/fv-button-outlined.component';
 import { TitleComponent } from '../../../components/title/title.component';
-import { IndexedDbService } from '../../../service/indexed-db.service';
 
 @Component({
   selector: 'app-event-list',
   standalone: true,
-  imports: [
-    CommonModule,
-    FaIconComponent,
-    TitleComponent,
-    FvButtonComponent,
-    FvButtonOutlinedComponent,
-    FvFloatingButtonComponent
-  ],
+  imports: [CommonModule, TitleComponent, FvButtonComponent, FvButtonOutlinedComponent, FvFloatingButtonComponent],
   templateUrl: './event-list.component.html',
   styleUrls: ['./event-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EventListComponent implements OnInit {
   /* Services */
-  readonly router = inject(Router);
-  readonly eventService = inject(EventService);
-  readonly dbService = inject(IndexedDbService);
+  private readonly router = inject(Router);
+  private readonly eventService = inject(EventService);
 
   /* Variables */
   events = signal<Doc<Event>[] | undefined>(undefined);
-  eventIdSelected = signal<string | undefined>(undefined);
-
-  /* Icons */
-  ICON_CALENDAR = faCalendar;
-  ICON_CLOCK = faClock;
-  ICON_LOCATION = faLocationPin;
 
   /* -------------------- Lifecycle hooks -------------------- */
   async ngOnInit(): Promise<void> {
-    /* Inizializzazione indexedDB */
-    await this.initIndexedDb();
-
-    /* Inizializzazione http */
-    await this.initHttp();
-  }
-
-  /* -------------------------- Methods initialization --------------------------  */
-  private async initIndexedDb() {
-    const events = await this.dbService.getEvents();
-    this.events.set(events);
-  }
-
-  private async initHttp() {
     const events = await this.eventService.getAllEvents();
     this.events.set(events);
-    this.eventIdSelected.set(events[0].id);
   }
 
   /* -------------------- Methods -------------------- */

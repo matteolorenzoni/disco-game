@@ -4,7 +4,10 @@ import { EventChallenge } from '../model/event-challenge.model';
 import { Team } from '../model/team.model';
 import { Event } from '../model/event.model';
 
-export type MergeEvent = { id: string } & Pick<Event, 'name' | 'imageUrl' | 'location' | 'startDate'> & {
+export type MergeEvent = { id: string } & Pick<
+  Event,
+  'name' | 'description' | 'imageUrl' | 'location' | 'startDate'
+> & {
     teamId: string | null;
   };
 
@@ -19,6 +22,7 @@ export const mergeEvents = (events: Doc<Event>[], teams: Doc<Team>[]): MergeEven
     const matchingTeam = teams.find((team) => team.props.eventId === event.id);
     const mergedEvent: MergeEvent = {
       id: event.id,
+      description: event.props.description,
       name: event.props.name,
       imageUrl: event.props.imageUrl,
       location: event.props.location,

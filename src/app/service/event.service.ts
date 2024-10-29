@@ -26,7 +26,7 @@ export class EventService {
   //! [INDEX]
   public async getAllEvents(): Promise<Doc<Event>[]> {
     return await this.httpService.execute(async () => {
-      const orderConstraints = [orderBy('startDate', 'asc')];
+      const orderConstraints = [orderBy('startDate', 'desc')];
       return this.documentService.getDocumentsWithConstraints<Event>(COL_EVENTS, orderConstraints, eventConverter);
     });
   }

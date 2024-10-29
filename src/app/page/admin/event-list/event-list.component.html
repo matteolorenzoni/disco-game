@@ -1,55 +1,35 @@
 <app-title [pages]="[{ path: '', label: 'Eventi' }]"></app-title>
 
-<ul class="flex flex-col gap-4">
+<ul class="flex flex-col gap-6 overflow-hidden">
   @for (event of events(); track event.id) {
-    @if (event.id === eventIdSelected()) {
-      <li class="overflow-hidden rounded bg-primary-500/30 text-on-surface shadow backdrop-blur-lg">
-        <img class="aspect-video h-auto w-full" [src]="event.props.imageUrl" alt="Immagine evento" />
-        <div class="flex flex-col gap-2 p-4">
-          <h3 class="text-xl font-semibold text-on-background">{{ event.props.name }}</h3>
-          <p class="flex gap-2 text-xs">
-            <fa-icon class="basis-4" [icon]="ICON_CALENDAR"></fa-icon>
-            <span> {{ event.props.startDate | date: 'dd/MM' }} - {{ event.props.endDate | date: 'dd/MM' }}</span>
+    <li class="relative overflow-hidden rounded-lg shadow">
+      <img class="aspect-video w-full" [src]="event.props.imageUrl" alt="Immagine evento" />
+      <div class="h-24 w-full"></div>
+      <div class="absolute inset-0 flex h-full w-full bg-gradient-to-b from-transparent from-20% to-black to-70%"></div>
+      <div class="absolute inset-0 flex h-full w-full flex-col gap-2 p-2">
+        <div
+          class="ml-auto flex h-12 w-12 flex-col items-center justify-center rounded bg-white/80 text-black shadow-md backdrop-blur">
+          <p class="text-lg font-bold">{{ event.props.startDate | date: 'dd' }}</p>
+          <p class="text-xs uppercase text-gray-700">
+            {{ (event.props.startDate | date: 'MMMM')!.substring(0, 3) }}
           </p>
-          <p class="flex gap-2 text-xs">
-            <fa-icon class="basis-4" [icon]="ICON_CLOCK"></fa-icon>
-            <span>{{ event.props.startDate | date: 'HH:mm' }} - {{ event.props.endDate | date: 'HH:mm' }}</span>
+        </div>
+        <div class="mt-auto flex flex-col overflow-hidden rounded-lg border border-black/50 p-2 shadow backdrop-blur">
+          <p class="truncate text-xxs text-gray-400">{{ event.props.location }}</p>
+          <p class="mb-2 truncate text-xl font-bold text-on-background">{{ event.props.name }}</p>
+          <p class="mb-4 line-clamp-3 whitespace-pre-line break-words text-xs italic text-neutral-400">
+            {{ event.props.description }}
           </p>
-          <p class="flex gap-2 text-xs">
-            <fa-icon class="basis-4" [icon]="ICON_LOCATION"></fa-icon>
-            <span>{{ event.props.location }}</span>
-          </p>
-          <p class="whitespace-pre-line break-words text-base italic leading-4">{{ event.props.description }}</p>
-
-          <div class="mt-4 flex flex-col gap-2">
-            <fv-button label="Modifica" [onClick]="goToUpdateEvent.bind(this, event.id)"></fv-button>
+          <div class="flex gap-2">
+            <fv-button class="basis-20" label="Modifica" [onClick]="goToUpdateEvent.bind(this, event.id)"></fv-button>
             <fv-button-outlined
+              class="basis-20"
               label="Sfide"
               [onClick]="goToUpdateEventChallenges.bind(this, event.id)"></fv-button-outlined>
           </div>
         </div>
-      </li>
-    } @else {
-      <li
-        class="transform cursor-pointer overflow-hidden rounded bg-surface text-on-surface shadow hover:bg-neutral-800"
-        [tabindex]="0"
-        (click)="eventIdSelected.set(event.id)"
-        (keydown)="eventIdSelected.set(event.id)">
-        <div class="relative p-2">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-base font-semibold text-on-background">{{ event.props.name }}</p>
-              <p class="text-xs">
-                {{ event.props.location }}
-              </p>
-            </div>
-            <div class="text-lg font-bold">
-              <p>{{ event.props.startDate | date: 'dd/MM' }}</p>
-            </div>
-          </div>
-        </div>
-      </li>
-    }
+      </div>
+    </li>
   }
 </ul>
 

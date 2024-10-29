@@ -19,9 +19,9 @@
       @for (event of mergedEvents; track event.id) {
         <li class="relative overflow-hidden rounded-lg shadow">
           <img class="aspect-video w-full" [src]="event.imageUrl" alt="Immagine evento" />
-          <div class="h-16 w-full"></div>
+          <div class="h-28 w-full"></div>
           <div
-            class="absolute inset-0 flex h-full w-full bg-gradient-to-b from-transparent from-30% to-black to-70%"></div>
+            class="absolute inset-0 flex h-full w-full bg-gradient-to-b from-transparent from-20% to-black to-70%"></div>
           <div class="absolute inset-0 flex h-full w-full flex-col gap-2 p-2">
             <div
               class="ml-auto flex h-12 w-12 flex-col items-center justify-center rounded bg-white/80 text-black shadow-md backdrop-blur">
@@ -34,6 +34,9 @@
               class="mt-auto flex flex-col overflow-hidden rounded-lg border border-black/50 p-2 shadow backdrop-blur">
               <p class="truncate text-xxs text-gray-400">{{ event.location }}</p>
               <p class="mb-2 truncate text-xl font-bold text-on-background">{{ event.name }}</p>
+              <p class="mb-4 line-clamp-3 whitespace-pre-line break-words text-xs italic text-neutral-400">
+                {{ event.description }}
+              </p>
               @if (event.teamId) {
                 <fv-button-outlined
                   class="flex-1"
