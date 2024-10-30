@@ -101,12 +101,12 @@ export class IndexedDbService {
     }
   }
 
-  public async deleteItems<T extends { id: string }>(object: ObjectKey, items: T[]): Promise<void> {
+  public async deleteItems(object: ObjectKey, itemIds: string[]): Promise<void> {
     try {
       const db = await openDB(DB_NAME, DB_VERSION);
       const tx = db.transaction(object, 'readwrite');
       const store = tx.objectStore(object);
-      await Promise.all(items.map((item) => store.delete(item.id)));
+      await Promise.all(itemIds.map((itemId) => store.delete(itemId)));
       await tx.done;
     } catch (error) {
       console.error('Error indexedDB:', error);
@@ -134,7 +134,10 @@ export class IndexedDbService {
     /* Elimino item scaduti */
     const events = await this.getEvents();
     const eventsToDelete = events.filter((x) => x.props.startDate < dateYesterday());
-    this.deleteItems('events', eventsToDelete);
+    this.deleteItems(
+      'events',
+      eventsToDelete.map((item) => item.id)
+    );
   }
 
   public async getEvents(): Promise<Doc<Event>[]> {
@@ -151,7 +154,10 @@ export class IndexedDbService {
     /* Elimino item scaduti */
     const teams = await this.getTeams();
     const teamsToDelete = teams.filter((x) => x.props.eventStartDate < dateYesterday());
-    this.deleteItems('teams', teamsToDelete);
+    this.deleteItems(
+      'teams',
+      teamsToDelete.map((item) => item.id)
+    );
   }
 
   public async getTeams(): Promise<Doc<Team>[]> {
@@ -164,11 +170,18 @@ export class IndexedDbService {
     return dbTeams.map(({ id, ...props }) => ({ id, props }));
   }
 
+  public async deleteTeams(teamIds: string[]): Promise<void> {
+    await this.deleteItems('teams', teamIds);
+  }
+
   /* ---------------------------------- Challenge ---------------------------------- */
   public async saveChallenges(items: MergeChallenge[]): Promise<void> {
     /* Elimino tutti gli item */
     const challenges = await this.getChallenges();
-    this.deleteItems('challenges', challenges);
+    this.deleteItems(
+      'challenges',
+      challenges.map((item) => item.id)
+    );
 
     /* Salvo i nuovi items */
     await this.saveItems('challenges', items);
@@ -188,7 +201,10 @@ export class IndexedDbService {
     /* Elimino item scaduti */
     const leaderboard = await this.getLeaderboard();
     const teamsToDelete = leaderboard.filter((x) => x.props.eventStartDate < dateYesterday());
-    this.deleteItems('leaderboard', teamsToDelete);
+    this.deleteItems(
+      'leaderboard',
+      teamsToDelete.map((item) => item.id)
+    );
   }
 
   private async getLeaderboard(): Promise<Doc<Team>[]> {
@@ -210,7 +226,10 @@ export class IndexedDbService {
   public async saveAdminChallenges(items: Doc<Challenge>[]): Promise<void> {
     /* Elimino tutti gli items */
     const challenges = await this.getAdminChallenges();
-    this.deleteItems('admin-challenges', challenges);
+    this.deleteItems(
+      'admin-challenges',
+      challenges.map((item) => item.id)
+    );
 
     /* Salvo i nuovi items */
     const indexedDbItems = items.map((x) => ({ id: x.id, ...x.props }));

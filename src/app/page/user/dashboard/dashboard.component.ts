@@ -108,7 +108,10 @@ export class DashboardComponent implements OnInit {
 
     // Se non è stato trovato alcun utente associato al team, termina l'operazione
     this.team.set(team);
-    if (!team) return;
+    if (!team) {
+      this.lsService.removeUserDashboardTeamId();
+      return;
+    }
 
     // Recupera l'evento e le sfide associate all'evento in parallelo
     const [event, eventChallenges] = await Promise.all([
@@ -150,6 +153,9 @@ export class DashboardComponent implements OnInit {
 
     /* Aggiorno User (prop: eventIds e teamIds) */
     await this.userService.updateEventsAndTeams('REMOVE', userId, event.id, team.id);
+
+    /* Rimuovi da indexedDb */
+    await this.dbService.deleteTeams([team.id]);
 
     /* Log */
     this.logService.addLogConfirm('Non fai piu parte della squadra');
