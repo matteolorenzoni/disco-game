@@ -8,15 +8,12 @@ import { Event } from '../../../model/event.model';
 import { EventModel, FromMap } from '../../../model/form.model';
 import { FirebaseDocumentService } from '../../../service/firebase-document.service';
 import { EventService } from '../../../service/event.service';
-import { FirebaseService } from '../../../service/firebase.service';
-import { LogService } from '../../../service/log.service';
 import { StorageService } from '../../../service/storage.service';
 import { endDateValidator } from '../../../util/utils';
 import { FvFieldComponent } from '../../../components/fv-field.component';
 import { FvTextAeraComponent } from '../../../components/fv-text-area.component';
 import { FvButtonComponent } from '../../../components/fv-button.component';
 import { TitleComponent } from '../../../components/title/title.component';
-import { HttpService } from '../../../service/http.service';
 
 const COL_EVENTS = environment.collection.EVENTS;
 
@@ -37,13 +34,10 @@ const COL_EVENTS = environment.collection.EVENTS;
 })
 export class EventCreateComponent implements OnInit {
   /* Services */
-  readonly route = inject(ActivatedRoute);
-  readonly firebaseService = inject(FirebaseService);
-  readonly firebaseDocumentService = inject(FirebaseDocumentService);
-  readonly storageService = inject(StorageService);
-  readonly httpService = inject(HttpService);
-  readonly eventService = inject(EventService);
-  readonly logService = inject(LogService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly firebaseDocumentService = inject(FirebaseDocumentService);
+  protected readonly storageService = inject(StorageService);
+  private readonly eventService = inject(EventService);
 
   /* Variables */
   event = signal<Doc<Event> | undefined>(undefined);
@@ -104,21 +98,19 @@ export class EventCreateComponent implements OnInit {
   protected async addOrUpdateEvent(): Promise<void> {
     if (this.eventForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
 
-    await this.httpService.execute(async () => {
-      const event = this.event();
-      const form = this.eventForm.getRawValue();
-      if (event) {
-        await this.eventService.updateEvent(event.id, form);
-      } else {
-        /* Creo id documento */
-        const eventId = this.firebaseDocumentService.createDocId(COL_EVENTS);
+    const event = this.event();
+    const form = this.eventForm.getRawValue();
+    if (event) {
+      await this.eventService.updateEvent(event.id, form);
+    } else {
+      /* Creo id documento */
+      const eventId = this.firebaseDocumentService.createDocId(COL_EVENTS);
 
-        /* Creo immagine */
-        const imageUrl = await this.storageService.saveImage(this.imageFile()!, COL_EVENTS, eventId);
+      /* Creo immagine */
+      const imageUrl = await this.storageService.saveImage(this.imageFile()!, COL_EVENTS, eventId);
 
-        /* Creazione evento */
-        await this.eventService.addEventById(eventId, form, imageUrl);
-      }
-    });
+      /* Creazione evento */
+      await this.eventService.addEventById(eventId, form, imageUrl);
+    }
   }
 }

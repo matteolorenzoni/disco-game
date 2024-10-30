@@ -46,7 +46,7 @@ export class EventService {
         eventConverter
       );
       return events.length ? events[0] : null;
-    });
+    }, 0);
   }
 
   //! [INDEX]
@@ -80,7 +80,7 @@ export class EventService {
       });
       this.logService.addLogConfirm('Evento aggiunto');
       return docRef.id;
-    });
+    }, 0);
   }
 
   /* --------------------------- Update ---------------------------*/
@@ -92,18 +92,18 @@ export class EventService {
         endDate: new Date(form.endDate)
       });
       this.logService.addLogConfirm('Evento aggiornato');
-    });
+    }, 0);
   }
 
   public async updateEventImageUrl(eventId: string, imageUrl: string): Promise<void> {
     return await this.httpService.execute(async () => {
       await this.documentService.updateDocument<Event>(eventId, COL_EVENTS, { imageUrl });
-    });
+    }, 0);
   }
 
   public async updateTeams(eventId: string, teamId: string): Promise<void> {
     return await this.httpService.execute(async () => {
       await this.documentService.updateDocumentAddingToArray<Event, string>(eventId, COL_EVENTS, 'teamIds', teamId);
-    });
+    }, 0);
   }
 }

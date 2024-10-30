@@ -75,26 +75,25 @@ export class LoginComponent {
   public async login(): Promise<void> {
     if (this.loginForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
 
-    await this.httpService.execute(async () => {
-      const userCredentials = await this.firebaseService.logIn(this.loginForm.getRawValue(), this.rememberMe());
-      const user = await this.userService.getUserById(userCredentials.user.uid);
-      this.lsService.setUser(user);
+    const form = this.loginForm.getRawValue();
+    const userCredentials = await this.firebaseService.logIn(form, this.rememberMe());
+    const user = await this.userService.getUserById(userCredentials.user.uid);
+    this.lsService.setUser(user);
 
-      switch (user?.props.role) {
-        case UserRole.ADMIN:
-          await this.router.navigate(['/admin/dashboard']);
-          break;
-        case UserRole.SCANNER:
-          await this.router.navigate(['/scanner/scanner']);
-          break;
-        case UserRole.USER:
-          await this.router.navigate(['/user/dashboard']);
-          break;
-        default:
-          throw new Error('noUserDocument', { cause: 'noUserDocument' });
-      }
-      this.logService.addLogConfirm(`Benvenuto ${user.props.userName}`);
-    });
+    switch (user?.props.role) {
+      case UserRole.ADMIN:
+        await this.router.navigate(['/admin/dashboard']);
+        break;
+      case UserRole.SCANNER:
+        await this.router.navigate(['/scanner/scanner']);
+        break;
+      case UserRole.USER:
+        await this.router.navigate(['/user/dashboard']);
+        break;
+      default:
+        throw new Error('noUserDocument', { cause: 'noUserDocument' });
+    }
+    this.logService.addLogConfirm(`Benvenuto ${user.props.userName}`);
   }
 
   protected resetPassword(): void {

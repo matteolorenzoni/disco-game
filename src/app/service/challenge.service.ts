@@ -51,20 +51,20 @@ export class ChallengeService {
         isActive: true,
         updatedAt: new Date()
       });
-    });
+    }, 0);
   }
 
   /* --------------------------- Update ---------------------------*/
   public async updateChallenge(challengeId: string, form: ChallengeModel): Promise<void> {
     return await this.httpService.execute(async () => {
       await this.documentService.updateDocument<Challenge>(challengeId, COL_CHALLENGES, form);
-    });
+    }, 0);
   }
 
   /* --------------------------- Delete ---------------------------*/
   public async softDeleteChallenge(challengeId: string): Promise<void> {
     return await this.httpService.execute(async () => {
       await this.documentService.updateDocument<Challenge>(challengeId, COL_CHALLENGES, { isActive: false });
-    });
+    }, 0);
   }
 }

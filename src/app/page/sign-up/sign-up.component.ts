@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { FirebaseService } from '../../service/firebase.service';
 import { UserCreateComponent } from '../user/user-create/user-create.component';
-import { HttpService } from '../../service/http.service';
 
 @Component({
   selector: 'app-sign-up',
@@ -14,11 +13,10 @@ import { HttpService } from '../../service/http.service';
 })
 export class SignUpComponent implements OnInit {
   /* Services */
-  readonly firebaseService = inject(FirebaseService);
-  readonly httpService = inject(HttpService);
+  private readonly firebaseService = inject(FirebaseService);
 
   /* ------------- Methods ------------- */
   async ngOnInit(): Promise<void> {
-    await this.httpService.execute(async () => await this.firebaseService.logout());
+    await this.firebaseService.logout();
   }
 }

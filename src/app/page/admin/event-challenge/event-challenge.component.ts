@@ -96,6 +96,21 @@ export class EventChallengeComponent implements OnInit {
 
   /* -------------------- Lifecycle hooks -------------------- */
   async ngOnInit(): Promise<void> {
+    /* Inizializzazione indexedDB */
+    await this.initIndexedDb();
+
+    /* Inizializzazione http */
+    await this.initHttp();
+  }
+
+  /* -------------------------- Methods initialization --------------------------  */
+  private async initIndexedDb() {
+    /* Ottengo le sfide dal indexedDB per limitare il numero di letture */
+    const challenges = await this.dbService.getAdminChallenges();
+    this.challenges.set(challenges);
+  }
+
+  private async initHttp() {
     // Recupera l'ID dell'evento dalla route
     this.route.paramMap.subscribe(async (params) => {
       const eventId = params.get('eventId');
@@ -108,10 +123,6 @@ export class EventChallengeComponent implements OnInit {
       ]);
       this.eventChallenges.set(eventChallenges);
     });
-
-    /* Ottengo le sfide dal indexedDB per limitare il numero di letture */
-    const challenges = await this.dbService.getAdminChallenges();
-    this.challenges.set(challenges);
   }
 
   /* -------------------- Methods: firebase -------------------- */

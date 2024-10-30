@@ -64,7 +64,7 @@ export class TeamService {
         teamConverter
       );
       return teams.length !== 1 ? null : teams[0];
-    });
+    }, 0);
   }
 
   public async getTeamByCode(code: string): Promise<Doc<Team> | null> {
@@ -75,7 +75,7 @@ export class TeamService {
         teamConverter
       );
       return teams.length !== 1 ? null : teams[0];
-    });
+    }, 0);
   }
 
   /* --------------------------- Create ---------------------------*/
@@ -116,7 +116,7 @@ export class TeamService {
 
       /* Restituisco l'oggetto appena creato */
       return { id: docRef.id, props };
-    });
+    }, 0);
   }
 
   /* --------------------------- Update ---------------------------*/
@@ -133,7 +133,7 @@ export class TeamService {
         }
       ];
       await this.documentService.updateDocument<Team>(team.id, COL_TEAMS, team.props);
-    });
+    }, 0);
   }
 
   public async updatePoints(team: Doc<Team>, userId: string, challengeId: string, points: number): Promise<void> {
@@ -151,7 +151,7 @@ export class TeamService {
         user.challenges.push({ id: challengeId, timestamps: [new Date()], totalPoints: points });
       }
       await this.documentService.updateDocument<Team>(team.id, COL_TEAMS, team.props);
-    });
+    }, 0);
   }
 
   /* --------------------------- Delete ---------------------------*/
@@ -160,6 +160,6 @@ export class TeamService {
       team.props.userIds = team.props.userIds.filter((x) => x !== userId);
       team.props.users = team.props.users.filter((x) => x.id !== userId);
       await this.documentService.updateDocument<Team>(team.id, COL_TEAMS, team.props);
-    });
+    }, 0);
   }
 }

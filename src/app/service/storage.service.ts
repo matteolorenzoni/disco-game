@@ -2,6 +2,7 @@ import { inject, Injectable, WritableSignal } from '@angular/core';
 import { deleteObject, getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import { LogService } from './log.service';
 import { FirebaseService } from './firebase.service';
+import { HttpService } from './http.service';
 
 @Injectable({
   providedIn: 'root'
@@ -9,39 +10,44 @@ import { FirebaseService } from './firebase.service';
 export class StorageService {
   /* Services */
   readonly firebaseService = inject(FirebaseService);
+  readonly httpService = inject(HttpService);
   readonly logService = inject(LogService);
 
   /* --------------------------- Method Firebase --------------------------- */
   public async saveImage(image: File, collection: string, name: string): Promise<string> {
-    // Crea un riferimento alla cartella specificata in Firebase Storage
-    const imageRef = ref(this.firebaseService.getStorage(), `${collection}/${name}.jpg`);
+    return await this.httpService.execute(async () => {
+      // Crea un riferimento alla cartella specificata in Firebase Storage
+      const imageRef = ref(this.firebaseService.getStorage(), `${collection}/${name}.jpg`);
 
-    // Carica la nuova immagine su Firebase Storage
-    const snapshot = await uploadBytesResumable(imageRef, image);
+      // Carica la nuova immagine su Firebase Storage
+      const snapshot = await uploadBytesResumable(imageRef, image);
 
-    // Ottieni l'URL della nuova immagine caricata
-    const downloadURL = await getDownloadURL(snapshot.ref);
-    return downloadURL;
+      // Ottieni l'URL della nuova immagine caricata
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      return downloadURL;
+    });
   }
 
   public async updateImage(image: File, collection: string, name: string): Promise<string> {
-    // Crea un riferimento alla cartella specificata in Firebase Storage
-    const imageRef = ref(this.firebaseService.getStorage(), `${collection}/${name}.jpg`);
+    return await this.httpService.execute(async () => {
+      // Crea un riferimento alla cartella specificata in Firebase Storage
+      const imageRef = ref(this.firebaseService.getStorage(), `${collection}/${name}.jpg`);
 
-    // Verifica se esiste già un'immagine con lo stesso nome e la elimina
-    try {
-      const existingImageUrl = await getDownloadURL(imageRef);
-      if (existingImageUrl) await deleteObject(imageRef);
-    } catch {
-      // Ignora l'errore se l'immagine non esiste (comportamento atteso)
-    }
+      // Verifica se esiste già un'immagine con lo stesso nome e la elimina
+      try {
+        const existingImageUrl = await getDownloadURL(imageRef);
+        if (existingImageUrl) await deleteObject(imageRef);
+      } catch {
+        // Ignora l'errore se l'immagine non esiste (comportamento atteso)
+      }
 
-    // Carica la nuova immagine su Firebase Storage
-    const snapshot = await uploadBytesResumable(imageRef, image);
+      // Carica la nuova immagine su Firebase Storage
+      const snapshot = await uploadBytesResumable(imageRef, image);
 
-    // Ottieni l'URL della nuova immagine caricata
-    const downloadURL = await getDownloadURL(snapshot.ref);
-    return downloadURL;
+      // Ottieni l'URL della nuova immagine caricata
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      return downloadURL;
+    });
   }
 
   /* --------------------------- Method Firebase --------------------------- */

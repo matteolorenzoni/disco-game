@@ -11,7 +11,6 @@ import { UserService } from '../../../service/user.service';
 import { environment } from '../../../../environments/environment';
 import { FvFieldComponent } from '../../../components/fv-field.component';
 import { FvButtonComponent } from '../../../components/fv-button.component';
-import { HttpService } from '../../../service/http.service';
 import { LocalStorageService } from '../../../service/local-storage.service';
 
 const COL_USERS = environment.collection.USERS;
@@ -26,12 +25,11 @@ const COL_USERS = environment.collection.USERS;
 })
 export class UserCreateComponent implements OnInit {
   /* Services */
-  readonly router = inject(Router);
-  readonly firebaseService = inject(FirebaseService);
-  readonly storageService = inject(StorageService);
-  readonly httpService = inject(HttpService);
-  readonly userService = inject(UserService);
-  readonly lsService = inject(LocalStorageService);
+  private readonly router = inject(Router);
+  protected readonly firebaseService = inject(FirebaseService);
+  protected readonly storageService = inject(StorageService);
+  private readonly userService = inject(UserService);
+  private readonly lsService = inject(LocalStorageService);
 
   /* Variables */
   imagePreview = signal<string | ArrayBuffer | null | undefined>(undefined);
@@ -88,42 +86,38 @@ export class UserCreateComponent implements OnInit {
   }
 
   private async addUser(userModelForm: UserModel): Promise<void> {
-    await this.httpService.execute(async () => {
-      /* Creazione utente */
-      const userCredential = await this.firebaseService.signUp(userModelForm.email, userModelForm.password);
+    /* Creazione utente */
+    const userCredential = await this.firebaseService.signUp(userModelForm.email, userModelForm.password);
 
-      /* Creazione utente immagine */
-      let imageUrl: string | null = null;
-      if (this.imageFile()) {
-        imageUrl = await this.storageService.saveImage(this.imageFile()!, COL_USERS, userCredential.user.uid);
-      }
+    /* Creazione utente immagine */
+    let imageUrl: string | null = null;
+    if (this.imageFile()) {
+      imageUrl = await this.storageService.saveImage(this.imageFile()!, COL_USERS, userCredential.user.uid);
+    }
 
-      /* Aggiunta utente a DB */
-      await this.userService.addUserById(userCredential.user.uid, userModelForm, imageUrl);
+    /* Aggiunta utente a DB */
+    await this.userService.addUserById(userCredential.user.uid, userModelForm, imageUrl);
 
-      /* Redirect */
-      await this.router.navigate(['/login']);
-    });
+    /* Redirect */
+    await this.router.navigate(['/login']);
   }
 
   private async updateUser(userId: string, userModelForm: UserModel): Promise<void> {
-    await this.httpService.execute(async () => {
-      /* Aggiornamento utente immagine */
-      let imageUrl: string | null | undefined;
-      if (this.imageFile()) {
-        imageUrl = await this.storageService.updateImage(this.imageFile()!, COL_USERS, userId);
-      }
+    /* Aggiornamento utente immagine */
+    let imageUrl: string | null | undefined;
+    if (this.imageFile()) {
+      imageUrl = await this.storageService.updateImage(this.imageFile()!, COL_USERS, userId);
+    }
 
-      /* Creazione utente */
-      await this.userService.updateUser(userId, userModelForm, imageUrl);
+    /* Creazione utente */
+    await this.userService.updateUser(userId, userModelForm, imageUrl);
 
-      /* Aggiorno local storage */
-      const lsUser = this.lsService.getUser();
-      if (lsUser) {
-        lsUser.props = { ...lsUser.props, ...userModelForm };
-        if (this.imageFile()) lsUser.props.imageUrl = imageUrl ?? null;
-        this.lsService.setUser(lsUser);
-      }
-    });
+    /* Aggiorno local storage */
+    const lsUser = this.lsService.getUser();
+    if (lsUser) {
+      lsUser.props = { ...lsUser.props, ...userModelForm };
+      if (this.imageFile()) lsUser.props.imageUrl = imageUrl ?? null;
+      this.lsService.setUser(lsUser);
+    }
   }
 }

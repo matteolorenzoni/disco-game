@@ -27,7 +27,7 @@ export class LeaderboardService {
         [...valueConstraints, ...orderConstraints],
         teamConverter
       );
-    });
+    }, 0);
   }
 
   public subscribeToActiveTeamsByEventIdTop10(eventId: string, onUpdate: (documents: Doc<Team>[]) => void): () => void {

@@ -20,6 +20,7 @@ import { environment } from '../../environments/environment';
 import { LoginModel } from '../model/form.model';
 import { LocalStorageService } from './local-storage.service';
 import { IndexedDbService } from './indexed-db.service';
+import { HttpService } from './http.service';
 
 @Injectable({
   providedIn: 'root'
@@ -27,6 +28,7 @@ import { IndexedDbService } from './indexed-db.service';
 export class FirebaseService {
   /* Variables */
   readonly router = inject(Router);
+  readonly httpService = inject(HttpService);
   readonly lsService = inject(LocalStorageService);
   readonly dbService = inject(IndexedDbService);
 
@@ -63,19 +65,25 @@ export class FirebaseService {
 
   /* --------------------------- Auth ---------------------------*/
   public async logIn(form: LoginModel, rememberMe: boolean): Promise<UserCredential> {
-    const { email, password } = form;
-    await setPersistence(this.auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
-    return await signInWithEmailAndPassword(this.auth, email, password);
+    return await this.httpService.execute(async () => {
+      const { email, password } = form;
+      await setPersistence(this.auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
+      return await signInWithEmailAndPassword(this.auth, email, password);
+    });
   }
 
   public async logout(): Promise<void> {
-    await signOut(this.auth);
-    this.lsService.clearAll();
-    await this.dbService.clearAll();
+    return await this.httpService.execute(async () => {
+      await signOut(this.auth);
+      this.lsService.clearAll();
+      await this.dbService.clearAll();
+    });
   }
 
   public async signUp(email: string, password: string): Promise<UserCredential> {
-    return await createUserWithEmailAndPassword(this.auth, email, password);
+    return await this.httpService.execute(async () => {
+      return await createUserWithEmailAndPassword(this.auth, email, password);
+    });
   }
 
   public observeUserState() {

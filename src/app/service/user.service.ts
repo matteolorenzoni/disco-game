@@ -38,7 +38,7 @@ export class UserService {
         userConverter
       );
       return users.length > 0 ? users[0] : null;
-    });
+    }, 0);
   }
 
   public async getUserByCode(code: string): Promise<Doc<User> | null> {
@@ -49,13 +49,13 @@ export class UserService {
         userConverter
       );
       return users.length > 0 ? users[0] : null;
-    });
+    }, 0);
   }
 
   public async getUsersByIds(userIds: string[]): Promise<Doc<User>[]> {
     return await this.httpService.execute(async () => {
       return this.documentService.getDocumentsByIds<User>(COL_USERS, userIds, userConverter);
-    });
+    }, 0);
   }
 
   /* --------------------------- Create ---------------------------*/
@@ -81,7 +81,7 @@ export class UserService {
         updatedAt: new Date()
       });
       this.logService.addLogConfirm('Utente registrato');
-    });
+    }, 0);
   }
 
   /* --------------------------- Update ---------------------------*/
@@ -95,7 +95,7 @@ export class UserService {
       if (imageUrl !== undefined) form.imageUrl = imageUrl;
       await this.documentService.updateDocument<User>(userId, COL_USERS, form);
       this.logService.addLogConfirm('Utente aggiornato');
-    });
+    }, 0);
   }
 
   public async updateEventsAndTeams(
@@ -119,6 +119,6 @@ export class UserService {
       }
 
       await this.documentService.updateDocument<User>(userId, COL_USERS, user.props);
-    });
+    }, 0);
   }
 }

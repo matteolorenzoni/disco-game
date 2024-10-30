@@ -8,7 +8,6 @@ import { UserCreateComponent } from '../user/user-create/user-create.component';
 import { FvButtonComponent } from '../../components/fv-button.component';
 import { FvButtonOutlinedComponent } from '../../components/fv-button-outlined.component';
 import { TitleComponent } from '../../components/title/title.component';
-import { HttpService } from '../../service/http.service';
 import { LogService } from '../../service/log.service';
 import { Doc } from '../../model/firebase';
 import { User } from '../../model/user.model';
@@ -37,11 +36,10 @@ export type Tab = {
 })
 export class SettingsComponent implements OnInit {
   /* Service */
-  readonly router = inject(Router);
-  readonly firebaseService = inject(FirebaseService);
-  readonly httpService = inject(HttpService);
-  readonly lsService = inject(LocalStorageService);
-  readonly logService = inject(LogService);
+  private readonly router = inject(Router);
+  private readonly firebaseService = inject(FirebaseService);
+  private readonly lsService = inject(LocalStorageService);
+  private readonly logService = inject(LogService);
 
   /* Constants */
   TABS: Tab[] = [
@@ -67,10 +65,8 @@ export class SettingsComponent implements OnInit {
 
   /* --------------------- Methods --------------------- */
   protected async logout(): Promise<void> {
-    await this.httpService.execute(async () => {
-      await this.firebaseService.logout();
-      this.router.navigate(['/login']);
-      this.logService.addLogConfirm('Logout completato. Buona giornata!');
-    });
+    await this.firebaseService.logout();
+    this.router.navigate(['/login']);
+    this.logService.addLogConfirm('Logout completato. Buona giornata!');
   }
 }

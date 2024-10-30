@@ -53,7 +53,7 @@ export class EventChallengeService {
     return await this.httpService.execute(async () => {
       const docRef = await this.documentService.addDocument<EventChallenge>(COL_EVENT_CHALLENGES, newEventChallenge);
       return { id: docRef.id, props: newEventChallenge };
-    });
+    }, 0);
   }
 
   /* --------------------------- Create ---------------------------*/
@@ -64,13 +64,13 @@ export class EventChallengeService {
         startDate: form.startDate ? new Date(form.startDate) : null,
         endDate: form.endDate ? new Date(form.endDate) : null
       });
-    });
+    }, 0);
   }
 
   /* --------------------------- Delete ---------------------------*/
   public async deleteEventChallenge(eventChallengeId: string): Promise<void> {
     return await this.httpService.execute(async () => {
       await this.documentService.deleteDocument(eventChallengeId, COL_EVENT_CHALLENGES);
-    });
+    }, 0);
   }
 }
