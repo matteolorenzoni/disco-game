@@ -40,7 +40,8 @@ export class EventChallengeService {
       const eventChallenges = await this.documentService.getDocumentsWithConstraints<EventChallenge>(
         COL_EVENT_CHALLENGES,
         valueConstraints,
-        eventChallengeConverter
+        eventChallengeConverter,
+        false
       );
       if (eventChallenges.length !== 1) throw new Error('noDocument', { cause: 'noDocument' });
       return eventChallenges[0];
