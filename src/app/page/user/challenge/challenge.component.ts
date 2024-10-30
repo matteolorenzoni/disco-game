@@ -84,7 +84,6 @@ export class ChallengeComponent implements OnInit {
 
           /* Genero qrcode */
           const qrcode: Qrcode = {
-            eventId,
             teamId,
             userId,
             challengeId,

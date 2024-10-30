@@ -20,7 +20,6 @@ export enum ChallengeStatus {
 }
 
 export type Qrcode = {
-  eventId: string;
   teamId: string;
   userId: string;
   challengeId: string;

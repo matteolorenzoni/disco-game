@@ -24,7 +24,6 @@ export const isQrcode = (obj: any): obj is Qrcode => {
 export const isEqualQrcode = (qrA: Qrcode, qrB: Qrcode | undefined): boolean => {
   if (!qrB) return false;
   return (
-    qrA.eventId === qrB.eventId &&
     qrA.teamId === qrB.teamId &&
     qrA.userId === qrB.userId &&
     qrA.challengeId === qrB.challengeId &&

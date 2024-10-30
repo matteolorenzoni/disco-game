@@ -23,6 +23,7 @@ import { Doc } from '../../../model/firebase';
 import { Qrcode } from '../../../model/event-challenge.model';
 import { Challenge } from '../../../model/challenge.model';
 import { isEqualQrcode, isQrcode } from '../../../util/type.util';
+import { Team } from '../../../model/team.model';
 
 type ScanError = {
   message: string;
@@ -153,31 +154,23 @@ export class DashboardComponent implements OnInit {
     /* Cerco prima se l'user ha una squadra per questo evento */
     const team = await this.teamService.getActiveTeamByUserAndEventId(user.id, eventId);
     if (!team) {
-      this.logService.addLogError('', "Squadra non trovata, l'utente non partecipa all'evento");
+      this.logService.addLogError('SCANNER', "Squadra non trovata, l'utente non partecipa all'evento");
       return;
     }
 
     /* Eseguo scan */
     const qrcode: Qrcode = {
-      eventId,
       teamId: team.id,
       userId: user.id,
       challengeId,
       points: this.challenges().find((x) => x.id === challengeId)!.props.points
     };
-    await this.scan(qrcode);
+    await this.scan(qrcode, team);
   }
 
-  protected async scan(qrcode: Qrcode): Promise<void> {
+  protected async scan(qrcode: Qrcode, team: Doc<Team>): Promise<void> {
     /* Memorizzo il qrcode per impedire piu scan con lo stesso valore */
     this.lasQrcode.set(qrcode);
-
-    /* Cerco prima se l'user ha una squadra per questo evento */
-    const team = await this.teamService.getActiveTeamByUserAndEventId(qrcode.userId, qrcode.eventId);
-    if (!team) {
-      this.logService.addLogError('', "Squadra non trovata, l'utente non partecipa all'evento");
-      return;
-    }
 
     /* Aggiorno il punteggio totale di squadra e del singolo user */
     await this.teamService.updatePoints(team, qrcode.userId, qrcode.challengeId, qrcode.points);
@@ -230,13 +223,23 @@ export class DashboardComponent implements OnInit {
   protected async handleScanSuccess(result: string): Promise<void> {
     /* Verifico che sia il qrcode giusto */
     const qrcode = JSON.parse(result);
-    if (!isQrcode(qrcode)) return;
+    if (!isQrcode(qrcode)) {
+      this.logService.addLogError('SCANNER', 'Qrcode errato');
+      return;
+    }
 
     /* Verifico che non sia lo stesso qrcode precedente */
     if (isEqualQrcode(qrcode, this.lasQrcode())) return;
 
+    /* Cerco prima se l'user ha una squadra per questo evento */
+    const team = await this.teamService.getTeamById(qrcode.teamId);
+    if (!team) {
+      this.logService.addLogError('SCANNER', "Squadra non trovata, l'utente non partecipa all'evento");
+      return;
+    }
+
     /* Eseguo scan */
-    await this.scan(qrcode);
+    await this.scan(qrcode, team);
   }
 
   protected handleScanError(error: ScanError): void {
