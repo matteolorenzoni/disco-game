@@ -44,11 +44,3 @@ export type EventChallengeModel = {
   startDate: string | null;
   endDate: string | null;
 };
-
-export type NewTeamModel = {
-  name: string;
-};
-
-export type FindTeamModel = {
-  code: string;
-};

@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { FirebaseDocumentService } from './firebase-document.service';
 import { environment } from '../../environments/environment';
-import { NewTeamModel } from '../model/form.model';
 import { Team, TeamStatus } from '../model/team.model';
 import { Doc } from '../model/firebase';
 import { teamConverter } from '../model/converter';
@@ -83,11 +82,11 @@ export class TeamService {
     user: Doc<User>,
     eventId: string,
     eventStartDate: Date,
-    teamForm: NewTeamModel
+    teamName: string
   ): Promise<Doc<Team> | undefined> {
     return await this.httpService.execute(async () => {
       /* Check nome univoco */
-      const valueConstraints = [where('eventId', '==', eventId), where('name', '==', teamForm.name)];
+      const valueConstraints = [where('eventId', '==', eventId), where('name', '==', teamName)];
       const teamsWithName = await this.documentService.getDocumentsWithConstraints<Team>(
         COL_TEAMS,
         valueConstraints,
@@ -101,7 +100,7 @@ export class TeamService {
       /* Aggiungo evento al DB */
       const props: Team = {
         leaderId: user.id,
-        name: teamForm.name,
+        name: teamName,
         code,
         status: TeamStatus.ACTIVE,
         totalPoints: 0,
@@ -155,11 +154,12 @@ export class TeamService {
   }
 
   /* --------------------------- Delete ---------------------------*/
-  public async deleteFromTeam(team: Doc<Team>, userId: string): Promise<void> {
+  public async deleteFromTeam(team: Doc<Team>, userId: string): Promise<Doc<Team>> {
     return await this.httpService.execute(async () => {
       team.props.userIds = team.props.userIds.filter((x) => x !== userId);
       team.props.users = team.props.users.filter((x) => x.id !== userId);
       await this.documentService.updateDocument<Team>(team.id, COL_TEAMS, team.props);
+      return team;
     }, 0);
   }
 }

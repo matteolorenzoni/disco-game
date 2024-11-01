@@ -1,11 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faCrown, faPeopleGroup } from '@fortawesome/free-solid-svg-icons';
-import { FindTeamModel, FromMap, NewTeamModel } from '../../../model/form.model';
 import { EventService } from '../../../service/event.service';
 import { FirebaseService } from '../../../service/firebase.service';
 import { LogService } from '../../../service/log.service';
@@ -26,7 +24,6 @@ import { MergeEvent, mergeEvents } from '../../../util/merge.util';
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule,
     FaIconComponent,
     TitleComponent,
     FvFieldIconComponent,
@@ -52,25 +49,6 @@ export class EventListComponent implements OnInit {
 
   /* Variables */
   mergedEvents = signal<MergeEvent[] | undefined>(undefined);
-  eventIdSelected = signal<string | undefined>(undefined);
-
-  /* Variables modal */
-  newTeamModalIsOpen = signal<boolean>(false);
-  findTeamModalIsOpen = signal<boolean>(false);
-
-  /* Form */
-  newTeamForm = new FormGroup<FromMap<NewTeamModel>>({
-    name: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required, Validators.maxLength(100)]
-    })
-  });
-  findTeamForm = new FormGroup<FromMap<FindTeamModel>>({
-    code: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required, Validators.minLength(6), Validators.maxLength(6)]
-    })
-  });
 
   /* Icons */
   ICON_CROWN = faCrown;
@@ -114,14 +92,17 @@ export class EventListComponent implements OnInit {
   }
 
   /* -------------------- Methods: firebase -------------------- */
-  protected async addTeam(): Promise<void> {
+  protected async addTeam(eventId: string): Promise<void> {
     const user = this.lsService.getUser();
-    const event = this.mergedEvents()!.find((x) => x.id === this.eventIdSelected());
+    const event = this.mergedEvents()!.find((x) => x.id === eventId);
     if (!user || !event) throw new Error('retry', { cause: 'retry' });
 
+    /* Ottengo il nome dal prompt */
+    const teamName = prompt('Inserisci il nome della tua squadra');
+    if (!teamName) return;
+
     /* Aggiungo Team al DB */
-    const form = this.newTeamForm.getRawValue();
-    const team = await this.teamService.addTeam(user, event.id, event.startDate, form);
+    const team = await this.teamService.addTeam(user, event.id, event.startDate, teamName);
     if (!team) {
       const msg = 'Nome già esistente, sceglierne uno nuovo';
       this.logService.addLogError(this.firebaseService.userFirebase()?.uid, msg);
@@ -136,14 +117,16 @@ export class EventListComponent implements OnInit {
     this.logService.addLogConfirm(`Squadra creata! Codice ${team.props.code} negli appunti`);
   }
 
-  protected async findTeam(): Promise<void> {
+  protected async findTeam(eventId: string): Promise<void> {
     const user = this.lsService.getUser();
-    const eventId = this.eventIdSelected();
-    if (!user || !eventId) throw new Error('retry', { cause: 'retry' });
+    if (!user) throw new Error('retry', { cause: 'retry' });
+
+    /* Ottengo il codice dal prompt */
+    const teamCode = prompt('Inserisci il codice della tua squadra');
+    if (!teamCode) return;
 
     /* Controllo se esiste una squadra con quel codice */
-    const form = this.findTeamForm.getRawValue();
-    const team = await this.teamService.getTeamByCode(form.code);
+    const team = await this.teamService.getTeamByCode(teamCode);
     if (!team) {
       this.logService.addLogError(user.id, 'Nessuna squadra trovata');
       return;
@@ -160,23 +143,6 @@ export class EventListComponent implements OnInit {
   }
 
   /* -------------------- Methods: on event -------------------- */
-  protected openNewTeamModal(eventId: string): void {
-    this.eventIdSelected.set(eventId);
-    this.newTeamModalIsOpen.set(true);
-  }
-
-  protected openFindTeamModal(eventId: string): void {
-    this.eventIdSelected.set(eventId);
-    this.findTeamModalIsOpen.set(true);
-  }
-
-  protected onBackdropClick(event: MouseEvent): void {
-    const clickedElement = event.target as HTMLElement;
-    if (clickedElement.dataset['dialogBackdrop'] === 'sign-in-modal') {
-      this.resetModalsAndForms();
-    }
-  }
-
   protected async onGoToTeam(eventId: string, teamId: string): Promise<void> {
     await this.router.navigate([`user/events/${eventId}/${teamId}`]);
   }
@@ -187,17 +153,11 @@ export class EventListComponent implements OnInit {
     await this.userService.updateEventsAndTeams('ADD', userId, eventId, teamId);
 
     /* Aggiorno Event (prop: teamIds) */
-    await this.eventService.updateTeams(eventId, teamId);
+    await this.eventService.updateTeams('ADD', eventId, teamId);
 
-    /* Chiude modal e reset form */
-    this.resetModalsAndForms();
-  }
-
-  private resetModalsAndForms(): void {
-    this.eventIdSelected.set(undefined);
-    this.newTeamModalIsOpen.set(false);
-    this.findTeamModalIsOpen.set(false);
-    this.newTeamForm.reset();
-    this.findTeamForm.reset();
+    /* Aggiorno lista e indexedDb */
+    const newTeam = await this.teamService.getTeamById(teamId);
+    this.dbService.saveTeams([newTeam]);
+    this.initIndexedDb();
   }
 }

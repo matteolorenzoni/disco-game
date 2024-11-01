@@ -16,7 +16,8 @@ import {
   collection as getCollection,
   QueryConstraint,
   onSnapshot,
-  deleteDoc
+  deleteDoc,
+  arrayRemove
 } from 'firebase/firestore';
 import { Doc } from '../model/firebase';
 import { FirebaseService } from './firebase.service';
@@ -155,7 +156,8 @@ export class FirebaseDocumentService {
     });
   }
 
-  public async updateDocumentAddingToArray<T extends Record<string, any> & { updatedAt: Date }, K>(
+  public async updateDocumentArray<T extends Record<string, any> & { updatedAt: Date }, K>(
+    operation: 'ADD' | 'REMOVE',
     id: string,
     collectionName: string,
     arrayField: keyof T,
@@ -164,7 +166,7 @@ export class FirebaseDocumentService {
     const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
     const docRef = doc(collectionRef, id);
     await updateDoc(docRef, {
-      [arrayField]: arrayUnion(newValue),
+      [arrayField]: operation === 'ADD' ? arrayUnion(newValue) : arrayRemove(newValue),
       updatedAt: new Date()
     });
   }

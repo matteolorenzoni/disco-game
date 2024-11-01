@@ -46,11 +46,11 @@
                 </fv-button-outlined>
               } @else {
                 <div class="flex gap-2">
-                  <fv-button class="flex-1" label="Crea" [onClick]="openNewTeamModal.bind(this, event.id)"></fv-button>
+                  <fv-button class="flex-1" label="Crea" [onClick]="addTeam.bind(this, event.id)"></fv-button>
                   <fv-button-outlined
                     class="flex-1"
                     label="Trova"
-                    [onClick]="openFindTeamModal.bind(this, event.id)"></fv-button-outlined>
+                    [onClick]="findTeam.bind(this, event.id)"></fv-button-outlined>
                 </div>
               }
             </div>
@@ -59,58 +59,4 @@
       }
     </ul>
   }
-}
-
-<!-- Crea squadra -->
-@if (newTeamModalIsOpen()) {
-  <div
-    data-dialog-backdrop="sign-in-modal"
-    data-dialog-backdrop-close="true"
-    class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center bg-black bg-opacity-60 opacity-0 backdrop-blur-sm"
-    [ngClass]="{ 'opacity-100 pointer-events-auto': newTeamModalIsOpen() }"
-    [tabindex]="-1"
-    (keydown)="(undefined)"
-    (click)="onBackdropClick($event)">
-    <div
-      data-dialog="sign-in-modal"
-      class="relative mx-auto w-4/5 max-w-[24rem] overflow-hidden rounded-lg border border-white/15 bg-white/15 p-2 shadow backdrop-blur">
-      <div class="flex flex-col gap-2">
-        <h3 class="mb-4 text-center text-lg font-semibold text-white">Crea squadra</h3>
-        <form
-          [formGroup]="newTeamForm"
-          (ngSubmit)="addTeam()"
-          class="flex w-full max-w-2xl flex-col justify-between gap-2">
-          <fv-field-icon name="name" label="Nome squadra" [icon]="ICON_TEAM"></fv-field-icon>
-          <fv-button type="submit" label="Crea" [disabled]="newTeamForm.invalid"></fv-button>
-        </form>
-      </div>
-    </div>
-  </div>
-}
-
-<!-- Cerca squadra -->
-@if (findTeamModalIsOpen()) {
-  <div
-    data-dialog-backdrop="sign-in-modal"
-    data-dialog-backdrop-close="true"
-    class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center bg-black bg-opacity-60 opacity-0 backdrop-blur-sm"
-    [ngClass]="{ 'opacity-100 pointer-events-auto': findTeamModalIsOpen() }"
-    [tabindex]="-1"
-    aria-hidden="true"
-    (click)="onBackdropClick($event)">
-    <div
-      data-dialog="sign-in-modal"
-      class="relative mx-auto w-4/5 max-w-[24rem] overflow-hidden rounded-lg border border-white/15 bg-white/15 p-2 shadow backdrop-blur">
-      <div class="flex flex-col gap-2">
-        <h3 class="mb-4 text-center text-lg font-semibold text-white">Cerca squadra</h3>
-        <form
-          [formGroup]="findTeamForm"
-          (ngSubmit)="findTeam()"
-          class="flex w-full max-w-2xl flex-col justify-between gap-2">
-          <fv-field-icon name="code" label="Codice squadra" twColor="secondary" [icon]="ICON_TEAM"></fv-field-icon>
-          <fv-button type="submit" label="Cerca" twColor="secondary" [disabled]="findTeamForm.invalid"></fv-button>
-        </form>
-      </div>
-    </div>
-  </div>
 }

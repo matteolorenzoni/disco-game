@@ -101,9 +101,9 @@ export class EventService {
     }, 0);
   }
 
-  public async updateTeams(eventId: string, teamId: string): Promise<void> {
+  public async updateTeams(operation: 'ADD' | 'REMOVE', eventId: string, teamId: string): Promise<void> {
     return await this.httpService.execute(async () => {
-      await this.documentService.updateDocumentAddingToArray<Event, string>(eventId, COL_EVENTS, 'teamIds', teamId);
+      await this.documentService.updateDocumentArray<Event, string>(operation, eventId, COL_EVENTS, 'teamIds', teamId);
     }, 0);
   }
 }
