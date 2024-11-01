@@ -13,7 +13,6 @@ import { FvFieldIconComponent } from '../../../components/fv-field-icon.componen
 import { FvButtonComponent } from '../../../components/fv-button.component';
 import { TitleComponent } from '../../../components/title/title.component';
 import { FvButtonOutlinedComponent } from '../../../components/fv-button-outlined.component';
-import { ChallengeService } from '../../../service/challenge.service';
 import { FvRatingComponent } from '../../../components/fv-rating.component';
 import { LocalStorageService } from '../../../service/local-storage.service';
 import { IndexedDbService } from '../../../service/indexed-db.service';
@@ -39,15 +38,14 @@ import { Doc } from '../../../model/firebase';
 })
 export class EventListComponent implements OnInit {
   /* Services */
-  readonly router = inject(Router);
-  readonly firebaseService = inject(FirebaseService);
-  readonly userService = inject(UserService);
-  readonly eventService = inject(EventService);
-  readonly teamService = inject(TeamService);
-  readonly challengeService = inject(ChallengeService);
-  readonly lsService = inject(LocalStorageService);
-  readonly dbService = inject(IndexedDbService);
-  readonly logService = inject(LogService);
+  private readonly router = inject(Router);
+  private readonly firebaseService = inject(FirebaseService);
+  private readonly userService = inject(UserService);
+  private readonly eventService = inject(EventService);
+  private readonly teamService = inject(TeamService);
+  private readonly lsService = inject(LocalStorageService);
+  private readonly dbService = inject(IndexedDbService);
+  private readonly logService = inject(LogService);
 
   /* Variables */
   mergedEvents = signal<MergeEvent[] | undefined>(undefined);
@@ -109,8 +107,7 @@ export class EventListComponent implements OnInit {
     /* Aggiungo Team al DB */
     const team = await this.teamService.addTeam(user, event.id, event.startDate, teamName);
     if (!team) {
-      const msg = 'Nome già esistente, sceglierne uno nuovo';
-      this.logService.addLogError(this.firebaseService.userFirebase()?.uid, msg);
+      this.logService.addLogErrorApp('Nome già esistente, sceglierne uno nuovo');
       return;
     }
 
@@ -137,7 +134,7 @@ export class EventListComponent implements OnInit {
     /* Controllo se esiste una squadra con quel codice */
     const team = await this.teamService.getTeamByCode(teamCode);
     if (!team) {
-      this.logService.addLogError(user.id, 'Nessuna squadra trovata');
+      this.logService.addLogErrorApp('Nessuna squadra trovata');
       return;
     }
 

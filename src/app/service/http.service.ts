@@ -1,17 +1,11 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
-import { LogService } from './log.service';
-import { LocalStorageService } from './local-storage.service';
+import { computed, Injectable, signal } from '@angular/core';
 
-const LOADER_TIMER = 500;
+const LOADER_TIMER = 100;
 
 @Injectable({
   providedIn: 'root'
 })
 export class HttpService {
-  /* Services */
-  readonly logService = inject(LogService);
-  readonly lsService = inject(LocalStorageService);
-
   /* Signals */
   httpRequestsQueue = signal<Set<number>>(new Set());
 
@@ -28,16 +22,10 @@ export class HttpService {
 
     try {
       const execution = await toExecute();
-      clearTimeout(timeout);
       return execution;
-    } catch (error) {
-      clearTimeout(timeout);
-      const user = this.lsService.getUser();
-      this.logService.addLogError(user?.id, error);
-      throw error;
     } finally {
-      // Rimuovi l'ID dalla coda indipendentemente dal successo della chiamata
-      // Sarà presente solo se il timer lo aveva precedetemene aggiunto
+      // Cancella il timeout e rimuovi l'ID dalla coda indipendentemente dal successo della chiamata
+      clearTimeout(timeout);
       this.httpRequestsQueue.update((queue) => {
         queue.delete(requestId);
         return new Set(queue);

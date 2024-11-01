@@ -12,7 +12,6 @@ import { FvButtonComponent } from '../../../components/fv-button.component';
 import { FvFieldComponent } from '../../../components/fv-field.component';
 import { EventService } from '../../../service/event.service';
 import { LogService } from '../../../service/log.service';
-import { FirebaseService } from '../../../service/firebase.service';
 import { LocalStorageService } from '../../../service/local-storage.service';
 import { TeamService } from '../../../service/team.service';
 import { ChallengeService } from '../../../service/challenge.service';
@@ -49,14 +48,13 @@ type ScanError = {
 })
 export class DashboardComponent implements OnInit {
   /* Services */
-  readonly firebaseService = inject(FirebaseService);
-  readonly userService = inject(UserService);
-  readonly eventService = inject(EventService);
-  readonly teamService = inject(TeamService);
-  readonly challengeService = inject(ChallengeService);
-  readonly eventChallengeService = inject(EventChallengeService);
-  readonly lsService = inject(LocalStorageService);
-  readonly logService = inject(LogService);
+  private readonly userService = inject(UserService);
+  private readonly eventService = inject(EventService);
+  private readonly teamService = inject(TeamService);
+  private readonly challengeService = inject(ChallengeService);
+  private readonly eventChallengeService = inject(EventChallengeService);
+  private readonly lsService = inject(LocalStorageService);
+  private readonly logService = inject(LogService);
 
   /* Variables */
   event = signal<Doc<Event> | undefined>(undefined);
@@ -122,7 +120,7 @@ export class DashboardComponent implements OnInit {
     const form = this.eventForm.getRawValue();
     const event = await this.eventService.getEventByCode(form.code);
     if (!event) {
-      this.logService.addLogError(this.firebaseService.userFirebase()?.uid, 'Nessuna evento trovato');
+      this.logService.addLogErrorApp('Nessuna evento trovato');
       return;
     }
 
@@ -147,14 +145,14 @@ export class DashboardComponent implements OnInit {
     /* Ottengo l'user */
     const user = await this.userService.getUserByCode(userCode);
     if (!user) {
-      this.logService.addLogError(this.firebaseService.userFirebase()?.uid, 'Utente non trovato');
+      this.logService.addLogErrorApp('Utente non trovato');
       return;
     }
 
     /* Cerco prima se l'user ha una squadra per questo evento */
     const team = await this.teamService.getActiveTeamByUserAndEventId(user.id, eventId);
     if (!team) {
-      this.logService.addLogError('SCANNER', "Squadra non trovata, l'utente non partecipa all'evento");
+      this.logService.addLogErrorApp("Squadra non trovata, l'utente non partecipa all'evento");
       return;
     }
 
@@ -224,7 +222,7 @@ export class DashboardComponent implements OnInit {
     /* Verifico che sia il qrcode giusto */
     const qrcode = JSON.parse(result);
     if (!isQrcode(qrcode)) {
-      this.logService.addLogError('SCANNER', 'Qrcode errato');
+      this.logService.addLogErrorApp('Qrcode non supportato, applicazione errata');
       return;
     }
 
@@ -234,7 +232,7 @@ export class DashboardComponent implements OnInit {
     /* Cerco prima se l'user ha una squadra per questo evento */
     const team = await this.teamService.getTeamById(qrcode.teamId);
     if (!team) {
-      this.logService.addLogError('SCANNER', "Squadra non trovata, l'utente non partecipa all'evento");
+      this.logService.addLogErrorApp("Squadra non trovata, l'utente non partecipa all'evento");
       return;
     }
 
@@ -243,7 +241,7 @@ export class DashboardComponent implements OnInit {
   }
 
   protected handleScanError(error: ScanError): void {
-    this.logService.addLogError(this.firebaseService.userFirebase()?.uid, error);
+    this.logService.addLogError('SCANNER', error);
   }
 
   protected handleCamerasFound(cameras: MediaDeviceInfo[]): void {
