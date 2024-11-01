@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@ang
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faCrown, faPeopleGroup } from '@fortawesome/free-solid-svg-icons';
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { EventService } from '../../../service/event.service';
 import { FirebaseService } from '../../../service/firebase.service';
 import { LogService } from '../../../service/log.service';
@@ -18,6 +18,8 @@ import { FvRatingComponent } from '../../../components/fv-rating.component';
 import { LocalStorageService } from '../../../service/local-storage.service';
 import { IndexedDbService } from '../../../service/indexed-db.service';
 import { MergeEvent, mergeEvents } from '../../../util/merge.util';
+import { Team } from '../../../model/team.model';
+import { Doc } from '../../../model/firebase';
 
 @Component({
   selector: 'app-event-list',
@@ -49,10 +51,10 @@ export class EventListComponent implements OnInit {
 
   /* Variables */
   mergedEvents = signal<MergeEvent[] | undefined>(undefined);
+  teams = signal<Doc<Team>[]>([]);
 
   /* Icons */
-  ICON_CROWN = faCrown;
-  ICON_TEAM = faPeopleGroup;
+  ICON_TRASH = faTrash;
 
   /* -------------------- Lifecycle hooks -------------------- */
   async ngOnInit(): Promise<void> {
@@ -68,19 +70,22 @@ export class EventListComponent implements OnInit {
 
   /* -------------------------- Methods initialization --------------------------  */
   private async initIndexedDb() {
-    const events = await this.dbService.getEvents();
     const teams = await this.dbService.getTeams();
+    this.teams.set(teams);
+
+    const events = await this.dbService.getEvents();
     const mergedEvents = mergeEvents(events, teams);
     this.mergedEvents.set(mergedEvents);
   }
 
   private async initHttp(userId: string) {
-    /* Ottengo gli eventi da ieri/oggi in poi */
-    /* Ottengo le varie partecipazioni dell'utente */
     const [events, teams] = await Promise.all([
-      this.eventService.getActiveEvents(),
-      this.teamService.getActiveTeamsByUserId(userId)
+      this.eventService.getActiveEvents(), // eventi da ieri in poi
+      this.teamService.getActiveTeamsByUserId(userId) // partecipazioni di eventi da ieri in poi
     ]);
+
+    /* Memorizzo le squadre */
+    this.teams.set(teams);
 
     /* Metto insieme i dati */
     const mergedEvents = mergeEvents(events, teams);
@@ -112,9 +117,13 @@ export class EventListComponent implements OnInit {
     /* Aggiungo partecipazione */
     await this.addParticipation(event.id, team.id, user.id);
 
-    /* Log */
-    navigator.clipboard.writeText(team.props.code);
-    this.logService.addLogConfirm(`Squadra creata! Codice ${team.props.code} negli appunti`);
+    /* Log e clipboard */
+    if (navigator && navigator.clipboard) {
+      navigator.clipboard.writeText(team.props.code);
+      this.logService.addLogConfirm(`Squadra creata. Codice [${team.props.code}] copiato negli appunti`);
+    } else {
+      this.logService.addLogConfirm(`Squadra creata`);
+    }
   }
 
   protected async findTeam(eventId: string): Promise<void> {
@@ -142,6 +151,34 @@ export class EventListComponent implements OnInit {
     this.logService.addLogConfirm('Ora fai parte della squadra, buona fortuna');
   }
 
+  protected async onEscapeToTeam(eventId: string, teamId: string): Promise<void> {
+    const userId = this.firebaseService.userFirebase()?.uid;
+    const team = this.teams().find((x) => x.id === teamId);
+    if (!userId || !team) throw new Error('retry', { cause: 'retry' });
+
+    const userConfirm = confirm('Sei sicuro di voler uscire dalla squadra?');
+    if (!userConfirm) return;
+
+    /* Rimuovi da User (prop: eventIds e teamIds) */
+    await this.userService.updateEventsAndTeams('REMOVE', userId, eventId, team.id);
+
+    /* Rimuovi da squadra */
+    const teamUpdated = await this.teamService.deleteFromTeam(team, userId);
+
+    /* Rimuovi squadra e aggiorna evento se non ha piu nessun membro */
+    if (teamUpdated.props.userIds.length <= 0) {
+      await this.teamService.deleteTeam(team.id);
+      await this.eventService.updateTeams('REMOVE', eventId, team.id);
+    }
+
+    /* Rimuovi da indexedDb */
+    this.lsService.removeUserDashboardTeamId();
+    await this.dbService.deleteTeams([team.id]);
+    await this.initIndexedDb();
+
+    /* Log */
+    this.logService.addLogConfirm('Non fai piu parte della squadra');
+  }
   /* -------------------- Methods: on event -------------------- */
   protected async onGoToTeam(eventId: string, teamId: string): Promise<void> {
     await this.router.navigate([`user/events/${eventId}/${teamId}`]);

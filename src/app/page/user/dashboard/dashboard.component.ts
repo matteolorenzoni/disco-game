@@ -82,15 +82,18 @@ export class DashboardComponent implements OnInit {
   private async initIndexedDb() {
     // Recupera l'ID del team dall'archiviazione locale, se non è presente termina l'operazione
     const lsTeamId = this.lsService.getUserDashboardTeamId();
-    if (!lsTeamId) return;
+    if (!lsTeamId) {
+      this.resetDashboard();
+      return;
+    }
 
-    // Imposta nello stato il team corrispondente all'ID salvato in Local Storage.
+    // Imposta il team corrispondente all'ID salvato in Local Storage
     const dbTeams = await this.dbService.getTeams();
     const team = dbTeams.find((x) => x.id === lsTeamId);
-    this.team.set(team);
+    this.team.set(team ?? null);
     if (!team) return;
 
-    // Imposta nello stato l'evento associato al team corrente.
+    // Imposta l'evento associato al team corrente
     const dbEvents = await this.dbService.getEvents();
     const event = dbEvents.find((x) => x.id === team.props.eventId);
     this.event.set(event);
@@ -109,7 +112,7 @@ export class DashboardComponent implements OnInit {
     // Se non è stato trovato alcun utente associato al team, termina l'operazione
     this.team.set(team);
     if (!team) {
-      this.lsService.removeUserDashboardTeamId();
+      await this.resetLocalStorageAndIndexedDB();
       return;
     }
 
@@ -132,14 +135,8 @@ export class DashboardComponent implements OnInit {
     this.dbService.saveChallenges(mergedChallenges);
   }
 
-  /* -------------------------- Methods event--------------------------  */
-  protected async onGoToTeam(): Promise<void> {
-    const team = this.team();
-    if (!team) throw new Error('retry', { cause: 'retry' });
-    await this.router.navigate([`user/events/${team.props.eventId}/${team.id}`]);
-  }
-
-  protected async onEscapeToTeam(): Promise<void> {
+  /* -------------------------- Methods firebase --------------------------  */
+  protected async escapeToTeam(): Promise<void> {
     const userId = this.firebaseService.userFirebase()?.uid;
     const event = this.event();
     const team = this.team();
@@ -148,17 +145,30 @@ export class DashboardComponent implements OnInit {
     const userConfirm = confirm('Sei sicuro di voler uscire dalla squadra?');
     if (!userConfirm) return;
 
-    /* Aggiorno squadra */
-    await this.teamService.deleteFromTeam(team, userId);
-
-    /* Aggiorno User (prop: eventIds e teamIds) */
+    /* Rimuovi da User (prop: eventIds e teamIds) */
     await this.userService.updateEventsAndTeams('REMOVE', userId, event.id, team.id);
 
-    /* Rimuovi da indexedDb */
-    await this.dbService.deleteTeams([team.id]);
+    /* Rimuovi da squadra */
+    const teamUpdated = await this.teamService.deleteFromTeam(team, userId);
+
+    /* Rimuovi squadra e aggiorna evento se non ha piu nessun membro */
+    if (teamUpdated.props.userIds.length <= 0) {
+      await this.teamService.deleteTeam(team.id);
+      await this.eventService.updateTeams('REMOVE', event.id, team.id);
+    }
+
+    /* Rimuovi da local storage e indexedDb */
+    await this.resetLocalStorageAndIndexedDB();
 
     /* Log */
     this.logService.addLogConfirm('Non fai piu parte della squadra');
+  }
+
+  /* -------------------------- Methods event--------------------------  */
+  protected async onGoToTeam(): Promise<void> {
+    const team = this.team();
+    if (!team) throw new Error('retry', { cause: 'retry' });
+    await this.router.navigate([`user/events/${team.props.eventId}/${team.id}`]);
   }
 
   protected async onGoToChallenge(challengeId: string): Promise<void> {
@@ -172,7 +182,26 @@ export class DashboardComponent implements OnInit {
     if (!team) throw new Error('retry', { cause: 'retry' });
     if (!navigator) return;
 
-    navigator.clipboard.writeText(team.props.code);
-    this.logService.addLogConfirm('Codice copiato negli appunti');
+    /* Log e clipboard */
+    if (navigator && navigator.clipboard) {
+      navigator.clipboard.writeText(team.props.code);
+      this.logService.addLogConfirm('Codice copiato negli appunti');
+    }
+  }
+
+  /* -------------------------- Methods utils --------------------------  */
+  private async resetDashboard() {
+    this.event.set(undefined);
+    this.team.set(null);
+    this.mergedChallenges.set([]);
+  }
+
+  private async resetLocalStorageAndIndexedDB() {
+    const teamId = this.lsService.getUserDashboardTeamId();
+    if (!teamId) return;
+
+    this.lsService.removeUserDashboardTeamId();
+    await this.dbService.deleteTeams([teamId]);
+    await this.initIndexedDb();
   }
 }

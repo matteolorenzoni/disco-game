@@ -113,20 +113,41 @@ export class IndexedDbService {
     }
   }
 
-  public async clearAll(): Promise<void> {
-    const db = await openDB(DB_NAME, DB_VERSION);
-    const tx = db.transaction(['events', 'teams', 'challenges', 'leaderboard'], 'readwrite');
-    await Promise.all([
-      tx.objectStore('events').clear(),
-      tx.objectStore('teams').clear(),
-      tx.objectStore('challenges').clear(),
-      tx.objectStore('leaderboard').clear()
-    ]);
-    await tx.done;
+  public async clearStore(object: ObjectKey): Promise<void> {
+    try {
+      const db = await openDB(DB_NAME, DB_VERSION);
+      const tx = db.transaction(object, 'readwrite');
+      await tx.objectStore(object).clear();
+      await tx.done;
+    } catch (error) {
+      console.error('Error indexedDB:', error);
+    }
+  }
+
+  public async clearAllStores(): Promise<void> {
+    try {
+      const db = await openDB(DB_NAME, DB_VERSION);
+      const tx = db.transaction(['events', 'teams', 'challenges', 'leaderboard'], 'readwrite');
+      await Promise.all([
+        tx.objectStore('events').clear(),
+        tx.objectStore('teams').clear(),
+        tx.objectStore('challenges').clear(),
+        tx.objectStore('leaderboard').clear()
+      ]);
+      await tx.done;
+    } catch (error) {
+      console.error('Error indexedDB:', error);
+    }
   }
 
   /* ---------------------------------- Event ---------------------------------- */
   public async saveEvents(items: Doc<Event>[]): Promise<void> {
+    /* Se l'array è vuoto allora elimino tutti elementi (per gestione su piu dispositivi) */
+    if (items.length === 0) {
+      this.clearStore('events');
+      return;
+    }
+
     /* Salvo i nuovi items */
     const indexedDbItems = items.map((x) => ({ id: x.id, ...x.props }));
     await this.saveItems('events', indexedDbItems);
@@ -148,6 +169,12 @@ export class IndexedDbService {
 
   /* ---------------------------------- Team ---------------------------------- */
   public async saveTeams(items: Doc<Team>[]): Promise<void> {
+    /* Se l'array è vuoto allora elimino tutti elementi (per gestione su piu dispositivi) */
+    if (items.length === 0) {
+      this.clearStore('teams');
+      return;
+    }
+
     const indexedDbItems = items.map((x) => ({ id: x.id, ...x.props }));
     await this.saveItems('teams', indexedDbItems);
 
@@ -176,6 +203,12 @@ export class IndexedDbService {
 
   /* ---------------------------------- Challenge ---------------------------------- */
   public async saveChallenges(items: MergeChallenge[]): Promise<void> {
+    /* Se l'array è vuoto allora elimino tutti elementi (per gestione su piu dispositivi) */
+    if (items.length === 0) {
+      this.clearStore('challenges');
+      return;
+    }
+
     /* Elimino tutti gli item */
     const challenges = await this.getChallenges();
     this.deleteItems(
@@ -195,6 +228,12 @@ export class IndexedDbService {
 
   /* ---------------------------------- Leaderboard ---------------------------------- */
   public async saveLeaderboard(items: Doc<Team>[]): Promise<void> {
+    /* Se l'array è vuoto allora elimino tutti elementi (per gestione su piu dispositivi) */
+    if (items.length === 0) {
+      this.clearStore('leaderboard');
+      return;
+    }
+
     const indexedDbItems = items.map((x) => ({ id: x.id, ...x.props }));
     await this.saveItems('leaderboard', indexedDbItems);
 

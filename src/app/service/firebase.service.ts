@@ -76,7 +76,7 @@ export class FirebaseService {
     return await this.httpService.execute(async () => {
       await signOut(this.auth);
       this.lsService.clearAll();
-      await this.dbService.clearAll();
+      await this.dbService.clearAllStores();
     });
   }
 

@@ -38,12 +38,20 @@
                 {{ event.description }}
               </p>
               @if (event.teamId) {
-                <fv-button-outlined
-                  class="flex-1"
-                  label="Visualizza squadra"
-                  twColor="amber"
-                  [onClick]="onGoToTeam.bind(this, event.id, event.teamId)">
-                </fv-button-outlined>
+                <div class="flex gap-2">
+                  <fv-button-outlined
+                    class="flex-1"
+                    label="Visualizza squadra"
+                    twColor="amber"
+                    [onClick]="onGoToTeam.bind(this, event.id, event.teamId)">
+                  </fv-button-outlined>
+                  <button
+                    type="button"
+                    class="rounded border border-amber-500 px-2 text-amber-500"
+                    (click)="onEscapeToTeam(event.id, event.teamId)">
+                    <fa-icon [icon]="ICON_TRASH"></fa-icon>
+                  </button>
+                </div>
               } @else {
                 <div class="flex gap-2">
                   <fv-button class="flex-1" label="Crea" [onClick]="addTeam.bind(this, event.id)"></fv-button>

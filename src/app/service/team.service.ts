@@ -154,6 +154,12 @@ export class TeamService {
   }
 
   /* --------------------------- Delete ---------------------------*/
+  public async deleteTeam(teamId: string): Promise<void> {
+    return await this.httpService.execute(async () => {
+      await this.documentService.deleteDocument(teamId, COL_TEAMS);
+    }, 0);
+  }
+
   public async deleteFromTeam(team: Doc<Team>, userId: string): Promise<Doc<Team>> {
     return await this.httpService.execute(async () => {
       team.props.userIds = team.props.userIds.filter((x) => x !== userId);
