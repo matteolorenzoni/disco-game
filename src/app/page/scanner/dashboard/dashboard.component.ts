@@ -23,6 +23,7 @@ import { Qrcode } from '../../../model/event-challenge.model';
 import { Challenge } from '../../../model/challenge.model';
 import { isEqualQrcode, isQrcode } from '../../../util/type.util';
 import { Team } from '../../../model/team.model';
+import { LoaderService } from '../../../service/loader.service';
 
 type ScanError = {
   message: string;
@@ -54,6 +55,7 @@ export class DashboardComponent implements OnInit {
   private readonly challengeService = inject(ChallengeService);
   private readonly eventChallengeService = inject(EventChallengeService);
   private readonly lsService = inject(LocalStorageService);
+  private readonly loaderService = inject(LoaderService);
   private readonly logService = inject(LogService);
 
   /* Variables */
@@ -89,83 +91,133 @@ export class DashboardComponent implements OnInit {
 
   /* --------------------- Lifecycle hooks --------------------- */
   async ngOnInit(): Promise<void> {
+    this.initIndexedDB();
+
+    await this.initCamera();
+  }
+
+  /* -------------------------- Methods initialization --------------------------  */
+  private async initCamera() {
+    await this.loaderService.executeWithDelay(async () => {
+      /* Verifico se il dispositivo supporta la camera */
+      try {
+        const mediaDevices = await navigator.mediaDevices.enumerateDevices();
+        const videoInputs = mediaDevices.filter((device) => device.kind === 'videoinput');
+
+        if (videoInputs.length > 0) {
+          /* Ha almeno una camera, chiedo il permesso */
+          await navigator.mediaDevices.getUserMedia({ video: true });
+          this.errorMessage.set(null);
+        } else {
+          /* Non ha nessuna camera */
+          this.errorMessage.set('NO_CAMERA');
+        }
+      } catch (error) {
+        console.error("Errore nell'accesso alla fotocamera:", error);
+        this.errorMessage.set('NO_PERMISSION');
+      }
+    });
+  }
+
+  private async initIndexedDB() {
     /* Recupera l'evento se è già stato cercato */
     const lsEvent = this.lsService.getScannerEvent();
     this.event.set(lsEvent ?? undefined);
-
-    /* Verifico se il dispositivo supporta la camera */
-    try {
-      const mediaDevices = await navigator.mediaDevices.enumerateDevices();
-      const videoInputs = mediaDevices.filter((device) => device.kind === 'videoinput');
-
-      if (videoInputs.length > 0) {
-        /* Ha almeno una camera, chiedo il permesso */
-        await navigator.mediaDevices.getUserMedia({ video: true });
-        this.errorMessage.set(null);
-      } else {
-        /* Non ha nessuna camera */
-        this.errorMessage.set('NO_CAMERA');
-      }
-    } catch (error) {
-      console.error("Errore nell'accesso alla fotocamera:", error);
-      this.errorMessage.set('NO_PERMISSION');
-    }
   }
 
-  /* --------------------- Method http --------------------- */
+  /* --------------------- Method: firebase --------------------- */
   protected async onGetEvent(): Promise<void> {
     if (this.eventForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
 
-    /* Ottengo evento */
-    const form = this.eventForm.getRawValue();
-    const event = await this.eventService.getEventByCode(form.code);
-    if (!event) {
-      this.logService.addLogErrorApp('Nessuna evento trovato');
-      return;
-    }
+    await this.loaderService.executeImmediate(async () => {
+      /* Ottengo evento */
+      const form = this.eventForm.getRawValue();
+      const event = await this.eventService.getEventByCode(form.code);
+      if (!event) {
+        this.logService.addLogErrorApp('Nessuna evento trovato');
+        return;
+      }
 
-    /* Memorizzo evento su locals storage */
-    this.event.set(event);
-    this.lsService.setScannerEvent(event);
+      /* Memorizzo evento su locals storage */
+      this.event.set(event);
+      this.lsService.setScannerEvent(event);
+    });
   }
 
   protected async onGetChallenges(): Promise<void> {
-    const eventChallenges = await this.eventChallengeService.getEventChallengesByProp([
-      { key: 'eventId', value: this.event()!.id }
-    ]);
-    const challenges = await this.challengeService.getChallengesByIds(eventChallenges.map((x) => x.props.challengeId));
-    this.challenges.set(challenges);
-    this.lsService.setScannerChallenges(challenges);
-    this.logService.addLogConfirm('Sfide aggiornate');
+    await this.loaderService.executeImmediate(async () => {
+      const eventChallenges = await this.eventChallengeService.getEventChallengesByProp([
+        { key: 'eventId', value: this.event()!.id }
+      ]);
+      const challenges = await this.challengeService.getChallengesByIds(
+        eventChallenges.map((x) => x.props.challengeId)
+      );
+      this.challenges.set(challenges);
+      this.lsService.setScannerChallenges(challenges);
+      this.logService.addLogConfirm('Sfide aggiornate');
+    });
+  }
+
+  protected async onScan(result: string) {
+    await this.loaderService.executeImmediate(async () => {
+      /* Verifico che sia il qrcode giusto */
+      const qrcode = JSON.parse(result);
+      if (!isQrcode(qrcode)) {
+        this.logService.addLogErrorApp('Qrcode non supportato, applicazione errata');
+        return;
+      }
+
+      /* Verifico che non sia lo stesso qrcode precedente */
+      if (isEqualQrcode(qrcode, this.lasQrcode())) return;
+
+      /* Cerco prima se l'user ha una squadra per questo evento */
+      const team = await this.teamService.getTeamById(qrcode.teamId);
+      if (!team) {
+        this.logService.addLogErrorApp("Squadra non trovata, l'utente non partecipa all'evento");
+        return;
+      }
+
+      /* Eseguo scan */
+      await this.scan(qrcode, team);
+    });
   }
 
   protected async onManualScan(eventId: string) {
-    const { challengeId, userCode } = this.manualScanForm.getRawValue();
+    await this.loaderService.executeImmediate(async () => {
+      const { challengeId, userCode } = this.manualScanForm.getRawValue();
 
-    /* Ottengo l'user */
-    const user = await this.userService.getUserByCode(userCode);
-    if (!user) {
-      this.logService.addLogErrorApp('Utente non trovato');
-      return;
-    }
+      /* Ottengo l'user */
+      const user = await this.userService.getUserByCode(userCode);
+      if (!user) {
+        this.logService.addLogErrorApp('Utente non trovato');
+        return;
+      }
 
-    /* Cerco prima se l'user ha una squadra per questo evento */
-    const team = await this.teamService.getActiveTeamByUserAndEventId(user.id, eventId);
-    if (!team) {
-      this.logService.addLogErrorApp("Squadra non trovata, l'utente non partecipa all'evento");
-      return;
-    }
+      /* Cerco prima se l'user ha una squadra per questo evento */
+      const team = await this.teamService.getActiveTeamByUserAndEventId(user.id, eventId);
+      if (!team) {
+        this.logService.addLogErrorApp("Squadra non trovata, l'utente non partecipa all'evento");
+        return;
+      }
 
-    /* Eseguo scan */
-    const qrcode: Qrcode = {
-      teamId: team.id,
-      userId: user.id,
-      challengeId,
-      points: this.challenges().find((x) => x.id === challengeId)!.props.points
-    };
-    await this.scan(qrcode, team);
+      /* Eseguo scan */
+      const qrcode: Qrcode = {
+        teamId: team.id,
+        userId: user.id,
+        challengeId,
+        points: this.challenges().find((x) => x.id === challengeId)!.props.points
+      };
+      await this.scan(qrcode, team);
+    });
   }
 
+  /* --------------------- Method event --------------------- */
+  protected onRemoveEvent(): void {
+    this.event.set(undefined);
+    this.lsService.removeScannerEvent();
+  }
+
+  /* --------------------- Method util --------------------- */
   protected async scan(qrcode: Qrcode, team: Doc<Team>): Promise<void> {
     /* Memorizzo il qrcode per impedire piu scan con lo stesso valore */
     this.lasQrcode.set(qrcode);
@@ -173,12 +225,6 @@ export class DashboardComponent implements OnInit {
     /* Aggiorno il punteggio totale di squadra e del singolo user */
     await this.teamService.updatePoints(team, qrcode.userId, qrcode.challengeId, qrcode.points);
     this.logService.addLogConfirm('Sfida confermata');
-  }
-
-  /* --------------------- Method event --------------------- */
-  protected onRemoveEvent(): void {
-    this.event.set(undefined);
-    this.lsService.removeScannerEvent();
   }
 
   /* --------------------- Method camera --------------------- */
@@ -219,25 +265,7 @@ export class DashboardComponent implements OnInit {
   }
 
   protected async handleScanSuccess(result: string): Promise<void> {
-    /* Verifico che sia il qrcode giusto */
-    const qrcode = JSON.parse(result);
-    if (!isQrcode(qrcode)) {
-      this.logService.addLogErrorApp('Qrcode non supportato, applicazione errata');
-      return;
-    }
-
-    /* Verifico che non sia lo stesso qrcode precedente */
-    if (isEqualQrcode(qrcode, this.lasQrcode())) return;
-
-    /* Cerco prima se l'user ha una squadra per questo evento */
-    const team = await this.teamService.getTeamById(qrcode.teamId);
-    if (!team) {
-      this.logService.addLogErrorApp("Squadra non trovata, l'utente non partecipa all'evento");
-      return;
-    }
-
-    /* Eseguo scan */
-    await this.scan(qrcode, team);
+    await this.onScan(result);
   }
 
   protected handleScanError(error: ScanError): void {

@@ -12,6 +12,7 @@ import { LogService } from '../../service/log.service';
 import { Doc } from '../../model/firebase';
 import { User } from '../../model/user.model';
 import { LocalStorageService } from '../../service/local-storage.service';
+import { LoaderService } from '../../service/loader.service';
 
 export type Tab = {
   id: 'profile' | 'code' | 'notifications';
@@ -40,6 +41,7 @@ export class SettingsComponent implements OnInit {
   private readonly firebaseService = inject(FirebaseService);
   private readonly lsService = inject(LocalStorageService);
   private readonly logService = inject(LogService);
+  private readonly loaderService = inject(LoaderService);
 
   /* Constants */
   TABS: Tab[] = [
@@ -58,15 +60,23 @@ export class SettingsComponent implements OnInit {
   ICON_USER = faCircleUser;
   ICON_LOGOUT = faRightFromBracket;
 
-  /* --------------------- Lifecycle hooks --------------------- */
+  /* -------------------- Lifecycle hooks -------------------- */
   ngOnInit(): void {
-    this.user.set(this.lsService.getUser() ?? undefined);
+    this.initIndexDB();
+  }
+
+  /* -------------------------- Methods initialization --------------------------  */
+  private async initIndexDB() {
+    const user = this.lsService.getUser();
+    this.user.set(user ?? undefined);
   }
 
   /* --------------------- Methods --------------------- */
   protected async logout(): Promise<void> {
-    await this.firebaseService.logout();
-    this.router.navigate(['/login']);
-    this.logService.addLogConfirm('Logout completato. Buona giornata!');
+    await this.loaderService.executeImmediate(async () => {
+      await this.firebaseService.logout();
+      this.router.navigate(['/login']);
+      this.logService.addLogConfirm('Logout completato. Buona giornata!');
+    });
   }
 }

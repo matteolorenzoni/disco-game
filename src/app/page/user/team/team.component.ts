@@ -1,6 +1,6 @@
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faAngleRight, faArrowDown, faArrowUp, faCrown, faEquals } from '@fortawesome/free-solid-svg-icons';
 import { Doc } from '../../../model/firebase';
@@ -9,6 +9,7 @@ import { TitleComponent } from '../../../components/title/title.component';
 import { Team, TeamUser } from '../../../model/team.model';
 import { TeamService } from '../../../service/team.service';
 import { GetUserTotalPointsPipe } from '../../../pipe/get-user-total-points.pipe';
+import { LoaderService } from '../../../service/loader.service';
 
 @Component({
   selector: 'app-team',
@@ -23,6 +24,7 @@ export class TeamComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   protected readonly firebaseService = inject(FirebaseService);
+  private readonly loaderService = inject(LoaderService);
   private readonly teamService = inject(TeamService);
 
   /* Variables */
@@ -40,7 +42,12 @@ export class TeamComponent implements OnInit {
   /* ------------------------ Lifecycle hooks ------------------------ */
   ngOnInit(): void {
     // Recupera l'ID dalla route
-    this.route.paramMap.subscribe(async (params) => {
+    this.route.paramMap.subscribe(async (params) => await this.initHttp(params));
+  }
+
+  /* -------------------------- Methods initialization --------------------------  */
+  private async initHttp(params: ParamMap) {
+    await this.loaderService.executeWithDelay(async () => {
       const userId = this.firebaseService.userFirebase()?.uid;
       const eventId = params.get('eventId');
       const teamId = params.get('teamId');

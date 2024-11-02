@@ -8,6 +8,7 @@ import { FvFloatingButtonComponent } from '../../../components/fv-floating-butto
 import { FvButtonComponent } from '../../../components/fv-button.component';
 import { FvButtonOutlinedComponent } from '../../../components/fv-button-outlined.component';
 import { TitleComponent } from '../../../components/title/title.component';
+import { LoaderService } from '../../../service/loader.service';
 
 @Component({
   selector: 'app-event-list',
@@ -21,14 +22,22 @@ export class EventListComponent implements OnInit {
   /* Services */
   private readonly router = inject(Router);
   private readonly eventService = inject(EventService);
+  private readonly loaderService = inject(LoaderService);
 
   /* Variables */
   events = signal<Doc<Event>[] | undefined>(undefined);
 
   /* -------------------- Lifecycle hooks -------------------- */
   async ngOnInit(): Promise<void> {
-    const events = await this.eventService.getAllEvents();
-    this.events.set(events);
+    await this.initHttp();
+  }
+
+  /* -------------------------- Methods initialization --------------------------  */
+  private async initHttp() {
+    await this.loaderService.executeWithDelay(async () => {
+      const events = await this.eventService.getAllEvents();
+      this.events.set(events);
+    });
   }
 
   /* -------------------- Methods -------------------- */

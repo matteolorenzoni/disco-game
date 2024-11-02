@@ -8,6 +8,7 @@ import { Challenge } from '../../../model/challenge.model';
 import { FvRatingComponent } from '../../../components/fv-rating.component';
 import { TitleComponent } from '../../../components/title/title.component';
 import { IndexedDbService } from '../../../service/indexed-db.service';
+import { LoaderService } from '../../../service/loader.service';
 
 @Component({
   selector: 'app-challenge-list',
@@ -22,15 +23,25 @@ export class ChallengeListComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly challengeService = inject(ChallengeService);
   private readonly dbService = inject(IndexedDbService);
+  private readonly loaderService = inject(LoaderService);
 
   /* Variables */
   challenges = signal<Doc<Challenge>[]>([]);
 
   /* -------------------- Lifecycle hooks -------------------- */
   async ngOnInit(): Promise<void> {
-    const challenges = await this.challengeService.getAllChallenges();
-    this.challenges.set(challenges);
-    await this.dbService.saveAdminChallenges(challenges);
+    await this.initHttp();
+  }
+
+  /* -------------------------- Methods initialization --------------------------  */
+  private async initHttp() {
+    await this.loaderService.executeWithDelay(async () => {
+      const challenges = await this.challengeService.getAllChallenges();
+      this.challenges.set(challenges);
+
+      /* Aggiorno indexedDb */
+      await this.dbService.saveAdminChallenges(challenges);
+    });
   }
 
   /* -------------------- Methods -------------------- */

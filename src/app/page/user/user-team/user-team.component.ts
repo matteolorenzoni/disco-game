@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { ChallengeStatus, EventChallenge } from '../../../model/event-challenge.model';
 import { Doc } from '../../../model/firebase';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { EventChallengeService } from '../../../service/event-challenge.service';
 import { User } from '../../../model/user.model';
 import { UserService } from '../../../service/user.service';
@@ -11,6 +11,7 @@ import { GetUserTotalPointsPipe } from '../../../pipe/get-user-total-points.pipe
 import { FvChallengeStatusComponent } from '../../../components/fv-challenge-status.component';
 import { TeamService } from '../../../service/team.service';
 import { TeamUser } from '../../../model/team.model';
+import { LoaderService } from '../../../service/loader.service';
 
 @Component({
   selector: 'app-user-team',
@@ -22,11 +23,12 @@ import { TeamUser } from '../../../model/team.model';
 })
 export class UserTeamComponent implements OnInit {
   /* Services */
-  readonly router = inject(Router);
-  readonly route = inject(ActivatedRoute);
-  readonly userService = inject(UserService);
-  readonly teamService = inject(TeamService);
-  readonly eventChallengeService = inject(EventChallengeService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly userService = inject(UserService);
+  private readonly teamService = inject(TeamService);
+  private readonly eventChallengeService = inject(EventChallengeService);
+  private readonly loaderService = inject(LoaderService);
 
   /* Variables */
   eventId = signal<string | undefined>(undefined);
@@ -40,7 +42,12 @@ export class UserTeamComponent implements OnInit {
   /* -------------------- Lifecycle hooks -------------------- */
   async ngOnInit(): Promise<void> {
     // Recupera l'ID dell'evento dalla route
-    this.route.paramMap.subscribe(async (params) => {
+    this.route.paramMap.subscribe(async (params) => await this.initHttp(params));
+  }
+
+  /* -------------------------- Methods initialization --------------------------  */
+  private async initHttp(params: ParamMap) {
+    this.loaderService.executeWithDelay(async () => {
       const eventId = params.get('eventId');
       const teamId = params.get('teamId');
       const teammateId = params.get('teammateId');

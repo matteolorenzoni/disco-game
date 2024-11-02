@@ -1,7 +1,7 @@
 import { CommonModule, Location } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, ParamMap } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { ChallengeModel, FromMap } from '../../../model/form.model';
@@ -13,6 +13,7 @@ import { FvFieldComponent } from '../../../components/fv-field.component';
 import { FvTextAeraComponent } from '../../../components/fv-text-area.component';
 import { TitleComponent } from '../../../components/title/title.component';
 import ChallengeTypes from './challenge-type.config.json';
+import { LoaderService } from '../../../service/loader.service';
 
 export type SelectOption = {
   label: string;
@@ -40,6 +41,7 @@ export class ChallengeCreateComponent implements OnInit {
   private readonly location = inject(Location);
   private readonly route = inject(ActivatedRoute);
   private readonly challengeService = inject(ChallengeService);
+  private readonly loaderService = inject(LoaderService);
   private readonly logService = inject(LogService);
 
   /* Constants */
@@ -84,7 +86,16 @@ export class ChallengeCreateComponent implements OnInit {
   /* ------------------------ Lifecycle hooks ------------------------ */
   ngOnInit(): void {
     // Recupera l'ID dalla route
-    this.route.paramMap.subscribe(async (params) => {
+    this.route.paramMap.subscribe(async (params) => await this.initHttp(params));
+
+    this.challengeForm.controls.type.valueChanges.subscribe((newValue) => {
+      this.challengeTypeActive.set(this.OPTIONS.find((x) => x.icon === newValue)!);
+    });
+  }
+
+  /* -------------------------- Methods initialization --------------------------  */
+  private async initHttp(params: ParamMap) {
+    this.loaderService.executeWithDelay(async () => {
       const challengeId = params.get('id');
       this.challengeId.set(params.get('id'));
       if (!challengeId) return;
@@ -92,41 +103,41 @@ export class ChallengeCreateComponent implements OnInit {
       const { props } = await this.challengeService.getChallengeById(challengeId);
       this.challengeForm.patchValue(props);
     });
-
-    this.challengeForm.controls.type.valueChanges.subscribe((newValue) => {
-      this.challengeTypeActive.set(this.OPTIONS.find((x) => x.icon === newValue)!);
-    });
   }
 
   /* ------------------------ Methods: firebase ------------------------ */
   protected async addOrUpdateChallenge(): Promise<void> {
     if (this.challengeForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
 
-    /* Aggiungo o aggiorno il documento */
-    const challengeId = this.challengeId();
-    const form = this.challengeForm.getRawValue();
-    if (challengeId) await this.challengeService.updateChallenge(challengeId, form);
-    else await this.challengeService.addChallenge(form);
+    await this.loaderService.executeImmediate(async () => {
+      /* Aggiungo o aggiorno il documento */
+      const challengeId = this.challengeId();
+      const form = this.challengeForm.getRawValue();
+      if (challengeId) await this.challengeService.updateChallenge(challengeId, form);
+      else await this.challengeService.addChallenge(form);
 
-    /* Torno indietro */
-    this.location.back();
+      /* Torno indietro */
+      this.location.back();
 
-    /* Log */
-    this.logService.addLogConfirm(challengeId ? 'Sfida aggiornata' : 'Sfida aggiunta');
+      /* Log */
+      this.logService.addLogConfirm(challengeId ? 'Sfida aggiornata' : 'Sfida aggiunta');
+    });
   }
 
   protected async deleteChallenge(eventChallengeId: string): Promise<void> {
     const userConfirm = confirm('Sei sicuro di voler eliminare la sfida?');
     if (!userConfirm) return;
 
-    /* Elimino il documento */
-    await this.challengeService.softDeleteChallenge(eventChallengeId);
+    await this.loaderService.executeImmediate(async () => {
+      /* Elimino il documento */
+      await this.challengeService.softDeleteChallenge(eventChallengeId);
 
-    /* Torno indietro */
-    this.location.back();
+      /* Torno indietro */
+      this.location.back();
 
-    /* Log */
-    this.logService.addLogConfirm('Sfida eliminata');
+      /* Log */
+      this.logService.addLogConfirm('Sfida eliminata');
+    });
   }
 
   /* ------------------------ Methods: utils ------------------------ */

@@ -11,8 +11,8 @@ import { UserService } from '../../service/user.service';
 import { loginFormAnimation } from '../../animation/animations';
 import { FvFieldIconComponent } from '../../components/fv-field-icon.component';
 import { FvButtonComponent } from '../../components/fv-button.component';
-import { HttpService } from '../../service/http.service';
 import { LocalStorageService } from '../../service/local-storage.service';
+import { LoaderService } from '../../service/loader.service';
 
 @Component({
   selector: 'app-login',
@@ -25,12 +25,12 @@ import { LocalStorageService } from '../../service/local-storage.service';
 })
 export class LoginComponent {
   /* Services */
-  readonly router = inject(Router);
-  readonly firebaseService = inject(FirebaseService);
-  readonly httpService = inject(HttpService);
-  readonly userService = inject(UserService);
-  readonly lsService = inject(LocalStorageService);
-  readonly logService = inject(LogService);
+  private readonly router = inject(Router);
+  private readonly firebaseService = inject(FirebaseService);
+  private readonly userService = inject(UserService);
+  private readonly lsService = inject(LocalStorageService);
+  private readonly logService = inject(LogService);
+  private readonly loaderService = inject(LoaderService);
 
   /* Variables */
   page = signal<'welcome' | 'login'>('welcome');
@@ -56,7 +56,42 @@ export class LoginComponent {
     this.setPage('welcome');
   }
 
-  /* ----------------- Methods: page ----------------- */
+  /* ------------- Methods: firebase ------------- */
+  public async login(): Promise<void> {
+    if (this.loginForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
+
+    await this.loaderService.executeImmediate(async () => {
+      const form = this.loginForm.getRawValue();
+      const userCredentials = await this.firebaseService.logIn(form, this.rememberMe());
+      const user = await this.userService.getUserById(userCredentials.user.uid);
+      this.lsService.setUser(user);
+
+      switch (user?.props.role) {
+        case UserRole.ADMIN:
+          await this.router.navigate(['/admin/dashboard']);
+          break;
+        case UserRole.SCANNER:
+          await this.router.navigate(['/scanner/scanner']);
+          break;
+        case UserRole.USER:
+          await this.router.navigate(['/user/dashboard']);
+          break;
+        default:
+          throw new Error('noUserDocument', { cause: 'noUserDocument' });
+      }
+
+      /* Log */
+      this.logService.addLogConfirm(`Benvenuto ${user.props.userName}`);
+    });
+  }
+
+  protected async resetPassword(): Promise<void> {
+    await this.loaderService.executeImmediate(async () => {
+      console.log('RESET PASSWORD');
+    });
+  }
+
+  /* ------------- Methods: event ------------- */
   protected onGoToRegistry(): void {
     this.router.navigate(['/sign-up']);
   }
@@ -69,34 +104,5 @@ export class LoginComponent {
     if (!target) return;
     const checkbox = target as HTMLInputElement;
     this.rememberMe.set(checkbox.checked);
-  }
-
-  /* ------------- Methods: auth ------------- */
-  public async login(): Promise<void> {
-    if (this.loginForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
-
-    const form = this.loginForm.getRawValue();
-    const userCredentials = await this.firebaseService.logIn(form, this.rememberMe());
-    const user = await this.userService.getUserById(userCredentials.user.uid);
-    this.lsService.setUser(user);
-
-    switch (user?.props.role) {
-      case UserRole.ADMIN:
-        await this.router.navigate(['/admin/dashboard']);
-        break;
-      case UserRole.SCANNER:
-        await this.router.navigate(['/scanner/scanner']);
-        break;
-      case UserRole.USER:
-        await this.router.navigate(['/user/dashboard']);
-        break;
-      default:
-        throw new Error('noUserDocument', { cause: 'noUserDocument' });
-    }
-    this.logService.addLogConfirm(`Benvenuto ${user.props.userName}`);
-  }
-
-  protected resetPassword(): void {
-    console.log('RESET PASSWORD');
   }
 }

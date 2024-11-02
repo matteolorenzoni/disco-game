@@ -1,7 +1,7 @@
 import { CommonModule, formatDate } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, ParamMap } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import {
   faArrowsRotate,
@@ -30,6 +30,7 @@ import { TitleComponent } from '../../../components/title/title.component';
 import EventChallengeStatus from './event-challenge-status.config.json';
 import { endDateValidator } from '../../../util/utils';
 import { IndexedDbService } from '../../../service/indexed-db.service';
+import { LoaderService } from '../../../service/loader.service';
 
 @Component({
   selector: 'app-event-challenge',
@@ -55,6 +56,7 @@ export class EventChallengeComponent implements OnInit {
   private readonly challengeService = inject(ChallengeService);
   private readonly eventChallengeService = inject(EventChallengeService);
   private readonly dbService = inject(IndexedDbService);
+  private readonly loaderService = inject(LoaderService);
   private readonly logService = inject(LogService);
 
   /* Variables */
@@ -100,7 +102,7 @@ export class EventChallengeComponent implements OnInit {
     await this.initIndexedDb();
 
     /* Inizializzazione http */
-    await this.initHttp();
+    this.route.paramMap.subscribe(async (params) => await this.initHttp(params));
   }
 
   /* -------------------------- Methods initialization --------------------------  */
@@ -110,9 +112,9 @@ export class EventChallengeComponent implements OnInit {
     this.challenges.set(challenges);
   }
 
-  private async initHttp() {
-    // Recupera l'ID dell'evento dalla route
-    this.route.paramMap.subscribe(async (params) => {
+  private async initHttp(params: ParamMap) {
+    await this.loaderService.executeWithDelay(async () => {
+      // Recupera l'ID dell'evento dalla route
       const eventId = params.get('eventId');
       this.eventId.set(eventId ?? undefined);
       if (!eventId) throw new Error('retry', { cause: 'retry' });
@@ -129,54 +131,64 @@ export class EventChallengeComponent implements OnInit {
   protected async addOrUpdateEventChallenge() {
     if (this.eventChallengeForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
 
-    const form = this.eventChallengeForm.getRawValue();
-    const eventChallengeSelected = this.eventChallengeSelected();
-    if (!eventChallengeSelected) {
-      /* Aggiorno db */
-      const challenge = this.challenges().find((x) => x.id === form.challengeId);
-      const { name, type } = challenge!.props;
-      const eventChallenge = this.createChallenge(name, type, form);
-      const newEventChallenge = await this.eventChallengeService.addEventChallenge(eventChallenge);
+    await this.loaderService.executeImmediate(async () => {
+      const form = this.eventChallengeForm.getRawValue();
+      const eventChallengeSelected = this.eventChallengeSelected();
+      if (!eventChallengeSelected) {
+        /* Aggiorno db */
+        const challenge = this.challenges().find((x) => x.id === form.challengeId);
+        const { name, type } = challenge!.props;
+        const eventChallenge = this.createChallenge(name, type, form);
+        const newEventChallenge = await this.eventChallengeService.addEventChallenge(eventChallenge);
 
-      /* Aggiorno app */
-      this.eventChallenges.update((eventChallenges) => [...eventChallenges, newEventChallenge]);
-    } else {
-      /* Aggiorno db */
-      const { challengeName, challengeType } = eventChallengeSelected.props;
-      const eventChallenge = this.createChallenge(challengeName, challengeType, form);
-      await this.eventChallengeService.updateEventChallenge(eventChallengeSelected.id, eventChallenge);
+        /* Aggiorno app */
+        this.eventChallenges.update((eventChallenges) => [...eventChallenges, newEventChallenge]);
+      } else {
+        /* Aggiorno db */
+        const { challengeName, challengeType } = eventChallengeSelected.props;
+        const eventChallenge = this.createChallenge(challengeName, challengeType, form);
+        await this.eventChallengeService.updateEventChallenge(eventChallengeSelected.id, eventChallenge);
 
-      /* Aggiorno app */
-      eventChallengeSelected.props = eventChallenge;
-    }
+        /* Aggiorno app */
+        eventChallengeSelected.props = eventChallenge;
+      }
 
-    /* Log */
-    this.logService.addLogConfirm(eventChallengeSelected ? 'Sfida aggiornata' : 'Sfida aggiunta');
+      /* Chiudo il modal e resetto il form */
+      this.resetForm();
 
-    /* Chiudo il modal e resetto il form */
-    this.resetForm();
+      /* Log */
+      this.logService.addLogConfirm(eventChallengeSelected ? 'Sfida aggiornata' : 'Sfida aggiunta');
+    });
   }
 
   protected async deleteEventChallenge(eventChallengeId: string): Promise<void> {
     const userConfirm = confirm("Sei sicuro di voler eliminare la sfida dall'evento?");
     if (!userConfirm) return;
 
-    const eventId = this.eventId();
-    if (!eventId) throw new Error('retry', { cause: 'retry' });
+    await this.loaderService.executeImmediate(async () => {
+      const eventId = this.eventId();
+      if (!eventId) throw new Error('retry', { cause: 'retry' });
 
-    /* Elimino il documento */
-    await this.eventChallengeService.deleteEventChallenge(eventChallengeId);
-    this.eventChallenges.update((eventChallenges) => eventChallenges.filter((x) => x.id !== eventChallengeId));
+      /* Elimino il documento */
+      await this.eventChallengeService.deleteEventChallenge(eventChallengeId);
+      this.eventChallenges.update((eventChallenges) => eventChallenges.filter((x) => x.id !== eventChallengeId));
 
-    /* Log */
-    this.logService.addLogConfirm('Sfida eliminata');
+      /* Log */
+      this.logService.addLogConfirm('Sfida eliminata');
+    });
   }
 
   protected async onRefreshChallenges(): Promise<void> {
-    const challenges = await this.challengeService.getAllChallenges();
-    this.challenges.set(challenges);
-    await this.dbService.saveAdminChallenges(challenges);
-    this.logService.addLogConfirm('Lista sfide aggiornata');
+    await this.loaderService.executeImmediate(async () => {
+      const challenges = await this.challengeService.getAllChallenges();
+      this.challenges.set(challenges);
+
+      /* Aggiorno indexedDb */
+      await this.dbService.saveAdminChallenges(challenges);
+
+      /* Log */
+      this.logService.addLogConfirm('Lista sfide aggiornata');
+    });
   }
 
   /* -------------------- Methods: event -------------------- */

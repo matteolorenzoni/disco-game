@@ -12,6 +12,7 @@ import { environment } from '../../../../environments/environment';
 import { FvFieldComponent } from '../../../components/fv-field.component';
 import { FvButtonComponent } from '../../../components/fv-button.component';
 import { LocalStorageService } from '../../../service/local-storage.service';
+import { LoaderService } from '../../../service/loader.service';
 
 const COL_USERS = environment.collection.USERS;
 
@@ -29,6 +30,7 @@ export class UserCreateComponent implements OnInit {
   protected readonly firebaseService = inject(FirebaseService);
   protected readonly storageService = inject(StorageService);
   private readonly userService = inject(UserService);
+  private readonly loaderService = inject(LoaderService);
   private readonly lsService = inject(LocalStorageService);
 
   /* Variables */
@@ -61,7 +63,12 @@ export class UserCreateComponent implements OnInit {
   });
 
   /* ------------- Lifecycle hooks ------------- */
-  async ngOnInit(): Promise<void> {
+  ngOnInit(): void {
+    this.initIndexedDb();
+  }
+
+  /* -------------------------- Methods initialization --------------------------  */
+  private initIndexedDb() {
     const lsUser = this.lsService.getUser();
     if (lsUser) {
       this.signUpForm.setValue({
@@ -77,14 +84,17 @@ export class UserCreateComponent implements OnInit {
     }
   }
 
-  /* ------------- Methods ------------- */
+  /* ------------------------------- Methods: firebase ------------------------------- */
   protected async addOrUpdateUser(): Promise<void> {
-    const userId = this.firebaseService.userFirebase()?.uid;
-    const userModelForm = this.signUpForm.getRawValue();
-    if (!userId) await this.addUser(userModelForm);
-    else await this.updateUser(userId, userModelForm);
+    await this.loaderService.executeImmediate(async () => {
+      const userId = this.firebaseService.userFirebase()?.uid;
+      const userModelForm = this.signUpForm.getRawValue();
+      if (!userId) await this.addUser(userModelForm);
+      else await this.updateUser(userId, userModelForm);
+    });
   }
 
+  /* ------------------------------- Methods: util ------------------------------- */
   private async addUser(userModelForm: UserModel): Promise<void> {
     /* Creazione utente */
     const userCredential = await this.firebaseService.signUp(userModelForm.email, userModelForm.password);

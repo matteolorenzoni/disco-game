@@ -21,6 +21,7 @@ import { IndexedDbService } from '../../../service/indexed-db.service';
 import { LocalStorageService } from '../../../service/local-storage.service';
 import { MergeChallenge, mergeChallenges } from '../../../util/merge.util';
 import { UserService } from '../../../service/user.service';
+import { LoaderService } from '../../../service/loader.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -40,16 +41,17 @@ import { UserService } from '../../../service/user.service';
 })
 export class DashboardComponent implements OnInit {
   /* Services */
-  readonly router = inject(Router);
-  readonly firebaseService = inject(FirebaseService);
-  readonly userService = inject(UserService);
-  readonly eventService = inject(EventService);
-  readonly teamService = inject(TeamService);
-  readonly eventChallengeService = inject(EventChallengeService);
-  readonly challengeService = inject(ChallengeService);
-  readonly lsService = inject(LocalStorageService);
-  readonly dbService = inject(IndexedDbService);
-  readonly logService = inject(LogService);
+  private readonly router = inject(Router);
+  protected readonly firebaseService = inject(FirebaseService);
+  private readonly userService = inject(UserService);
+  private readonly eventService = inject(EventService);
+  private readonly teamService = inject(TeamService);
+  private readonly eventChallengeService = inject(EventChallengeService);
+  private readonly challengeService = inject(ChallengeService);
+  private readonly lsService = inject(LocalStorageService);
+  private readonly dbService = inject(IndexedDbService);
+  private readonly loaderService = inject(LoaderService);
+  private readonly logService = inject(LogService);
 
   /* Variables */
   event = signal<Doc<Event> | undefined>(undefined);
@@ -106,62 +108,68 @@ export class DashboardComponent implements OnInit {
   }
 
   private async initHttp(userId: string) {
-    // Recupera le informazioni della partecipazione piu recente
-    const team = await this.teamService.getFirstActiveTeamByUserId(userId);
+    this.loaderService.executeWithDelay(async () => {
+      // Recupera le informazioni della partecipazione piu recente
+      const team = await this.teamService.getFirstActiveTeamByUserId(userId);
 
-    // Se non è stato trovato alcun utente associato al team, termina l'operazione
-    this.team.set(team);
-    if (!team) {
-      await this.resetLocalStorageAndIndexedDB();
-      return;
-    }
+      // Se non è stato trovato alcun utente associato al team, termina l'operazione
+      this.team.set(team);
+      if (!team) {
+        await this.resetLocalStorageAndIndexedDB();
+        return;
+      }
 
-    // Recupera l'evento e le sfide associate all'evento in parallelo
-    const [event, eventChallenges] = await Promise.all([
-      this.eventService.getEventById(team.props.eventId),
-      this.eventChallengeService.getEventChallengesByProp([{ key: 'eventId', value: team.props.eventId }])
-    ]);
-    this.event.set(event);
+      // Recupera l'evento e le sfide associate all'evento in parallelo
+      const [event, eventChallenges] = await Promise.all([
+        this.eventService.getEventById(team.props.eventId),
+        this.eventChallengeService.getEventChallengesByProp([{ key: 'eventId', value: team.props.eventId }])
+      ]);
+      this.event.set(event);
 
-    // Recupera le informazioni dettagliate sulle sfide
-    const challenges = await this.challengeService.getChallengesByIds(eventChallenges.map((x) => x.props.challengeId));
-    const mergedChallenges = mergeChallenges(challenges, eventChallenges);
-    this.mergedChallenges.set(mergedChallenges);
+      // Recupera le informazioni dettagliate sulle sfide
+      const challenges = await this.challengeService.getChallengesByIds(
+        eventChallenges.map((x) => x.props.challengeId)
+      );
+      const mergedChallenges = mergeChallenges(challenges, eventChallenges);
+      this.mergedChallenges.set(mergedChallenges);
 
-    /* Aggiorno il local storage indexedDB */
-    this.lsService.setUserDashboardTeamId(team.id);
-    this.dbService.saveTeams([team]);
-    this.dbService.saveEvents([event]);
-    this.dbService.saveChallenges(mergedChallenges);
+      /* Aggiorno il local storage indexedDB */
+      this.lsService.setUserDashboardTeamId(team.id);
+      this.dbService.saveTeams([team]);
+      this.dbService.saveEvents([event]);
+      this.dbService.saveChallenges(mergedChallenges);
+    });
   }
 
   /* -------------------------- Methods firebase --------------------------  */
   protected async escapeToTeam(): Promise<void> {
-    const userId = this.firebaseService.userFirebase()?.uid;
-    const event = this.event();
-    const team = this.team();
-    if (!userId || !event || !team) throw new Error('retry', { cause: 'retry' });
+    this.loaderService.executeImmediate(async () => {
+      const userId = this.firebaseService.userFirebase()?.uid;
+      const event = this.event();
+      const team = this.team();
+      if (!userId || !event || !team) throw new Error('retry', { cause: 'retry' });
 
-    const userConfirm = confirm('Sei sicuro di voler uscire dalla squadra?');
-    if (!userConfirm) return;
+      const userConfirm = confirm('Sei sicuro di voler uscire dalla squadra?');
+      if (!userConfirm) return;
 
-    /* Rimuovi da User (prop: eventIds e teamIds) */
-    await this.userService.updateEventsAndTeams('REMOVE', userId, event.id, team.id);
+      /* Rimuovi da User (prop: eventIds e teamIds) */
+      await this.userService.updateEventsAndTeams('REMOVE', userId, event.id, team.id);
 
-    /* Rimuovi da squadra */
-    const teamUpdated = await this.teamService.deleteFromTeam(team, userId);
+      /* Rimuovi da squadra */
+      const teamUpdated = await this.teamService.deleteFromTeam(team, userId);
 
-    /* Rimuovi squadra e aggiorna evento se non ha piu nessun membro */
-    if (teamUpdated.props.userIds.length <= 0) {
-      await this.teamService.deleteTeam(team.id);
-      await this.eventService.updateTeams('REMOVE', event.id, team.id);
-    }
+      /* Rimuovi squadra e aggiorna evento se non ha piu nessun membro */
+      if (teamUpdated.props.userIds.length <= 0) {
+        await this.teamService.deleteTeam(team.id);
+        await this.eventService.updateTeams('REMOVE', event.id, team.id);
+      }
 
-    /* Rimuovi da local storage e indexedDb */
-    await this.resetLocalStorageAndIndexedDB();
+      /* Rimuovi da local storage e indexedDb */
+      await this.resetLocalStorageAndIndexedDB();
 
-    /* Log */
-    this.logService.addLogConfirm('Non fai piu parte della squadra');
+      /* Log */
+      this.logService.addLogConfirm('Non fai piu parte della squadra');
+    });
   }
 
   /* -------------------------- Methods event--------------------------  */

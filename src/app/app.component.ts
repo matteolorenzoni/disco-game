@@ -4,7 +4,8 @@ import { FirebaseService } from './service/firebase.service';
 import { LogService } from './service/log.service';
 import { FvToastComponent } from './components/fv-toast.component';
 import { FvBottomNavigationComponent } from './components/fv-bottom-navigation.component';
-import { HttpService } from './service/http.service';
+import { LoaderService } from './service/loader.service';
+import { IndexedDbService } from './service/indexed-db.service';
 
 @Component({
   selector: 'app-root',
@@ -15,9 +16,10 @@ import { HttpService } from './service/http.service';
 })
 export class AppComponent {
   /* Services */
-  readonly firebaseService = inject(FirebaseService);
-  readonly httpService = inject(HttpService);
-  readonly logService = inject(LogService);
+  private readonly firebaseService = inject(FirebaseService);
+  protected readonly loaderService = inject(LoaderService);
+  protected readonly dbService = inject(IndexedDbService);
+  protected readonly logService = inject(LogService);
 
   /* Variables */
   isPortrait = signal<boolean>(false);
@@ -33,5 +35,11 @@ export class AppComponent {
     screen.orientation.addEventListener('change', () => {
       this.isPortrait.set(screen.orientation.type.startsWith('portrait'));
     });
+  }
+
+  /* ------------------- Constructor ------------------- */
+  protected async onRefreshPage(): Promise<void> {
+    await this.dbService.clearAllStores();
+    window.location.reload();
   }
 }

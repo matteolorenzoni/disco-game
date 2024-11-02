@@ -19,6 +19,7 @@ import { IndexedDbService } from '../../../service/indexed-db.service';
 import { MergeEvent, mergeEvents } from '../../../util/merge.util';
 import { Team } from '../../../model/team.model';
 import { Doc } from '../../../model/firebase';
+import { LoaderService } from '../../../service/loader.service';
 
 @Component({
   selector: 'app-event-list',
@@ -45,6 +46,7 @@ export class EventListComponent implements OnInit {
   private readonly teamService = inject(TeamService);
   private readonly lsService = inject(LocalStorageService);
   private readonly dbService = inject(IndexedDbService);
+  private readonly loaderService = inject(LoaderService);
   private readonly logService = inject(LogService);
 
   /* Variables */
@@ -56,14 +58,11 @@ export class EventListComponent implements OnInit {
 
   /* -------------------- Lifecycle hooks -------------------- */
   async ngOnInit(): Promise<void> {
-    const userId = this.firebaseService.userFirebase()?.uid;
-    if (!userId) throw new Error('retry', { cause: 'retry' });
-
     /* Inizializzazione indexedDB */
     await this.initIndexedDb();
 
     /* Inizializzazione http */
-    await this.initHttp(userId);
+    await this.initHttp();
   }
 
   /* -------------------------- Methods initialization --------------------------  */
@@ -76,105 +75,115 @@ export class EventListComponent implements OnInit {
     this.mergedEvents.set(mergedEvents);
   }
 
-  private async initHttp(userId: string) {
-    const [events, teams] = await Promise.all([
-      this.eventService.getActiveEvents(), // eventi da ieri in poi
-      this.teamService.getActiveTeamsByUserId(userId) // partecipazioni di eventi da ieri in poi
-    ]);
+  private async initHttp() {
+    const userId = this.firebaseService.userFirebase()?.uid;
+    if (!userId) throw new Error('retry', { cause: 'retry' });
 
-    /* Memorizzo le squadre */
-    this.teams.set(teams);
+    await this.loaderService.executeWithDelay(async () => {
+      const [events, teams] = await Promise.all([
+        this.eventService.getActiveEvents(), // eventi da ieri in poi
+        this.teamService.getActiveTeamsByUserId(userId) // partecipazioni di eventi da ieri in poi
+      ]);
 
-    /* Metto insieme i dati */
-    const mergedEvents = mergeEvents(events, teams);
-    this.mergedEvents.set(mergedEvents);
+      /* Memorizzo le squadre */
+      this.teams.set(teams);
 
-    /* Aggiorno il indexedDB */
-    this.dbService.saveEvents(events);
-    this.dbService.saveTeams(teams);
+      /* Metto insieme i dati */
+      const mergedEvents = mergeEvents(events, teams);
+      this.mergedEvents.set(mergedEvents);
+
+      /* Aggiorno il indexedDB */
+      this.dbService.saveEvents(events);
+      this.dbService.saveTeams(teams);
+    });
   }
 
   /* -------------------- Methods: firebase -------------------- */
-  protected async addTeam(eventId: string): Promise<void> {
-    const user = this.lsService.getUser();
-    const event = this.mergedEvents()!.find((x) => x.id === eventId);
-    if (!user || !event) throw new Error('retry', { cause: 'retry' });
+  protected async addTeam(eventId: string, startDate: Date): Promise<void> {
+    await this.loaderService.executeImmediate(async () => {
+      const user = this.lsService.getUser();
+      if (!user) throw new Error('retry', { cause: 'retry' });
 
-    /* Ottengo il nome dal prompt */
-    const teamName = prompt('Inserisci il nome della tua squadra');
-    if (!teamName) return;
+      /* Ottengo il nome dal prompt */
+      const teamName = prompt('Inserisci il nome della tua squadra');
+      if (!teamName) return;
 
-    /* Aggiungo Team al DB */
-    const team = await this.teamService.addTeam(user, event.id, event.startDate, teamName);
-    if (!team) {
-      this.logService.addLogErrorApp('Nome già esistente, sceglierne uno nuovo');
-      return;
-    }
+      /* Aggiungo Team al DB */
+      const team = await this.teamService.addTeam(user, eventId, startDate, teamName);
+      if (!team) {
+        this.logService.addLogErrorApp('Nome già esistente, sceglierne uno nuovo');
+        return;
+      }
 
-    /* Aggiungo partecipazione */
-    await this.addParticipation(event.id, team.id, user.id);
+      /* Aggiungo partecipazione */
+      await this.addParticipation(eventId, team.id, user.id);
 
-    /* Log e clipboard */
-    if (navigator && navigator.clipboard) {
-      navigator.clipboard.writeText(team.props.code);
-      this.logService.addLogConfirm(`Squadra creata. Codice [${team.props.code}] copiato negli appunti`);
-    } else {
-      this.logService.addLogConfirm(`Squadra creata`);
-    }
+      /* Log e clipboard */
+      if (navigator && navigator.clipboard) {
+        navigator.clipboard.writeText(team.props.code);
+        this.logService.addLogConfirm(`Squadra creata. Codice [${team.props.code}] copiato negli appunti`);
+      } else {
+        this.logService.addLogConfirm(`Squadra creata`);
+      }
+    });
   }
 
   protected async findTeam(eventId: string): Promise<void> {
-    const user = this.lsService.getUser();
-    if (!user) throw new Error('retry', { cause: 'retry' });
+    await this.loaderService.executeImmediate(async () => {
+      const user = this.lsService.getUser();
+      if (!user) throw new Error('retry', { cause: 'retry' });
 
-    /* Ottengo il codice dal prompt */
-    const teamCode = prompt('Inserisci il codice della tua squadra');
-    if (!teamCode) return;
+      /* Ottengo il codice dal prompt */
+      const teamCode = prompt('Inserisci il codice della tua squadra');
+      if (!teamCode) return;
 
-    /* Controllo se esiste una squadra con quel codice */
-    const team = await this.teamService.getTeamByCode(teamCode);
-    if (!team) {
-      this.logService.addLogErrorApp('Nessuna squadra trovata');
-      return;
-    }
+      /* Controllo se esiste una squadra con quel codice */
+      const team = await this.teamService.getTeamByCode(teamCode);
+      if (!team) {
+        this.logService.addLogErrorApp('Nessuna squadra trovata');
+        return;
+      }
 
-    /* Aggiungo user al team */
-    await this.teamService.updateUsers(team, user);
+      /* Aggiungo user al team */
+      await this.teamService.updateUsers(team, user);
 
-    /* Aggiungo partecipazione */
-    await this.addParticipation(eventId, team.id, user.id);
+      /* Aggiungo partecipazione */
+      await this.addParticipation(eventId, team.id, user.id);
 
-    /* Log */
-    this.logService.addLogConfirm('Ora fai parte della squadra, buona fortuna');
+      /* Log */
+      this.logService.addLogConfirm('Ora fai parte della squadra, buona fortuna');
+    });
   }
 
   protected async onEscapeToTeam(eventId: string, teamId: string): Promise<void> {
-    const userId = this.firebaseService.userFirebase()?.uid;
-    const team = this.teams().find((x) => x.id === teamId);
-    if (!userId || !team) throw new Error('retry', { cause: 'retry' });
+    await this.loaderService.executeImmediate(async () => {
+      const userId = this.firebaseService.userFirebase()?.uid;
+      const team = this.teams().find((x) => x.id === teamId);
+      if (!userId || !team) throw new Error('retry', { cause: 'retry' });
 
-    const userConfirm = confirm('Sei sicuro di voler uscire dalla squadra?');
-    if (!userConfirm) return;
+      const userConfirm = confirm('Sei sicuro di voler uscire dalla squadra?');
+      if (!userConfirm) return;
 
-    /* Rimuovi da User (prop: eventIds e teamIds) */
-    await this.userService.updateEventsAndTeams('REMOVE', userId, eventId, team.id);
+      /* Rimuovi da User (prop: eventIds e teamIds) */
+      await this.userService.updateEventsAndTeams('REMOVE', userId, eventId, team.id);
 
-    /* Rimuovi da squadra */
-    const teamUpdated = await this.teamService.deleteFromTeam(team, userId);
+      /* Rimuovi da squadra */
+      const teamUpdated = await this.teamService.deleteFromTeam(team, userId);
 
-    /* Rimuovi squadra e aggiorna evento se non ha piu nessun membro */
-    if (teamUpdated.props.userIds.length <= 0) {
-      await this.teamService.deleteTeam(team.id);
-      await this.eventService.updateTeams('REMOVE', eventId, team.id);
-    }
+      /* Rimuovi squadra e aggiorna evento se non ha piu nessun membro */
+      if (teamUpdated.props.userIds.length <= 0) {
+        await this.teamService.deleteTeam(team.id);
+        await this.eventService.updateTeams('REMOVE', eventId, team.id);
+      }
 
-    /* Rimuovi da indexedDb */
-    this.lsService.removeUserDashboardTeamId();
-    await this.dbService.deleteTeams([team.id]);
-    await this.initIndexedDb();
+      /* Rimuovi da indexedDb */
+      this.lsService.removeUserDashboardTeamId();
+      await this.dbService.deleteTeams([team.id]);
+      await this.initIndexedDb();
 
-    /* Log */
-    this.logService.addLogConfirm('Non fai piu parte della squadra');
+      /* Log */
+      this.logService.addLogConfirm('Non fai piu parte della squadra');
+    });
   }
   /* -------------------- Methods: on event -------------------- */
   protected async onGoToTeam(eventId: string, teamId: string): Promise<void> {

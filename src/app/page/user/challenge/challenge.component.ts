@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, ParamMap } from '@angular/router';
 import { ChallengeService } from '../../../service/challenge.service';
 import { EventChallengeService } from '../../../service/event-challenge.service';
 import { Doc } from '../../../model/firebase';
@@ -14,6 +14,7 @@ import { FvRatingComponent } from '../../../components/fv-rating.component';
 import { TitleComponent, TitlePageItem } from '../../../components/title/title.component';
 import { QRCodeModule } from 'angularx-qrcode';
 import { FirebaseService } from '../../../service/firebase.service';
+import { LoaderService } from '../../../service/loader.service';
 
 @Component({
   selector: 'app-challenge',
@@ -37,6 +38,7 @@ export class ChallengeComponent implements OnInit {
   private readonly firebaseService = inject(FirebaseService);
   private readonly challengeService = inject(ChallengeService);
   private readonly eventChallengeService = inject(EventChallengeService);
+  private readonly loaderService = inject(LoaderService);
 
   /* Variables */
   pages = signal<TitlePageItem[]>([]);
@@ -48,10 +50,15 @@ export class ChallengeComponent implements OnInit {
   /* Icons */
   ICON_INFINITY = faInfinity;
 
-  /* ------------------------ Lifecycle hooks ------------------------ */
-  ngOnInit(): void {
+  /* -------------------- Lifecycle hooks -------------------- */
+  async ngOnInit(): Promise<void> {
     // Recupera l'ID dalla route
-    this.route.paramMap.subscribe(async (params) => {
+    this.route.paramMap.subscribe(async (params) => await this.initHttp(params));
+  }
+
+  /* -------------------------- Methods initialization --------------------------  */
+  private async initHttp(params: ParamMap) {
+    await this.loaderService.executeWithDelay(async () => {
       const eventId = params.get('eventId');
       const teamId = params.get('teamId');
       const userId = this.firebaseService.userFirebase()?.uid;

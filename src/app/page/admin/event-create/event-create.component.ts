@@ -1,7 +1,7 @@
 import { CommonModule, formatDate } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, ParamMap } from '@angular/router';
 import { environment } from '../../../../environments/environment';
 import { Doc } from '../../../model/firebase';
 import { Event } from '../../../model/event.model';
@@ -14,6 +14,7 @@ import { FvFieldComponent } from '../../../components/fv-field.component';
 import { FvTextAeraComponent } from '../../../components/fv-text-area.component';
 import { FvButtonComponent } from '../../../components/fv-button.component';
 import { TitleComponent } from '../../../components/title/title.component';
+import { LoaderService } from '../../../service/loader.service';
 
 const COL_EVENTS = environment.collection.EVENTS;
 
@@ -38,6 +39,7 @@ export class EventCreateComponent implements OnInit {
   private readonly firebaseDocumentService = inject(FirebaseDocumentService);
   protected readonly storageService = inject(StorageService);
   private readonly eventService = inject(EventService);
+  private readonly loaderService = inject(LoaderService);
 
   /* Variables */
   event = signal<Doc<Event> | undefined>(undefined);
@@ -74,7 +76,12 @@ export class EventCreateComponent implements OnInit {
   /* ------------------------ Lifecycle hooks ------------------------ */
   ngOnInit(): void {
     // Recupera l'ID dalla route
-    this.route.paramMap.subscribe(async (params) => {
+    this.route.paramMap.subscribe(async (params) => await this.initHttp(params));
+  }
+
+  /* -------------------------- Methods initialization --------------------------  */
+  private async initHttp(params: ParamMap) {
+    await this.loaderService.executeWithDelay(async () => {
       const eventId = params.get('eventId');
       if (!eventId) return;
 
@@ -98,11 +105,14 @@ export class EventCreateComponent implements OnInit {
   protected async addOrUpdateEvent(): Promise<void> {
     if (this.eventForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
 
-    const event = this.event();
-    const form = this.eventForm.getRawValue();
-    if (event) {
-      await this.eventService.updateEvent(event.id, form);
-    } else {
+    await this.loaderService.executeImmediate(async () => {
+      const event = this.event();
+      const form = this.eventForm.getRawValue();
+      if (event) {
+        await this.eventService.updateEvent(event.id, form);
+        return;
+      }
+
       /* Creo id documento */
       const eventId = this.firebaseDocumentService.createDocId(COL_EVENTS);
 
@@ -111,6 +121,6 @@ export class EventCreateComponent implements OnInit {
 
       /* Creazione evento */
       await this.eventService.addEventById(eventId, form, imageUrl);
-    }
+    });
   }
 }

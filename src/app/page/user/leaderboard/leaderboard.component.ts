@@ -10,6 +10,7 @@ import { IndexedDbService } from '../../../service/indexed-db.service';
 import { LeaderboardService } from '../../../service/leadeboard.service';
 import { Team } from '../../../model/team.model';
 import { LogService } from '../../../service/log.service';
+import { LoaderService } from '../../../service/loader.service';
 
 @Component({
   selector: 'app-leaderboard',
@@ -24,6 +25,7 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
   private readonly eventService = inject(EventService);
   private readonly leaderboardService = inject(LeaderboardService);
   private readonly dbService = inject(IndexedDbService);
+  private readonly loaderService = inject(LoaderService);
   private readonly logService = inject(LogService);
 
   /* Variable */
@@ -60,7 +62,7 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
         const mode = this.mode();
         if (!eventSelected) return;
 
-        this.resetRefs();
+        this.resetObservableAndTimer();
 
         if (mode === 'live') {
           // Ottengo il live delle prime 10 squadre
@@ -84,7 +86,7 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.resetRefs();
+    this.resetObservableAndTimer();
   }
 
   /* -------------------------- Methods initialization --------------------------  */
@@ -99,30 +101,34 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
   }
 
   private async initHttp() {
-    const events = await this.eventService.getActiveEvents();
-    this.events.set(events);
-    this.eventSelected.set(events[0]);
+    await this.loaderService.executeWithDelay(async () => {
+      const events = await this.eventService.getActiveEvents();
+      this.events.set(events);
+      this.eventSelected.set(events[0]);
 
-    /* Aggiorno il indexedDB */
-    this.dbService.saveEvents(events);
+      /* Aggiorno il indexedDB */
+      this.dbService.saveEvents(events);
+    });
   }
 
-  /* -------------------- Methods firebase -------------------- */
+  /* -------------------- Methods: firebase -------------------- */
   private async getLeaderboardEveryMinute(eventId: string): Promise<void> {
     const leaderboard = await this.dbService.getLeaderboardByEventId(eventId);
     this.teamsTotal.set(leaderboard);
 
     // Attivo l'intervallo
     this.timeout = setInterval(async () => {
-      const now = new Date();
-      const seconds = now.getSeconds();
-      this.secondsLeft.set(60 - seconds);
-      if (seconds !== 0) return;
+      await this.loaderService.executeImmediate(async () => {
+        const now = new Date();
+        const seconds = now.getSeconds();
+        this.secondsLeft.set(60 - seconds);
+        if (seconds !== 0) return;
 
-      const teams = await this.leaderboardService.getActiveTeamsByEventId(eventId);
-      this.teamsTotal.set(teams);
-      this.dbService.saveLeaderboard(teams); // Aggiorno il indexedDB
-      this.logService.addLogConfirm('Classifica aggiornata');
+        const teams = await this.leaderboardService.getActiveTeamsByEventId(eventId);
+        this.teamsTotal.set(teams);
+        this.dbService.saveLeaderboard(teams); // Aggiorno il indexedDB
+        this.logService.addLogConfirm('Classifica aggiornata');
+      });
     }, 1000);
   }
 
@@ -148,7 +154,7 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
     this.teamsTotal.set([]);
   }
 
-  private resetRefs(): void {
+  private resetObservableAndTimer(): void {
     // Interrompo subscribe di liveTop10 e timer di general
     if (this.unsubscribe) this.unsubscribe();
     if (this.timeout) clearInterval(this.timeout);
