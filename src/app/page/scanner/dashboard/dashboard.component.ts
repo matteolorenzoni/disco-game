@@ -73,6 +73,7 @@ export class DashboardComponent implements OnInit {
 
   /* Constants */
   ALLOWED_FORMATS = [BarcodeFormat.QR_CODE];
+  NOW = new Date();
 
   /* Icons */
   ICON_EVENT = faCalendar;
@@ -160,7 +161,7 @@ export class DashboardComponent implements OnInit {
         return;
       }
 
-      /* Memorizzo evento su locals storage */
+      /* Aggiorno indexedDB */
       this.event.set(event);
       await this.dbService.saveScannerEvent(event);
 
@@ -245,6 +246,20 @@ export class DashboardComponent implements OnInit {
     this.event.set(undefined);
     await this.dbService.deleteScannerEvent();
     await this.dbService.deleteScannerChallenges();
+  }
+
+  protected async onRefreshPage(eventCode: string): Promise<void> {
+    await this.loaderService.executeImmediate(async () => {
+      /* Ottengo evento */
+      const event = await this.eventService.getEventByCode(eventCode);
+
+      /* Aggiorno indexedDB */
+      this.event.set(event);
+      if (event) await this.dbService.saveScannerEvent(event);
+      else this.dbService.deleteScannerEvent();
+
+      window.location.reload();
+    });
   }
 
   /* --------------------- Method util --------------------- */

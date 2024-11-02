@@ -5,79 +5,87 @@
   ]">
 </app-title>
 
-<ul class="flex flex-col divide-y divide-gray-800">
-  @for (item of eventChallenges(); track item.props.challengeId) {
-    <li class="flex flex-col gap-3 py-8">
-      <div class="flex items-center gap-2">
-        <img class="h-8 w-8" [src]="'images/challenge/' + item.props.challengeType + '.png'" alt="Tipo" />
-        <p class="flex-1 truncate text-sm">{{ item.props.challengeName }}</p>
-        <div class="divide-x divide-gray-800">
-          <button
-            class="px-2 text-xxs font-semibold uppercase text-primary-500 underline"
-            (click)="goToUpdateEventChallenge(item.id)">
-            Modifica
-          </button>
-          <button class="px-2 text-xxs font-semibold uppercase text-rose-500" (click)="deleteEventChallenge(item.id)">
-            <fa-icon [icon]="ICON_TRASH"></fa-icon>
-          </button>
+@if (event(); as event) {
+  <ul class="flex flex-col divide-y divide-gray-800">
+    @for (item of eventChallenges(); track item.props.challengeId) {
+      <li class="flex flex-col gap-3 py-8">
+        <div class="flex items-center gap-2">
+          <img class="h-8 w-8" [src]="'images/challenge/' + item.props.challengeType + '.png'" alt="Tipo" />
+          <p class="flex-1 truncate text-sm">{{ item.props.challengeName }}</p>
+          <div class="divide-x divide-gray-800">
+            <button
+              class="px-2 text-xxs font-semibold uppercase text-primary-500 hover:underline"
+              (click)="goToUpdateEventChallenge(item.id)">
+              Modifica
+            </button>
+            @if (event.props.startDate > NOW) {
+              <button
+                class="px-2 text-xxs font-semibold uppercase text-rose-500 hover:text-rose-600 active:text-rose-700"
+                (click)="deleteEventChallenge(item.id, event.props.startDate)">
+                <fa-icon [icon]="ICON_TRASH"></fa-icon>
+              </button>
+            }
+          </div>
         </div>
-      </div>
 
-      <!-- Info su  eventChallenge-->
-      <div
-        class="flex h-20 divide-x divide-neutral-700 overflow-x-auto rounded-xl bg-neutral-800 py-2 text-on-surface shadow">
-        <div class="flex min-w-16 shrink-0 basis-1/4 flex-col items-center gap-2 px-2">
-          <p class="w-full rounded bg-neutral-700 p-1 text-center text-xxs uppercase text-on-background">Stato</p>
-          <fa-icon class="my-auto" [icon]="ICON_STATUS_VALUE[item.props.status]"></fa-icon>
+        <!-- Info su  eventChallenge-->
+        <div
+          class="flex h-20 divide-x divide-neutral-700 overflow-x-auto rounded-xl bg-neutral-800 py-2 text-on-surface shadow">
+          <div class="flex min-w-16 shrink-0 basis-1/4 flex-col items-center gap-2 px-2">
+            <p class="w-full rounded bg-neutral-700 p-1 text-center text-xxs uppercase text-on-background">Stato</p>
+            <fa-icon class="my-auto" [icon]="ICON_STATUS_VALUE[item.props.status]"></fa-icon>
+          </div>
+          <div class="flex min-w-16 shrink-0 basis-1/4 flex-col items-center gap-2 px-2">
+            <p class="w-full rounded bg-neutral-700 p-1 text-center text-xxs uppercase text-on-background">Inizio</p>
+            @if (item.props.startDate; as startDate) {
+              <div class="my-auto flex flex-col gap-1">
+                <p class="inline-flex gap-1 text-xxs">
+                  <fa-icon [icon]="ICON_CALENDAR"></fa-icon>
+                  <span>{{ startDate | date: 'dd/MM' }}</span>
+                </p>
+                <p class="inline-flex gap-1 text-xxs">
+                  <fa-icon [icon]="ICON_CLOCK"> </fa-icon>
+                  <span>{{ startDate | date: 'HH:mm' }}</span>
+                </p>
+              </div>
+            } @else {
+              <p>-</p>
+            }
+          </div>
+          <div class="flex min-w-16 shrink-0 basis-1/4 flex-col items-center gap-2 px-2">
+            <p class="w-full rounded bg-neutral-700 p-1 text-center text-xxs uppercase text-on-background">FINE</p>
+            @if (item.props.endDate; as endDate) {
+              <div class="my-auto flex flex-col gap-1">
+                <p class="inline-flex gap-1">
+                  <fa-icon [icon]="ICON_CALENDAR"></fa-icon>
+                  <span>{{ endDate | date: 'dd/MM' }}</span>
+                </p>
+                <p class="inline-flex gap-1">
+                  <fa-icon [icon]="ICON_CLOCK"> </fa-icon>
+                  <span>{{ endDate | date: 'HH:mm' }}</span>
+                </p>
+              </div>
+            } @else {
+              <p>-</p>
+            }
+          </div>
+          <div class="flex min-w-16 shrink-0 basis-1/4 flex-col items-center gap-2 px-2">
+            <p class="w-full rounded bg-neutral-700 p-1 text-center text-xxs uppercase text-on-background">N°</p>
+            @if (item.props.maxTimes; as maxTimes) {
+              <p class="my-auto flex-1 flex-center">{{ maxTimes }}</p>
+            } @else {
+              <fa-icon class="my-auto flex-1 flex-center" [icon]="ICON_INFINITY"></fa-icon>
+            }
+          </div>
         </div>
-        <div class="flex min-w-16 shrink-0 basis-1/4 flex-col items-center gap-2 px-2">
-          <p class="w-full rounded bg-neutral-700 p-1 text-center text-xxs uppercase text-on-background">Inizio</p>
-          @if (item.props.startDate; as startDate) {
-            <div class="my-auto flex flex-col gap-1">
-              <p class="inline-flex gap-1 text-xxs">
-                <fa-icon [icon]="ICON_CALENDAR"></fa-icon>
-                <span>{{ startDate | date: 'dd/MM' }}</span>
-              </p>
-              <p class="inline-flex gap-1 text-xxs">
-                <fa-icon [icon]="ICON_CLOCK"> </fa-icon>
-                <span>{{ startDate | date: 'HH:mm' }}</span>
-              </p>
-            </div>
-          } @else {
-            <p>-</p>
-          }
-        </div>
-        <div class="flex min-w-16 shrink-0 basis-1/4 flex-col items-center gap-2 px-2">
-          <p class="w-full rounded bg-neutral-700 p-1 text-center text-xxs uppercase text-on-background">FINE</p>
-          @if (item.props.endDate; as endDate) {
-            <div class="my-auto flex flex-col gap-1">
-              <p class="inline-flex gap-1">
-                <fa-icon [icon]="ICON_CALENDAR"></fa-icon>
-                <span>{{ endDate | date: 'dd/MM' }}</span>
-              </p>
-              <p class="inline-flex gap-1">
-                <fa-icon [icon]="ICON_CLOCK"> </fa-icon>
-                <span>{{ endDate | date: 'HH:mm' }}</span>
-              </p>
-            </div>
-          } @else {
-            <p>-</p>
-          }
-        </div>
-        <div class="flex min-w-16 shrink-0 basis-1/4 flex-col items-center gap-2 px-2">
-          <p class="w-full rounded bg-neutral-700 p-1 text-center text-xxs uppercase text-on-background">N°</p>
-          @if (item.props.maxTimes; as maxTimes) {
-            <p class="my-auto flex-1 flex-center">{{ maxTimes }}</p>
-          } @else {
-            <fa-icon class="my-auto flex-1 flex-center" [icon]="ICON_INFINITY"></fa-icon>
-          }
-        </div>
-      </div>
-    </li>
+      </li>
+    }
+  </ul>
+
+  @if (event.props.startDate > NOW) {
+    <fv-floating-button [execute]="onExecuteFloatingButton.bind(this)"></fv-floating-button>
   }
-</ul>
-
-<fv-floating-button [execute]="onExecuteFloatingButton.bind(this)"></fv-floating-button>
+}
 
 <!-- Seleziona tipo della sfida -->
 @if (formModalIsOpen()) {

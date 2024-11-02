@@ -45,12 +45,14 @@
                     twColor="amber"
                     [onClick]="onGoToTeam.bind(this, event.id, event.teamId)">
                   </fv-button-outlined>
-                  <button
-                    type="button"
-                    class="rounded border border-amber-500 px-2 text-amber-500"
-                    (click)="onEscapeToTeam(event.id, event.teamId)">
-                    <fa-icon [icon]="ICON_TRASH"></fa-icon>
-                  </button>
+                  @if (event.startDate > NOW) {
+                    <button
+                      type="button"
+                      class="rounded border border-amber-500 px-2 text-amber-500"
+                      (click)="deleteTeam(event.id, event.startDate, event.teamId)">
+                      <fa-icon [icon]="ICON_TRASH"></fa-icon>
+                    </button>
+                  }
                 </div>
               } @else {
                 <div class="flex gap-2">

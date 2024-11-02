@@ -32,6 +32,8 @@ import EventChallengeStatus from './event-challenge-status.config.json';
 import { endDateValidator } from '../../../util/utils';
 import { IndexedDbService } from '../../../service/indexed-db.service';
 import { LoaderService } from '../../../service/loader.service';
+import { EventService } from '../../../service/event.service';
+import { Event } from '../../../model/event.model';
 
 @Component({
   selector: 'app-event-challenge',
@@ -54,6 +56,7 @@ import { LoaderService } from '../../../service/loader.service';
 export class EventChallengeComponent implements OnInit {
   /* Services */
   private readonly route = inject(ActivatedRoute);
+  private readonly eventService = inject(EventService);
   private readonly challengeService = inject(ChallengeService);
   private readonly eventChallengeService = inject(EventChallengeService);
   private readonly dbService = inject(IndexedDbService);
@@ -62,6 +65,7 @@ export class EventChallengeComponent implements OnInit {
 
   /* Variables */
   eventId = signal<string | undefined>(undefined);
+  event = signal<Doc<Event> | undefined>(undefined);
   challenges = signal<Doc<Challenge>[]>([]);
   eventChallenges = signal<Doc<EventChallenge>[]>([]);
   eventChallengeSelected = signal<Doc<EventChallenge> | undefined>(undefined);
@@ -70,6 +74,7 @@ export class EventChallengeComponent implements OnInit {
 
   /* Constants */
   OPTIONS = EventChallengeStatus as SelectOption<ChallengeStatus>[];
+  NOW = new Date();
 
   /* Icons */
   ICON_STATUS = faMobileScreenButton;
@@ -121,9 +126,11 @@ export class EventChallengeComponent implements OnInit {
       if (!eventId) throw new Error('retry', { cause: 'retry' });
 
       /* Ottengo le sfide che fanno parte dell'evento */
-      const eventChallenges = await this.eventChallengeService.getEventChallengesByProp([
-        { key: 'eventId', value: eventId }
+      const [event, eventChallenges] = await Promise.all([
+        this.eventService.getEventById(eventId),
+        this.eventChallengeService.getEventChallengesByProp([{ key: 'eventId', value: eventId }])
       ]);
+      this.event.set(event);
       this.eventChallenges.set(eventChallenges);
     });
   }
@@ -132,11 +139,23 @@ export class EventChallengeComponent implements OnInit {
   protected async addOrUpdateEventChallenge() {
     if (this.eventChallengeForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
 
+    if (this.event() && this.event()!.props.startDate < new Date()) {
+      this.logService.addLogErrorApp('Operazione non piu possibile, evento iniziato');
+      return;
+    }
+
     await this.loaderService.executeImmediate(async () => {
       const form = trimFormValues(this.eventChallengeForm.getRawValue());
       const eventChallengeSelected = this.eventChallengeSelected();
       if (!eventChallengeSelected) {
         /* Aggiorno db */
+        /* Controllo che la sfida non sia gia presente */
+        const challengeIds = this.eventChallenges().map((x) => x.props.challengeId);
+        if (challengeIds.includes(form.challengeId)) {
+          this.logService.addLogErrorApp("Sfida gia presente nell'evento");
+          return;
+        }
+
         const challenge = this.challenges().find((x) => x.id === form.challengeId);
         const { name, type } = challenge!.props;
         const eventChallenge = this.createChallenge(name, type, form);
@@ -162,14 +181,16 @@ export class EventChallengeComponent implements OnInit {
     });
   }
 
-  protected async deleteEventChallenge(eventChallengeId: string): Promise<void> {
+  protected async deleteEventChallenge(eventChallengeId: string, eventStartDate: Date): Promise<void> {
     const userConfirm = confirm("Sei sicuro di voler eliminare la sfida dall'evento?");
     if (!userConfirm) return;
 
-    await this.loaderService.executeImmediate(async () => {
-      const eventId = this.eventId();
-      if (!eventId) throw new Error('retry', { cause: 'retry' });
+    if (eventStartDate < new Date()) {
+      this.logService.addLogErrorApp('Operazione non piu possibile, evento iniziato');
+      return;
+    }
 
+    await this.loaderService.executeImmediate(async () => {
       /* Elimino il documento */
       await this.eventChallengeService.deleteEventChallenge(eventChallengeId);
       this.eventChallenges.update((eventChallenges) => eventChallenges.filter((x) => x.id !== eventChallengeId));

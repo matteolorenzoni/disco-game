@@ -53,6 +53,9 @@ export class EventListComponent implements OnInit {
   mergedEvents = signal<MergeEvent[] | undefined>(undefined);
   teams = signal<Doc<Team>[]>([]);
 
+  /* Constants */
+  NOW = new Date();
+
   /* Icons */
   ICON_TRASH = faTrash;
 
@@ -161,14 +164,19 @@ export class EventListComponent implements OnInit {
     });
   }
 
-  protected async onEscapeToTeam(eventId: string, teamId: string): Promise<void> {
+  protected async deleteTeam(eventId: string, eventStartDate: Date, teamId: string): Promise<void> {
+    const userConfirm = confirm('Sei sicuro di voler uscire dalla squadra?');
+    if (!userConfirm) return;
+
+    if (eventStartDate < new Date()) {
+      this.logService.addLogErrorApp('Operazione non piu possibile, evento iniziato');
+      return;
+    }
+
     await this.loaderService.executeImmediate(async () => {
       const userId = this.firebaseService.userFirebase()?.uid;
       const team = this.teams().find((x) => x.id === teamId);
       if (!userId || !team) throw new Error('retry', { cause: 'retry' });
-
-      const userConfirm = confirm('Sei sicuro di voler uscire dalla squadra?');
-      if (!userConfirm) return;
 
       /* Rimuovi da User (prop: eventIds e teamIds) */
       await this.userService.updateEventsAndTeams('REMOVE', userId, eventId, team.id);

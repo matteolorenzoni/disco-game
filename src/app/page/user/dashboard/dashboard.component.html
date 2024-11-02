@@ -1,9 +1,9 @@
 <app-title [pages]="[{ path: '', label: 'Dashboard' }]"></app-title>
 
 @if (team() === null) {
-  <div class="absolute left-0 top-0 -z-10 h-screen p-8 flex-center">
-    <div class="flex-col rounded-lg bg-surface p-4 text-gray-200 shadow backdrop-blur">
-      <h2 class="mb-2 text-lg font-bold">Nessuna squadra trovata</h2>
+  <div class="p-8 pt-40 flex-center">
+    <div class="flex flex-col rounded-lg bg-surface p-4 text-gray-200 shadow backdrop-blur">
+      <h2 class="mb-4 text-lg font-bold">Nessuna squadra trovata</h2>
       <p class="text-sm">
         Al momento non sei associato a nessuna squadra. Unisciti a noi per partecipare a eventi emozionanti e vivere
         nuove esperienze!
@@ -33,7 +33,7 @@
       <p class="text-md italic">{{ event.props.description }}</p>
     </div>
 
-    @if (event.props.startDate.getTime() > NOW.getTime()) {
+    @if (event.props.startDate > NOW) {
       <div class="mt-12 flex flex-col items-center gap-1 py-8">
         <p class="text-xxs uppercase text-gray-400">Tempo mancante</p>
         <fv-countdown class="text-5xl text-on-background" [date]="event.props.startDate"></fv-countdown>
@@ -73,9 +73,11 @@
       </ul>
       <div class="flex gap-2">
         <fv-button class="flex-1" label="Visualizza" twColor="primary" [onClick]="onGoToTeam.bind(this)"></fv-button>
-        <button type="button" class="rounded bg-primary-700 px-2" (click)="escapeToTeam()">
-          <fa-icon [icon]="ICON_TRASH"></fa-icon>
-        </button>
+        @if (event.props.startDate > NOW) {
+          <button type="button" class="rounded bg-primary-700 px-2" (click)="deleteTeam(event.props.startDate)">
+            <fa-icon [icon]="ICON_TRASH"></fa-icon>
+          </button>
+        }
       </div>
     </div>
 

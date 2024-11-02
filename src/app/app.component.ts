@@ -37,7 +37,7 @@ export class AppComponent {
     });
   }
 
-  /* ------------------- Constructor ------------------- */
+  /* ------------------- Method: event ------------------- */
   protected async onRefreshPage(): Promise<void> {
     await this.dbService.clearAllStores();
     window.location.reload();

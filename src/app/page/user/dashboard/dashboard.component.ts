@@ -142,15 +142,20 @@ export class DashboardComponent implements OnInit {
   }
 
   /* -------------------------- Methods firebase --------------------------  */
-  protected async escapeToTeam(): Promise<void> {
+  protected async deleteTeam(eventStartDate: Date): Promise<void> {
+    const userConfirm = confirm('Sei sicuro di voler uscire dalla squadra?');
+    if (!userConfirm) return;
+
+    if (eventStartDate < new Date()) {
+      this.logService.addLogErrorApp('Operazione non piu possibile, evento iniziato');
+      return;
+    }
+
     this.loaderService.executeImmediate(async () => {
       const userId = this.firebaseService.userFirebase()?.uid;
       const event = this.event();
       const team = this.team();
       if (!userId || !event || !team) throw new Error('retry', { cause: 'retry' });
-
-      const userConfirm = confirm('Sei sicuro di voler uscire dalla squadra?');
-      if (!userConfirm) return;
 
       /* Rimuovi da User (prop: eventIds e teamIds) */
       await this.userService.updateEventsAndTeams('REMOVE', userId, event.id, team.id);
