@@ -1,6 +1,7 @@
-import { Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { FirebaseError } from 'firebase/app';
 import { LogType } from '../model/enum';
+import { AudioService } from './audio.service';
 
 const ERROR_FIREBASE: Record<string, string> = {
   // Autenticazione
@@ -63,8 +64,15 @@ export type Log = {
   providedIn: 'root'
 })
 export class LogService {
+  /* Service */
+  private readonly audioService = inject(AudioService);
+
   /* Variables */
   logs = signal<Log[]>([]);
+  audio = signal({
+    ok: new Audio('audio/ok.mp3'),
+    error: new Audio('audio/error.mp3')
+  });
 
   public addLogConfirm(message: string, hide = true): void {
     this.addLog(LogType.OK, message, hide);
@@ -111,6 +119,18 @@ export class LogService {
 
     // Aggiungi il log
     this.logs.update((logs) => [...logs, { type, message, id }]);
+
+    // Audio
+    if (type === LogType.INFO || type === LogType.OK) {
+      this.audioService.playAudio('OK');
+    } else {
+      this.audioService.playAudio('ERROR');
+    }
+
+    // Vibrazione
+    if (navigator.vibrate) {
+      navigator.vibrate(200);
+    }
 
     // Rimuovi il log dopo 3 secondi
     if (hide) setTimeout(() => this.removeLog(id), 3000);
