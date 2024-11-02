@@ -24,6 +24,7 @@ import { Challenge } from '../../../model/challenge.model';
 import { isEqualQrcode, isQrcode } from '../../../util/type.util';
 import { Team } from '../../../model/team.model';
 import { LoaderService } from '../../../service/loader.service';
+import { trimFormValues } from '../../../util/utils';
 
 type ScanError = {
   message: string;
@@ -131,7 +132,7 @@ export class DashboardComponent implements OnInit {
 
     await this.loaderService.executeImmediate(async () => {
       /* Ottengo evento */
-      const form = this.eventForm.getRawValue();
+      const form = trimFormValues(this.eventForm.getRawValue());
       const event = await this.eventService.getEventByCode(form.code);
       if (!event) {
         this.logService.addLogErrorApp('Nessuna evento trovato');
@@ -141,6 +142,8 @@ export class DashboardComponent implements OnInit {
       /* Memorizzo evento su locals storage */
       this.event.set(event);
       this.lsService.setScannerEvent(event);
+
+      this.eventForm.reset();
     });
   }
 
@@ -184,7 +187,7 @@ export class DashboardComponent implements OnInit {
 
   protected async onManualScan(eventId: string) {
     await this.loaderService.executeImmediate(async () => {
-      const { challengeId, userCode } = this.manualScanForm.getRawValue();
+      const { challengeId, userCode } = trimFormValues(this.manualScanForm.getRawValue());
 
       /* Ottengo l'user */
       const user = await this.userService.getUserByCode(userCode);
@@ -208,6 +211,8 @@ export class DashboardComponent implements OnInit {
         points: this.challenges().find((x) => x.id === challengeId)!.props.points
       };
       await this.scan(qrcode, team);
+
+      this.manualScanForm.reset();
     });
   }
 
@@ -224,6 +229,8 @@ export class DashboardComponent implements OnInit {
 
     /* Aggiorno il punteggio totale di squadra e del singolo user */
     await this.teamService.updatePoints(team, qrcode.userId, qrcode.challengeId, qrcode.points);
+
+    /* log */
     this.logService.addLogConfirm('Sfida confermata');
   }
 

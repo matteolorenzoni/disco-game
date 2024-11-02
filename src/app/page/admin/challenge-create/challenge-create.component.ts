@@ -14,6 +14,7 @@ import { FvTextAeraComponent } from '../../../components/fv-text-area.component'
 import { TitleComponent } from '../../../components/title/title.component';
 import ChallengeTypes from './challenge-type.config.json';
 import { LoaderService } from '../../../service/loader.service';
+import { trimFormValues } from '../../../util/utils';
 
 export type SelectOption = {
   label: string;
@@ -38,8 +39,8 @@ export type SelectOption = {
 })
 export class ChallengeCreateComponent implements OnInit {
   /* Services */
-  private readonly location = inject(Location);
   private readonly route = inject(ActivatedRoute);
+  private readonly location = inject(Location);
   private readonly challengeService = inject(ChallengeService);
   private readonly loaderService = inject(LoaderService);
   private readonly logService = inject(LogService);
@@ -112,7 +113,7 @@ export class ChallengeCreateComponent implements OnInit {
     await this.loaderService.executeImmediate(async () => {
       /* Aggiungo o aggiorno il documento */
       const challengeId = this.challengeId();
-      const form = this.challengeForm.getRawValue();
+      const form = trimFormValues(this.challengeForm.getRawValue());
       if (challengeId) await this.challengeService.updateChallenge(challengeId, form);
       else await this.challengeService.addChallenge(form);
 

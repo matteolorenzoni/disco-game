@@ -5,8 +5,6 @@ import { User, UserParticipation, UserRole } from '../model/user.model';
 import { Doc } from '../model/firebase';
 import { UserModel } from '../model/form.model';
 import { userConverter } from '../model/converter';
-import { LogService } from './log.service';
-import { FirebaseService } from './firebase.service';
 import { FirebaseDocumentService } from './firebase-document.service';
 import { generateUniqueCode } from '../util/utils';
 
@@ -17,9 +15,7 @@ const COL_USERS = environment.collection.USERS;
 })
 export class UserService {
   /* Services */
-  readonly firebaseService = inject(FirebaseService);
-  readonly documentService = inject(FirebaseDocumentService);
-  readonly logService = inject(LogService);
+  private readonly documentService = inject(FirebaseDocumentService);
 
   /* --------------------------- Read ---------------------------*/
   public async getUserById(userId: string): Promise<Doc<User>> {
@@ -69,7 +65,6 @@ export class UserService {
       isActive: true,
       updatedAt: new Date()
     });
-    this.logService.addLogConfirm('Utente registrato');
   }
 
   /* --------------------------- Update ---------------------------*/
@@ -81,7 +76,6 @@ export class UserService {
     const form: Partial<User> = { ...userModelForm, updatedAt: new Date() };
     if (imageUrl !== undefined) form.imageUrl = imageUrl;
     await this.documentService.updateDocument<User>(userId, COL_USERS, form);
-    this.logService.addLogConfirm('Utente aggiornato');
   }
 
   public async updateEventsAndTeams(

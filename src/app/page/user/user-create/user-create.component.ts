@@ -13,6 +13,8 @@ import { FvFieldComponent } from '../../../components/fv-field.component';
 import { FvButtonComponent } from '../../../components/fv-button.component';
 import { LocalStorageService } from '../../../service/local-storage.service';
 import { LoaderService } from '../../../service/loader.service';
+import { LogService } from '../../../service/log.service';
+import { trimFormValues } from '../../../util/utils';
 
 const COL_USERS = environment.collection.USERS;
 
@@ -32,6 +34,7 @@ export class UserCreateComponent implements OnInit {
   private readonly userService = inject(UserService);
   private readonly loaderService = inject(LoaderService);
   private readonly lsService = inject(LocalStorageService);
+  private readonly logService = inject(LogService);
 
   /* Variables */
   imagePreview = signal<string | ArrayBuffer | null | undefined>(undefined);
@@ -88,9 +91,11 @@ export class UserCreateComponent implements OnInit {
   protected async addOrUpdateUser(): Promise<void> {
     await this.loaderService.executeImmediate(async () => {
       const userId = this.firebaseService.userFirebase()?.uid;
-      const userModelForm = this.signUpForm.getRawValue();
+      const userModelForm = trimFormValues(this.signUpForm.getRawValue());
       if (!userId) await this.addUser(userModelForm);
       else await this.updateUser(userId, userModelForm);
+
+      this.signUpForm.reset();
     });
   }
 
@@ -107,6 +112,9 @@ export class UserCreateComponent implements OnInit {
 
     /* Aggiunta utente a DB */
     await this.userService.addUserById(userCredential.user.uid, userModelForm, imageUrl);
+
+    /* Log */
+    this.logService.addLogConfirm('Utente registrato');
 
     /* Redirect */
     await this.router.navigate(['/login']);
@@ -129,5 +137,8 @@ export class UserCreateComponent implements OnInit {
       if (this.imageFile()) lsUser.props.imageUrl = imageUrl ?? null;
       this.lsService.setUser(lsUser);
     }
+
+    /* Log */
+    this.logService.addLogConfirm('Utente aggiornato');
   }
 }

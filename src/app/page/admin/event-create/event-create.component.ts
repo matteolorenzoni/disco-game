@@ -1,4 +1,4 @@
-import { CommonModule, formatDate } from '@angular/common';
+import { CommonModule, formatDate, Location } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, ParamMap } from '@angular/router';
@@ -9,12 +9,13 @@ import { EventModel, FromMap } from '../../../model/form.model';
 import { FirebaseDocumentService } from '../../../service/firebase-document.service';
 import { EventService } from '../../../service/event.service';
 import { StorageService } from '../../../service/storage.service';
-import { endDateValidator } from '../../../util/utils';
+import { endDateValidator, trimFormValues } from '../../../util/utils';
 import { FvFieldComponent } from '../../../components/fv-field.component';
 import { FvTextAeraComponent } from '../../../components/fv-text-area.component';
 import { FvButtonComponent } from '../../../components/fv-button.component';
 import { TitleComponent } from '../../../components/title/title.component';
 import { LoaderService } from '../../../service/loader.service';
+import { LogService } from '../../../service/log.service';
 
 const COL_EVENTS = environment.collection.EVENTS;
 
@@ -36,10 +37,12 @@ const COL_EVENTS = environment.collection.EVENTS;
 export class EventCreateComponent implements OnInit {
   /* Services */
   private readonly route = inject(ActivatedRoute);
+  private readonly location = inject(Location);
   private readonly firebaseDocumentService = inject(FirebaseDocumentService);
   protected readonly storageService = inject(StorageService);
   private readonly eventService = inject(EventService);
   private readonly loaderService = inject(LoaderService);
+  private readonly logService = inject(LogService);
 
   /* Variables */
   event = signal<Doc<Event> | undefined>(undefined);
@@ -107,9 +110,15 @@ export class EventCreateComponent implements OnInit {
 
     await this.loaderService.executeImmediate(async () => {
       const event = this.event();
-      const form = this.eventForm.getRawValue();
+      const form = trimFormValues(this.eventForm.getRawValue());
       if (event) {
         await this.eventService.updateEvent(event.id, form);
+
+        /* Torno indietro */
+        this.location.back();
+
+        /* Torno indietro */
+        this.logService.addLogConfirm('Evento aggiornato');
         return;
       }
 
@@ -121,6 +130,12 @@ export class EventCreateComponent implements OnInit {
 
       /* Creazione evento */
       await this.eventService.addEventById(eventId, form, imageUrl);
+
+      /* Torno indietro */
+      this.location.back();
+
+      /* Torno indietro */
+      this.logService.addLogConfirm('Evento aggiunto');
     });
   }
 }

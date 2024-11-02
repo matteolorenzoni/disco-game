@@ -4,7 +4,6 @@ import { environment } from '../../environments/environment';
 import { Event } from '../model/event.model';
 import { EventModel } from '../model/form.model';
 import { eventConverter } from '../model/converter';
-import { LogService } from './log.service';
 import { Doc } from '../model/firebase';
 import { generateUniqueCode } from '../util/utils';
 import { orderBy, where } from 'firebase/firestore';
@@ -18,7 +17,6 @@ const COL_EVENTS = environment.collection.EVENTS;
 export class EventService {
   /* Services */
   private readonly documentService = inject(FirebaseDocumentService);
-  private readonly logService = inject(LogService);
 
   /* --------------------------- Read ---------------------------*/
   //! [INDEX]
@@ -67,7 +65,6 @@ export class EventService {
       isActive: true,
       updatedAt: new Date()
     });
-    this.logService.addLogConfirm('Evento aggiunto');
     return docRef.id;
   }
 
@@ -78,7 +75,6 @@ export class EventService {
       startDate: new Date(form.startDate),
       endDate: new Date(form.endDate)
     });
-    this.logService.addLogConfirm('Evento aggiornato');
   }
 
   public async updateEventImageUrl(eventId: string, imageUrl: string): Promise<void> {

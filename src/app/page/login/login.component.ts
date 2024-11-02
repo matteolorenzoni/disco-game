@@ -13,6 +13,7 @@ import { FvFieldIconComponent } from '../../components/fv-field-icon.component';
 import { FvButtonComponent } from '../../components/fv-button.component';
 import { LocalStorageService } from '../../service/local-storage.service';
 import { LoaderService } from '../../service/loader.service';
+import { trimFormValues } from '../../util/utils';
 
 @Component({
   selector: 'app-login',
@@ -61,9 +62,11 @@ export class LoginComponent {
     if (this.loginForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
 
     await this.loaderService.executeImmediate(async () => {
-      const form = this.loginForm.getRawValue();
+      const form = trimFormValues(this.loginForm.getRawValue());
       const userCredentials = await this.firebaseService.logIn(form, this.rememberMe());
       const user = await this.userService.getUserById(userCredentials.user.uid);
+
+      /* Aggiorno local storage */
       this.lsService.setUser(user);
 
       switch (user?.props.role) {

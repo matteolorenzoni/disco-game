@@ -1,3 +1,4 @@
+import { trimFormValues } from './../../../util/utils';
 import { CommonModule, formatDate } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -132,7 +133,7 @@ export class EventChallengeComponent implements OnInit {
     if (this.eventChallengeForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
 
     await this.loaderService.executeImmediate(async () => {
-      const form = this.eventChallengeForm.getRawValue();
+      const form = trimFormValues(this.eventChallengeForm.getRawValue());
       const eventChallengeSelected = this.eventChallengeSelected();
       if (!eventChallengeSelected) {
         /* Aggiorno db */

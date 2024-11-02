@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { AbstractControl, ValidatorFn } from '@angular/forms';
 
 // Definire una funzione di validatore personalizzata per garantire che la data di fine sia dopo la data di inizio
@@ -42,4 +43,26 @@ export const generateUniqueCode = async <T>(
 
   // Riprova con un numero di tentativi decrescente
   return generateUniqueCode(length, attempts - 1, checkUserExistence);
+};
+
+export const trimFormValues = <T extends Record<string, any>>(form: T): T => {
+  const trimmedValues: Record<string, any> = {};
+
+  // Itera sulle chiavi dell'oggetto
+  Object.keys(form).forEach((key) => {
+    const value = form[key];
+
+    if (typeof value === 'string') {
+      // Se il valore è una stringa, applica trim
+      trimmedValues[key] = value.trim();
+    } else if (value && typeof value === 'object' && !Array.isArray(value)) {
+      // Se il valore è un oggetto, chiama ricorsivamente la funzione
+      trimmedValues[key] = trimFormValues(value);
+    } else {
+      // Altrimenti, mantieni il valore originale
+      trimmedValues[key] = value;
+    }
+  });
+
+  return trimmedValues as T; // Cast finale a T
 };
