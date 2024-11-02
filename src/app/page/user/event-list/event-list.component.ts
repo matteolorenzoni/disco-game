@@ -144,6 +144,12 @@ export class EventListComponent implements OnInit {
         return;
       }
 
+      /* Controllo se la squadra ha raggiunto il limite di 10 membri */
+      if (team.props.userIds.length >= 10) {
+        this.logService.addLogErrorApp('Squadra al completo (10 membri)');
+        return;
+      }
+
       /* Aggiungo user al team */
       await this.teamService.updateUsers(team, user);
 
