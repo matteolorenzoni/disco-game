@@ -23,8 +23,12 @@ export class LoaderService {
       await toExecute();
     } finally {
       clearTimeout(timeout);
-      this.isLoaderVisible.set(false);
-      this.hasRefreshButton.set(false);
+
+      // Nascondi il loader solo se è stato visualizzato
+      if (this.isLoaderVisible()) {
+        this.isLoaderVisible.set(false);
+        this.hasRefreshButton.set(false);
+      }
     }
   }
 

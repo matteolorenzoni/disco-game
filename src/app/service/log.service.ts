@@ -108,8 +108,8 @@ export class LogService {
     console.log('[ERROR]', userId, errorMessageDebug);
   }
 
-  public addLogErrorApp(message: string): void {
-    this.addLog(LogType.ERROR, message, true);
+  public addLogErrorApp(message: string, hide = true): void {
+    this.addLog(LogType.ERROR, message, hide);
   }
 
   /* ------------------ Utils ------------------ */

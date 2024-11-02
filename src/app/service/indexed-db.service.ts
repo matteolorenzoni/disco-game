@@ -18,9 +18,18 @@ interface FvDB1 extends DBSchema {
   challenges: { key: string; value: MergeChallenge };
   leaderboard: { key: string; value: IndexDB<Team> };
   'admin-challenges': { key: string; value: IndexDB<Challenge> };
+  'scanner-event': { key: string; value: IndexDB<Event> };
+  'scanner-challenges': { key: string; value: MergeChallenge };
 }
 
-type ObjectKey = 'events' | 'teams' | 'challenges' | 'leaderboard' | 'admin-challenges';
+type ObjectKey =
+  | 'events'
+  | 'teams'
+  | 'challenges'
+  | 'leaderboard'
+  | 'admin-challenges'
+  | 'scanner-event'
+  | 'scanner-challenges';
 
 @Injectable({
   providedIn: 'root'
@@ -49,6 +58,12 @@ export class IndexedDbService {
         }
         if (!db.objectStoreNames.contains('admin-challenges')) {
           db.createObjectStore('admin-challenges', { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('scanner-event')) {
+          db.createObjectStore('scanner-event', { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('scanner-challenges')) {
+          db.createObjectStore('scanner-challenges', { keyPath: 'id' });
         }
       }
     });
@@ -175,6 +190,7 @@ export class IndexedDbService {
       return;
     }
 
+    /* Salvo i nuovi items */
     const indexedDbItems = items.map((x) => ({ id: x.id, ...x.props }));
     await this.saveItems('teams', indexedDbItems);
 
@@ -210,11 +226,7 @@ export class IndexedDbService {
     }
 
     /* Elimino tutti gli item */
-    const challenges = await this.getChallenges();
-    this.deleteItems(
-      'challenges',
-      challenges.map((item) => item.id)
-    );
+    await this.clearStore('challenges');
 
     /* Salvo i nuovi items */
     await this.saveItems('challenges', items);
@@ -234,21 +246,18 @@ export class IndexedDbService {
       return;
     }
 
+    /* Salvo i nuovi items */
     const indexedDbItems = items.map((x) => ({ id: x.id, ...x.props }));
     await this.saveItems('leaderboard', indexedDbItems);
 
     /* Elimino item scaduti */
-    const leaderboard = await this.getLeaderboard();
+    const dbLeaderboard = await this.getAllItems<Team>('leaderboard');
+    const leaderboard = dbLeaderboard.map(({ id, ...props }) => ({ id, props }));
     const teamsToDelete = leaderboard.filter((x) => x.props.eventStartDate < dateYesterday());
     this.deleteItems(
       'leaderboard',
       teamsToDelete.map((item) => item.id)
     );
-  }
-
-  private async getLeaderboard(): Promise<Doc<Team>[]> {
-    const dbLeaderboard = await this.getAllItems<Team>('leaderboard');
-    return dbLeaderboard.map(({ id, ...props }) => ({ id, props }));
   }
 
   public async getLeaderboardByEventId(eventId: string): Promise<Doc<Team>[]> {
@@ -263,12 +272,14 @@ export class IndexedDbService {
 
   /* ---------------------------------- Admin ---------------------------------- */
   public async saveAdminChallenges(items: Doc<Challenge>[]): Promise<void> {
+    /* Se l'array è vuoto allora elimino tutti elementi (per gestione su piu dispositivi) */
+    if (items.length === 0) {
+      this.clearStore('leaderboard');
+      return;
+    }
+
     /* Elimino tutti gli items */
-    const challenges = await this.getAdminChallenges();
-    this.deleteItems(
-      'admin-challenges',
-      challenges.map((item) => item.id)
-    );
+    await this.clearStore('admin-challenges');
 
     /* Salvo i nuovi items */
     const indexedDbItems = items.map((x) => ({ id: x.id, ...x.props }));
@@ -279,5 +290,51 @@ export class IndexedDbService {
     const dbChallenges = await this.getAllItems<Challenge>('admin-challenges');
     dbChallenges.sort((a, b) => a.name.localeCompare(b.name));
     return dbChallenges.map(({ id, ...props }) => ({ id, props }));
+  }
+
+  /* ---------------------------------- Scanner ---------------------------------- */
+  public async saveScannerEvent(item: Doc<Event>): Promise<void> {
+    /* Elimino tutti gli items */
+    await this.clearStore('scanner-event');
+
+    /* Salvo i nuovi items */
+    const indexedDbItem = { id: item.id, ...item.props };
+    await this.saveItems('scanner-event', [indexedDbItem]);
+  }
+
+  public async getScannerEvent(): Promise<Doc<Event> | null> {
+    const dbEvents = await this.getAllItems<Event>('scanner-event');
+    if (dbEvents.length !== 1) return null;
+
+    const { id, ...props } = dbEvents[0];
+    return { id, props };
+  }
+
+  public async deleteScannerEvent(): Promise<void> {
+    await this.clearStore('scanner-event');
+  }
+
+  public async saveScannerChallenges(items: MergeChallenge[]): Promise<void> {
+    /* Se l'array è vuoto allora elimino tutti elementi (per gestione su piu dispositivi) */
+    if (items.length === 0) {
+      this.clearStore('scanner-challenges');
+      return;
+    }
+
+    /* Elimino tutti gli item */
+    await this.clearStore('scanner-challenges');
+
+    /* Salvo i nuovi items */
+    await this.saveItems('scanner-challenges', items);
+  }
+
+  public async getScannerChallenges(): Promise<MergeChallenge[]> {
+    const dbChallenges = await this.getAllItems<MergeChallenge>('scanner-challenges');
+    dbChallenges.sort((a, b) => a.name.localeCompare(b.name));
+    return dbChallenges;
+  }
+
+  public async deleteScannerChallenges(): Promise<void> {
+    await this.clearStore('scanner-challenges');
   }
 }

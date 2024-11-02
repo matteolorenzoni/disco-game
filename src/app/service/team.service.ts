@@ -43,11 +43,7 @@ export class TeamService {
   }
 
   public async getActiveTeamByUserAndEventId(userId: string, eventId: string): Promise<Doc<Team> | null> {
-    const valueConstraints = [
-      where('eventId', '==', eventId),
-      where('userIds', 'array-contains', userId),
-      where('eventStartDate', '>=', dateYesterday())
-    ];
+    const valueConstraints = [where('eventId', '==', eventId), where('userIds', 'array-contains', userId)];
     const teams = await this.documentService.getDocumentsWithConstraints<Team>(
       COL_TEAMS,
       valueConstraints,

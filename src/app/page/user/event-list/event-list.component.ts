@@ -207,6 +207,6 @@ export class EventListComponent implements OnInit {
     /* Aggiorno lista e indexedDb */
     const newTeam = await this.teamService.getTeamById(teamId);
     this.dbService.saveTeams([newTeam]);
-    this.initIndexedDb();
+    await this.initIndexedDb();
   }
 }

@@ -3,16 +3,12 @@ import { AES, enc } from 'crypto-js';
 import { environment } from '../../environments/environment';
 import { Doc } from '../model/firebase';
 import { User } from '../model/user.model';
-import { Event } from '../model/event.model';
-import { Challenge } from '../model/challenge.model';
 
 const PREFIX = 'FV';
 
 const KEY_USER = 'USER';
 const KEY_USER_DASHBOARD_TEAM_ID = 'USER_TEAM_ID';
-const KEY_SCANNER_EVENT = 'SCANNER_EVENT';
 const KEY_SCANNER_DEVICE_ID = 'SCANNER_DEVICE_ID';
-const KEY_SCANNER_CHALLENGES = 'SCANNER_CHALLENGES';
 
 @Injectable({
   providedIn: 'root'
@@ -108,7 +104,7 @@ export class LocalStorageService {
   }
 
   /* ------------------------------ Method app  ------------------------------ */
-  /* User */
+  /* ------------------------- User ------------------------- */
   public getUser(): Doc<User> | null {
     const stringValue = this.getItem(KEY_USER, true);
     if (!stringValue) return null;
@@ -123,7 +119,7 @@ export class LocalStorageService {
     return this.removeItem(KEY_USER);
   }
 
-  /* User dashboard */
+  /* ------------------------- User dashboard ------------------------- */
   public getUserDashboardTeamId(): string | null | undefined {
     return this.getItem(KEY_USER_DASHBOARD_TEAM_ID);
   }
@@ -136,21 +132,7 @@ export class LocalStorageService {
     return this.removeItem(KEY_USER_DASHBOARD_TEAM_ID);
   }
 
-  /* Scanner */
-  public getScannerEvent(): Doc<Event> | null | undefined {
-    const stringValue = this.getItem(KEY_SCANNER_EVENT);
-    if (!stringValue) return null;
-    return JSON.parse(stringValue) as Doc<Event>;
-  }
-
-  public setScannerEvent(event: Doc<Event>): void {
-    this.setItem<Doc<Event>>(KEY_SCANNER_EVENT, event);
-  }
-
-  public removeScannerEvent(): void {
-    return this.removeItem(KEY_SCANNER_EVENT);
-  }
-
+  /* ------------------------- Scanner ------------------------- */
   public getScannerDeviceId(): string | null | undefined {
     return this.getItem(KEY_SCANNER_DEVICE_ID);
   }
@@ -161,19 +143,5 @@ export class LocalStorageService {
 
   public removeScannerDeviceId(): void {
     return this.removeItem(KEY_SCANNER_DEVICE_ID);
-  }
-
-  public getScannerChallenges(): Doc<Challenge>[] {
-    const stringValue = this.getItem(KEY_SCANNER_CHALLENGES);
-    if (!stringValue) return [];
-    return JSON.parse(stringValue) as Doc<Challenge>[];
-  }
-
-  public setScannerChallenges(challenges: Doc<Challenge>[]): void {
-    this.setItem<Doc<Challenge>[]>(KEY_SCANNER_CHALLENGES, challenges);
-  }
-
-  public removeScannerChallenges(): void {
-    return this.removeItem(KEY_SCANNER_CHALLENGES);
   }
 }

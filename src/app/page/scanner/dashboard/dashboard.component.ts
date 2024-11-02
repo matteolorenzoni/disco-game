@@ -19,12 +19,13 @@ import { EventChallengeService } from '../../../service/event-challenge.service'
 import { UserService } from '../../../service/user.service';
 import { Event } from '../../../model/event.model';
 import { Doc } from '../../../model/firebase';
-import { Qrcode } from '../../../model/event-challenge.model';
-import { Challenge } from '../../../model/challenge.model';
+import { ChallengeStatus, Qrcode } from '../../../model/event-challenge.model';
 import { isEqualQrcode, isQrcode } from '../../../util/type.util';
 import { Team } from '../../../model/team.model';
 import { LoaderService } from '../../../service/loader.service';
 import { trimFormValues } from '../../../util/utils';
+import { IndexedDbService } from '../../../service/indexed-db.service';
+import { MergeChallenge, mergeChallenges } from '../../../util/merge.util';
 
 type ScanError = {
   message: string;
@@ -56,13 +57,14 @@ export class DashboardComponent implements OnInit {
   private readonly challengeService = inject(ChallengeService);
   private readonly eventChallengeService = inject(EventChallengeService);
   private readonly lsService = inject(LocalStorageService);
+  private readonly dbService = inject(IndexedDbService);
   private readonly loaderService = inject(LoaderService);
   private readonly logService = inject(LogService);
 
   /* Variables */
-  event = signal<Doc<Event> | undefined>(undefined);
-  challenges = signal<Doc<Challenge>[]>(this.lsService.getScannerChallenges());
-  lasQrcode = signal<Qrcode | undefined>(undefined);
+  event = signal<Doc<Event> | null | undefined>(undefined);
+  mergeChallenges = signal<MergeChallenge[]>([]);
+  lastQrcode = signal<Qrcode | undefined>(undefined);
 
   /* Variables camera*/
   errorMessage = signal<'NO_CAMERA' | 'NO_PERMISSION' | null | undefined>(undefined);
@@ -92,12 +94,37 @@ export class DashboardComponent implements OnInit {
 
   /* --------------------- Lifecycle hooks --------------------- */
   async ngOnInit(): Promise<void> {
-    this.initIndexedDB();
-
     await this.initCamera();
+
+    await this.initIndexedDB();
+
+    if (!this.mergeChallenges().length) {
+      await this.initHttp();
+    }
   }
 
   /* -------------------------- Methods initialization --------------------------  */
+  private async initIndexedDB() {
+    /* Recupera l'evento se è già stato cercato */
+    const dbEvent = await this.dbService.getScannerEvent();
+    this.event.set(dbEvent);
+
+    /* Recupera le sfide se presenti */
+    const mergeChallenges = await this.dbService.getScannerChallenges();
+    this.mergeChallenges.set(mergeChallenges);
+  }
+
+  private async initHttp() {
+    await this.loaderService.executeWithDelay(async () => {
+      /* Recupera le sfide per verificare che non superino il numero massimo di tentativi */
+      const mergeChallenges = await this.getMergedChallenges();
+      this.mergeChallenges.set(mergeChallenges);
+
+      /* Aggiorno indexedDB */
+      this.dbService.saveScannerChallenges(mergeChallenges);
+    });
+  }
+
   private async initCamera() {
     await this.loaderService.executeWithDelay(async () => {
       /* Verifico se il dispositivo supporta la camera */
@@ -120,12 +147,6 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  private async initIndexedDB() {
-    /* Recupera l'evento se è già stato cercato */
-    const lsEvent = this.lsService.getScannerEvent();
-    this.event.set(lsEvent ?? undefined);
-  }
-
   /* --------------------- Method: firebase --------------------- */
   protected async onGetEvent(): Promise<void> {
     if (this.eventForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
@@ -135,28 +156,31 @@ export class DashboardComponent implements OnInit {
       const form = trimFormValues(this.eventForm.getRawValue());
       const event = await this.eventService.getEventByCode(form.code);
       if (!event) {
-        this.logService.addLogErrorApp('Nessuna evento trovato');
+        this.logService.addLogErrorApp('Nessuna evento trovato', false);
         return;
       }
 
       /* Memorizzo evento su locals storage */
       this.event.set(event);
-      this.lsService.setScannerEvent(event);
+      await this.dbService.saveScannerEvent(event);
 
+      /* Reset form */
       this.eventForm.reset();
+
+      /* Log */
+      this.logService.addLogConfirm('Evento trovato');
     });
   }
 
   protected async onGetChallenges(): Promise<void> {
     await this.loaderService.executeImmediate(async () => {
-      const eventChallenges = await this.eventChallengeService.getEventChallengesByProp([
-        { key: 'eventId', value: this.event()!.id }
-      ]);
-      const challenges = await this.challengeService.getChallengesByIds(
-        eventChallenges.map((x) => x.props.challengeId)
-      );
-      this.challenges.set(challenges);
-      this.lsService.setScannerChallenges(challenges);
+      const mergeChallenges = await this.getMergedChallenges();
+      this.mergeChallenges.set(mergeChallenges);
+
+      /* Aggiorno indexedDB */
+      this.dbService.saveScannerChallenges(mergeChallenges);
+
+      /* Log */
       this.logService.addLogConfirm('Sfide aggiornate');
     });
   }
@@ -166,17 +190,17 @@ export class DashboardComponent implements OnInit {
       /* Verifico che sia il qrcode giusto */
       const qrcode = JSON.parse(result);
       if (!isQrcode(qrcode)) {
-        this.logService.addLogErrorApp('Qrcode non supportato, applicazione errata');
+        this.logService.addLogErrorApp('Qrcode non supportato', false);
         return;
       }
 
       /* Verifico che non sia lo stesso qrcode precedente */
-      if (isEqualQrcode(qrcode, this.lasQrcode())) return;
+      if (isEqualQrcode(qrcode, this.lastQrcode())) return;
 
       /* Cerco prima se l'user ha una squadra per questo evento */
       const team = await this.teamService.getTeamById(qrcode.teamId);
       if (!team) {
-        this.logService.addLogErrorApp("Squadra non trovata, l'utente non partecipa all'evento");
+        this.logService.addLogErrorApp("Squadra non trovata, l'utente non partecipa all'evento", false);
         return;
       }
 
@@ -192,14 +216,14 @@ export class DashboardComponent implements OnInit {
       /* Ottengo l'user */
       const user = await this.userService.getUserByCode(userCode);
       if (!user) {
-        this.logService.addLogErrorApp('Utente non trovato');
+        this.logService.addLogErrorApp('Utente non trovato', false);
         return;
       }
 
       /* Cerco prima se l'user ha una squadra per questo evento */
       const team = await this.teamService.getActiveTeamByUserAndEventId(user.id, eventId);
       if (!team) {
-        this.logService.addLogErrorApp("Squadra non trovata, l'utente non partecipa all'evento");
+        this.logService.addLogErrorApp("Squadra non trovata, l'utente non partecipa all'evento", false);
         return;
       }
 
@@ -208,7 +232,7 @@ export class DashboardComponent implements OnInit {
         teamId: team.id,
         userId: user.id,
         challengeId,
-        points: this.challenges().find((x) => x.id === challengeId)!.props.points
+        points: this.mergeChallenges().find((x) => x.id === challengeId)!.points
       };
       await this.scan(qrcode, team);
 
@@ -217,21 +241,55 @@ export class DashboardComponent implements OnInit {
   }
 
   /* --------------------- Method event --------------------- */
-  protected onRemoveEvent(): void {
+  protected async onRemoveEvent(): Promise<void> {
     this.event.set(undefined);
-    this.lsService.removeScannerEvent();
+    await this.dbService.deleteScannerEvent();
+    await this.dbService.deleteScannerChallenges();
   }
 
   /* --------------------- Method util --------------------- */
   protected async scan(qrcode: Qrcode, team: Doc<Team>): Promise<void> {
     /* Memorizzo il qrcode per impedire piu scan con lo stesso valore */
-    this.lasQrcode.set(qrcode);
+    this.lastQrcode.set(qrcode);
+
+    /* Controllo presenza della sfida */
+    const mergeChallenge = this.mergeChallenges().find((x) => x.id === qrcode.challengeId);
+    if (!mergeChallenge) {
+      this.logService.addLogErrorApp('Sfida non trovata, aggiornare le sfide e riprovare', false);
+      return;
+    }
+
+    /* Controllo che la sfida sia attiva */
+    if (mergeChallenge.status !== ChallengeStatus.ACTIVE) {
+      this.logService.addLogErrorApp('Sfida non attiva (disabilitata dagli admin)', false);
+      return;
+    }
+
+    /* Controllo che la sfida può essere eseguita (massimo numero di volte) */
+    if (mergeChallenge.maxTimes !== null) {
+      const user = team.props.users.find((x) => x.id === qrcode.userId);
+      if (user) {
+        const userChallenge = user.challenges.find((x) => x.id === qrcode.challengeId);
+        if (userChallenge && userChallenge.timestamps.length >= mergeChallenge.maxTimes) {
+          this.logService.addLogErrorApp('Raggiunto limite massimo di tentativi per questa sfida', false);
+          return;
+        }
+      }
+    }
 
     /* Aggiorno il punteggio totale di squadra e del singolo user */
     await this.teamService.updatePoints(team, qrcode.userId, qrcode.challengeId, qrcode.points);
 
     /* log */
     this.logService.addLogConfirm('Sfida confermata');
+  }
+
+  protected async getMergedChallenges(): Promise<MergeChallenge[]> {
+    const eventChallenges = await this.eventChallengeService.getEventChallengesByProp([
+      { key: 'eventId', value: this.event()!.id }
+    ]);
+    const challenges = await this.challengeService.getChallengesByIds(eventChallenges.map((x) => x.props.challengeId));
+    return mergeChallenges(challenges, eventChallenges);
   }
 
   /* --------------------- Method camera --------------------- */
