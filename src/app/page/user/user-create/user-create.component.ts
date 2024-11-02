@@ -44,10 +44,7 @@ export class UserCreateComponent implements OnInit {
   signUpForm = new FormGroup<FromMap<UserModel>>({
     name: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     lastName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    userName: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required, Validators.minLength(6)]
-    }),
+    userName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     // birthDate: new FormControl('', {
     //   nonNullable: true,
     //   validators: [Validators.required]
@@ -86,6 +83,8 @@ export class UserCreateComponent implements OnInit {
 
   /* ------------------------------- Methods: firebase ------------------------------- */
   protected async addOrUpdateUser(): Promise<void> {
+    if (this.signUpForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
+
     await this.loaderService.executeImmediate(async () => {
       const userId = this.firebaseService.userFirebase()?.uid;
       const userModelForm = trimFormValues(this.signUpForm.getRawValue());

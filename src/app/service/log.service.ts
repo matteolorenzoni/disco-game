@@ -39,7 +39,7 @@ const ERROR_FIREBASE: Record<string, string> = {
 
 const ERROR_CUSTOM: Record<string, string> = {
   retry: 'Si è verificato un errore. Riprova più tardi. Se il problema persiste, contatta il supporto.',
-  formNotValid: 'I valori inseriti non sono validi. Controlla i campi evidenziati e riprova.',
+  formNotValid: 'I valori inseriti non sono validi. Compilare tutti i campi obbligatori e riprovare.',
   noUserDocument:
     "L'utente registrato è stato trovato, ma non esiste un documento associato. Contatta il supporto per assistenza.",
   noDocument: 'Documento non trovato. Contatta il supporto per assistenza.',
@@ -81,7 +81,7 @@ export class LogService {
     } else if (error instanceof Error) {
       if (error.cause && typeof error.cause === 'string') {
         errorMessageDebug = ERROR_CUSTOM[error.cause] || ERROR_UNKNOWN;
-        errorMessageLog = ERROR_FIREBASE[error.cause] || ERROR_UNKNOWN;
+        errorMessageLog = ERROR_CUSTOM[error.cause] || ERROR_UNKNOWN;
       } else {
         errorMessageDebug = error.message;
       }
