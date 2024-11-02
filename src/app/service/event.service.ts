@@ -8,6 +8,7 @@ import { Doc } from '../model/firebase';
 import { generateUniqueCode } from '../util/utils';
 import { orderBy, where } from 'firebase/firestore';
 import { dateYesterday } from '../util/type.util';
+import { StorageService } from './storage.service';
 
 const COL_EVENTS = environment.collection.EVENTS;
 
@@ -17,6 +18,7 @@ const COL_EVENTS = environment.collection.EVENTS;
 export class EventService {
   /* Services */
   private readonly documentService = inject(FirebaseDocumentService);
+  protected readonly storageService = inject(StorageService);
 
   /* --------------------------- Read ---------------------------*/
   //! [INDEX]
@@ -51,7 +53,11 @@ export class EventService {
   }
 
   /* --------------------------- Create ---------------------------*/
-  public async addEventById(eventId: string, form: EventModel, imageUrl: string): Promise<string> {
+  public createEventId(): string {
+    return this.documentService.createDocId(COL_EVENTS);
+  }
+
+  public async addEvent(eventId: string, form: EventModel, imageUrl: string): Promise<string> {
     /* Check codice univoco */
     const code = await generateUniqueCode(6, 100, this.getEventByCode.bind(this));
 
@@ -66,6 +72,10 @@ export class EventService {
       updatedAt: new Date()
     });
     return docRef.id;
+  }
+
+  public async addEventImage(image: File, name: string) {
+    return await this.storageService.saveImage(image, COL_EVENTS, name);
   }
 
   /* --------------------------- Update ---------------------------*/

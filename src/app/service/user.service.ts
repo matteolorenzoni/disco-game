@@ -7,6 +7,7 @@ import { UserModel } from '../model/form.model';
 import { userConverter } from '../model/converter';
 import { FirebaseDocumentService } from './firebase-document.service';
 import { generateUniqueCode } from '../util/utils';
+import { StorageService } from './storage.service';
 
 const COL_USERS = environment.collection.USERS;
 
@@ -16,6 +17,7 @@ const COL_USERS = environment.collection.USERS;
 export class UserService {
   /* Services */
   private readonly documentService = inject(FirebaseDocumentService);
+  protected readonly storageService = inject(StorageService);
 
   /* --------------------------- Read ---------------------------*/
   public async getUserById(userId: string): Promise<Doc<User>> {
@@ -45,7 +47,7 @@ export class UserService {
   }
 
   /* --------------------------- Create ---------------------------*/
-  public async addUserById(userId: string, userModelForm: UserModel, imageUrl: string | null): Promise<void> {
+  public async addUser(userId: string, userModelForm: UserModel, imageUrl: string | null): Promise<void> {
     /* Check user name univoco */
     const user = await this.getUserByUsername(userModelForm.userName);
     if (user) throw new Error('usernameNotAvailable', { cause: 'usernameNotAvailable' });
@@ -67,6 +69,10 @@ export class UserService {
     });
   }
 
+  public async addUserImage(image: File, name: string) {
+    return await this.storageService.saveImage(image, COL_USERS, name);
+  }
+
   /* --------------------------- Update ---------------------------*/
   public async updateUser(
     userId: string,
@@ -76,6 +82,10 @@ export class UserService {
     const form: Partial<User> = { ...userModelForm, updatedAt: new Date() };
     if (imageUrl !== undefined) form.imageUrl = imageUrl;
     await this.documentService.updateDocument<User>(userId, COL_USERS, form);
+  }
+
+  public async updateUserImage(image: File, name: string) {
+    return await this.storageService.updateImage(image, COL_USERS, name);
   }
 
   public async updateEventsAndTeams(

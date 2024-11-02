@@ -2,13 +2,10 @@ import { CommonModule, formatDate, Location } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, ParamMap } from '@angular/router';
-import { environment } from '../../../../environments/environment';
 import { Doc } from '../../../model/firebase';
-import { Event } from '../../../model/event.model';
+import { Event as FvEvent } from '../../../model/event.model';
 import { EventModel, FromMap } from '../../../model/form.model';
-import { FirebaseDocumentService } from '../../../service/firebase-document.service';
 import { EventService } from '../../../service/event.service';
-import { StorageService } from '../../../service/storage.service';
 import { endDateValidator, trimFormValues } from '../../../util/utils';
 import { FvFieldComponent } from '../../../components/fv-field.component';
 import { FvTextAeraComponent } from '../../../components/fv-text-area.component';
@@ -16,8 +13,7 @@ import { FvButtonComponent } from '../../../components/fv-button.component';
 import { TitleComponent } from '../../../components/title/title.component';
 import { LoaderService } from '../../../service/loader.service';
 import { LogService } from '../../../service/log.service';
-
-const COL_EVENTS = environment.collection.EVENTS;
+import { StorageService } from '../../../service/storage.service';
 
 @Component({
   selector: 'app-event-create',
@@ -38,14 +34,13 @@ export class EventCreateComponent implements OnInit {
   /* Services */
   private readonly route = inject(ActivatedRoute);
   private readonly location = inject(Location);
-  private readonly firebaseDocumentService = inject(FirebaseDocumentService);
-  protected readonly storageService = inject(StorageService);
+  private readonly storageService = inject(StorageService);
   private readonly eventService = inject(EventService);
   private readonly loaderService = inject(LoaderService);
   private readonly logService = inject(LogService);
 
   /* Variables */
-  event = signal<Doc<Event> | undefined>(undefined);
+  event = signal<Doc<FvEvent> | undefined>(undefined);
   imagePreview = signal<string | ArrayBuffer | undefined>(undefined);
   imageFile = signal<File | undefined>(undefined);
 
@@ -104,7 +99,7 @@ export class EventCreateComponent implements OnInit {
     });
   }
 
-  /* ------------------------ Methods ------------------------ */
+  /* ------------------------ Methods: firebase ------------------------ */
   protected async addOrUpdateEvent(): Promise<void> {
     if (this.eventForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
 
@@ -123,19 +118,24 @@ export class EventCreateComponent implements OnInit {
       }
 
       /* Creo id documento */
-      const eventId = this.firebaseDocumentService.createDocId(COL_EVENTS);
+      const eventId = this.eventService.createEventId();
 
       /* Creo immagine */
-      const imageUrl = await this.storageService.saveImage(this.imageFile()!, COL_EVENTS, eventId);
+      const imageUrl = await this.eventService.addEventImage(this.imageFile()!, eventId);
 
       /* Creazione evento */
-      await this.eventService.addEventById(eventId, form, imageUrl);
+      await this.eventService.addEvent(eventId, form, imageUrl);
 
       /* Torno indietro */
       this.location.back();
 
-      /* Torno indietro */
+      /* Log */
       this.logService.addLogConfirm('Evento aggiunto');
     });
+  }
+
+  /* ------------------------------- Methods: event ------------------------------- */
+  protected onImageChange(event: Event) {
+    this.storageService.onImageChange(event, this.imagePreview, this.imageFile);
   }
 }

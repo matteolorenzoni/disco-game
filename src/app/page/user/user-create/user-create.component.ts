@@ -8,15 +8,12 @@ import { FromMap, UserModel } from '../../../model/form.model';
 import { FirebaseService } from '../../../service/firebase.service';
 import { StorageService } from '../../../service/storage.service';
 import { UserService } from '../../../service/user.service';
-import { environment } from '../../../../environments/environment';
 import { FvFieldComponent } from '../../../components/fv-field.component';
 import { FvButtonComponent } from '../../../components/fv-button.component';
 import { LocalStorageService } from '../../../service/local-storage.service';
 import { LoaderService } from '../../../service/loader.service';
 import { LogService } from '../../../service/log.service';
 import { trimFormValues } from '../../../util/utils';
-
-const COL_USERS = environment.collection.USERS;
 
 @Component({
   selector: 'app-user-create',
@@ -30,7 +27,7 @@ export class UserCreateComponent implements OnInit {
   /* Services */
   private readonly router = inject(Router);
   protected readonly firebaseService = inject(FirebaseService);
-  protected readonly storageService = inject(StorageService);
+  private readonly storageService = inject(StorageService);
   private readonly userService = inject(UserService);
   private readonly loaderService = inject(LoaderService);
   private readonly lsService = inject(LocalStorageService);
@@ -99,6 +96,11 @@ export class UserCreateComponent implements OnInit {
     });
   }
 
+  /* ------------------------------- Methods: event ------------------------------- */
+  protected onImageChange(event: Event) {
+    this.storageService.onImageChange(event, this.imagePreview, this.imageFile);
+  }
+
   /* ------------------------------- Methods: util ------------------------------- */
   private async addUser(userModelForm: UserModel): Promise<void> {
     /* Creazione utente */
@@ -107,11 +109,11 @@ export class UserCreateComponent implements OnInit {
     /* Creazione utente immagine */
     let imageUrl: string | null = null;
     if (this.imageFile()) {
-      imageUrl = await this.storageService.saveImage(this.imageFile()!, COL_USERS, userCredential.user.uid);
+      imageUrl = await this.userService.addUserImage(this.imageFile()!, userCredential.user.uid);
     }
 
     /* Aggiunta utente a DB */
-    await this.userService.addUserById(userCredential.user.uid, userModelForm, imageUrl);
+    await this.userService.addUser(userCredential.user.uid, userModelForm, imageUrl);
 
     /* Log */
     this.logService.addLogConfirm('Utente registrato');
@@ -124,7 +126,7 @@ export class UserCreateComponent implements OnInit {
     /* Aggiornamento utente immagine */
     let imageUrl: string | null | undefined;
     if (this.imageFile()) {
-      imageUrl = await this.storageService.updateImage(this.imageFile()!, COL_USERS, userId);
+      imageUrl = await this.userService.updateUserImage(this.imageFile()!, userId);
     }
 
     /* Creazione utente */
