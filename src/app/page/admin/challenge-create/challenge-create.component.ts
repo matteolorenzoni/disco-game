@@ -15,6 +15,8 @@ import { TitleComponent } from '../../../components/title/title.component';
 import ChallengeTypes from './challenge-type.config.json';
 import { LoaderService } from '../../../service/loader.service';
 import { trimFormValues } from '../../../util/utils';
+import { EventChallengeService } from '../../../service/event-challenge.service';
+import { ChallengeStatus } from '../../../model/event-challenge.model';
 
 export type SelectOption = {
   label: string;
@@ -42,6 +44,7 @@ export class ChallengeCreateComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly location = inject(Location);
   private readonly challengeService = inject(ChallengeService);
+  private readonly eventChallengeService = inject(EventChallengeService);
   private readonly loaderService = inject(LoaderService);
   private readonly logService = inject(LogService);
 
@@ -125,13 +128,31 @@ export class ChallengeCreateComponent implements OnInit {
     });
   }
 
-  protected async deleteChallenge(eventChallengeId: string): Promise<void> {
+  protected async deleteChallenge(challengeId: string): Promise<void> {
     const userConfirm = confirm('Sei sicuro di voler eliminare la sfida?');
     if (!userConfirm) return;
 
     await this.loaderService.executeImmediate(async () => {
-      /* Elimino il documento */
-      await this.challengeService.softDeleteChallenge(eventChallengeId);
+      /* Elimina la sfida */
+      await this.challengeService.softDeleteChallenge(challengeId);
+
+      /* Elimina tutti gli eventChallenge associati a quella sfida oppure li marco come ban (in base alla data di evento) */
+      const eventChallenges = await this.eventChallengeService.getEventChallengesByProp([
+        { key: 'challengeId', value: challengeId }
+      ]);
+      const mergeEventsSplitted = eventChallenges.reduce(
+        (acc, cur) => {
+          const target = cur.props.eventStartDate > new Date() ? 'futureIds' : 'pastIds';
+          acc[target].push(cur.id);
+          return acc;
+        },
+        { futureIds: [] as string[], pastIds: [] as string[] }
+      );
+      await this.eventChallengeService.deleteEventChallenges(mergeEventsSplitted.futureIds);
+      await this.eventChallengeService.updateEventChallengesStatus(
+        mergeEventsSplitted.pastIds,
+        ChallengeStatus.CHALLENGE_DELETED
+      );
 
       /* Torno indietro */
       this.location.back();

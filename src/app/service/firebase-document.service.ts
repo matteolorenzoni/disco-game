@@ -156,6 +156,23 @@ export class FirebaseDocumentService {
     });
   }
 
+  public async updateDocuments<T extends Record<string, any> & { updatedAt: Date }>(
+    ids: string[],
+    collectionName: string,
+    data: Partial<T>
+  ): Promise<void> {
+    const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
+    const updates = ids.map(async (id) => {
+      const docRef = doc(collectionRef, id);
+      return updateDoc(docRef, {
+        ...data,
+        updatedAt: new Date()
+      });
+    });
+
+    await Promise.all(updates);
+  }
+
   public async updateDocumentArray<T extends Record<string, any> & { updatedAt: Date }, K>(
     operation: 'ADD' | 'REMOVE',
     id: string,
@@ -176,5 +193,18 @@ export class FirebaseDocumentService {
     const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
     const docRef = doc(collectionRef, id);
     await deleteDoc(docRef);
+  }
+
+  public async deleteDocuments(ids: string[], collectionName: string): Promise<void> {
+    const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
+
+    // Creazione di un array di promesse per ogni eliminazione
+    const deletePromises = ids.map((id) => {
+      const docRef = doc(collectionRef, id);
+      return deleteDoc(docRef);
+    });
+
+    // Attendi il completamento di tutte le eliminazioni
+    await Promise.all(deletePromises);
   }
 }

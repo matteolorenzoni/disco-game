@@ -46,7 +46,10 @@
       [label]="challengeId() ? 'Aggiorna' : 'Salva'"
       [disabled]="challengeForm.invalid"></fv-button>
     @if (challengeId(); as challengeId) {
-      <button type="button" class="rounded bg-primary-700 px-2" (click)="deleteChallenge(challengeId)">
+      <button
+        type="button"
+        class="rounded border border-rose-800 px-2 text-rose-800 hover:bg-rose-900/25 active:bg-rose-900/50"
+        (click)="deleteChallenge(challengeId)">
         <fa-icon [icon]="ICON_TRASH"></fa-icon>
       </button>
     }

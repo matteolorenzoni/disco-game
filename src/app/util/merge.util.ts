@@ -7,9 +7,7 @@ import { Event } from '../model/event.model';
 export type MergeEvent = { id: string } & Pick<
   Event,
   'name' | 'description' | 'imageUrl' | 'location' | 'startDate'
-> & {
-    teamId: string | null;
-  };
+> & { teamId: string | null };
 
 export type MergeChallenge = { id: string } & Pick<
   Challenge,

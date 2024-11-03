@@ -6,6 +6,7 @@ import { ActivatedRoute, ParamMap } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import {
   faArrowsRotate,
+  faBan,
   faCalendar,
   faClock,
   faInfinity,
@@ -64,7 +65,6 @@ export class EventChallengeComponent implements OnInit {
   private readonly logService = inject(LogService);
 
   /* Variables */
-  eventId = signal<string | undefined>(undefined);
   event = signal<Doc<Event> | undefined>(undefined);
   challenges = signal<Doc<Challenge>[]>([]);
   eventChallenges = signal<Doc<EventChallenge>[]>([]);
@@ -76,6 +76,9 @@ export class EventChallengeComponent implements OnInit {
   OPTIONS = EventChallengeStatus as SelectOption<ChallengeStatus>[];
   NOW = new Date();
 
+  /* Enum */
+  CHALLENGE_STATUS = ChallengeStatus;
+
   /* Icons */
   ICON_STATUS = faMobileScreenButton;
   ICON_CALENDAR = faCalendar;
@@ -84,7 +87,8 @@ export class EventChallengeComponent implements OnInit {
     ACTIVE: faPlay,
     LOCKED: faLock,
     CANCELED: faTrash,
-    SUSPENDED: faPause
+    SUSPENDED: faPause,
+    CHALLENGE_DELETED: faBan
   };
   ICON_INFINITY = faInfinity;
   ICON_TRASH = faTrash;
@@ -122,10 +126,9 @@ export class EventChallengeComponent implements OnInit {
     await this.loaderService.executeWithDelay(async () => {
       // Recupera l'ID dell'evento dalla route
       const eventId = params.get('eventId');
-      this.eventId.set(eventId ?? undefined);
       if (!eventId) throw new Error('retry', { cause: 'retry' });
 
-      /* Ottengo le sfide che fanno parte dell'evento */
+      /* Ottengo l'evento e le sfide che fanno parte */
       const [event, eventChallenges] = await Promise.all([
         this.eventService.getEventById(eventId),
         this.eventChallengeService.getEventChallengesByProp([{ key: 'eventId', value: eventId }])
@@ -140,7 +143,7 @@ export class EventChallengeComponent implements OnInit {
     if (this.eventChallengeForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
 
     if (this.event() && this.event()!.props.startDate < new Date()) {
-      this.logService.addLogErrorApp('Operazione non piu possibile, evento iniziato');
+      this.logService.addLogErrorApp('Operazione non più possibile, evento iniziato');
       return;
     }
 
@@ -186,7 +189,7 @@ export class EventChallengeComponent implements OnInit {
     if (!userConfirm) return;
 
     if (eventStartDate < new Date()) {
-      this.logService.addLogErrorApp('Operazione non piu possibile, evento iniziato');
+      this.logService.addLogErrorApp('Operazione non più possibile, evento iniziato');
       return;
     }
 
@@ -253,11 +256,12 @@ export class EventChallengeComponent implements OnInit {
     challengeType: ChallengeType,
     form: EventChallengeModel
   ): EventChallenge {
-    const eventId = this.eventId();
-    if (!eventId) throw new Error('retry', { cause: 'retry' });
+    const event = this.event();
+    if (!event) throw new Error('retry', { cause: 'retry' });
 
     const eventChallenge: EventChallenge = {
-      eventId,
+      eventId: event.id,
+      eventStartDate: event.props.startDate,
       challengeId: form.challengeId,
       challengeName,
       challengeType,

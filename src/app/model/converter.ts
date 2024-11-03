@@ -171,6 +171,7 @@ export const eventChallengeConverter: FirestoreDataConverter<EventChallenge> = {
   toFirestore(eventChallenge: EventChallenge): DocumentData {
     return {
       eventId: eventChallenge.eventId,
+      eventStartDate: eventChallenge.eventStartDate,
       challengeId: eventChallenge.challengeId,
       challengeName: eventChallenge.challengeName,
       challengeType: eventChallenge.challengeType,
@@ -186,6 +187,7 @@ export const eventChallengeConverter: FirestoreDataConverter<EventChallenge> = {
     const data = snapshot.data(options)!;
     return {
       eventId: data['eventId'],
+      eventStartDate: timestampToDate(data['eventStartDate']),
       challengeId: data['challengeId'],
       challengeName: data['challengeName'],
       challengeType: data['challengeType'] as ChallengeType,

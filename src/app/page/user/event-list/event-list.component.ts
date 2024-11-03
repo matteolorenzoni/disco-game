@@ -169,7 +169,7 @@ export class EventListComponent implements OnInit {
     if (!userConfirm) return;
 
     if (eventStartDate < new Date()) {
-      this.logService.addLogErrorApp('Operazione non piu possibile, evento iniziato');
+      this.logService.addLogErrorApp('Operazione non più possibile, evento iniziato');
       return;
     }
 
@@ -184,7 +184,7 @@ export class EventListComponent implements OnInit {
       /* Rimuovi da squadra */
       const teamUpdated = await this.teamService.deleteFromTeam(team, userId);
 
-      /* Rimuovi squadra e aggiorna evento se non ha piu nessun membro */
+      /* Rimuovi squadra e aggiorna evento se non ha più nessun membro */
       if (teamUpdated.props.userIds.length <= 0) {
         await this.teamService.deleteTeam(team.id);
         await this.eventService.updateTeams('REMOVE', eventId, team.id);
@@ -196,7 +196,7 @@ export class EventListComponent implements OnInit {
       await this.initIndexedDb();
 
       /* Log */
-      this.logService.addLogConfirm('Non fai piu parte della squadra');
+      this.logService.addLogConfirm('Non fai più parte della squadra');
     });
   }
   /* -------------------- Methods: on event -------------------- */

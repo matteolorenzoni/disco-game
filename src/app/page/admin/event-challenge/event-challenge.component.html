@@ -8,29 +8,33 @@
 @if (event(); as event) {
   <ul class="flex flex-col divide-y divide-gray-800">
     @for (item of eventChallenges(); track item.props.challengeId) {
-      <li class="flex flex-col gap-3 py-8">
+      <li
+        class="flex flex-col gap-3 py-8"
+        [ngClass]="{ 'bg-rose-500/30 p-2 rounded-lg': item.props.status === CHALLENGE_STATUS.CHALLENGE_DELETED }">
         <div class="flex items-center gap-2">
           <img class="h-8 w-8" [src]="'images/challenge/' + item.props.challengeType + '.png'" alt="Tipo" />
           <p class="flex-1 truncate text-sm">{{ item.props.challengeName }}</p>
           <div class="divide-x divide-gray-800">
-            <button
-              class="px-2 text-xxs font-semibold uppercase text-primary-500 hover:underline"
-              (click)="goToUpdateEventChallenge(item.id)">
-              Modifica
-            </button>
-            @if (event.props.startDate > NOW) {
+            @if (item.props.status !== CHALLENGE_STATUS.CHALLENGE_DELETED) {
               <button
-                class="px-2 text-xxs font-semibold uppercase text-rose-500 hover:text-rose-600 active:text-rose-700"
-                (click)="deleteEventChallenge(item.id, event.props.startDate)">
-                <fa-icon [icon]="ICON_TRASH"></fa-icon>
+                class="px-2 text-xxs font-semibold uppercase text-primary-500 hover:underline"
+                (click)="goToUpdateEventChallenge(item.id)">
+                Modifica
               </button>
+              @if (event.props.startDate > NOW) {
+                <button
+                  class="px-2 text-xxs font-semibold uppercase text-rose-700 hover:text-rose-800 active:text-rose-700"
+                  (click)="deleteEventChallenge(item.id, event.props.startDate)">
+                  <fa-icon [icon]="ICON_TRASH"></fa-icon>
+                </button>
+              }
             }
           </div>
         </div>
 
         <!-- Info su  eventChallenge-->
         <div
-          class="flex h-20 divide-x divide-neutral-700 overflow-x-auto rounded-xl bg-neutral-800 py-2 text-on-surface shadow">
+          class="flex h-20 divide-x divide-neutral-700 overflow-x-auto rounded-lg bg-neutral-800 py-2 text-on-surface shadow">
           <div class="flex min-w-16 shrink-0 basis-1/4 flex-col items-center gap-2 px-2">
             <p class="w-full rounded bg-neutral-700 p-1 text-center text-xxs uppercase text-on-background">Stato</p>
             <fa-icon class="my-auto" [icon]="ICON_STATUS_VALUE[item.props.status]"></fa-icon>
@@ -95,8 +99,8 @@
     class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center bg-black bg-opacity-60 opacity-0 backdrop-blur-sm"
     [ngClass]="{ 'opacity-100 pointer-events-auto': formModalIsOpen() }"
     [tabindex]="-1"
-    aria-hidden="true"
-    (click)="onCloseModal($event)">
+    (click)="onCloseModal($event)"
+    (keydown)="(undefined)">
     <div data-dialog="sign-in-modal" class="relative mx-auto w-4/5 max-w-[40rem] overflow-hidden rounded shadow-sm">
       <div class="flex flex-col gap-2 bg-surface p-4 text-on-background">
         <h3 class="text-on-secondary mb-4 text-center text-lg font-semibold">Sfida</h3>

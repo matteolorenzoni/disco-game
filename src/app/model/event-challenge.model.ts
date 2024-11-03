@@ -2,6 +2,7 @@ import { ChallengeType } from './challenge.model';
 
 export type EventChallenge = {
   eventId: string; // ID evento
+  eventStartDate: Date; // Data di inizio dell'evento
   challengeId: string; // ID della sfida collegata
   challengeName: string; // Nome della sfida collegata
   challengeType: ChallengeType; // Tipo della sfida collegata
@@ -16,12 +17,13 @@ export enum ChallengeStatus {
   ACTIVE = 'ACTIVE', // Sfida attiva e in corso
   LOCKED = 'LOCKED', // Sfida in attesa di inizio
   CANCELED = 'CANCELED', // Sfida annullata
-  SUSPENDED = 'SUSPENDED' // Sfida sospesa temporaneamente
+  SUSPENDED = 'SUSPENDED', // Sfida sospesa temporaneamente
+  CHALLENGE_DELETED = 'CHALLENGE_DELETED' // Sfida (generale) eliminata
 }
 
 export type Qrcode = {
-  teamId: string;
-  userId: string;
-  challengeId: string;
-  points: number;
+  teamId: string; // ID della squadra associata all'utente
+  userId: string; // ID dell'utente che effettua la scansione
+  challengeId: string; // ID della sfida a cui si riferisce il codice
+  points: number; // Punti assegnati per la scansione della sfida
 };

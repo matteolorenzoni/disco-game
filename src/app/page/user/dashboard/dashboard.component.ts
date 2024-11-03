@@ -109,7 +109,7 @@ export class DashboardComponent implements OnInit {
 
   private async initHttp(userId: string) {
     this.loaderService.executeWithDelay(async () => {
-      // Recupera le informazioni della partecipazione piu recente
+      // Recupera le informazioni della partecipazione più recente
       const team = await this.teamService.getFirstActiveTeamByUserId(userId);
 
       // Se non è stato trovato alcun utente associato al team, termina l'operazione
@@ -147,7 +147,7 @@ export class DashboardComponent implements OnInit {
     if (!userConfirm) return;
 
     if (eventStartDate < new Date()) {
-      this.logService.addLogErrorApp('Operazione non piu possibile, evento iniziato');
+      this.logService.addLogErrorApp('Operazione non più possibile, evento iniziato');
       return;
     }
 
@@ -163,7 +163,7 @@ export class DashboardComponent implements OnInit {
       /* Rimuovi da squadra */
       const teamUpdated = await this.teamService.deleteFromTeam(team, userId);
 
-      /* Rimuovi squadra e aggiorna evento se non ha piu nessun membro */
+      /* Rimuovi squadra e aggiorna evento se non ha più nessun membro */
       if (teamUpdated.props.userIds.length <= 0) {
         await this.teamService.deleteTeam(team.id);
         await this.eventService.updateTeams('REMOVE', event.id, team.id);
@@ -173,7 +173,7 @@ export class DashboardComponent implements OnInit {
       await this.resetLocalStorageAndIndexedDB();
 
       /* Log */
-      this.logService.addLogConfirm('Non fai piu parte della squadra');
+      this.logService.addLogConfirm('Non fai più parte della squadra');
     });
   }
 

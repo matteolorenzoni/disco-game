@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { FirebaseDocumentService } from './firebase-document.service';
-import { EventChallenge } from '../model/event-challenge.model';
+import { ChallengeStatus, EventChallenge } from '../model/event-challenge.model';
 import { environment } from '../../environments/environment';
 import { eventChallengeConverter } from '../model/converter';
 import { Doc } from '../model/firebase';
@@ -57,8 +57,18 @@ export class EventChallengeService {
     });
   }
 
+  public async updateEventChallengesStatus(eventChallengeIds: string[], status: ChallengeStatus): Promise<void> {
+    await this.documentService.updateDocuments(eventChallengeIds, COL_EVENT_CHALLENGES, {
+      status
+    });
+  }
+
   /* --------------------------- Delete ---------------------------*/
   public async deleteEventChallenge(eventChallengeId: string): Promise<void> {
     await this.documentService.deleteDocument(eventChallengeId, COL_EVENT_CHALLENGES);
+  }
+
+  public async deleteEventChallenges(eventChallengeIds: string[]): Promise<void> {
+    await this.documentService.deleteDocuments(eventChallengeIds, COL_EVENT_CHALLENGES);
   }
 }
