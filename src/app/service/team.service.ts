@@ -32,19 +32,6 @@ export class TeamService {
     return this.documentService.getDocumentsWithConstraints<Team>(COL_TEAMS, valueConstraints, teamConverter);
   }
 
-  public async getActiveTeamByUserIdFirst(userId: string): Promise<Doc<Team> | null> {
-    const limitConstraints = [limit(1)];
-    const valueConstraints = [
-      where('userIds', 'array-contains', userId),
-      where('eventStartDate', '>=', dateYesterday())
-    ];
-    return this.documentService.getDocumentWithConstraints<Team>(
-      COL_TEAMS,
-      [...limitConstraints, ...valueConstraints],
-      teamConverter
-    );
-  }
-
   public async getActiveTeamsByEventId(eventId: string): Promise<Doc<Team>[]> {
     const valueConstraints = [where('eventId', '==', eventId)];
     const orderConstraints = [orderBy('name', 'asc')];
@@ -63,6 +50,20 @@ export class TeamService {
   public async getTeamByCode(code: string): Promise<Doc<Team> | null> {
     const valueConstraints = [where('code', '==', code)];
     return await this.documentService.getDocumentWithConstraints<Team>(COL_TEAMS, valueConstraints, teamConverter);
+  }
+
+  public subscribeFirstTeam(userId: string, onUpdate: (documents: Doc<Team> | null) => void): () => void {
+    const limitConstraints = [limit(1)];
+    const valueConstraints = [
+      where('userIds', 'array-contains', userId),
+      where('eventStartDate', '>=', dateYesterday())
+    ];
+    return this.documentService.subscribeToDocumentWithConstraints<Team>(
+      COL_TEAMS,
+      [...limitConstraints, ...valueConstraints],
+      teamConverter,
+      onUpdate
+    );
   }
 
   /* --------------------------- Create ---------------------------*/

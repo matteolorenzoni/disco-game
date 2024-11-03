@@ -98,6 +98,6 @@ export class EventTeamComponent implements OnInit {
   /* -------------------------- Methods: event --------------------------  */
   protected onSelectTeam(team: Doc<Team>): void {
     this.pointsToUpdate = null;
-    this.teamSelected.set(team);
+    this.teamSelected.update((val) => (val?.id === team.id ? undefined : team));
   }
 }

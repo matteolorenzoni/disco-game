@@ -42,6 +42,21 @@ export class EventChallengeService {
     return eventChallenges[0];
   }
 
+  public subscribeEventChallengesByProp(
+    props: { key: 'eventId' | 'challengeId'; value: string }[],
+    onUpdate: (documents: Doc<EventChallenge>[]) => void
+  ): () => void {
+    const valueConstraints = props.map((x) => where(x.key, '==', x.value));
+    const orderConstraints = [orderBy('challengeName', 'asc')];
+    return this.documentService.subscribeToDocumentsWithConstraints<EventChallenge>(
+      COL_EVENT_CHALLENGES,
+      [...valueConstraints, ...orderConstraints],
+      eventChallengeConverter,
+      onUpdate,
+      false
+    );
+  }
+
   /* --------------------------- Create ---------------------------*/
   public async addEventChallenge(newEventChallenge: EventChallenge): Promise<Doc<EventChallenge>> {
     const docRef = await this.documentService.addDocument<EventChallenge>(COL_EVENT_CHALLENGES, newEventChallenge);

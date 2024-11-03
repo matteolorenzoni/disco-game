@@ -120,6 +120,28 @@ export class FirebaseDocumentService {
     });
   }
 
+  public subscribeToDocumentWithConstraints<T extends Record<string, any>>(
+    collectionName: string,
+    queryConstraints: QueryConstraint[],
+    converter: FirestoreDataConverter<T>,
+    onUpdate: (documents: Doc<T> | null) => void,
+    isActiveConstraint = true
+  ): () => void {
+    const collectionRef = getCollection(this.firebaseService.getDb(), collectionName).withConverter(converter);
+    if (isActiveConstraint) queryConstraints.push(where('isActive', '==', true));
+    const q = query(collectionRef, ...queryConstraints);
+
+    return onSnapshot(q, (querySnapshot) => {
+      const documents: Doc<T>[] = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        props: doc.data() as T
+      }));
+      if (documents.length > 1) throw new Error('tooManyDocuments', { cause: 'tooManyDocuments' });
+      const document = documents[0] as Doc<T> | undefined;
+      onUpdate(document ?? null);
+    });
+  }
+
   /* --------------------- Methods CREATE --------------------- */
   public createDocId(collectionName: string): string {
     const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);

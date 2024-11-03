@@ -30,7 +30,7 @@
         <span>{{ event.props.startDate | date: 'dd/MM/yyyy HH:mm' }}</span>
         <span>{{ event.props.endDate | date: 'dd/MM/yyyy HH:mm' }}</span>
       </p>
-      <p class="text-md italic">{{ event.props.description }}</p>
+      <p class="text-md whitespace-pre-line italic">{{ event.props.description }}</p>
     </div>
 
     @if (event.props.startDate > NOW) {
@@ -43,6 +43,7 @@
     @if (team.props.status !== TEAM_STATUS.ACTIVE) {
       <div class="mt-12 items-center rounded text-sm font-semibold uppercase">
         @if (team.props.status === TEAM_STATUS.SUSPENDED) {
+          <p class="rounded-md border border-orange-500/50 bg-orange-500/25 p-2 text-center">Squadra sospesa</p>
         } @else if (team.props.status === TEAM_STATUS.BANNED) {
           <p class="rounded-md border border-rose-500/50 bg-rose-500/25 p-2 text-center">Squadra eliminata</p>
         }

@@ -7,7 +7,7 @@
 
 <ul class="mt-8 flex flex-col divide-y divide-gray-800">
   @for (team of teams(); track team.id) {
-    <li class="flex flex-col py-2 text-base">
+    <li class="flex flex-col py-4 text-base">
       <button class="flex items-center justify-between gap-4" (click)="onSelectTeam(team)">
         <div class="flex flex-1 items-center gap-1 overflow-hidden">
           <p class="truncate text-start text-base font-semibold">{{ team.props.name }}</p>

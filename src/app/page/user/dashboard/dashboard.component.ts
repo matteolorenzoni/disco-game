@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faCalendar, faClipboard, faCrown, faLocationPin, faTrash } from '@fortawesome/free-solid-svg-icons';
@@ -39,7 +39,7 @@ import { LoaderService } from '../../../service/loader.service';
   styleUrls: ['./dashboard.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   /* Services */
   private readonly router = inject(Router);
   protected readonly firebaseService = inject(FirebaseService);
@@ -64,6 +64,10 @@ export class DashboardComponent implements OnInit {
   /* Enum */
   TEAM_STATUS = TeamStatus;
 
+  /* Ref */
+  teamUnsubscribe?: () => void;
+  eventChallengeUnsubscribe?: () => void;
+
   /* Icons */
   ICON_CALENDAR = faCalendar;
   ICON_PLACE = faLocationPin;
@@ -81,6 +85,11 @@ export class DashboardComponent implements OnInit {
 
     /* Inizializzazione http */
     await this.initHttp(userId);
+  }
+
+  ngOnDestroy(): void {
+    if (this.teamUnsubscribe) this.teamUnsubscribe();
+    if (this.eventChallengeUnsubscribe) this.eventChallengeUnsubscribe();
   }
 
   /* -------------------------- Methods initialization --------------------------  */
@@ -111,36 +120,42 @@ export class DashboardComponent implements OnInit {
   }
 
   private async initHttp(userId: string) {
-    this.loaderService.executeWithDelay(async () => {
-      // Recupera le informazioni della partecipazione più recente
-      const team = await this.teamService.getActiveTeamByUserIdFirst(userId);
+    let teamId: string | null = null;
 
+    // Rimane in ascolto sulla squadra
+    if (this.teamUnsubscribe) this.teamUnsubscribe();
+    this.teamUnsubscribe = this.teamService.subscribeFirstTeam(userId, async (team) => {
       // Se non è stato trovato alcun utente associato al team, termina l'operazione
-      this.team.set(team);
       if (!team) {
         await this.resetLocalStorageAndIndexedDB();
         return;
       }
-
-      // Recupera l'evento e le sfide associate all'evento in parallelo
-      const [event, eventChallenges] = await Promise.all([
-        this.eventService.getEventById(team.props.eventId),
-        this.eventChallengeService.getEventChallengesByProp([{ key: 'eventId', value: team.props.eventId }])
-      ]);
-      this.event.set(event);
-
-      // Recupera le informazioni dettagliate sulle sfide
-      const challenges = await this.challengeService.getChallengesByIds(
-        eventChallenges.map((x) => x.props.challengeId)
-      );
-      const mergedChallenges = mergeChallenges(challenges, eventChallenges);
-      this.mergedChallenges.set(mergedChallenges);
-
-      /* Aggiorno il local storage indexedDB */
+      this.team.set(team);
       this.lsService.setUserDashboardTeamId(team.id);
       this.dbService.saveTeams([team]);
+
+      /* Proseguo solo se cambia squadra dalla volta precedente (in teoria solo la 1° volta) */
+      if (teamId === team.id) return;
+      teamId = team.id;
+
+      // Recupera l'evento
+      const event = await this.eventService.getEventById(team.props.eventId);
+      this.event.set(event);
       this.dbService.saveEvents([event]);
-      this.dbService.saveChallenges(mergedChallenges);
+
+      // Rimane in ascolto sulle sfide associate all'evento
+      if (this.eventChallengeUnsubscribe) this.eventChallengeUnsubscribe();
+      this.eventChallengeUnsubscribe = this.eventChallengeService.subscribeEventChallengesByProp(
+        [{ key: 'eventId', value: team.props.eventId }],
+        async (eventChallenges) => {
+          // Recupera le informazioni dettagliate sulle sfide
+          const challengeIds = eventChallenges.map((x) => x.props.challengeId);
+          const challenges = await this.challengeService.getChallengesByIds(challengeIds);
+          const mergedChallenges = mergeChallenges(challenges, eventChallenges);
+          this.mergedChallenges.set(mergedChallenges);
+          this.dbService.saveChallenges(mergedChallenges);
+        }
+      );
     });
   }
 
@@ -174,6 +189,10 @@ export class DashboardComponent implements OnInit {
 
       /* Aggiorno local storage e indexedDb */
       await this.resetLocalStorageAndIndexedDB();
+
+      /* Fermo ascolti sui documenti */
+      if (this.teamUnsubscribe) this.teamUnsubscribe();
+      if (this.eventChallengeUnsubscribe) this.eventChallengeUnsubscribe();
 
       /* Log */
       this.logService.addLogConfirm('Non fai più parte della squadra');
