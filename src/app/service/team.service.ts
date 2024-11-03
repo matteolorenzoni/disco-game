@@ -36,13 +36,18 @@ export class TeamService {
     );
   }
 
-  public async getFirstActiveTeamByUserId(userId: string): Promise<Doc<Team> | null> {
+  public async getActiveTeamByUserIdFirst(userId: string): Promise<Doc<Team> | null> {
     const limitConstraints = [limit(1)];
     const teams = await this.getActiveTeamsByUserId(userId, limitConstraints);
     return teams.length !== 1 ? null : teams[0];
   }
 
-  public async getActiveTeamByUserAndEventId(userId: string, eventId: string): Promise<Doc<Team> | null> {
+  public async getActiveTeamsByEventId(eventId: string): Promise<Doc<Team>[]> {
+    const valueConstraints = [where('eventId', '==', eventId)];
+    return await this.documentService.getDocumentsWithConstraints<Team>(COL_TEAMS, valueConstraints, teamConverter);
+  }
+
+  public async getActiveTeamByUserIdAndEventId(userId: string, eventId: string): Promise<Doc<Team> | null> {
     const valueConstraints = [where('eventId', '==', eventId), where('userIds', 'array-contains', userId)];
     const teams = await this.documentService.getDocumentsWithConstraints<Team>(
       COL_TEAMS,
@@ -132,8 +137,8 @@ export class TeamService {
   }
 
   /* --------------------------- Delete ---------------------------*/
-  public async deleteTeam(teamId: string): Promise<void> {
-    await this.documentService.deleteDocument(teamId, COL_TEAMS);
+  public async softDeleteTeams(teamIds: string[]): Promise<void> {
+    await this.documentService.updateDocuments<Team>(teamIds, COL_TEAMS, { isActive: false });
   }
 
   public async deleteFromTeam(team: Doc<Team>, userId: string): Promise<Doc<Team>> {

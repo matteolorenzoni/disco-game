@@ -88,7 +88,7 @@ export class UserService {
     return await this.storageService.updateImage(image, COL_USERS, name);
   }
 
-  public async updateEventsAndTeams(
+  public async updateParticipations(
     operation: 'ADD' | 'REMOVE',
     userId: string,
     eventId: string,

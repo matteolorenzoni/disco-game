@@ -178,20 +178,19 @@ export class EventListComponent implements OnInit {
       const team = this.teams().find((x) => x.id === teamId);
       if (!userId || !team) throw new Error('retry', { cause: 'retry' });
 
-      /* Rimuovi da User (prop: eventIds e teamIds) */
-      await this.userService.updateEventsAndTeams('REMOVE', userId, eventId, team.id);
-
-      /* Rimuovi da squadra */
+      /* Elimino da squadra */
       const teamUpdated = await this.teamService.deleteFromTeam(team, userId);
 
-      /* Rimuovi squadra e aggiorna evento se non ha più nessun membro */
+      /* Elimino squadra (se non ha più nessun membro) */
       if (teamUpdated.props.userIds.length <= 0) {
-        await this.teamService.deleteTeam(team.id);
+        await this.teamService.softDeleteTeams([team.id]);
         await this.eventService.updateTeams('REMOVE', eventId, team.id);
       }
 
-      /* Rimuovi da indexedDb */
-      this.lsService.removeUserDashboardTeamId();
+      /* Elimino partecipazione dall'utente */
+      await this.userService.updateParticipations('REMOVE', userId, eventId, team.id);
+
+      /* Aggiorno indexedDb */
       await this.dbService.deleteTeams([team.id]);
       await this.initIndexedDb();
 
@@ -207,7 +206,7 @@ export class EventListComponent implements OnInit {
   /* -------------------- Methods: utils -------------------- */
   private async addParticipation(eventId: string, teamId: string, userId: string): Promise<void> {
     /* Aggiorno User (prop: eventIds e teamIds) */
-    await this.userService.updateEventsAndTeams('ADD', userId, eventId, teamId);
+    await this.userService.updateParticipations('ADD', userId, eventId, teamId);
 
     /* Aggiorno Event (prop: teamIds) */
     await this.eventService.updateTeams('ADD', eventId, teamId);

@@ -23,23 +23,9 @@
       <label
         for="event-image-upload"
         class="flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-neutral-600 bg-neutral-800 text-neutral-600 hover:bg-neutral-900">
-        <div class="flex flex-col items-center justify-center">
-          <svg
-            class="mb-4 h-8 w-8"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 20 16">
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
-          </svg>
-          <p class="text-sm">
-            <span class="font-semibold">Carica immagine</span>
-          </p>
+        <div class="flex flex-col items-center justify-center gap-2">
+          <fa-icon class="text-2xl" [icon]="ICON_UPLOAD"></fa-icon>
+          <p class="text-sm font-bold">Carica immagine</p>
         </div>
         <input
           id="event-image-upload"
@@ -49,13 +35,23 @@
           class="hidden" />
       </label>
     } @else {
-      <img [src]="imagePreview()" alt="Anteprima immagine" class="rounded object-cover" />
+      <img class="aspect-video" [src]="imagePreview()" alt="Anteprima immagine" class="rounded object-cover" />
     }
   </div>
 
-  <fv-button
-    class="mt-12"
-    type="submit"
-    [label]="event() ? 'Aggiorna' : 'Salva'"
-    [disabled]="eventForm.invalid || !imagePreview()"></fv-button>
+  <div class="mt-8 flex gap-2">
+    <fv-button
+      class="flex-1"
+      type="submit"
+      [label]="event() ? 'Aggiorna' : 'Salva'"
+      [disabled]="eventForm.invalid || !imagePreview()"></fv-button>
+    @if (event(); as event) {
+      <button
+        type="button"
+        class="rounded border border-rose-800 px-2 text-rose-800 hover:bg-rose-900/25 active:bg-rose-900/50"
+        (click)="deleteEvent(event.id, event.props.startDate)">
+        <fa-icon [icon]="ICON_TRASH"></fa-icon>
+      </button>
+    }
+  </div>
 </form>

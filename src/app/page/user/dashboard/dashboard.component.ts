@@ -110,7 +110,7 @@ export class DashboardComponent implements OnInit {
   private async initHttp(userId: string) {
     this.loaderService.executeWithDelay(async () => {
       // Recupera le informazioni della partecipazione più recente
-      const team = await this.teamService.getFirstActiveTeamByUserId(userId);
+      const team = await this.teamService.getActiveTeamByUserIdFirst(userId);
 
       // Se non è stato trovato alcun utente associato al team, termina l'operazione
       this.team.set(team);
@@ -157,19 +157,19 @@ export class DashboardComponent implements OnInit {
       const team = this.team();
       if (!userId || !event || !team) throw new Error('retry', { cause: 'retry' });
 
-      /* Rimuovi da User (prop: eventIds e teamIds) */
-      await this.userService.updateEventsAndTeams('REMOVE', userId, event.id, team.id);
-
-      /* Rimuovi da squadra */
+      /* Elimino da squadra */
       const teamUpdated = await this.teamService.deleteFromTeam(team, userId);
 
-      /* Rimuovi squadra e aggiorna evento se non ha più nessun membro */
+      /* Elimino squadra (se non ha più nessun membro) */
       if (teamUpdated.props.userIds.length <= 0) {
-        await this.teamService.deleteTeam(team.id);
+        await this.teamService.softDeleteTeams([team.id]);
         await this.eventService.updateTeams('REMOVE', event.id, team.id);
       }
 
-      /* Rimuovi da local storage e indexedDb */
+      /* Elimino partecipazione dall'utente */
+      await this.userService.updateParticipations('REMOVE', userId, event.id, team.id);
+
+      /* Aggiorno local storage e indexedDb */
       await this.resetLocalStorageAndIndexedDB();
 
       /* Log */

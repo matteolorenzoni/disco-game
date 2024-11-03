@@ -222,7 +222,7 @@ export class DashboardComponent implements OnInit {
       }
 
       /* Cerco prima se l'user ha una squadra per questo evento */
-      const team = await this.teamService.getActiveTeamByUserAndEventId(user.id, eventId);
+      const team = await this.teamService.getActiveTeamByUserIdAndEventId(user.id, eventId);
       if (!team) {
         this.logService.addLogErrorApp("Squadra non trovata, l'utente non partecipa all'evento", false);
         return;

@@ -5,7 +5,7 @@ import { ActivatedRoute, ParamMap } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { ChallengeModel, FromMap } from '../../../model/form.model';
-import { ChallengeType } from '../../../model/challenge.model';
+import { Challenge, ChallengeType } from '../../../model/challenge.model';
 import { ChallengeService } from '../../../service/challenge.service';
 import { LogService } from '../../../service/log.service';
 import { FvButtonComponent } from '../../../components/fv-button.component';
@@ -17,6 +17,7 @@ import { LoaderService } from '../../../service/loader.service';
 import { trimFormValues } from '../../../util/utils';
 import { EventChallengeService } from '../../../service/event-challenge.service';
 import { ChallengeStatus } from '../../../model/event-challenge.model';
+import { Doc } from '../../../model/firebase';
 
 export type SelectOption = {
   label: string;
@@ -52,7 +53,7 @@ export class ChallengeCreateComponent implements OnInit {
   OPTIONS = ChallengeTypes as SelectOption[];
 
   /* Variables */
-  challengeId = signal<string | null>(null);
+  challenge = signal<Doc<Challenge> | null | undefined>(undefined);
   challengeTypeModalIsOpen = signal<boolean>(false);
   challengeTypeActive = signal<SelectOption>(this.OPTIONS.find((x) => x.icon === ChallengeType.FROG)!);
 
@@ -101,11 +102,14 @@ export class ChallengeCreateComponent implements OnInit {
   private async initHttp(params: ParamMap) {
     this.loaderService.executeWithDelay(async () => {
       const challengeId = params.get('id');
-      this.challengeId.set(params.get('id'));
-      if (!challengeId) return;
+      if (!challengeId) {
+        this.challenge.set(null);
+        return;
+      }
 
-      const { props } = await this.challengeService.getChallengeById(challengeId);
-      this.challengeForm.patchValue(props);
+      const challenge = await this.challengeService.getChallengeById(challengeId);
+      this.challenge.set(challenge);
+      this.challengeForm.patchValue(challenge.props);
     });
   }
 
@@ -115,16 +119,16 @@ export class ChallengeCreateComponent implements OnInit {
 
     await this.loaderService.executeImmediate(async () => {
       /* Aggiungo o aggiorno il documento */
-      const challengeId = this.challengeId();
+      const challenge = this.challenge();
       const form = trimFormValues(this.challengeForm.getRawValue());
-      if (challengeId) await this.challengeService.updateChallenge(challengeId, form);
+      if (challenge) await this.challengeService.updateChallenge(challenge.id, form);
       else await this.challengeService.addChallenge(form);
 
       /* Torno indietro */
       this.location.back();
 
       /* Log */
-      this.logService.addLogConfirm(challengeId ? 'Sfida aggiornata' : 'Sfida aggiunta');
+      this.logService.addLogConfirm(challenge ? 'Sfida aggiornata' : 'Sfida aggiunta');
     });
   }
 
@@ -171,7 +175,7 @@ export class ChallengeCreateComponent implements OnInit {
   }
 
   protected onSelectType(challengeType: ChallengeType): void {
-    this.challengeForm.controls.type.setValue(challengeType);
+    this.challengeForm.patchValue({ type: challengeType });
     this.challengeTypeModalIsOpen.set(false);
   }
 }

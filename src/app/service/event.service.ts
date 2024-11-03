@@ -94,4 +94,9 @@ export class EventService {
   public async updateTeams(operation: 'ADD' | 'REMOVE', eventId: string, teamId: string): Promise<void> {
     await this.documentService.updateDocumentArray<Event, string>(operation, eventId, COL_EVENTS, 'teamIds', teamId);
   }
+
+  /* --------------------------- Delete ---------------------------*/
+  public async softDeleteEvent(challengeId: string): Promise<void> {
+    await this.documentService.updateDocument<Event>(challengeId, COL_EVENTS, { isActive: false });
+  }
 }
