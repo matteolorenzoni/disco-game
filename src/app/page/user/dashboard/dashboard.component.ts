@@ -5,7 +5,7 @@ import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faCalendar, faClipboard, faCrown, faLocationPin, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { Doc } from '../../../model/firebase';
 import { Event } from '../../../model/event.model';
-import { Team } from '../../../model/team.model';
+import { Team, TeamStatus } from '../../../model/team.model';
 import { EventService } from '../../../service/event.service';
 import { FirebaseService } from '../../../service/firebase.service';
 import { TeamService } from '../../../service/team.service';
@@ -60,6 +60,9 @@ export class DashboardComponent implements OnInit {
 
   /* Constants */
   NOW = new Date();
+
+  /* Enum */
+  TEAM_STATUS = TeamStatus;
 
   /* Icons */
   ICON_CALENDAR = faCalendar;

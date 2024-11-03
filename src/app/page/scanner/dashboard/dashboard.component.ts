@@ -21,7 +21,7 @@ import { Event } from '../../../model/event.model';
 import { Doc } from '../../../model/firebase';
 import { ChallengeStatus, Qrcode } from '../../../model/event-challenge.model';
 import { isEqualQrcode, isQrcode } from '../../../util/type.util';
-import { Team } from '../../../model/team.model';
+import { Team, TeamStatus } from '../../../model/team.model';
 import { LoaderService } from '../../../service/loader.service';
 import { trimFormValues } from '../../../util/utils';
 import { IndexedDbService } from '../../../service/indexed-db.service';
@@ -267,6 +267,12 @@ export class DashboardComponent implements OnInit {
     /* Memorizzo il qrcode per impedire piu scan con lo stesso valore */
     this.lastQrcode.set(qrcode);
 
+    /* Controllo se la squadra è attiva */
+    if (team.props.status !== TeamStatus.ACTIVE) {
+      this.logService.addLogErrorApp('Squadra non attiva (disattivata dagli admin)', false);
+      return;
+    }
+
     /* Controllo presenza della sfida */
     const mergeChallenge = this.mergeChallenges().find((x) => x.id === qrcode.challengeId);
     if (!mergeChallenge) {
@@ -293,7 +299,7 @@ export class DashboardComponent implements OnInit {
     }
 
     /* Aggiorno il punteggio totale di squadra e del singolo user */
-    await this.teamService.updatePoints(team, qrcode.userId, qrcode.challengeId, qrcode.points);
+    await this.teamService.updateUserPoints(team, qrcode.userId, qrcode.challengeId, qrcode.points);
 
     /* log */
     this.logService.addLogConfirm('Sfida confermata');

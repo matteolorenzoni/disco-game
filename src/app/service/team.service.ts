@@ -5,7 +5,7 @@ import { Team, TeamStatus } from '../model/team.model';
 import { Doc } from '../model/firebase';
 import { teamConverter } from '../model/converter';
 import { generateUniqueCode } from '../util/utils';
-import { limit, where } from 'firebase/firestore';
+import { limit, orderBy, where } from 'firebase/firestore';
 import { User } from '../model/user.model';
 import { dateYesterday } from '../util/type.util';
 
@@ -47,7 +47,12 @@ export class TeamService {
 
   public async getActiveTeamsByEventId(eventId: string): Promise<Doc<Team>[]> {
     const valueConstraints = [where('eventId', '==', eventId)];
-    return await this.documentService.getDocumentsWithConstraints<Team>(COL_TEAMS, valueConstraints, teamConverter);
+    const orderConstraints = [orderBy('name', 'asc')];
+    return await this.documentService.getDocumentsWithConstraints<Team>(
+      COL_TEAMS,
+      [...valueConstraints, ...orderConstraints],
+      teamConverter
+    );
   }
 
   public async getActiveTeamByUserIdAndEventId(userId: string, eventId: string): Promise<Doc<Team> | null> {
@@ -114,7 +119,7 @@ export class TeamService {
     await this.documentService.updateDocuments<Team>([team.id], COL_TEAMS, team.props);
   }
 
-  public async updatePoints(team: Doc<Team>, userId: string, challengeId: string, points: number): Promise<void> {
+  public async updateUserPoints(team: Doc<Team>, userId: string, challengeId: string, points: number): Promise<void> {
     // Aggiorno la squadra
     team.props.totalPoints += points;
 
@@ -128,6 +133,14 @@ export class TeamService {
       user.challenges.push({ id: challengeId, timestamps: [new Date()], totalPoints: points });
     }
     await this.documentService.updateDocuments<Team>([team.id], COL_TEAMS, team.props);
+  }
+
+  public async updateTeamPoints(teamId: string, totalPoints: number): Promise<void> {
+    await this.documentService.updateDocuments<Team>([teamId], COL_TEAMS, { totalPoints });
+  }
+
+  public async updateTeamStatus(teamId: string, status: TeamStatus): Promise<void> {
+    await this.documentService.updateDocuments<Team>([teamId], COL_TEAMS, { status });
   }
 
   /* --------------------------- Delete ---------------------------*/

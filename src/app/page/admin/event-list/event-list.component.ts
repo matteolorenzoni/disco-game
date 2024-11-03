@@ -9,11 +9,20 @@ import { FvButtonComponent } from '../../../components/fv-button.component';
 import { FvButtonOutlinedComponent } from '../../../components/fv-button-outlined.component';
 import { TitleComponent } from '../../../components/title/title.component';
 import { LoaderService } from '../../../service/loader.service';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import { faPeopleGroup } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-event-list',
   standalone: true,
-  imports: [CommonModule, TitleComponent, FvButtonComponent, FvButtonOutlinedComponent, FvFloatingButtonComponent],
+  imports: [
+    CommonModule,
+    FaIconComponent,
+    TitleComponent,
+    FvButtonComponent,
+    FvButtonOutlinedComponent,
+    FvFloatingButtonComponent
+  ],
   templateUrl: './event-list.component.html',
   styleUrls: ['./event-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -26,6 +35,9 @@ export class EventListComponent implements OnInit {
 
   /* Variables */
   events = signal<Doc<Event>[] | undefined>(undefined);
+
+  /* Icons */
+  ICON_TEAM = faPeopleGroup;
 
   /* -------------------- Lifecycle hooks -------------------- */
   async ngOnInit(): Promise<void> {
@@ -47,6 +59,10 @@ export class EventListComponent implements OnInit {
 
   protected async goToUpdateEventChallenges(eventId: string): Promise<void> {
     await this.router.navigate([`admin/events/${eventId}/challenges`]);
+  }
+
+  protected async goToUpdateEventTeams(eventId: string): Promise<void> {
+    await this.router.navigate([`admin/events/${eventId}/teams`]);
   }
 
   protected async executeFloatingButton(): Promise<void> {

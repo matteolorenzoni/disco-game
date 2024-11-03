@@ -1,0 +1,5 @@
+[
+  { "label": "Attiva", "value": "ACTIVE" },
+  { "label": "Sospesa", "value": "SUSPENDED" },
+  { "label": "Eliminata ", "value": "BANNED" }
+]

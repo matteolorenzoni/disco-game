@@ -44,6 +44,11 @@ export const routes: Routes = [
                   import('../page/admin/event-challenge/event-challenge.component').then(
                     (m) => m.EventChallengeComponent
                   )
+              },
+              {
+                path: 'teams',
+                loadComponent: () =>
+                  import('../page/admin/event-team/event-team.component').then((m) => m.EventTeamComponent)
               }
             ]
           }

@@ -17,15 +17,18 @@
         <div class="mt-auto flex flex-col overflow-hidden rounded-lg border border-black/50 p-2 shadow backdrop-blur">
           <p class="truncate text-xxs text-gray-400">{{ event.props.location }}</p>
           <p class="mb-2 truncate text-xl font-bold text-on-background">{{ event.props.name }}</p>
-          <p class="mb-4 line-clamp-3 whitespace-pre-line break-words text-xs italic text-neutral-400">
+          <p class="mb-4 line-clamp-3 whitespace-pre-line text-xs italic text-neutral-400">
             {{ event.props.description }}
           </p>
-          <div class="flex gap-2">
+          <div class="flex shrink-0 gap-2 overflow-hidden">
             <fv-button class="basis-20" label="Modifica" [onClick]="goToUpdateEvent.bind(this, event.id)"></fv-button>
             <fv-button-outlined
               class="basis-20"
               label="Sfide"
               [onClick]="goToUpdateEventChallenges.bind(this, event.id)"></fv-button-outlined>
+            <button class="rounded border px-2 text-white" (click)="goToUpdateEventTeams(event.id)">
+              <fa-icon class="text-sm" [icon]="ICON_TEAM"></fa-icon>
+            </button>
           </div>
         </div>
       </div>
