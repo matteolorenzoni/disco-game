@@ -18,6 +18,7 @@ import { trimFormValues } from '../../../util/utils';
 import { EventChallengeService } from '../../../service/event-challenge.service';
 import { ChallengeStatus } from '../../../model/event-challenge.model';
 import { Doc } from '../../../model/firebase';
+import { splitByDate } from '../../../util/merge.util';
 
 export type SelectOption = {
   label: string;
@@ -121,8 +122,24 @@ export class ChallengeCreateComponent implements OnInit {
       /* Aggiungo o aggiorno il documento */
       const challenge = this.challenge();
       const form = trimFormValues(this.challengeForm.getRawValue());
-      if (challenge) await this.challengeService.update(challenge.id, form);
-      else await this.challengeService.add(form);
+      if (challenge) {
+        const isNewName = challenge.props.name !== form.name;
+        const isNewType = challenge.props.type !== form.type;
+
+        /* Aggiorno sfida */
+        await this.challengeService.update(challenge.id, form);
+
+        /* Aggiorno eventChallenge collegati alla sfida */
+        if (isNewName || isNewType) {
+          const eventChallenges = await this.eventChallengeService.getEventChallengesByProp([
+            { key: 'challengeId', value: challenge.id }
+          ]);
+          await this.eventChallengeService.updateProps(
+            eventChallenges.map((x) => x.id),
+            { challengeName: form.name, challengeType: form.type }
+          );
+        }
+      } else await this.challengeService.add(form);
 
       /* Torno indietro */
       this.location.back();
@@ -144,18 +161,13 @@ export class ChallengeCreateComponent implements OnInit {
       const eventChallenges = await this.eventChallengeService.getEventChallengesByProp([
         { key: 'challengeId', value: challengeId }
       ]);
-      const mergeEventsSplitted = eventChallenges.reduce(
-        (acc, cur) => {
-          const target = cur.props.eventStartDate.getTime() > new Date().getTime() ? 'futureIds' : 'pastIds';
-          acc[target].push(cur.id);
-          return acc;
-        },
-        { futureIds: [] as string[], pastIds: [] as string[] }
-      );
-      await this.eventChallengeService.delete(mergeEventsSplitted.futureIds);
-      await this.eventChallengeService.updateProps(mergeEventsSplitted.pastIds, {
-        status: ChallengeStatus.CHALLENGE_DELETED
-      });
+      const mergeEventsSplitted = splitByDate(eventChallenges, 'eventStartDate');
+      await Promise.all([
+        this.eventChallengeService.delete(mergeEventsSplitted.futureIds),
+        this.eventChallengeService.updateProps(mergeEventsSplitted.pastIds, {
+          status: ChallengeStatus.CHALLENGE_DELETED
+        })
+      ]);
 
       /* Torno indietro */
       this.location.back();

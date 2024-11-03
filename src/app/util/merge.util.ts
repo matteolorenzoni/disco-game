@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Challenge } from '../model/challenge.model';
 import { Doc } from '../model/firebase';
 import { EventChallenge } from '../model/event-challenge.model';
@@ -57,4 +58,18 @@ export const mergeChallenges = (
     }
     return acc;
   }, []);
+};
+
+export const splitByDate = <T extends Record<string, any>, K extends keyof T>(
+  items: Doc<T>[],
+  key: K & (T[K] extends Date ? K : never)
+) => {
+  return items.reduce(
+    (acc, cur) => {
+      const target = (cur.props[key] as Date).getTime() > new Date().getTime() ? 'futureIds' : 'pastIds';
+      acc[target].push(cur.id);
+      return acc;
+    },
+    { futureIds: [] as string[], pastIds: [] as string[] }
+  );
 };
