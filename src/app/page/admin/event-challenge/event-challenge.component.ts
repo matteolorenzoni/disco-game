@@ -195,7 +195,7 @@ export class EventChallengeComponent implements OnInit {
 
     await this.loaderService.executeImmediate(async () => {
       /* Elimino il documento */
-      await this.eventChallengeService.deleteEventChallenge(eventChallengeId);
+      await this.eventChallengeService.deleteEventChallenges([eventChallengeId]);
       this.eventChallenges.update((eventChallenges) => eventChallenges.filter((x) => x.id !== eventChallengeId));
 
       /* Log */

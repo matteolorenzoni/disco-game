@@ -40,7 +40,7 @@ export class FirebaseDocumentService {
     const collectionRef = getCollection(this.firebaseService.getDb(), collectionName).withConverter(converter);
     const docRef = doc(collectionRef, id);
     const docSnap = await getDoc(docRef);
-    if (!docSnap.exists() || !docSnap.data().isActive) throw new Error('noDocument', { cause: 'noDocument' });
+    if (!docSnap.exists()) throw new Error('noDocument', { cause: 'noDocument' });
 
     const data = docSnap.data() as T;
     if (!data.isActive) throw new Error('documentNotActive', { cause: 'documentNotActive' });
@@ -56,6 +56,7 @@ export class FirebaseDocumentService {
     const collectionRef = getCollection(this.firebaseService.getDb(), collectionName).withConverter(converter);
     const docRefs = ids.map((id) => doc(collectionRef, id));
     const docsSnap = await Promise.all(docRefs.map((ref) => getDoc(ref)));
+
     const docs: Doc<T>[] = docsSnap.reduce((acc, docSnap) => {
       if (!docSnap.exists()) return acc;
 
@@ -65,19 +66,6 @@ export class FirebaseDocumentService {
       return [...acc, { id: docSnap.id, props: data }];
     }, [] as Doc<T>[]);
 
-    return docs;
-  }
-
-  public async getDocumentsByProps<T extends Record<string, any>>(
-    collectionName: string,
-    queryParams: Partial<T>,
-    converter: FirestoreDataConverter<T>
-  ): Promise<Doc<T>[]> {
-    const collectionRef = getCollection(this.firebaseService.getDb(), collectionName).withConverter(converter);
-    const queryConstraints = Object.entries(queryParams).map(([key, value]) => where(key, '==', value));
-    const q = query(collectionRef, ...queryConstraints);
-    const querySnapshot = await getDocs(q);
-    const docs = querySnapshot.docs.map((doc) => ({ id: doc.id, props: doc.data() as T }));
     return docs;
   }
 
@@ -95,6 +83,22 @@ export class FirebaseDocumentService {
     return docs;
   }
 
+  public async getDocumentWithConstraints<T extends Record<string, any>>(
+    collectionName: string,
+    queryConstraints: QueryConstraint[],
+    converter: FirestoreDataConverter<T>,
+    isActiveConstraint = true
+  ): Promise<Doc<T> | null> {
+    const collectionRef = getCollection(this.firebaseService.getDb(), collectionName).withConverter(converter);
+    if (isActiveConstraint) queryConstraints.push(where('isActive', '==', true));
+    const q = query(collectionRef, ...queryConstraints);
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.size > 1) throw new Error('tooManyDocuments', { cause: 'tooManyDocuments' });
+    if (querySnapshot.empty) return null;
+    const doc = querySnapshot.docs[0];
+    return { id: doc.id, props: doc.data() as T };
+  }
+
   /* --------------------- Methods READ subscribe --------------------- */
   public subscribeToDocumentsWithConstraints<T extends Record<string, any>>(
     collectionName: string,
@@ -106,6 +110,7 @@ export class FirebaseDocumentService {
     const collectionRef = getCollection(this.firebaseService.getDb(), collectionName).withConverter(converter);
     if (isActiveConstraint) queryConstraints.push(where('isActive', '==', true));
     const q = query(collectionRef, ...queryConstraints);
+
     return onSnapshot(q, (querySnapshot) => {
       const documents: Doc<T>[] = querySnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -122,7 +127,7 @@ export class FirebaseDocumentService {
     return newDocRef.id;
   }
 
-  public async addDocumentById<T extends Record<string, any>>(
+  public async addDocumentById<T extends Record<string, any> & { updatedAt: Date }>(
     id: string,
     collectionName: string,
     data: T
@@ -143,19 +148,6 @@ export class FirebaseDocumentService {
   }
 
   /* --------------------- Methods UPDATE --------------------- */
-  public async updateDocument<T extends Record<string, any> & { updatedAt: Date }>(
-    id: string,
-    collectionName: string,
-    data: Partial<T>
-  ): Promise<void> {
-    const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
-    const docRef = doc(collectionRef, id);
-    await updateDoc(docRef, {
-      ...data,
-      updatedAt: new Date()
-    });
-  }
-
   public async updateDocuments<T extends Record<string, any> & { updatedAt: Date }>(
     ids: string[],
     collectionName: string,
@@ -189,12 +181,6 @@ export class FirebaseDocumentService {
   }
 
   /* --------------------- Methods UPDATE --------------------- */
-  public async deleteDocument(id: string, collectionName: string): Promise<void> {
-    const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
-    const docRef = doc(collectionRef, id);
-    await deleteDoc(docRef);
-  }
-
   public async deleteDocuments(ids: string[], collectionName: string): Promise<void> {
     const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
 

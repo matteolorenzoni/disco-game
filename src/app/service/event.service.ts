@@ -33,12 +33,7 @@ export class EventService {
 
   public async getEventByCode(code: string): Promise<Doc<Event> | null> {
     const valueConstraints = [where('code', '==', code)];
-    const events = await this.documentService.getDocumentsWithConstraints<Event>(
-      COL_EVENTS,
-      valueConstraints,
-      eventConverter
-    );
-    return events.length ? events[0] : null;
+    return await this.documentService.getDocumentWithConstraints<Event>(COL_EVENTS, valueConstraints, eventConverter);
   }
 
   //! [INDEX]
@@ -80,7 +75,7 @@ export class EventService {
 
   /* --------------------------- Update ---------------------------*/
   public async updateEvent(eventId: string, form: EventModel): Promise<void> {
-    await this.documentService.updateDocument<Event>(eventId, COL_EVENTS, {
+    await this.documentService.updateDocuments<Event>([eventId], COL_EVENTS, {
       ...form,
       startDate: new Date(form.startDate),
       endDate: new Date(form.endDate)
@@ -88,7 +83,7 @@ export class EventService {
   }
 
   public async updateEventImageUrl(eventId: string, imageUrl: string): Promise<void> {
-    await this.documentService.updateDocument<Event>(eventId, COL_EVENTS, { imageUrl });
+    await this.documentService.updateDocuments<Event>([eventId], COL_EVENTS, { imageUrl });
   }
 
   public async updateTeams(operation: 'ADD' | 'REMOVE', eventId: string, teamId: string): Promise<void> {
@@ -97,6 +92,6 @@ export class EventService {
 
   /* --------------------------- Delete ---------------------------*/
   public async softDeleteEvent(challengeId: string): Promise<void> {
-    await this.documentService.updateDocument<Event>(challengeId, COL_EVENTS, { isActive: false });
+    await this.documentService.updateDocuments<Event>([challengeId], COL_EVENTS, { isActive: false });
   }
 }

@@ -50,7 +50,7 @@ export class EventChallengeService {
 
   /* --------------------------- Create ---------------------------*/
   public async updateEventChallenge(eventChallengeId: string, form: EventChallenge): Promise<void> {
-    await this.documentService.updateDocument<EventChallenge>(eventChallengeId, COL_EVENT_CHALLENGES, {
+    await this.documentService.updateDocuments<EventChallenge>([eventChallengeId], COL_EVENT_CHALLENGES, {
       ...form,
       startDate: form.startDate ? new Date(form.startDate) : null,
       endDate: form.endDate ? new Date(form.endDate) : null
@@ -64,10 +64,6 @@ export class EventChallengeService {
   }
 
   /* --------------------------- Delete ---------------------------*/
-  public async deleteEventChallenge(eventChallengeId: string): Promise<void> {
-    await this.documentService.deleteDocument(eventChallengeId, COL_EVENT_CHALLENGES);
-  }
-
   public async deleteEventChallenges(eventChallengeIds: string[]): Promise<void> {
     await this.documentService.deleteDocuments(eventChallengeIds, COL_EVENT_CHALLENGES);
   }

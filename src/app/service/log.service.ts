@@ -44,6 +44,7 @@ const ERROR_CUSTOM: Record<string, string> = {
   noUserDocument:
     "L'utente registrato è stato trovato, ma non esiste un documento associato. Contatta il supporto per assistenza.",
   noDocument: 'Documento non trovato. Contatta il supporto per assistenza.',
+  tooManyDocuments: 'Trovato più di un documento, contattare assistenza',
   documentNotActive:
     'Il documento non è attivo perché è stato precedentemente eliminato. Contatta il supporto per assistenza.',
   tooManyEvents: 'Limite massimo di eventi creati raggiunto. Contatta il supporto.',

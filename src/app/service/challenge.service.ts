@@ -46,11 +46,11 @@ export class ChallengeService {
 
   /* --------------------------- Update ---------------------------*/
   public async updateChallenge(challengeId: string, form: ChallengeModel): Promise<void> {
-    await this.documentService.updateDocument<Challenge>(challengeId, COL_CHALLENGES, form);
+    await this.documentService.updateDocuments<Challenge>([challengeId], COL_CHALLENGES, form);
   }
 
   /* --------------------------- Delete ---------------------------*/
   public async softDeleteChallenge(challengeId: string): Promise<void> {
-    await this.documentService.updateDocument<Challenge>(challengeId, COL_CHALLENGES, { isActive: false });
+    await this.documentService.updateDocuments<Challenge>([challengeId], COL_CHALLENGES, { isActive: false });
   }
 }

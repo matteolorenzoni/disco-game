@@ -5,7 +5,7 @@ import { Team, TeamStatus } from '../model/team.model';
 import { Doc } from '../model/firebase';
 import { teamConverter } from '../model/converter';
 import { generateUniqueCode } from '../util/utils';
-import { limit, QueryConstraint, where } from 'firebase/firestore';
+import { limit, where } from 'firebase/firestore';
 import { User } from '../model/user.model';
 import { dateYesterday } from '../util/type.util';
 
@@ -24,22 +24,25 @@ export class TeamService {
   }
 
   //! [INDEX]
-  public async getActiveTeamsByUserId(userId: string, constraints: QueryConstraint[] = []): Promise<Doc<Team>[]> {
+  public async getActiveTeamsByUserId(userId: string): Promise<Doc<Team>[]> {
     const valueConstraints = [
       where('userIds', 'array-contains', userId),
       where('eventStartDate', '>=', dateYesterday())
     ];
-    return this.documentService.getDocumentsWithConstraints<Team>(
-      COL_TEAMS,
-      [...valueConstraints, ...constraints],
-      teamConverter
-    );
+    return this.documentService.getDocumentsWithConstraints<Team>(COL_TEAMS, valueConstraints, teamConverter);
   }
 
   public async getActiveTeamByUserIdFirst(userId: string): Promise<Doc<Team> | null> {
     const limitConstraints = [limit(1)];
-    const teams = await this.getActiveTeamsByUserId(userId, limitConstraints);
-    return teams.length !== 1 ? null : teams[0];
+    const valueConstraints = [
+      where('userIds', 'array-contains', userId),
+      where('eventStartDate', '>=', dateYesterday())
+    ];
+    return this.documentService.getDocumentWithConstraints<Team>(
+      COL_TEAMS,
+      [...limitConstraints, ...valueConstraints],
+      teamConverter
+    );
   }
 
   public async getActiveTeamsByEventId(eventId: string): Promise<Doc<Team>[]> {
@@ -49,21 +52,12 @@ export class TeamService {
 
   public async getActiveTeamByUserIdAndEventId(userId: string, eventId: string): Promise<Doc<Team> | null> {
     const valueConstraints = [where('eventId', '==', eventId), where('userIds', 'array-contains', userId)];
-    const teams = await this.documentService.getDocumentsWithConstraints<Team>(
-      COL_TEAMS,
-      valueConstraints,
-      teamConverter
-    );
-    return teams.length !== 1 ? null : teams[0];
+    return await this.documentService.getDocumentWithConstraints<Team>(COL_TEAMS, valueConstraints, teamConverter);
   }
 
   public async getTeamByCode(code: string): Promise<Doc<Team> | null> {
-    const teams = await this.documentService.getDocumentsByProps<Team>(
-      COL_TEAMS,
-      { code, isActive: true },
-      teamConverter
-    );
-    return teams.length !== 1 ? null : teams[0];
+    const valueConstraints = [where('code', '==', code)];
+    return await this.documentService.getDocumentWithConstraints<Team>(COL_TEAMS, valueConstraints, teamConverter);
   }
 
   /* --------------------------- Create ---------------------------*/
@@ -117,7 +111,7 @@ export class TeamService {
         challenges: []
       }
     ];
-    await this.documentService.updateDocument<Team>(team.id, COL_TEAMS, team.props);
+    await this.documentService.updateDocuments<Team>([team.id], COL_TEAMS, team.props);
   }
 
   public async updatePoints(team: Doc<Team>, userId: string, challengeId: string, points: number): Promise<void> {
@@ -133,7 +127,7 @@ export class TeamService {
     } else {
       user.challenges.push({ id: challengeId, timestamps: [new Date()], totalPoints: points });
     }
-    await this.documentService.updateDocument<Team>(team.id, COL_TEAMS, team.props);
+    await this.documentService.updateDocuments<Team>([team.id], COL_TEAMS, team.props);
   }
 
   /* --------------------------- Delete ---------------------------*/
@@ -144,7 +138,7 @@ export class TeamService {
   public async deleteFromTeam(team: Doc<Team>, userId: string): Promise<Doc<Team>> {
     team.props.userIds = team.props.userIds.filter((x) => x !== userId);
     team.props.users = team.props.users.filter((x) => x.id !== userId);
-    await this.documentService.updateDocument<Team>(team.id, COL_TEAMS, team.props);
+    await this.documentService.updateDocuments<Team>([team.id], COL_TEAMS, team.props);
     return team;
   }
 }

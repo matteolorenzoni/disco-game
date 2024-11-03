@@ -8,6 +8,7 @@ import { userConverter } from '../model/converter';
 import { FirebaseDocumentService } from './firebase-document.service';
 import { generateUniqueCode } from '../util/utils';
 import { StorageService } from './storage.service';
+import { where } from 'firebase/firestore';
 
 const COL_USERS = environment.collection.USERS;
 
@@ -25,21 +26,13 @@ export class UserService {
   }
 
   public async getUserByUsername(userName: string): Promise<Doc<User> | null> {
-    const users = await this.documentService.getDocumentsByProps<User>(
-      COL_USERS,
-      { userName, isActive: true },
-      userConverter
-    );
-    return users.length > 0 ? users[0] : null;
+    const valueConstraints = [where('userName', '==', userName)];
+    return await this.documentService.getDocumentWithConstraints<User>(COL_USERS, valueConstraints, userConverter);
   }
 
   public async getUserByCode(code: string): Promise<Doc<User> | null> {
-    const users = await this.documentService.getDocumentsByProps<User>(
-      COL_USERS,
-      { code, isActive: true },
-      userConverter
-    );
-    return users.length > 0 ? users[0] : null;
+    const valueConstraints = [where('code', '==', code)];
+    return await this.documentService.getDocumentWithConstraints<User>(COL_USERS, valueConstraints, userConverter);
   }
 
   public async getUsersByIds(userIds: string[]): Promise<Doc<User>[]> {
@@ -81,7 +74,7 @@ export class UserService {
   ): Promise<void> {
     const form: Partial<User> = { ...userModelForm, updatedAt: new Date() };
     if (imageUrl !== undefined) form.imageUrl = imageUrl;
-    await this.documentService.updateDocument<User>(userId, COL_USERS, form);
+    await this.documentService.updateDocuments<User>([userId], COL_USERS, form);
   }
 
   public async updateUserImage(image: File, name: string) {
