@@ -3,7 +3,7 @@
 @if (errorMessage() === null) {
   @if (event() !== undefined) {
     @if (event(); as event) {
-      @if (event.props.startDate < NOW) {
+      @if (event.props.startDate.getTime() < NOW.getTime()) {
         <div class="mb-12 flex items-center justify-center gap-4">
           <p class="text-center text-3xl font-bold text-on-background">{{ event.props.name }}</p>
           <button class="h-8 w-8 rounded-full bg-surface p-1 hover:bg-neutral-700" (click)="onRemoveEvent()">

@@ -146,7 +146,7 @@ export class ChallengeCreateComponent implements OnInit {
       ]);
       const mergeEventsSplitted = eventChallenges.reduce(
         (acc, cur) => {
-          const target = cur.props.eventStartDate > new Date() ? 'futureIds' : 'pastIds';
+          const target = cur.props.eventStartDate.getTime() > new Date().getTime() ? 'futureIds' : 'pastIds';
           acc[target].push(cur.id);
           return acc;
         },

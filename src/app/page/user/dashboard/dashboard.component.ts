@@ -164,7 +164,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const userConfirm = confirm('Sei sicuro di voler uscire dalla squadra?');
     if (!userConfirm) return;
 
-    if (eventStartDate < new Date()) {
+    if (eventStartDate.getTime() < new Date().getTime()) {
       this.logService.addLogErrorApp('Operazione non più possibile, evento iniziato');
       return;
     }

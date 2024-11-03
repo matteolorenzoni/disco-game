@@ -45,7 +45,7 @@
                     twColor="amber"
                     [onClick]="onGoToTeam.bind(this, event.id, event.teamId)">
                   </fv-button-outlined>
-                  @if (event.startDate > NOW) {
+                  @if (event.startDate.getTime() > NOW.getTime()) {
                     <button
                       type="button"
                       class="rounded border border-amber-500 px-2 text-amber-500"

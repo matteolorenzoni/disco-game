@@ -13,7 +13,7 @@ export const endDateValidator: ValidatorFn = (group: AbstractControl): Record<st
   const startDate = new Date(startDateStr);
   const endDate = new Date(endDateStr);
 
-  return endDate < startDate ? { endBeforeStart: true } : null;
+  return endDate.getTime() < startDate.getTime() ? { endBeforeStart: true } : null;
 };
 
 export const generateUniqueCode = async <T>(

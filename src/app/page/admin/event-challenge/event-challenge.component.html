@@ -21,7 +21,7 @@
                 (click)="goToUpdateEventChallenge(item.id)">
                 Modifica
               </button>
-              @if (event.props.startDate > NOW) {
+              @if (event.props.startDate.getTime() > NOW.getTime()) {
                 <button
                   class="px-2 text-xxs font-semibold uppercase text-rose-700 hover:text-rose-800 active:text-rose-700"
                   (click)="deleteEventChallenge(item.id, event.props.startDate)">
@@ -86,7 +86,7 @@
     }
   </ul>
 
-  @if (event.props.startDate > NOW) {
+  @if (event.props.startDate.getTime() > NOW.getTime()) {
     <fv-floating-button [execute]="onExecuteFloatingButton.bind(this)"></fv-floating-button>
   }
 }

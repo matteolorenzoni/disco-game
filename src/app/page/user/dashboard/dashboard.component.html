@@ -33,7 +33,7 @@
       <p class="text-md whitespace-pre-line italic">{{ event.props.description }}</p>
     </div>
 
-    @if (event.props.startDate > NOW) {
+    @if (event.props.startDate.getTime() > NOW.getTime()) {
       <div class="mt-12 flex flex-col items-center gap-1 py-8">
         <p class="text-xxs uppercase text-gray-400">Tempo mancante</p>
         <fv-countdown class="truncate text-5xl text-on-background" [date]="event.props.startDate"></fv-countdown>
@@ -86,7 +86,7 @@
       </div>
       <div class="flex gap-2 overflow-hidden">
         <fv-button class="flex-1" label="Visualizza" twColor="primary" [onClick]="onGoToTeam.bind(this)"></fv-button>
-        @if (event.props.startDate > NOW) {
+        @if (event.props.startDate.getTime() > NOW.getTime()) {
           <button type="button" class="rounded bg-primary-700 px-2" (click)="deleteTeam(event.props.startDate)">
             <fa-icon [icon]="ICON_TRASH"></fa-icon>
           </button>

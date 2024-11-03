@@ -120,7 +120,7 @@ export class EventCreateComponent implements OnInit {
     if (this.eventForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
 
     const startDate = new Date(this.eventForm.getRawValue().startDate);
-    if (startDate < new Date()) {
+    if (startDate.getTime() < new Date().getTime()) {
       this.logService.addLogErrorApp('Operazione non più possibile, evento iniziato');
       return;
     }
@@ -162,7 +162,7 @@ export class EventCreateComponent implements OnInit {
     );
     if (!userConfirm) return;
 
-    if (eventStartDate < new Date()) {
+    if (eventStartDate.getTime() < new Date().getTime()) {
       this.logService.addLogErrorApp('Operazione non più possibile, evento iniziato');
       return;
     }

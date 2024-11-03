@@ -169,7 +169,7 @@ export class IndexedDbService {
 
     /* Elimino item scaduti */
     const events = await this.getEvents();
-    const eventsToDelete = events.filter((x) => x.props.startDate < dateYesterday());
+    const eventsToDelete = events.filter((x) => x.props.startDate.getTime() < dateYesterday().getTime());
     this.deleteItems(
       'events',
       eventsToDelete.map((item) => item.id)
@@ -196,7 +196,7 @@ export class IndexedDbService {
 
     /* Elimino item scaduti */
     const teams = await this.getTeams();
-    const teamsToDelete = teams.filter((x) => x.props.eventStartDate < dateYesterday());
+    const teamsToDelete = teams.filter((x) => x.props.eventStartDate.getTime() < dateYesterday().getTime());
     this.deleteItems(
       'teams',
       teamsToDelete.map((item) => item.id)
@@ -253,7 +253,7 @@ export class IndexedDbService {
     /* Elimino item scaduti */
     const dbLeaderboard = await this.getAllItems<Team>('leaderboard');
     const leaderboard = dbLeaderboard.map(({ id, ...props }) => ({ id, props }));
-    const teamsToDelete = leaderboard.filter((x) => x.props.eventStartDate < dateYesterday());
+    const teamsToDelete = leaderboard.filter((x) => x.props.eventStartDate.getTime() < dateYesterday().getTime());
     this.deleteItems(
       'leaderboard',
       teamsToDelete.map((item) => item.id)

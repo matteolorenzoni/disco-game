@@ -142,7 +142,7 @@ export class EventChallengeComponent implements OnInit {
   protected async addOrUpdateEventChallenge() {
     if (this.eventChallengeForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
 
-    if (this.event() && this.event()!.props.startDate < new Date()) {
+    if (this.event() && this.event()!.props.startDate.getTime() < new Date().getTime()) {
       this.logService.addLogErrorApp('Operazione non più possibile, evento iniziato');
       return;
     }
@@ -188,7 +188,7 @@ export class EventChallengeComponent implements OnInit {
     const userConfirm = confirm("Sei sicuro di voler eliminare la sfida dall'evento?");
     if (!userConfirm) return;
 
-    if (eventStartDate < new Date()) {
+    if (eventStartDate.getTime() < new Date().getTime()) {
       this.logService.addLogErrorApp('Operazione non più possibile, evento iniziato');
       return;
     }
