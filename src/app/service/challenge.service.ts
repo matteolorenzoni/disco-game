@@ -36,7 +36,7 @@ export class ChallengeService {
   }
 
   /* --------------------------- Create ---------------------------*/
-  public async addChallenge(form: ChallengeModel): Promise<void> {
+  public async add(form: ChallengeModel): Promise<void> {
     await this.documentService.addDocument<Challenge>(COL_CHALLENGES, {
       ...form,
       isActive: true,
@@ -45,12 +45,12 @@ export class ChallengeService {
   }
 
   /* --------------------------- Update ---------------------------*/
-  public async updateChallenge(challengeId: string, form: ChallengeModel): Promise<void> {
+  public async update(challengeId: string, form: ChallengeModel): Promise<void> {
     await this.documentService.updateDocuments<Challenge>([challengeId], COL_CHALLENGES, form);
   }
 
   /* --------------------------- Delete ---------------------------*/
-  public async softDeleteChallenge(challengeId: string): Promise<void> {
+  public async softDelete(challengeId: string): Promise<void> {
     await this.documentService.updateDocuments<Challenge>([challengeId], COL_CHALLENGES, { isActive: false });
   }
 }

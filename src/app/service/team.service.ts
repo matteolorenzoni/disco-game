@@ -67,7 +67,7 @@ export class TeamService {
   }
 
   /* --------------------------- Create ---------------------------*/
-  public async addTeam(
+  public async add(
     user: Doc<User>,
     eventId: string,
     eventStartDate: Date,
@@ -106,7 +106,11 @@ export class TeamService {
   }
 
   /* --------------------------- Update ---------------------------*/
-  public async updateUsers(team: Doc<Team>, user: Doc<User>): Promise<void> {
+  public async updateProps(teamIds: string[], data: Partial<Team>): Promise<void> {
+    await this.documentService.updateDocuments<Team>(teamIds, COL_TEAMS, data);
+  }
+
+  public async updateUser(team: Doc<Team>, user: Doc<User>): Promise<void> {
     team.props.userIds = [...team.props.userIds, user.id];
     team.props.users = [
       ...team.props.users,
@@ -136,16 +140,8 @@ export class TeamService {
     await this.documentService.updateDocuments<Team>([team.id], COL_TEAMS, team.props);
   }
 
-  public async updateTeamPoints(teamId: string, totalPoints: number): Promise<void> {
-    await this.documentService.updateDocuments<Team>([teamId], COL_TEAMS, { totalPoints });
-  }
-
-  public async updateTeamStatus(teamId: string, status: TeamStatus): Promise<void> {
-    await this.documentService.updateDocuments<Team>([teamId], COL_TEAMS, { status });
-  }
-
   /* --------------------------- Delete ---------------------------*/
-  public async softDeleteTeams(teamIds: string[]): Promise<void> {
+  public async softDelete(teamIds: string[]): Promise<void> {
     await this.documentService.updateDocuments<Team>(teamIds, COL_TEAMS, { isActive: false });
   }
 

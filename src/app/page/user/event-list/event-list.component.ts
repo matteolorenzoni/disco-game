@@ -112,7 +112,7 @@ export class EventListComponent implements OnInit {
       if (!teamName) return;
 
       /* Aggiungo Team al DB */
-      const team = await this.teamService.addTeam(user, eventId, startDate, teamName);
+      const team = await this.teamService.add(user, eventId, startDate, teamName);
       if (!team) {
         this.logService.addLogErrorApp('Nome già esistente, sceglierne uno nuovo');
         return;
@@ -154,7 +154,7 @@ export class EventListComponent implements OnInit {
       }
 
       /* Aggiungo user al team */
-      await this.teamService.updateUsers(team, user);
+      await this.teamService.updateUser(team, user);
 
       /* Aggiungo partecipazione */
       await this.addParticipation(eventId, team.id, user.id);
@@ -183,7 +183,7 @@ export class EventListComponent implements OnInit {
 
       /* Elimino squadra (se non ha più nessun membro) */
       if (teamUpdated.props.userIds.length <= 0) {
-        await this.teamService.softDeleteTeams([team.id]);
+        await this.teamService.softDelete([team.id]);
         await this.eventService.updateTeams('REMOVE', eventId, team.id);
       }
 

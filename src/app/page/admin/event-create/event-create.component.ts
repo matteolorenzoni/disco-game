@@ -129,7 +129,32 @@ export class EventCreateComponent implements OnInit {
       const event = this.event();
       const form = trimFormValues(this.eventForm.getRawValue());
       if (event) {
-        await this.eventService.updateEvent(event.id, form);
+        const isNewStartDate = event.props.startDate.getTime() !== new Date(form.startDate).getTime();
+
+        /* Controllo che non si sia sbagliato con l'aggiornamento della data */
+        if (isNewStartDate) {
+          const userConfirm = confirm('Data di inizio aggiornata, proseguire?');
+          if (!userConfirm) return;
+        }
+
+        await this.eventService.update(event.id, form);
+
+        if (isNewStartDate) {
+          const [teams, eventChallenges] = await Promise.all([
+            this.teamService.getActiveTeamsByEventId(event.id),
+            this.eventChallengeService.getEventChallengesByProp([{ key: 'eventId', value: event.id }])
+          ]);
+          await Promise.all([
+            this.teamService.updateProps(
+              teams.map((x) => x.id),
+              { eventStartDate: new Date(form.startDate) }
+            ),
+            this.eventChallengeService.updateProps(
+              eventChallenges.map((x) => x.id),
+              { eventStartDate: new Date(form.startDate) }
+            )
+          ]);
+        }
 
         /* Torno indietro */
         this.location.back();
@@ -140,13 +165,13 @@ export class EventCreateComponent implements OnInit {
       }
 
       /* Creo id documento */
-      const eventId = this.eventService.createEventId();
+      const eventId = this.eventService.createId();
 
       /* Creo immagine */
-      const imageUrl = await this.eventService.addEventImage(this.imageFile()!, eventId);
+      const imageUrl = await this.eventService.addImage(this.imageFile()!, eventId);
 
       /* Creazione evento */
-      await this.eventService.addEvent(eventId, form, imageUrl);
+      await this.eventService.add(eventId, form, imageUrl);
 
       /* Torno indietro */
       this.location.back();
@@ -169,11 +194,11 @@ export class EventCreateComponent implements OnInit {
 
     await this.loaderService.executeImmediate(async () => {
       /* Elimino evento */
-      await this.eventService.softDeleteEvent(eventId);
+      await this.eventService.softDelete(eventId);
 
       /* Elimino squadre associate all'evento */
       const teams = await this.teamService.getActiveTeamsByEventId(eventId);
-      await this.teamService.softDeleteTeams(teams.map((x) => x.id));
+      await this.teamService.softDelete(teams.map((x) => x.id));
 
       /* Elimino le partecipazioni dei membri delle varie squadre eliminate */
       const participations = teams.flatMap((team) =>
@@ -192,7 +217,7 @@ export class EventCreateComponent implements OnInit {
       const eventChallenges = await this.eventChallengeService.getEventChallengesByProp([
         { key: 'eventId', value: eventId }
       ]);
-      await this.eventChallengeService.deleteEventChallenges(eventChallenges.map((x) => x.id));
+      await this.eventChallengeService.delete(eventChallenges.map((x) => x.id));
 
       /* Torno indietro */
       this.location.back();

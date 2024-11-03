@@ -162,7 +162,7 @@ export class EventChallengeComponent implements OnInit {
         const challenge = this.challenges().find((x) => x.id === form.challengeId);
         const { name, type } = challenge!.props;
         const eventChallenge = this.createChallenge(name, type, form);
-        const newEventChallenge = await this.eventChallengeService.addEventChallenge(eventChallenge);
+        const newEventChallenge = await this.eventChallengeService.add(eventChallenge);
 
         /* Aggiorno app */
         this.eventChallenges.update((eventChallenges) => [...eventChallenges, newEventChallenge]);
@@ -170,7 +170,7 @@ export class EventChallengeComponent implements OnInit {
         /* Aggiorno db */
         const { challengeName, challengeType } = eventChallengeSelected.props;
         const eventChallenge = this.createChallenge(challengeName, challengeType, form);
-        await this.eventChallengeService.updateEventChallenge(eventChallengeSelected.id, eventChallenge);
+        await this.eventChallengeService.update(eventChallengeSelected.id, eventChallenge);
 
         /* Aggiorno app */
         eventChallengeSelected.props = eventChallenge;
@@ -195,7 +195,7 @@ export class EventChallengeComponent implements OnInit {
 
     await this.loaderService.executeImmediate(async () => {
       /* Elimino il documento */
-      await this.eventChallengeService.deleteEventChallenges([eventChallengeId]);
+      await this.eventChallengeService.delete([eventChallengeId]);
       this.eventChallenges.update((eventChallenges) => eventChallenges.filter((x) => x.id !== eventChallengeId));
 
       /* Log */

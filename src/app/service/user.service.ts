@@ -40,7 +40,7 @@ export class UserService {
   }
 
   /* --------------------------- Create ---------------------------*/
-  public async addUser(userId: string, userModelForm: UserModel, imageUrl: string | null): Promise<void> {
+  public async add(userId: string, userModelForm: UserModel, imageUrl: string | null): Promise<void> {
     /* Check user name univoco */
     const user = await this.getUserByUsername(userModelForm.userName);
     if (user) throw new Error('usernameNotAvailable', { cause: 'usernameNotAvailable' });
@@ -62,22 +62,18 @@ export class UserService {
     });
   }
 
-  public async addUserImage(image: File, name: string) {
+  public async addImage(image: File, name: string) {
     return await this.storageService.saveImage(image, COL_USERS, name);
   }
 
   /* --------------------------- Update ---------------------------*/
-  public async updateUser(
-    userId: string,
-    userModelForm: UserModel,
-    imageUrl: string | null | undefined
-  ): Promise<void> {
+  public async update(userId: string, userModelForm: UserModel, imageUrl: string | null | undefined): Promise<void> {
     const form: Partial<User> = { ...userModelForm, updatedAt: new Date() };
     if (imageUrl !== undefined) form.imageUrl = imageUrl;
     await this.documentService.updateDocuments<User>([userId], COL_USERS, form);
   }
 
-  public async updateUserImage(image: File, name: string) {
+  public async updateImage(image: File, name: string) {
     return await this.storageService.updateImage(image, COL_USERS, name);
   }
 

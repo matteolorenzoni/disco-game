@@ -75,7 +75,7 @@ export class EventTeamComponent implements OnInit {
 
       /* Aggiorno squadra */
       const totalPoints = team.props.totalPoints + (operation === 'ADD' ? this.pointsToUpdate : -this.pointsToUpdate);
-      await this.teamService.updateTeamPoints(team.id, totalPoints);
+      await this.teamService.updateProps([team.id], { totalPoints });
       this.teams.update((val) => val.map((x) => (x.id === team.id ? { ...x, props: { ...x.props, totalPoints } } : x)));
 
       /* Log */
@@ -87,7 +87,7 @@ export class EventTeamComponent implements OnInit {
     await this.loaderService.executeImmediate(async () => {
       /* Aggiorno squadra */
       const status = (event.target as HTMLSelectElement).value as TeamStatus;
-      await this.teamService.updateTeamStatus(team.id, status);
+      await this.teamService.updateProps([team.id], { status });
       this.teams.update((val) => val.map((x) => (x.id === team.id ? { ...x, props: { ...x.props, status } } : x)));
 
       /* Log */

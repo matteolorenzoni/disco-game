@@ -180,7 +180,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
       /* Elimino squadra (se non ha più nessun membro) */
       if (teamUpdated.props.userIds.length <= 0) {
-        await this.teamService.softDeleteTeams([team.id]);
+        await this.teamService.softDelete([team.id]);
         await this.eventService.updateTeams('REMOVE', event.id, team.id);
       }
 

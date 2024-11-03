@@ -108,11 +108,11 @@ export class UserCreateComponent implements OnInit {
     /* Creazione utente immagine */
     let imageUrl: string | null = null;
     if (this.imageFile()) {
-      imageUrl = await this.userService.addUserImage(this.imageFile()!, userCredential.user.uid);
+      imageUrl = await this.userService.addImage(this.imageFile()!, userCredential.user.uid);
     }
 
     /* Aggiunta utente a DB */
-    await this.userService.addUser(userCredential.user.uid, userModelForm, imageUrl);
+    await this.userService.add(userCredential.user.uid, userModelForm, imageUrl);
 
     /* Log */
     this.logService.addLogConfirm('Utente registrato');
@@ -125,11 +125,11 @@ export class UserCreateComponent implements OnInit {
     /* Aggiornamento utente immagine */
     let imageUrl: string | null | undefined;
     if (this.imageFile()) {
-      imageUrl = await this.userService.updateUserImage(this.imageFile()!, userId);
+      imageUrl = await this.userService.updateImage(this.imageFile()!, userId);
     }
 
     /* Creazione utente */
-    await this.userService.updateUser(userId, userModelForm, imageUrl);
+    await this.userService.update(userId, userModelForm, imageUrl);
 
     /* Aggiorno local storage */
     const lsUser = this.lsService.getUser();

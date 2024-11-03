@@ -48,11 +48,11 @@ export class EventService {
   }
 
   /* --------------------------- Create ---------------------------*/
-  public createEventId(): string {
+  public createId(): string {
     return this.documentService.createDocId(COL_EVENTS);
   }
 
-  public async addEvent(eventId: string, form: EventModel, imageUrl: string): Promise<string> {
+  public async add(eventId: string, form: EventModel, imageUrl: string): Promise<string> {
     /* Check codice univoco */
     const code = await generateUniqueCode(6, 100, this.getEventByCode.bind(this));
 
@@ -69,12 +69,12 @@ export class EventService {
     return docRef.id;
   }
 
-  public async addEventImage(image: File, name: string) {
+  public async addImage(image: File, name: string) {
     return await this.storageService.saveImage(image, COL_EVENTS, name);
   }
 
   /* --------------------------- Update ---------------------------*/
-  public async updateEvent(eventId: string, form: EventModel): Promise<void> {
+  public async update(eventId: string, form: EventModel): Promise<void> {
     await this.documentService.updateDocuments<Event>([eventId], COL_EVENTS, {
       ...form,
       startDate: new Date(form.startDate),
@@ -82,8 +82,8 @@ export class EventService {
     });
   }
 
-  public async updateEventImageUrl(eventId: string, imageUrl: string): Promise<void> {
-    await this.documentService.updateDocuments<Event>([eventId], COL_EVENTS, { imageUrl });
+  public async updateProps(eventIds: string[], data: Partial<Event>): Promise<void> {
+    await this.documentService.updateDocuments<Event>(eventIds, COL_EVENTS, data);
   }
 
   public async updateTeams(operation: 'ADD' | 'REMOVE', eventId: string, teamId: string): Promise<void> {
@@ -91,7 +91,7 @@ export class EventService {
   }
 
   /* --------------------------- Delete ---------------------------*/
-  public async softDeleteEvent(challengeId: string): Promise<void> {
+  public async softDelete(challengeId: string): Promise<void> {
     await this.documentService.updateDocuments<Event>([challengeId], COL_EVENTS, { isActive: false });
   }
 }

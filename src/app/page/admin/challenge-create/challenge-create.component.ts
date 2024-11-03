@@ -121,8 +121,8 @@ export class ChallengeCreateComponent implements OnInit {
       /* Aggiungo o aggiorno il documento */
       const challenge = this.challenge();
       const form = trimFormValues(this.challengeForm.getRawValue());
-      if (challenge) await this.challengeService.updateChallenge(challenge.id, form);
-      else await this.challengeService.addChallenge(form);
+      if (challenge) await this.challengeService.update(challenge.id, form);
+      else await this.challengeService.add(form);
 
       /* Torno indietro */
       this.location.back();
@@ -138,7 +138,7 @@ export class ChallengeCreateComponent implements OnInit {
 
     await this.loaderService.executeImmediate(async () => {
       /* Elimina la sfida */
-      await this.challengeService.softDeleteChallenge(challengeId);
+      await this.challengeService.softDelete(challengeId);
 
       /* Elimina tutti gli eventChallenge associati a quella sfida oppure li marco come ban (in base alla data di evento) */
       const eventChallenges = await this.eventChallengeService.getEventChallengesByProp([
@@ -152,11 +152,10 @@ export class ChallengeCreateComponent implements OnInit {
         },
         { futureIds: [] as string[], pastIds: [] as string[] }
       );
-      await this.eventChallengeService.deleteEventChallenges(mergeEventsSplitted.futureIds);
-      await this.eventChallengeService.updateEventChallengesStatus(
-        mergeEventsSplitted.pastIds,
-        ChallengeStatus.CHALLENGE_DELETED
-      );
+      await this.eventChallengeService.delete(mergeEventsSplitted.futureIds);
+      await this.eventChallengeService.updateProps(mergeEventsSplitted.pastIds, {
+        status: ChallengeStatus.CHALLENGE_DELETED
+      });
 
       /* Torno indietro */
       this.location.back();
