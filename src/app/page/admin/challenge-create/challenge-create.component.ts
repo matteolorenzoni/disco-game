@@ -19,6 +19,7 @@ import { EventChallengeService } from '../../../service/event-challenge.service'
 import { ChallengeStatus } from '../../../model/event-challenge.model';
 import { Doc } from '../../../model/firebase';
 import { splitByDate } from '../../../util/merge.util';
+import { EventService } from '../../../service/event.service';
 
 export type SelectOption = {
   label: string;
@@ -45,6 +46,7 @@ export class ChallengeCreateComponent implements OnInit {
   /* Services */
   private readonly route = inject(ActivatedRoute);
   private readonly location = inject(Location);
+  private readonly eventService = inject(EventService);
   private readonly challengeService = inject(ChallengeService);
   private readonly eventChallengeService = inject(EventChallengeService);
   private readonly loaderService = inject(LoaderService);
@@ -134,10 +136,16 @@ export class ChallengeCreateComponent implements OnInit {
           const eventChallenges = await this.eventChallengeService.getEventChallengesByProp([
             { key: 'challengeId', value: challenge.id }
           ]);
-          await this.eventChallengeService.updateProps(
-            eventChallenges.map((x) => x.id),
-            { challengeName: form.name, challengeType: form.type }
-          );
+          await Promise.all([
+            this.eventChallengeService.updateProps(
+              eventChallenges.map((x) => x.id),
+              { challengeName: form.name, challengeType: form.type }
+            ),
+            this.eventService.updateProps(
+              eventChallenges.map((x) => x.props.eventId),
+              {}
+            )
+          ]);
         }
       } else await this.challengeService.add(form);
 
@@ -163,10 +171,15 @@ export class ChallengeCreateComponent implements OnInit {
       ]);
       const mergeEventsSplitted = splitByDate(eventChallenges, 'eventStartDate');
       await Promise.all([
-        this.eventChallengeService.delete(mergeEventsSplitted.futureIds),
-        this.eventChallengeService.updateProps(mergeEventsSplitted.pastIds, {
-          status: ChallengeStatus.CHALLENGE_DELETED
-        })
+        this.eventChallengeService.delete(mergeEventsSplitted.future.map((x) => x.id)),
+        this.eventChallengeService.updateProps(
+          mergeEventsSplitted.past.map((x) => x.id),
+          { status: ChallengeStatus.CHALLENGE_DELETED }
+        ),
+        this.eventService.updateProps(
+          eventChallenges.map((x) => x.props.eventId),
+          {}
+        )
       ]);
 
       /* Torno indietro */

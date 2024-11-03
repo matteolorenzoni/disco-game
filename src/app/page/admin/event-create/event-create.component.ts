@@ -137,8 +137,10 @@ export class EventCreateComponent implements OnInit {
           if (!userConfirm) return;
         }
 
+        /* Aggiorno evento */
         await this.eventService.update(event.id, form);
 
+        /* Aggiorno squadre e eventChallenge collegati all'evento */
         if (isNewStartDate) {
           const [teams, eventChallenges] = await Promise.all([
             this.teamService.getActiveTeamsByEventId(event.id),

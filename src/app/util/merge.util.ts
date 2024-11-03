@@ -66,10 +66,10 @@ export const splitByDate = <T extends Record<string, any>, K extends keyof T>(
 ) => {
   return items.reduce(
     (acc, cur) => {
-      const target = (cur.props[key] as Date).getTime() > new Date().getTime() ? 'futureIds' : 'pastIds';
-      acc[target].push(cur.id);
+      const target = (cur.props[key] as Date).getTime() > new Date().getTime() ? 'future' : 'past';
+      acc[target].push(cur);
       return acc;
     },
-    { futureIds: [] as string[], pastIds: [] as string[] }
+    { future: [] as Doc<T>[], past: [] as Doc<T>[] }
   );
 };
