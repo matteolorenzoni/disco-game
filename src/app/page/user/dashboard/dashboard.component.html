@@ -1,18 +1,5 @@
 <app-title [pages]="[{ path: '', label: 'Dashboard' }]"></app-title>
 
-@if (team() === null) {
-  <div class="p-8 pt-40 flex-center">
-    <div class="flex flex-col rounded-lg bg-surface p-4 text-gray-200 shadow backdrop-blur">
-      <h2 class="mb-4 text-lg font-bold">Nessuna squadra trovata</h2>
-      <p class="text-sm">
-        Al momento non sei associato a nessuna squadra. Unisciti a noi per partecipare a eventi emozionanti e vivere
-        nuove esperienze!
-      </p>
-      <p class="mt-2 text-sm">Crea una squadra o unisciti a una già esistente per iniziare la tua avventura!</p>
-    </div>
-  </div>
-}
-
 @if (team(); as team) {
   @if (event(); as event) {
     <div class="flex flex-col gap-2">
@@ -125,4 +112,17 @@
       }
     </div>
   }
+}
+
+@if (team() === null) {
+  <div class="mt-40 p-8 flex-center">
+    <div class="flex flex-col rounded-lg bg-surface p-4 text-gray-200 shadow backdrop-blur">
+      <h2 class="mb-4 text-lg font-bold">Nessuna squadra trovata</h2>
+      <p class="text-sm">
+        Al momento non sei associato a nessuna squadra. Unisciti a noi per partecipare a eventi emozionanti e vivere
+        nuove esperienze!
+      </p>
+      <p class="mt-2 text-sm">Crea una squadra o unisciti a una già esistente per iniziare la tua avventura!</p>
+    </div>
+  </div>
 }

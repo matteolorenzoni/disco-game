@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { BarcodeFormat } from '@zxing/library';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
@@ -37,6 +37,7 @@ type ScanError = {
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     ReactiveFormsModule,
     TitleComponent,
     FvFieldIconComponent,
@@ -69,7 +70,12 @@ export class DashboardComponent implements OnInit {
   /* Variables camera*/
   errorMessage = signal<'NO_CAMERA' | 'NO_PERMISSION' | null | undefined>(undefined);
   cameras = signal<MediaDeviceInfo[]>([]);
-  cameraSelected = signal<MediaDeviceInfo | undefined>(undefined);
+  deviceId = signal<string | undefined>(undefined);
+  device = computed<MediaDeviceInfo | undefined>(() => {
+    const cameras = this.cameras();
+    const deviceId = this.deviceId();
+    return cameras.find((x) => x.deviceId === deviceId);
+  });
 
   /* Constants */
   ALLOWED_FORMATS = [BarcodeFormat.QR_CODE];
@@ -286,7 +292,15 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    /* Controllo che la sfida può essere eseguita (massimo numero di volte) */
+    /* Controllo l'orario di inizio della sfida (se presente) */
+    if (mergeChallenge.startDate !== null) {
+      if (mergeChallenge.startDate.getDate() > new Date().getTime()) {
+        this.logService.addLogErrorApp('Sfida non ancora iniziata', false);
+        return;
+      }
+    }
+
+    /* Controllo che la sfida non abbia raggiunto il numero massimo di tentativi (se presente) */
     if (mergeChallenge.maxTimes !== null) {
       const user = team.props.users.find((x) => x.id === qrcode.userId);
       if (user) {
@@ -317,35 +331,28 @@ export class DashboardComponent implements OnInit {
   protected onCameraChange(event: EventTarget | null): void {
     /* Se nessun evento, chiudo la camera a pulisco il local storage */
     if (!event) {
-      this.cameraSelected.set(undefined);
+      this.deviceId.set(undefined);
       this.lsService.removeScannerDeviceId();
       return;
     }
 
     /* Imposto la camera selezionata */
     const deviceId = (event as HTMLSelectElement).value;
-    const newCamera = this.cameras().find((x) => x.deviceId === deviceId);
-
-    /* Verifico se la nuova camera esiste, aggiorno il local storage */
-    if (newCamera) {
-      this.cameraSelected.set(newCamera);
-      this.lsService.setScannerDeviceId(deviceId);
-    } else {
-      this.lsService.removeScannerDeviceId();
-    }
+    this.deviceId.set(deviceId);
+    this.lsService.setScannerDeviceId(deviceId);
   }
 
   protected onToggleCamera(): void {
     const lsScannerDeviceId = this.lsService.getScannerDeviceId();
 
-    /* Se presente la camera la chiudo, viceversa seleziono la prima tra quelle disponibili */
+    /* Se la camera è presente allora la chiudo, viceversa seleziono la prima tra quelle disponibili */
     if (lsScannerDeviceId) {
-      this.cameraSelected.set(undefined);
+      this.deviceId.set(undefined);
       this.lsService.removeScannerDeviceId();
     } else {
       const camera = this.cameras()[0] as MediaDeviceInfo | undefined;
       if (!camera) return;
-      this.cameraSelected.set(camera);
+      this.deviceId.set(camera.deviceId);
       this.lsService.setScannerDeviceId(camera.deviceId);
     }
   }
@@ -363,11 +370,9 @@ export class DashboardComponent implements OnInit {
     this.cameras.set(cameras);
 
     /* Recupero l'ID della camera selezionata dal local storage e verifico se esiste */
-    const deviceId = this.lsService.getScannerDeviceId();
-    const newCamera = this.cameras().find((x) => x.deviceId === deviceId);
-
     /* Se esiste, imposta quella come camera selezionata, altrimenti seleziona la prima camera disponibile */
-    if (newCamera) this.cameraSelected.set(newCamera);
-    else if (cameras.length > 0) this.cameraSelected.set(cameras[0]);
+    const deviceId = this.lsService.getScannerDeviceId();
+    if (deviceId) this.deviceId.set(deviceId);
+    else if (cameras.length > 0) this.deviceId.set(cameras[0].deviceId);
   }
 }
