@@ -53,6 +53,7 @@ export class UserService {
 
     await this.documentService.addDocumentById<User>(userId, COL_USERS, {
       ...userWithoutPassword,
+      birthDate: new Date(userWithoutPassword.birthDate),
       imageUrl,
       role: UserRole.USER,
       code,
@@ -68,7 +69,15 @@ export class UserService {
 
   /* --------------------------- Update ---------------------------*/
   public async update(userId: string, userModelForm: UserModel, imageUrl: string | null | undefined): Promise<void> {
-    const form: Partial<User> = { ...userModelForm, updatedAt: new Date() };
+    /* Escludi la password dal userModelForm */
+    const { password, ...userWithoutPassword } = userModelForm;
+
+    /* Aggiorno user ed eventualmente immagine */
+    const form: Partial<User> = {
+      ...userWithoutPassword,
+      birthDate: new Date(userWithoutPassword.birthDate),
+      updatedAt: new Date()
+    };
     if (imageUrl !== undefined) form.imageUrl = imageUrl;
     await this.documentService.updateDocuments<User>([userId], COL_USERS, form);
   }

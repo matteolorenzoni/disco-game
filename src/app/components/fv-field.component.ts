@@ -2,14 +2,15 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { ControlContainer, FormGroupDirective, ReactiveFormsModule } from '@angular/forms';
 
-type InputType = 'text' | 'password' | 'email' | 'number' | 'datetime-local';
+type InputType = 'text' | 'password' | 'email' | 'number' | 'date' | 'datetime-local';
 
 const inputModeMap: { [key in InputType]: string } = {
   text: 'text',
   password: 'text',
   email: 'email',
   number: 'numeric',
-  'datetime-local': 'text' // Modifica se necessario
+  date: 'text',
+  'datetime-local': 'text'
 };
 
 @Component({

@@ -2,6 +2,7 @@ export type User = {
   name: string;
   lastName: string;
   userName: string;
+  birthDate: Date;
   email: string;
   imageUrl: string | null;
   role: UserRole;

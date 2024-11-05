@@ -1,4 +1,4 @@
-import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { CommonModule, formatDate, NgOptimizedImage } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -39,7 +39,7 @@ export class UserCreateComponent implements OnInit {
   user = signal<Doc<User> | undefined>(undefined);
   imagePreview = signal<string | ArrayBuffer | null | undefined>(undefined);
   imageFile = signal<File | undefined>(undefined);
-  isPolicyOk = signal<boolean>(false);
+  isPolicyAccepted = signal<boolean>(false);
 
   /* Icons */
   ICON_PEN = faPen;
@@ -49,10 +49,7 @@ export class UserCreateComponent implements OnInit {
     name: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     lastName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     userName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    // birthDate: new FormControl('', {
-    //   nonNullable: true,
-    //   validators: [Validators.required]
-    // }),
+    birthDate: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     email: new FormControl('', {
       nonNullable: true,
       validators: [Validators.required, Validators.email]
@@ -77,6 +74,7 @@ export class UserCreateComponent implements OnInit {
         name: lsUser.props.name,
         lastName: lsUser.props.lastName,
         userName: lsUser.props.userName,
+        birthDate: formatDate(lsUser.props.birthDate, 'yyyy-MM-dd', 'it'),
         email: lsUser.props.email,
         password: '******'
       });
@@ -103,9 +101,14 @@ export class UserCreateComponent implements OnInit {
     this.storageService.onImageChange(event, this.imagePreview, this.imageFile);
   }
 
+  protected onUpdatePolicyAcceptance(event: Event): void {
+    const isChecked = (event.target as HTMLInputElement)?.checked ?? false;
+    this.isPolicyAccepted.set(isChecked);
+  }
+
   /* ------------------------------- Methods: util ------------------------------- */
   private async addUser(userModelForm: UserModel): Promise<void> {
-    if (!this.isPolicyOk()) {
+    if (!this.isPolicyAccepted()) {
       this.logService.addLogErrorApp('Accetta la privacy policy per procedere');
       return;
     }
@@ -142,7 +145,7 @@ export class UserCreateComponent implements OnInit {
     /* Aggiorno local storage */
     const lsUser = this.lsService.getUser();
     if (lsUser) {
-      lsUser.props = { ...lsUser.props, ...userModelForm };
+      lsUser.props = { ...lsUser.props, ...userModelForm, birthDate: new Date(userModelForm.birthDate) };
       if (this.imageFile()) lsUser.props.imageUrl = imageUrl ?? null;
       this.lsService.setUser(lsUser);
     }

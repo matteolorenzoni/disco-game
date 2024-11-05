@@ -32,6 +32,8 @@
 
   <fv-field name="userName" label="Username"></fv-field>
 
+  <fv-field name="birthDate" label="Data di nascita" type="date"></fv-field>
+
   <fv-field name="email" label="Email" type="email"></fv-field>
 
   <fv-field name="password" label="Password" type="password"></fv-field>
@@ -41,7 +43,8 @@
       <input
         type="checkbox"
         id="privacy"
-        class="mr-2 h-4 w-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500" />
+        class="mr-2 h-4 w-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
+        (change)="onUpdatePolicyAcceptance($event)" />
       <label for="privacy" class="text-gray-200">
         Accetto la
         <a href="./sign-up/privacy-policy" class="font-bold text-primary-500 hover:underline">Privacy Policy</a>
