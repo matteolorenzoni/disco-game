@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
-import { FirebaseService } from '../../service/firebase.service';
-import { UserCreateComponent } from '../user/user-create/user-create.component';
+import { FirebaseService } from '../../../service/firebase.service';
+import { UserCreateComponent } from '../user-create/user-create.component';
 
 @Component({
   selector: 'app-sign-up',

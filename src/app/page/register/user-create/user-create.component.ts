@@ -14,6 +14,8 @@ import { LocalStorageService } from '../../../service/local-storage.service';
 import { LoaderService } from '../../../service/loader.service';
 import { LogService } from '../../../service/log.service';
 import { trimFormValues } from '../../../util/utils';
+import { Doc } from '../../../model/firebase';
+import { User } from '../../../model/user.model';
 
 @Component({
   selector: 'app-user-create',
@@ -34,8 +36,10 @@ export class UserCreateComponent implements OnInit {
   private readonly logService = inject(LogService);
 
   /* Variables */
+  user = signal<Doc<User> | undefined>(undefined);
   imagePreview = signal<string | ArrayBuffer | null | undefined>(undefined);
   imageFile = signal<File | undefined>(undefined);
+  isPolicyOk = signal<boolean>(false);
 
   /* Icons */
   ICON_PEN = faPen;
@@ -67,6 +71,7 @@ export class UserCreateComponent implements OnInit {
   /* -------------------------- Methods initialization --------------------------  */
   private initIndexedDb() {
     const lsUser = this.lsService.getUser();
+    this.user.set(lsUser ?? undefined);
     if (lsUser) {
       this.signUpForm.setValue({
         name: lsUser.props.name,
@@ -90,8 +95,6 @@ export class UserCreateComponent implements OnInit {
       const userModelForm = trimFormValues(this.signUpForm.getRawValue());
       if (!userId) await this.addUser(userModelForm);
       else await this.updateUser(userId, userModelForm);
-
-      this.signUpForm.reset();
     });
   }
 
@@ -102,6 +105,11 @@ export class UserCreateComponent implements OnInit {
 
   /* ------------------------------- Methods: util ------------------------------- */
   private async addUser(userModelForm: UserModel): Promise<void> {
+    if (!this.isPolicyOk()) {
+      this.logService.addLogErrorApp('Accetta la privacy policy per procedere');
+      return;
+    }
+
     /* Creazione utente */
     const userCredential = await this.firebaseService.signUp(userModelForm.email, userModelForm.password);
 

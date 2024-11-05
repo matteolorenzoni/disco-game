@@ -7,7 +7,20 @@ export const routes: Routes = [
     canActivate: [userGuard],
     loadComponent: () => import('../page/login/login.component').then((m) => m.LoginComponent)
   },
-  { path: 'sign-up', loadComponent: () => import('../page/sign-up/sign-up.component').then((m) => m.SignUpComponent) },
+  {
+    path: 'sign-up',
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('../page/register/sign-up/sign-up.component').then((m) => m.SignUpComponent)
+      },
+      {
+        path: 'privacy-policy',
+        loadComponent: () =>
+          import('../page/register/privacy-policy/privacy-policy.component').then((m) => m.PrivacyPolicyComponent)
+      }
+    ]
+  },
   {
     path: 'admin',
     canActivate: [userGuard],
@@ -80,16 +93,7 @@ export const routes: Routes = [
       },
       {
         path: 'settings',
-        children: [
-          {
-            path: '',
-            loadComponent: () => import('../page/settings/settings.component').then((m) => m.SettingsComponent)
-          },
-          {
-            path: 'profile',
-            loadComponent: () => import('../page/sign-up/sign-up.component').then((m) => m.SignUpComponent)
-          }
-        ]
+        loadComponent: () => import('../page/settings/settings.component').then((m) => m.SettingsComponent)
       },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: '**', redirectTo: 'dashboard' }
@@ -106,16 +110,7 @@ export const routes: Routes = [
       },
       {
         path: 'settings',
-        children: [
-          {
-            path: '',
-            loadComponent: () => import('../page/settings/settings.component').then((m) => m.SettingsComponent)
-          },
-          {
-            path: 'profile',
-            loadComponent: () => import('../page/sign-up/sign-up.component').then((m) => m.SignUpComponent)
-          }
-        ]
+        loadComponent: () => import('../page/settings/settings.component').then((m) => m.SettingsComponent)
       },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: '**', redirectTo: 'dashboard' }
@@ -173,16 +168,7 @@ export const routes: Routes = [
       // Impostazioni
       {
         path: 'settings',
-        children: [
-          {
-            path: '',
-            loadComponent: () => import('../page/settings/settings.component').then((m) => m.SettingsComponent)
-          },
-          {
-            path: 'profile',
-            loadComponent: () => import('../page/sign-up/sign-up.component').then((m) => m.SignUpComponent)
-          }
-        ]
+        loadComponent: () => import('../page/settings/settings.component').then((m) => m.SettingsComponent)
       },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: '**', redirectTo: 'dashboard' }

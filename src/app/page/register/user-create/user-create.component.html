@@ -36,8 +36,21 @@
 
   <fv-field name="password" label="Password" type="password"></fv-field>
 
+  @if (!user()) {
+    <div class="mt-4 flex items-center text-sm text-on-background">
+      <input
+        type="checkbox"
+        id="privacy"
+        class="mr-2 h-4 w-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500" />
+      <label for="privacy" class="text-gray-200">
+        Accetto la
+        <a href="./sign-up/privacy-policy" class="font-bold text-primary-500 hover:underline">Privacy Policy</a>
+      </label>
+    </div>
+  }
+
   <fv-button
-    class="mt-12"
+    class="mt-8"
     type="submit"
     [label]="firebaseService.userFirebase() ? 'Aggiorna' : 'Registrati'"
     [disabled]="signUpForm.invalid"></fv-button>

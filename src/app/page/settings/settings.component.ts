@@ -4,7 +4,7 @@ import { Router, RouterModule } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faAngleRight, faCircleUser, faHome, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 import { FirebaseService } from '../../service/firebase.service';
-import { UserCreateComponent } from '../user/user-create/user-create.component';
+import { UserCreateComponent } from '../register/user-create/user-create.component';
 import { FvButtonComponent } from '../../components/fv-button.component';
 import { FvButtonOutlinedComponent } from '../../components/fv-button-outlined.component';
 import { TitleComponent } from '../../components/title/title.component';
