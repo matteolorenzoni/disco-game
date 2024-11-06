@@ -64,7 +64,7 @@
             <li class="flex shrink-0 basis-12 flex-col items-center gap-1 overflow-hidden">
               <img
                 class="aspect-square w-12 rounded-full object-cover shadow"
-                [src]="user.imageUrl"
+                [src]="user.imageUrl ?? 'images/profile-user-3.png'"
                 [alt]="'Immagine di ' + user.userName" />
               <p class="w-full truncate text-center text-xxs">{{ user.userName }}</p>
             </li>

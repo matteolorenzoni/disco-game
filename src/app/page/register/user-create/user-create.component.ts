@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@ang
 import { Router } from '@angular/router';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faPen } from '@fortawesome/free-solid-svg-icons';
+import { faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FromMap, UserModel } from '../../../model/form.model';
 import { FirebaseService } from '../../../service/firebase.service';
 import { StorageService } from '../../../service/storage.service';
@@ -16,6 +16,7 @@ import { LogService } from '../../../service/log.service';
 import { trimFormValues } from '../../../util/utils';
 import { Doc } from '../../../model/firebase';
 import { User } from '../../../model/user.model';
+import { TeamService } from '../../../service/team.service';
 
 @Component({
   selector: 'app-user-create',
@@ -31,6 +32,7 @@ export class UserCreateComponent implements OnInit {
   protected readonly firebaseService = inject(FirebaseService);
   private readonly storageService = inject(StorageService);
   private readonly userService = inject(UserService);
+  private readonly teamService = inject(TeamService);
   private readonly loaderService = inject(LoaderService);
   private readonly lsService = inject(LocalStorageService);
   private readonly logService = inject(LogService);
@@ -43,6 +45,7 @@ export class UserCreateComponent implements OnInit {
 
   /* Icons */
   ICON_PEN = faPen;
+  ICON_TRASH = faTrash;
 
   /* Form */
   signUpForm = new FormGroup<FromMap<UserModel>>({
@@ -61,27 +64,35 @@ export class UserCreateComponent implements OnInit {
   });
 
   /* ------------- Lifecycle hooks ------------- */
-  ngOnInit(): void {
-    this.initIndexedDb();
+  async ngOnInit(): Promise<void> {
+    let user = this.lsService.getUser();
+    if (!user) {
+      const userId = this.firebaseService.userFirebase()?.uid;
+      if (!userId) return;
+      user = await this.userService.getUserById(userId);
+      this.lsService.setUser(user);
+    }
+
+    /* Aggiorno user */
+    this.user.set(user);
+
+    /* Aggiorno form */
+    this.initForm(user);
   }
 
   /* -------------------------- Methods initialization --------------------------  */
-  private initIndexedDb() {
-    const lsUser = this.lsService.getUser();
-    this.user.set(lsUser ?? undefined);
-    if (lsUser) {
-      this.signUpForm.setValue({
-        name: lsUser.props.name,
-        lastName: lsUser.props.lastName,
-        userName: lsUser.props.userName,
-        birthDate: formatDate(lsUser.props.birthDate, 'yyyy-MM-dd', 'it'),
-        email: lsUser.props.email,
-        password: '******'
-      });
-      this.imagePreview.set(lsUser.props.imageUrl); // Aggiorno immagine
-      this.signUpForm.get('email')?.disable(); // Disabilito field email
-      this.signUpForm.get('password')?.disable(); // Disabilito field password
-    }
+  private initForm(user: Doc<User>) {
+    this.signUpForm.setValue({
+      name: user.props.name,
+      lastName: user.props.lastName,
+      userName: user.props.userName,
+      birthDate: formatDate(user.props.birthDate, 'yyyy-MM-dd', 'it'),
+      email: user.props.email,
+      password: '******'
+    });
+    this.imagePreview.set(user.props.imageUrl); // Aggiorno immagine
+    this.signUpForm.get('email')?.disable(); // Disabilito field email
+    this.signUpForm.get('password')?.disable(); // Disabilito field password
   }
 
   /* ------------------------------- Methods: firebase ------------------------------- */
@@ -101,6 +112,11 @@ export class UserCreateComponent implements OnInit {
     this.storageService.onImageChange(event, this.imagePreview, this.imageFile);
   }
 
+  protected onImageRemove() {
+    this.imagePreview.set(null);
+    this.imageFile.set(undefined);
+  }
+
   protected onUpdatePolicyAcceptance(event: Event): void {
     const isChecked = (event.target as HTMLInputElement)?.checked ?? false;
     this.isPolicyAccepted.set(isChecked);
@@ -113,16 +129,16 @@ export class UserCreateComponent implements OnInit {
       return;
     }
 
-    /* Creazione utente */
+    /* Creo profilo */
     const userCredential = await this.firebaseService.signUp(userModelForm.email, userModelForm.password);
 
-    /* Creazione utente immagine */
+    /* Aggiungo utente immagine */
     let imageUrl: string | null = null;
     if (this.imageFile()) {
       imageUrl = await this.userService.addImage(this.imageFile()!, userCredential.user.uid);
     }
 
-    /* Aggiunta utente a DB */
+    /* Aggiungo utente */
     await this.userService.add(userCredential.user.uid, userModelForm, imageUrl);
 
     /* Log */
@@ -133,22 +149,36 @@ export class UserCreateComponent implements OnInit {
   }
 
   private async updateUser(userId: string, userModelForm: UserModel): Promise<void> {
+    const user = this.user();
+    if (!user) throw new Error('retry', { cause: 'retry' });
+
     /* Aggiornamento utente immagine */
-    let imageUrl: string | null | undefined;
+    let imageUrl: string | null = null;
     if (this.imageFile()) {
       imageUrl = await this.userService.updateImage(this.imageFile()!, userId);
     }
 
-    /* Creazione utente */
+    /* Aggiorno le varie squadre */
+    const isNewUserName = user.props.userName !== userModelForm.userName;
+    const isNewImage = user.props.userName !== imageUrl;
+    if (isNewUserName || isNewImage) {
+      const teams = await this.teamService.getActiveTeamsByUserId(user.id);
+      await this.teamService.updateExistingUser(teams, user.id, {
+        userName: userModelForm.userName,
+        imageUrl
+      });
+    }
+
+    /* Aggiorna utente */
     await this.userService.update(userId, userModelForm, imageUrl);
 
     /* Aggiorno local storage */
-    const lsUser = this.lsService.getUser();
-    if (lsUser) {
-      lsUser.props = { ...lsUser.props, ...userModelForm, birthDate: new Date(userModelForm.birthDate) };
-      if (this.imageFile()) lsUser.props.imageUrl = imageUrl ?? null;
-      this.lsService.setUser(lsUser);
-    }
+    const userUpdated: Doc<User> = {
+      id: user.id,
+      props: { ...user.props, ...userModelForm, birthDate: new Date(userModelForm.birthDate), imageUrl }
+    };
+    this.user.set(userUpdated);
+    this.lsService.setUser(userUpdated);
 
     /* Log */
     this.logService.addLogConfirm('Utente aggiornato');

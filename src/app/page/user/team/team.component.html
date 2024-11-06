@@ -45,7 +45,7 @@
           (click)="goToUserChallenges(teammate.id)">
           <img
             class="absolute -top-2 h-16 w-16 rounded-3xl border-2 border-neutral-800 object-cover object-center shadow"
-            [ngClass]="{ 'bg-[#8acff1]': !teammate.imageUrl }"
+            [ngClass]="{ 'bg-[#8acff1]': teammate.imageUrl === undefined }"
             [ngSrc]="teammate.imageUrl ?? 'images/profile-user-3.png'"
             width="64"
             height="64"

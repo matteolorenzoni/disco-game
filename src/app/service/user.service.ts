@@ -82,7 +82,7 @@ export class UserService {
     await this.documentService.updateDocuments<User>([userId], COL_USERS, form);
   }
 
-  public async updateImage(image: File, name: string) {
+  public async updateImage(image: File, name: string): Promise<string> {
     return await this.storageService.updateImage(image, COL_USERS, name);
   }
 

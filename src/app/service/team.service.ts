@@ -110,20 +110,6 @@ export class TeamService {
     await this.documentService.updateDocuments<Team>(teamIds, COL_TEAMS, data);
   }
 
-  public async updateUser(team: Doc<Team>, user: Doc<User>): Promise<void> {
-    team.props.userIds = [...team.props.userIds, user.id];
-    team.props.users = [
-      ...team.props.users,
-      {
-        id: user.id,
-        userName: user.props.userName,
-        imageUrl: user.props.imageUrl,
-        challenges: []
-      }
-    ];
-    await this.documentService.updateDocuments<Team>([team.id], COL_TEAMS, team.props);
-  }
-
   public async updateUserPoints(team: Doc<Team>, userId: string, challengeId: string, points: number): Promise<void> {
     // Aggiorno la squadra
     team.props.totalPoints += points;
@@ -138,6 +124,36 @@ export class TeamService {
       user.challenges.push({ id: challengeId, timestamps: [new Date()], totalPoints: points });
     }
     await this.documentService.updateDocuments<Team>([team.id], COL_TEAMS, team.props);
+  }
+
+  public async updateNewUser(team: Doc<Team>, user: Doc<User>): Promise<void> {
+    team.props.userIds = [...team.props.userIds, user.id];
+    team.props.users = [
+      ...team.props.users,
+      {
+        id: user.id,
+        userName: user.props.userName,
+        imageUrl: user.props.imageUrl,
+        challenges: []
+      }
+    ];
+    await this.documentService.updateDocuments<Team>([team.id], COL_TEAMS, team.props);
+  }
+
+  public async updateExistingUser(
+    teams: Doc<Team>[],
+    userId: string,
+    updates: { userName: string; imageUrl: string | null }
+  ): Promise<void> {
+    const updatePromises = teams.reduce<Promise<void>[]>((acc, team) => {
+      const user = team.props.users.find((existingUser) => existingUser.id === userId);
+      if (!user) return acc;
+      user.userName = updates.userName;
+      user.imageUrl = updates.imageUrl;
+      acc.push(this.documentService.updateDocuments<Team>([team.id], COL_TEAMS, team.props));
+      return acc;
+    }, []);
+    await Promise.all(updatePromises);
   }
 
   /* --------------------------- Delete ---------------------------*/

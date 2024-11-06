@@ -154,7 +154,7 @@ export class EventListComponent implements OnInit {
       }
 
       /* Aggiungo user al team */
-      await this.teamService.updateUser(team, user);
+      await this.teamService.updateNewUser(team, user);
 
       /* Aggiungo partecipazione */
       await this.addParticipation(eventId, team.id, user.id);
