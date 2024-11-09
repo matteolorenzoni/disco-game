@@ -1,7 +1,9 @@
+import { DebugService } from './debug.service';
 import { inject, Injectable, signal } from '@angular/core';
 import { FirebaseError } from 'firebase/app';
 import { LogType } from '../model/enum';
 import { AudioService } from './audio.service';
+import { DebugType } from '../model/debug.model';
 
 const ERROR_FIREBASE: Record<string, string> = {
   // Autenticazione
@@ -66,6 +68,7 @@ export type Log = {
 })
 export class LogService {
   /* Service */
+  private readonly debugService = inject(DebugService);
   private readonly audioService = inject(AudioService);
 
   /* Variables */
@@ -80,25 +83,21 @@ export class LogService {
   }
 
   public addLogError(userId: string | undefined, error: unknown): void {
-    let errorMessageLog = ERROR_UNKNOWN;
-    let errorMessageDebug = ERROR_UNKNOWN;
+    let errorMessageLog: string = ERROR_UNKNOWN;
+    let errorMessageDebug = '';
 
     // Gestione specifica per FirebaseError
     if (error instanceof FirebaseError) {
-      errorMessageDebug = ERROR_FIREBASE[error.code] || ERROR_UNKNOWN;
       errorMessageLog = ERROR_FIREBASE[error.code] || ERROR_UNKNOWN;
     } else if (error instanceof Error) {
+      errorMessageDebug = error.toString();
       if (error.cause && typeof error.cause === 'string') {
-        errorMessageDebug = ERROR_CUSTOM[error.cause] || ERROR_UNKNOWN;
         errorMessageLog = ERROR_CUSTOM[error.cause] || ERROR_UNKNOWN;
-      } else {
-        errorMessageDebug = error.message;
       }
     } else if (typeof error === 'string') {
       errorMessageDebug = error;
     } else if (typeof error === 'object' && error !== null && 'message' in error) {
-      errorMessageDebug = (error as { message?: string }).message || ERROR_UNKNOWN;
-      errorMessageLog = errorMessageDebug;
+      errorMessageDebug = (error as { message: string }).message;
     }
 
     /* Log */
@@ -106,7 +105,12 @@ export class LogService {
 
     /* Debug */
     // Memorizzare solo quelli utili
-    console.log('[ERROR]', userId, errorMessageDebug);
+    this.debugService.add({
+      userId: userId ?? null,
+      type: DebugType.ERROR,
+      updatedAt: new Date(),
+      message: errorMessageDebug
+    });
   }
 
   public addLogErrorApp(message: string, hide = true): void {
