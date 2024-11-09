@@ -13,7 +13,6 @@ export const isQrcode = (obj: any): obj is Qrcode => {
   return (
     typeof obj === 'object' &&
     obj !== null &&
-    typeof obj.eventId === 'string' &&
     typeof obj.teamId === 'string' &&
     typeof obj.userId === 'string' &&
     typeof obj.challengeId === 'string' &&
@@ -21,12 +20,12 @@ export const isQrcode = (obj: any): obj is Qrcode => {
   );
 };
 
-export const isEqualQrcode = (qrA: Qrcode, qrB: Qrcode | undefined): boolean => {
-  if (!qrB) return false;
+export const isSameQrcode = (oldQrcode: Qrcode | undefined, newQrcode: Qrcode): boolean => {
+  if (!oldQrcode) return false;
   return (
-    qrA.teamId === qrB.teamId &&
-    qrA.userId === qrB.userId &&
-    qrA.challengeId === qrB.challengeId &&
-    qrA.points === qrB.points
+    oldQrcode.teamId === newQrcode.teamId &&
+    oldQrcode.userId === newQrcode.userId &&
+    oldQrcode.challengeId === newQrcode.challengeId &&
+    oldQrcode.points === newQrcode.points
   );
 };

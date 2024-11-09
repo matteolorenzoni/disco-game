@@ -20,7 +20,7 @@ import { UserService } from '../../../service/user.service';
 import { Event } from '../../../model/event.model';
 import { Doc } from '../../../model/firebase';
 import { ChallengeStatus, Qrcode } from '../../../model/event-challenge.model';
-import { isEqualQrcode, isQrcode } from '../../../util/type.util';
+import { isSameQrcode, isQrcode } from '../../../util/type.util';
 import { Team, TeamStatus } from '../../../model/team.model';
 import { LoaderService } from '../../../service/loader.service';
 import { trimFormValues } from '../../../util/utils';
@@ -76,6 +76,7 @@ export class DashboardComponent implements OnInit {
     const deviceId = this.deviceId();
     return cameras.find((x) => x.deviceId === deviceId);
   });
+  scanError = signal<ScanError | undefined>(undefined);
 
   /* Constants */
   ALLOWED_FORMATS = [BarcodeFormat.QR_CODE];
@@ -122,9 +123,12 @@ export class DashboardComponent implements OnInit {
   }
 
   private async initHttp() {
+    const event = this.event();
+    if (!event) return;
+
     await this.loaderService.executeWithDelay(async () => {
       /* Recupera le sfide per verificare che non superino il numero massimo di tentativi */
-      const mergeChallenges = await this.getMergedChallenges();
+      const mergeChallenges = await this.getMergedChallenges(event.id);
       this.mergeChallenges.set(mergeChallenges);
 
       /* Aggiorno indexedDB */
@@ -181,7 +185,7 @@ export class DashboardComponent implements OnInit {
 
   protected async onGetChallenges(): Promise<void> {
     await this.loaderService.executeImmediate(async () => {
-      const mergeChallenges = await this.getMergedChallenges();
+      const mergeChallenges = await this.getMergedChallenges(this.event()!.id);
       this.mergeChallenges.set(mergeChallenges);
 
       /* Aggiorno indexedDB */
@@ -194,15 +198,20 @@ export class DashboardComponent implements OnInit {
 
   protected async onScan(result: string) {
     await this.loaderService.executeImmediate(async () => {
-      /* Verifico che sia il qrcode giusto */
       const qrcode = JSON.parse(result);
+      const lastQrcode = this.lastQrcode();
+
+      /* Memorizzo il qrcode per impedire piu scan con lo stesso valore */
+      this.lastQrcode.set(qrcode);
+
+      /* Verifico che non sia lo stesso qrcode precedente */
+      if (isSameQrcode(lastQrcode, qrcode)) return;
+
+      /* Verifico che sia il qrcode giusto */
       if (!isQrcode(qrcode)) {
         this.logService.addLogErrorApp('Qrcode non supportato', false);
         return;
       }
-
-      /* Verifico che non sia lo stesso qrcode precedente */
-      if (isEqualQrcode(qrcode, this.lastQrcode())) return;
 
       /* Cerco prima se l'user ha una squadra per questo evento */
       const team = await this.teamService.getTeamById(qrcode.teamId);
@@ -249,7 +258,7 @@ export class DashboardComponent implements OnInit {
 
   /* --------------------- Method event --------------------- */
   protected async onRemoveEvent(): Promise<void> {
-    this.event.set(undefined);
+    this.event.set(null);
     await this.dbService.deleteScannerEvent();
     await this.dbService.deleteScannerChallenges();
   }
@@ -270,9 +279,6 @@ export class DashboardComponent implements OnInit {
 
   /* --------------------- Method util --------------------- */
   protected async scan(qrcode: Qrcode, team: Doc<Team>): Promise<void> {
-    /* Memorizzo il qrcode per impedire piu scan con lo stesso valore */
-    this.lastQrcode.set(qrcode);
-
     /* Controllo se la squadra è attiva */
     if (team.props.status !== TeamStatus.ACTIVE) {
       this.logService.addLogErrorApp('Squadra non attiva (disattivata dagli admin)', false);
@@ -289,6 +295,18 @@ export class DashboardComponent implements OnInit {
     /* Controllo che la sfida sia attiva */
     if (mergeChallenge.status !== ChallengeStatus.ACTIVE) {
       this.logService.addLogErrorApp('Sfida non attiva (disabilitata dagli admin)', false);
+      return;
+    }
+
+    /* Controllo che la sfida sia gia iniziata (se present) */
+    if (mergeChallenge.startDate !== null && mergeChallenge.startDate.getTime() > new Date().getTime()) {
+      this.logService.addLogErrorApp('Sfida non iniziata (attendere orario inizio)', false);
+      return;
+    }
+
+    /* Controllo che la sfida non sia terminata (se present) */
+    if (mergeChallenge.endDate !== null && mergeChallenge.endDate.getTime() < new Date().getTime()) {
+      this.logService.addLogErrorApp('Sfida terminata (fuori orario)', false);
       return;
     }
 
@@ -316,12 +334,12 @@ export class DashboardComponent implements OnInit {
     await this.teamService.updateUserPoints(team, qrcode.userId, qrcode.challengeId, qrcode.points);
 
     /* log */
-    this.logService.addLogConfirm('Sfida confermata');
+    this.logService.addLogConfirm('Sfida confermata', false);
   }
 
-  protected async getMergedChallenges(): Promise<MergeChallenge[]> {
+  protected async getMergedChallenges(eventId: string): Promise<MergeChallenge[]> {
     const eventChallenges = await this.eventChallengeService.getEventChallengesByProp([
-      { key: 'eventId', value: this.event()!.id }
+      { key: 'eventId', value: eventId }
     ]);
     const challenges = await this.challengeService.getChallengesByIds(eventChallenges.map((x) => x.props.challengeId));
     return mergeChallenges(challenges, eventChallenges);
@@ -361,8 +379,9 @@ export class DashboardComponent implements OnInit {
     await this.onScan(result);
   }
 
-  protected handleScanError(error: ScanError): void {
-    this.logService.addLogError('SCANNER', error);
+  protected handleScanError(scanError: ScanError): void {
+    this.logService.addLogError('SCANNER', scanError);
+    this.scanError.set(scanError);
   }
 
   protected handleCamerasFound(cameras: MediaDeviceInfo[]): void {

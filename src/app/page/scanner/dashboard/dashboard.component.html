@@ -40,6 +40,14 @@
             (scanError)="handleScanError($event)"></zxing-scanner>
         </div>
 
+        @if (scanError(); as scanError) {
+          <div class="flex w-full flex-col gap-1 rounded border-2 border-rose-500 bg-rose-500/50 p-2 shadow">
+            <p>Codice: {{ scanError.code }}</p>
+            <p>Messaggio: {{ scanError.message }}</p>
+            <p class="mt-4">[Pulire cronologia e cache del browser utilizzato e riprovare]</p>
+          </div>
+        }
+
         <form
           class="flex flex-col gap-2 rounded-lg bg-surface p-4 text-on-background shadow"
           [formGroup]="manualScanForm"
