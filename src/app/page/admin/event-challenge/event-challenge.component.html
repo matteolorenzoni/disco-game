@@ -120,7 +120,7 @@
           <fv-select name="status" label="Stato" [options]="OPTIONS"></fv-select>
 
           <!-- Max Times -->
-          <fv-field name="maxTimes" label="Numero massimo di tentativi" type="number"></fv-field>
+          <fv-field name="maxTimes" label="Numero massimo di tentativi" type="number" [min]="0"></fv-field>
 
           <!-- Start Date -->
           <fv-field name="startDate" label="Data di inizio" type="datetime-local"></fv-field>

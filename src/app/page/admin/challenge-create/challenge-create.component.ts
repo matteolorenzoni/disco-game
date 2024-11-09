@@ -83,11 +83,16 @@ export class ChallengeCreateComponent implements OnInit {
     }),
     points: new FormControl(0, {
       nonNullable: true,
-      validators: [Validators.required, Validators.min(0)]
+      validators: [Validators.required, Validators.min(0), Validators.pattern('^(0|[1-9][0-9]*)$')]
     }),
     complexity: new FormControl(1, {
       nonNullable: true,
-      validators: [Validators.required, Validators.min(1), Validators.max(5)]
+      validators: [
+        Validators.required,
+        Validators.min(1),
+        Validators.max(5),
+        Validators.pattern('^(?:[1-4](?:\\.\\d+)?|5(?:\\.0+)?)$')
+      ]
     })
   });
 
@@ -121,10 +126,18 @@ export class ChallengeCreateComponent implements OnInit {
     if (this.challengeForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
 
     await this.loaderService.executeImmediate(async () => {
+      console.log(this.challengeForm.getRawValue());
+      console.log(this.challengeForm.value);
+      console.log(this.challengeForm.value.points);
+      const form = trimFormValues(this.challengeForm.getRawValue());
+
       /* Aggiungo o aggiorno il documento */
       const challenge = this.challenge();
-      const form = trimFormValues(this.challengeForm.getRawValue());
-      if (challenge) {
+      if (!challenge) {
+        // Creo sfida
+        await this.challengeService.add(form);
+      } else {
+        // Aggiorno sfida
         const isNewName = challenge.props.name !== form.name;
         const isNewType = challenge.props.type !== form.type;
 
@@ -147,7 +160,7 @@ export class ChallengeCreateComponent implements OnInit {
             )
           ]);
         }
-      } else await this.challengeService.add(form);
+      }
 
       /* Torno indietro */
       this.location.back();
