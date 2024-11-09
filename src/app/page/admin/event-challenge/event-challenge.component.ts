@@ -142,11 +142,6 @@ export class EventChallengeComponent implements OnInit {
   protected async addOrUpdateEventChallenge() {
     if (this.eventChallengeForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
 
-    if (this.event() && this.event()!.props.startDate.getTime() < new Date().getTime()) {
-      this.logService.addLogErrorApp('Operazione non più possibile, evento iniziato');
-      return;
-    }
-
     await this.loaderService.executeImmediate(async () => {
       const form = trimFormValues(this.eventChallengeForm.getRawValue());
       const eventChallengeSelected = this.eventChallengeSelected();

@@ -86,9 +86,7 @@
     }
   </ul>
 
-  @if (event.props.startDate.getTime() > NOW.getTime()) {
-    <fv-floating-button [execute]="onExecuteFloatingButton.bind(this)"></fv-floating-button>
-  }
+  <fv-floating-button [execute]="onExecuteFloatingButton.bind(this)"></fv-floating-button>
 }
 
 <!-- Seleziona tipo della sfida -->

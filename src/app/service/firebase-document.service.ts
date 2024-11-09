@@ -21,7 +21,6 @@ import {
 } from 'firebase/firestore';
 import { Doc } from '../model/firebase';
 import { FirebaseService } from './firebase.service';
-import { LogService } from './log.service';
 
 @Injectable({
   providedIn: 'root'
@@ -29,7 +28,6 @@ import { LogService } from './log.service';
 export class FirebaseDocumentService {
   /* Services */
   readonly firebaseService = inject(FirebaseService);
-  readonly logService = inject(LogService);
 
   /* --------------------- Methods READ --------------------- */
   public async getDocumentById<T extends Record<string, any> & { isActive: boolean }>(

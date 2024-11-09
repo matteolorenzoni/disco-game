@@ -298,13 +298,13 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    /* Controllo che la sfida sia gia iniziata (se present) */
+    /* Controllo che la sfida sia gia iniziata (se presente) */
     if (mergeChallenge.startDate !== null && mergeChallenge.startDate.getTime() > new Date().getTime()) {
       this.logService.addLogErrorApp('Sfida non iniziata (attendere orario inizio)', false);
       return;
     }
 
-    /* Controllo che la sfida non sia terminata (se present) */
+    /* Controllo che la sfida non sia terminata (se presente) */
     if (mergeChallenge.endDate !== null && mergeChallenge.endDate.getTime() < new Date().getTime()) {
       this.logService.addLogErrorApp('Sfida terminata (fuori orario)', false);
       return;
