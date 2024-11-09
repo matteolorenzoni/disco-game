@@ -9,8 +9,8 @@
   @for (team of teams(); track team.id) {
     <li class="flex flex-col py-4 text-base">
       <button class="flex items-center justify-between gap-4" (click)="onSelectTeam(team)">
-        <div class="flex flex-1 items-center gap-1 overflow-hidden">
-          <p class="truncate text-start text-base font-semibold">{{ team.props.name }}</p>
+        <div class="flex flex-1 items-center gap-2 overflow-hidden">
+          <p class="truncate text-start text-xl font-semibold">{{ team.props.name }}</p>
           @switch (team.props.status) {
             @case (TEAM_STATUS.SUSPENDED) {
               <p class="rounded-full bg-orange-500/50 px-2 py-[2px] text-xxs uppercase">Sospesa</p>
