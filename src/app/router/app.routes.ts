@@ -26,10 +26,13 @@ export const routes: Routes = [
     canActivate: [userGuard],
     loadComponent: () => import('../page/home/home.component').then((m) => m.HomeComponent),
     children: [
+      // Dashboard
       {
         path: 'dashboard',
         loadComponent: () => import('../page/admin/dashboard/dashboard.component').then((m) => m.DashboardComponent)
       },
+
+      // Eventi
       {
         path: 'events',
         children: [
@@ -67,6 +70,8 @@ export const routes: Routes = [
           }
         ]
       },
+
+      // Sfide
       {
         path: 'challenges',
         children: [
@@ -91,6 +96,14 @@ export const routes: Routes = [
           }
         ]
       },
+
+      // Classifiche
+      {
+        path: 'leaderboards',
+        loadComponent: () =>
+          import('../page/user/leaderboard/leaderboard.component').then((m) => m.LeaderboardComponent)
+      },
+
       {
         path: 'settings',
         loadComponent: () => import('../page/settings/settings.component').then((m) => m.SettingsComponent)

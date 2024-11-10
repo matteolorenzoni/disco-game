@@ -10,15 +10,15 @@ import { RouterLinkActive, RouterModule } from '@angular/router';
   imports: [CommonModule, RouterModule, RouterLinkActive, FaIconComponent],
   template: `
     <nav class="fixed bottom-0 left-0 h-16 w-full border-t border-neutral-800 bg-surface p-2 text-neutral-500">
-      <ul class="flex h-full items-center gap-2">
+      <ul class="flex h-full items-center gap-1">
         @for (item of menu(); track item.id) {
-          <li class="flex-1">
+          <li class="flex-1 basis-0 overflow-hidden">
             <a
               class="flex flex-col items-center justify-between"
               [routerLink]="item.path"
               routerLinkActive="text-white">
               <fa-icon class="text-sm" [icon]="item.icon"></fa-icon>
-              <span class="text-xxs">{{ item.label }}</span>
+              <span class="w-full overflow-hidden truncate text-center text-xxs">{{ item.label }}</span>
             </a>
           </li>
         }

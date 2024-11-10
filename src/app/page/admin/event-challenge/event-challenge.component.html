@@ -57,14 +57,14 @@
             }
           </div>
           <div class="flex min-w-16 shrink-0 basis-1/4 flex-col items-center gap-2 px-2">
-            <p class="w-full rounded bg-neutral-700 p-1 text-center text-xxs uppercase text-on-background">FINE</p>
+            <p class="w-full rounded bg-neutral-700 p-1 text-center text-xxs uppercase text-on-background">Inizio</p>
             @if (item.props.endDate; as endDate) {
               <div class="my-auto flex flex-col gap-1">
-                <p class="inline-flex gap-1">
+                <p class="inline-flex gap-1 text-xxs">
                   <fa-icon [icon]="ICON_CALENDAR"></fa-icon>
                   <span>{{ endDate | date: 'dd/MM' }}</span>
                 </p>
-                <p class="inline-flex gap-1">
+                <p class="inline-flex gap-1 text-xxs">
                   <fa-icon [icon]="ICON_CLOCK"> </fa-icon>
                   <span>{{ endDate | date: 'HH:mm' }}</span>
                 </p>
