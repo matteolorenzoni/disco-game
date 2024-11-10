@@ -119,67 +119,19 @@ export class EventCreateComponent implements OnInit {
   protected async addOrUpdateEvent(): Promise<void> {
     if (this.eventForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
 
-    const startDate = new Date(this.eventForm.getRawValue().startDate);
-    if (startDate.getTime() < new Date().getTime()) {
-      this.logService.addLogErrorApp('Operazione non più possibile, evento iniziato');
+    /* Controllo che la nuova data di inizio evento non sia nel passato */
+    const form = this.eventForm.getRawValue();
+    if (new Date(form.startDate).getTime() < new Date().getTime()) {
+      this.logService.addLogErrorApp("L'orario di inizio non deve essere già passato");
       return;
     }
 
     await this.loaderService.executeImmediate(async () => {
       const event = this.event();
-      const form = trimFormValues(this.eventForm.getRawValue());
-      if (event) {
-        const isNewStartDate = event.props.startDate.getTime() !== new Date(form.startDate).getTime();
+      const eventModelForm = trimFormValues(form);
 
-        /* Controllo che non si sia sbagliato con l'aggiornamento della data */
-        if (isNewStartDate) {
-          const userConfirm = confirm('Data di inizio aggiornata, proseguire?');
-          if (!userConfirm) return;
-        }
-
-        /* Aggiorno evento */
-        await this.eventService.update(event.id, form);
-
-        /* Aggiorno squadre e eventChallenge collegati all'evento */
-        if (isNewStartDate) {
-          const [teams, eventChallenges] = await Promise.all([
-            this.teamService.getActiveTeamsByEventId(event.id),
-            this.eventChallengeService.getEventChallengesByProp([{ key: 'eventId', value: event.id }])
-          ]);
-          await Promise.all([
-            this.teamService.updateProps(
-              teams.map((x) => x.id),
-              { eventStartDate: new Date(form.startDate) }
-            ),
-            this.eventChallengeService.updateProps(
-              eventChallenges.map((x) => x.id),
-              { eventStartDate: new Date(form.startDate) }
-            )
-          ]);
-        }
-
-        /* Torno indietro */
-        this.location.back();
-
-        /* Torno indietro */
-        this.logService.addLogConfirm('Evento aggiornato');
-        return;
-      }
-
-      /* Creo id documento */
-      const eventId = this.eventService.createId();
-
-      /* Creo immagine */
-      const imageUrl = await this.eventService.addImage(this.imageFile()!, eventId);
-
-      /* Creazione evento */
-      await this.eventService.add(eventId, form, imageUrl);
-
-      /* Torno indietro */
-      this.location.back();
-
-      /* Log */
-      this.logService.addLogConfirm('Evento aggiunto');
+      if (!event) await this.addEvent(eventModelForm);
+      else await this.updateEvent(event, eventModelForm);
     });
   }
 
@@ -230,7 +182,67 @@ export class EventCreateComponent implements OnInit {
   }
 
   /* ------------------------------- Methods: event ------------------------------- */
-  protected onImageChange(event: Event) {
+  protected onImageChange(event: Event): void {
     this.storageService.onImageChange(event, this.imagePreview, this.imageFile);
+  }
+
+  /* ------------------------------- Methods: util  ------------------------------- */
+  private async addEvent(form: EventModel): Promise<void> {
+    /* Creo id documento */
+    const eventId = this.eventService.createId();
+
+    /* Creo immagine */
+    const imageUrl = await this.eventService.addImage(this.imageFile()!, eventId);
+
+    /* Creazione evento */
+    await this.eventService.add(eventId, form, imageUrl);
+
+    /* Torno indietro */
+    this.location.back();
+
+    /* Log */
+    this.logService.addLogConfirm('Evento aggiunto');
+  }
+
+  private async updateEvent(event: Doc<FvEvent>, form: EventModel): Promise<void> {
+    /* Controllo che l'evento non sia già iniziato */
+    if (event.props.startDate.getTime() < new Date().getTime()) {
+      this.logService.addLogErrorApp('Operazione non più possibile, evento iniziato');
+      return;
+    }
+
+    /* Controllo che non si sia sbagliato con l'aggiornamento della data */
+    const isNewStartDate = event.props.startDate.getTime() !== new Date(form.startDate).getTime();
+    if (isNewStartDate) {
+      const userConfirm = confirm('Data di inizio aggiornata, proseguire?');
+      if (!userConfirm) return;
+    }
+
+    /* Aggiorno evento */
+    await this.eventService.update(event.id, form);
+
+    /* Aggiorno squadre e eventChallenge collegati all'evento */
+    if (isNewStartDate) {
+      const [teams, eventChallenges] = await Promise.all([
+        this.teamService.getActiveTeamsByEventId(event.id),
+        this.eventChallengeService.getEventChallengesByProp([{ key: 'eventId', value: event.id }])
+      ]);
+      await Promise.all([
+        this.teamService.updateProps(
+          teams.map((x) => x.id),
+          { eventStartDate: new Date(form.startDate) }
+        ),
+        this.eventChallengeService.updateProps(
+          eventChallenges.map((x) => x.id),
+          { eventStartDate: new Date(form.startDate) }
+        )
+      ]);
+    }
+
+    /* Torno indietro */
+    this.location.back();
+
+    /* Log */
+    this.logService.addLogConfirm('Evento aggiornato');
   }
 }
