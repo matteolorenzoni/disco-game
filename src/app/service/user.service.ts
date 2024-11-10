@@ -68,18 +68,17 @@ export class UserService {
   }
 
   /* --------------------------- Update ---------------------------*/
-  public async update(userId: string, userModelForm: UserModel, imageUrl: string | null | undefined): Promise<void> {
+  public async update(userId: string, userModelForm: UserModel, imageUrl: string | null): Promise<void> {
     /* Escludi la password dal userModelForm */
     const { password, ...userWithoutPassword } = userModelForm;
 
     /* Aggiorno user ed eventualmente immagine */
-    const form: Partial<User> = {
+    await this.documentService.updateDocuments<User>([userId], COL_USERS, {
       ...userWithoutPassword,
+      imageUrl,
       birthDate: new Date(userWithoutPassword.birthDate),
       updatedAt: new Date()
-    };
-    if (imageUrl !== undefined) form.imageUrl = imageUrl;
-    await this.documentService.updateDocuments<User>([userId], COL_USERS, form);
+    });
   }
 
   public async updateImage(image: File, name: string): Promise<string> {

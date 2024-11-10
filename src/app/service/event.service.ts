@@ -74,12 +74,17 @@ export class EventService {
   }
 
   /* --------------------------- Update ---------------------------*/
-  public async update(eventId: string, form: EventModel): Promise<void> {
+  public async update(eventId: string, form: EventModel, imageUrl: string): Promise<void> {
     await this.documentService.updateDocuments<Event>([eventId], COL_EVENTS, {
       ...form,
+      imageUrl,
       startDate: new Date(form.startDate),
       endDate: new Date(form.endDate)
     });
+  }
+
+  public async updateImage(image: File, name: string): Promise<string> {
+    return await this.storageService.updateImage(image, COL_EVENTS, name);
   }
 
   public async updateProps(eventIds: string[], data: Partial<Event>): Promise<void> {

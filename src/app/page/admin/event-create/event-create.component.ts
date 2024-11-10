@@ -16,7 +16,7 @@ import { LoaderService } from '../../../service/loader.service';
 import { LogService } from '../../../service/log.service';
 import { StorageService } from '../../../service/storage.service';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faTrash, faUpload } from '@fortawesome/free-solid-svg-icons';
+import { faPen, faTrash, faUpload } from '@fortawesome/free-solid-svg-icons';
 import { TeamService } from '../../../service/team.service';
 import { UserService } from '../../../service/user.service';
 
@@ -59,6 +59,7 @@ export class EventCreateComponent implements OnInit {
   /* Icons */
   ICON_UPLOAD = faUpload;
   ICON_TRASH = faTrash;
+  ICON_PEN = faPen;
 
   /* Form */
   eventForm = new FormGroup<FromMap<EventModel>>(
@@ -218,8 +219,14 @@ export class EventCreateComponent implements OnInit {
       if (!userConfirm) return;
     }
 
+    /* Aggiornamento evento immagine */
+    let imageUrl = event.props.imageUrl;
+    if (this.imageFile()) {
+      imageUrl = await this.eventService.updateImage(this.imageFile()!, event.id);
+    }
+
     /* Aggiorno evento */
-    await this.eventService.update(event.id, form);
+    await this.eventService.update(event.id, form, imageUrl);
 
     /* Aggiorno squadre e eventChallenge collegati all'evento */
     if (isNewStartDate) {

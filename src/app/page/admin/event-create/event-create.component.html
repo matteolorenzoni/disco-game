@@ -30,12 +30,29 @@
         <input
           id="event-image-upload"
           type="file"
-          accept="image/png, image/jpeg"
+          accept="image/jpg, image/jpeg, image/png"
           (change)="onImageChange($event)"
           class="hidden" />
       </label>
     } @else {
-      <img class="aspect-video" [src]="imagePreview()" alt="Anteprima immagine" class="rounded object-cover" />
+      <div class="relative aspect-video w-full">
+        <img
+          class="w-full rounded border border-card-border object-cover"
+          [src]="imagePreview()"
+          alt="Immagine evento" />
+
+        <label
+          for="event-image-upload-update"
+          class="absolute bottom-2 right-2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-card-border bg-surface text-on-surface hover:bg-neutral-500">
+          <fa-icon [icon]="ICON_PEN"></fa-icon>
+          <input
+            id="event-image-upload-update"
+            class="hidden"
+            type="file"
+            accept="image/jpg, image/jpeg, image/png"
+            (change)="onImageChange($event)" />
+        </label>
+      </div>
     }
   </div>
 
