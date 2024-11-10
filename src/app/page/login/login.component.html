@@ -34,10 +34,10 @@
         id="container_form"
         [@loginFormAnimation]="page() === 'login' ? 'center' : 'bottom'"
         class="absolute -bottom-full left-0 flex w-full flex-col justify-center gap-8 bg-primary-500 px-4 pb-20 pt-12 text-on-background">
-        <!-- <div class="flex flex-col gap-1 text-center text-on-background">
+        <div class="flex flex-col gap-1 text-center text-on-background">
           <h3 class="text-3xl font-semibold text-white">Ben tornato!</h3>
           <p class="text-sm">Accedi al tuo account</p>
-        </div> -->
+        </div>
 
         <form [formGroup]="loginForm" (ngSubmit)="login()" class="flex w-full max-w-2xl flex-col justify-between gap-2">
           <fv-field-icon name="email" label="Email" [icon]="faUser" type="email"></fv-field-icon>
