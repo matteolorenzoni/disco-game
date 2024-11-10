@@ -6,32 +6,13 @@
 </app-title>
 
 @if (team(); as team) {
-  <div class="flex h-32 flex-col justify-around">
+  <div class="flex h-32 flex-col justify-center">
     <h3 class="text-center text-3xl font-bold">{{ team.props.name }}</h3>
-    <div class="flex items-center justify-evenly gap-4">
+    <div class="flex items-center justify-evenly">
       <p class="text-center">
         <span class="text-[60px]">{{ team.props.totalPoints }}</span>
         <span class="text-sm">pt</span>
       </p>
-      <!-- <div class="flex items-center gap-4">
-        <div class="flex h-full items-center justify-center rounded-full border-2 border-cyan-600 bg-cyan-600/25 p-2">
-          <p class="text-sm">
-            {{ team.props.currentPosition > 0 ? team.props.currentPosition + '°' : 'Ultimo' }} posto
-          </p>
-        </div>
-        @if (team.props.lastPosition > 0) {
-          <div
-            class="flex gap-1"
-            [ngClass]="{
-              'text-red-600': diffPosition().value < 0,
-              'text-green-600': diffPosition().value > 0,
-              'text-on-background': diffPosition().value === 0
-            }">
-            <fa-icon [icon]="diffPosition().icon"></fa-icon>
-            <p>{{ diffPosition().value }}</p>
-          </div>
-        }
-      </div> -->
     </div>
   </div>
 
@@ -40,49 +21,70 @@
       @for (teammate of teammates(); track teammate.id) {
         <li class="relative cursor-pointer rounded-lg shadow transition duration-300">
           <button
-            class="flex h-full w-full items-center rounded-lg bg-gradient-to-r from-neutral-800/25 from-15% to-neutral-800 p-2 pr-4 shadow-lg hover:to-primary-500/50 active:to-primary-500/75"
+            class="flex w-full gap-2 rounded-lg bg-gradient-to-r from-neutral-800/25 to-neutral-800 p-1 pr-4 shadow-lg hover:to-primary-500/50 active:to-primary-500/75"
             (click)="goToUserChallenges(teammate.id)">
-            <img
-              class="absolute -top-2 h-16 w-16 rounded-3xl border-2 border-neutral-800 object-cover object-center shadow"
-              [ngClass]="{ 'bg-[#8acff1]': teammate.imageUrl === undefined }"
-              [ngSrc]="teammate.imageUrl ?? 'images/profile-user-3.png'"
-              width="64"
-              height="64"
-              priority
-              alt="Immagine utente" />
-            <div class="ml-20 flex h-full flex-col justify-around text-start">
-              <p class="flex items-end gap-2 text-sm">
-                @if (teammate.id === team.props.leaderId) {
-                  <fa-icon [icon]="ICON_CROWN"></fa-icon>
-                }
-                <span class="font-semibold text-neutral-300">{{ teammate.userName }}</span>
-              </p>
-              <span class="text-2xl font-bold text-white">
-                {{ teammate.challenges | getUserTotalPoints }}
-              </span>
+            <div class="relative shrink-0 basis-16 overflow-visible">
+              <img
+                class="absolute -top-4 h-16 w-16 rounded-3xl border-2 border-neutral-800 object-cover shadow"
+                [ngClass]="{ 'bg-[#8acff1]': teammate.imageUrl === undefined }"
+                [ngSrc]="teammate.imageUrl ?? 'images/profile-user-3.png'"
+                width="64"
+                height="64"
+                priority
+                alt="Immagine utente" />
             </div>
-            <fa-icon class="ml-auto" [icon]="ICON_RIGHT"></fa-icon>
+            <div class="flex flex-1 items-center gap-2 overflow-hidden">
+              <div class="flex flex-1 flex-col overflow-hidden text-start">
+                <p class="flex items-center gap-2 text-sm">
+                  @if (teammate.id === team.props.leaderId) {
+                    <fa-icon class="text-yellow-500" [icon]="ICON_CROWN"></fa-icon>
+                  }
+                  <span class="truncate font-semibold text-neutral-300">{{ teammate.userName }}</span>
+                  @if (
+                    team.props.eventStartDate.getTime() > NOW.getTime() &&
+                    firebaseService.userFirebase()?.uid === team.props.leaderId
+                  ) {
+                    <button
+                      class="text-xxs uppercase text-rose-700 hover:underline"
+                      (click)="deleteFromTeam($event, teammate.id, team)">
+                      Elimina
+                    </button>
+                  }
+                </p>
+                <span class="text-2xl font-bold text-white">
+                  {{ teammate.challenges | getUserTotalPoints }}
+                </span>
+              </div>
+              <fa-icon class="ml-auto" [icon]="ICON_RIGHT"></fa-icon>
+            </div>
           </button>
         </li>
       }
     </ul>
   </div>
 
-  <div
-    class="fixed bottom-[120px] right-4 rounded border border-white/50 bg-white/25 px-2 py-1 text-xs shadow-lg backdrop-blur-lg">
-    Codice: <span class="font-bold">{{ team.props.code }}</span>
+  <div class="fixed bottom-[120px] right-0 px-4">
+    <div
+      class="flex items-center gap-2 rounded border border-white/50 bg-white/25 px-2 py-1 text-xs shadow-lg backdrop-blur-lg">
+      <p>
+        Codice: <span class="font-bold">{{ team.props.code }}</span>
+      </p>
+      <button (click)="onCopyCodeToClipboard()">
+        <fa-icon [icon]="ICON_CLIPBOARD"></fa-icon>
+      </button>
+    </div>
   </div>
 
   @if (myTeammate(); as myTeammate) {
-    <div class="fixed bottom-16 left-0 flex w-full flex-col gap-1 rounded-t px-4 py-2 text-on-surface">
+    <div class="fixed bottom-16 left-0 w-full px-4 py-2 text-on-surface">
       <button
-        class="flex h-full w-full items-center rounded-lg bg-primary-500/25 p-2 pr-4 shadow-lg backdrop-blur-lg hover:to-primary-500/50 active:to-primary-500/15"
+        class="flex w-full items-center rounded-lg bg-primary-500/25 p-2 shadow-lg backdrop-blur-lg hover:to-primary-500/50 active:to-primary-500/15"
         (click)="goToUserChallenges(myTeammate.id)">
         <div class="flex w-full items-end gap-2 text-base">
           @if (firebaseService.userFirebase()?.uid === team.props.leaderId) {
             <fa-icon [icon]="ICON_CROWN"></fa-icon>
           }
-          <p class="font-semibold text-neutral-300">Mio punteggio</p>
+          <p class="truncate font-semibold text-neutral-300">Mio punteggio</p>
           <span class="font-bold text-white">{{ myTeammate.challenges | getUserTotalPoints }} </span>
           <fa-icon class="ml-auto" [icon]="ICON_RIGHT"></fa-icon>
         </div>
