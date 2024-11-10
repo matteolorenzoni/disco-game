@@ -5,7 +5,7 @@ import { ChallengeService } from '../../../service/challenge.service';
 import { EventChallengeService } from '../../../service/event-challenge.service';
 import { Doc } from '../../../model/firebase';
 import { Challenge } from '../../../model/challenge.model';
-import { EventChallenge, Qrcode } from '../../../model/event-challenge.model';
+import { ChallengeStatus, EventChallenge, Qrcode } from '../../../model/event-challenge.model';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faInfinity } from '@fortawesome/free-solid-svg-icons';
 import { FvChallengeStatusComponent } from '../../../components/fv-challenge-status.component';
@@ -46,6 +46,9 @@ export class ChallengeComponent implements OnInit {
   teamId = signal<string | undefined>(undefined);
   challengeMerged = signal<{ challenge: Doc<Challenge>; eventChallenge: Doc<EventChallenge> } | undefined>(undefined);
   qrdata = signal<string | undefined>(undefined);
+
+  /* Enum */
+  CHALLENGE_STATUS = ChallengeStatus;
 
   /* Icons */
   ICON_INFINITY = faInfinity;

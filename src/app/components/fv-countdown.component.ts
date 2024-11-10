@@ -10,7 +10,7 @@ import { ChangeDetectionStrategy, Component, computed, input, OnDestroy, OnInit,
     @if (date() && date()!.getTime() - currentDate().getTime() > 0) {
       <p>{{ hours() }}:{{ minutes() | number: '2.0' }}:{{ seconds() | number: '2.0' }}</p>
     } @else {
-      <p>Attivo</p>
+      <p>In corso</p>
     }
   `,
   styles: [],

@@ -17,10 +17,9 @@
 
 <ul class="grid grid-cols-[repeat(auto-fill,minmax(6rem,1fr))] gap-4">
   @for (challenge of mergedChallenges(); track challenge.eventChallenge.id) {
-    <li class="relative rounded-xl bg-neutral-800 text-on-surface shadow">
+    <li class="rounded-xl bg-neutral-800 text-on-surface shadow">
       <button
-        class="flex h-full w-full flex-col items-center gap-2 rounded-xl p-1"
-        [disabled]="challenge.eventChallenge.props.status === ChallengeStatus.LOCKED"
+        class="relative flex h-full w-full flex-col items-center gap-2 rounded-xl p-1"
         (click)="onGoToChallenge(challenge.eventChallenge.props.challengeId)">
         <div class="w-full rounded-lg bg-surface p-2">
           <img
@@ -39,8 +38,13 @@
             <span class="text-[8px]">pt</span>
           </p>
         </div>
+        <fv-challenge-status
+          class="absolute left-0 top-0 h-full w-full"
+          [type]="'effect'"
+          [status]="challenge.eventChallenge.props.status"
+          [startDate]="challenge.eventChallenge.props.startDate"
+          [detail]="true"></fv-challenge-status>
       </button>
-      <fv-challenge-status [type]="'effect'" [status]="challenge.eventChallenge.props.status"></fv-challenge-status>
     </li>
   }
 </ul>

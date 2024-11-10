@@ -97,7 +97,11 @@
                     <fv-rating [rating]="challenge.complexity"></fv-rating>
                   </div>
                   <p class="w-full truncate text-start text-xs text-gray-500">{{ challenge.description }}</p>
-                  <fv-challenge-status type="effect" [status]="challenge.status"></fv-challenge-status>
+                  <fv-challenge-status
+                    type="effect"
+                    [status]="challenge.status"
+                    [startDate]="challenge.startDate"
+                    [detail]="true"></fv-challenge-status>
                 </button>
               </li>
             }
