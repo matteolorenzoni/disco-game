@@ -64,21 +64,21 @@
   <!-- Podio -->
   <div class="mt-8 flex justify-evenly gap-4">
     <div class="flex flex-1 basis-1/3 flex-col items-center overflow-hidden pt-12">
-      <img class="h-20 w-20" src="images/silver-medal.png" alt="Medaglia d'argento" />
+      <img class="h-20 w-20" src="images/medal/silver-medal.png" alt="Medaglia d'argento" />
       @if (teams().podium.second; as second) {
         <p class="mt-2 w-full truncate text-center text-sm">{{ second.props.name }}</p>
         <p class="text-xl font-bold">{{ second.props.totalPoints }}<span class="text-xxs text-gray-300">pt</span></p>
       }
     </div>
     <div class="flex flex-1 basis-1/3 flex-col items-center overflow-hidden">
-      <img class="h-24 w-24" src="images/gold-medal.png" alt="Medaglia d'oro" />
+      <img class="h-24 w-24" src="images/medal/gold-medal.png" alt="Medaglia d'oro" />
       @if (teams().podium.first; as first) {
         <p class="mt-2 w-full truncate text-center text-sm">{{ first.props.name }}</p>
         <p class="text-xl font-bold">{{ first.props.totalPoints }}<span class="text-xxs text-gray-300">pt</span></p>
       }
     </div>
     <div class="flex flex-1 basis-1/3 flex-col items-center overflow-hidden pt-12">
-      <img class="h-20 w-20" src="images/bronze-medal.png" alt="Medaglia di bronzo" />
+      <img class="h-20 w-20" src="images/medal/bronze-medal.png" alt="Medaglia di bronzo" />
       @if (teams().podium.third; as third) {
         <p class="mt-2 w-full truncate text-center text-sm">{{ third.props.name }}</p>
         <p class="text-xl font-bold">{{ third.props.totalPoints }}<span class="text-xxs text-gray-300">pt</span></p>
