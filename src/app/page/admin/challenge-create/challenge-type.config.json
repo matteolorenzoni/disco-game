@@ -1,12 +1,16 @@
 [
-  { "label": "Camaleonte", "icon": "chameleon" },
-  { "label": "Granchio", "icon": "crab" },
-  { "label": "Fenicottero", "icon": "flamingo" },
-  { "label": "Rana", "icon": "frog" },
-  { "label": "Leone", "icon": "lion" },
-  { "label": "Gufo", "icon": "owl" },
-  { "label": "Panda", "icon": "panda" },
-  { "label": "Pinguino", "icon": "penguin" },
-  { "label": "Bradipo", "icon": "sloth" },
-  { "label": "Zebra", "icon": "zebra" }
+  { "label": "Albero", "icon": "albero" },
+  { "label": "Alieno", "icon": "alieno" },
+  { "label": "Basket", "icon": "basket" },
+  { "label": "Bellezza", "icon": "bellezza" },
+  { "label": "Cantante", "icon": "cantante" },
+  { "label": "Cocktail", "icon": "cocktail" },
+  { "label": "Dj", "icon": "dj" },
+  { "label": "Jam out", "icon": "jam_out" },
+  { "label": "Lingua", "icon": "lingua" },
+  { "label": "Melanzana", "icon": "melanzana" },
+  { "label": "Shopping bag", "icon": "shopping_bag" },
+  { "label": "Skate", "icon": "skate" },
+  { "label": "Statua della Libertà", "icon": "statua_liberta" },
+  { "label": "Traguardo", "icon": "traguardo" }
 ]

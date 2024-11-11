@@ -58,7 +58,7 @@ export class ChallengeCreateComponent implements OnInit {
   /* Variables */
   challenge = signal<Doc<Challenge> | null | undefined>(undefined);
   challengeTypeModalIsOpen = signal<boolean>(false);
-  challengeTypeActive = signal<SelectOption>(this.OPTIONS.find((x) => x.icon === ChallengeType.FROG)!);
+  challengeTypeActive = signal<SelectOption>(this.OPTIONS.find((x) => x.icon === ChallengeType.ALBERO)!);
 
   /* Icons */
   ICON_TRASH = faTrash;
@@ -77,7 +77,7 @@ export class ChallengeCreateComponent implements OnInit {
       nonNullable: true,
       validators: [Validators.required]
     }),
-    type: new FormControl(ChallengeType.FROG, {
+    type: new FormControl(ChallengeType.ALBERO, {
       nonNullable: true,
       validators: [Validators.required]
     }),
@@ -126,9 +126,6 @@ export class ChallengeCreateComponent implements OnInit {
     if (this.challengeForm.invalid) throw new Error('formNotValid', { cause: 'formNotValid' });
 
     await this.loaderService.executeImmediate(async () => {
-      console.log(this.challengeForm.getRawValue());
-      console.log(this.challengeForm.value);
-      console.log(this.challengeForm.value.points);
       const form = trimFormValues(this.challengeForm.getRawValue());
 
       /* Aggiungo o aggiorno il documento */

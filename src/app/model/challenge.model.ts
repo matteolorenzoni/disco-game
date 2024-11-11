@@ -10,14 +10,18 @@ export type Challenge = {
 };
 
 export enum ChallengeType {
-  CHAMELEON = 'chameleon',
-  CRAB = 'crab',
-  FLAMINGO = 'flamingo',
-  FROG = 'frog',
-  LION = 'lion',
-  OWL = 'owl',
-  PANDA = 'panda',
-  PENGUIN = 'penguin',
-  SLOTH = 'sloth',
-  ZEBRA = 'zebra'
+  ALBERO = 'albero',
+  ALIENO = 'alieno',
+  BASKET = 'basket',
+  BELLEZZA = 'bellezza',
+  CANTANTE = 'cantante',
+  COCKTAIL = 'cocktail',
+  DJ = 'dj',
+  JAM_OUT = 'jam_out',
+  LINGUA = 'lingua',
+  MELANZANA = 'melanzana',
+  SHOPPING_BAG = 'shopping_bag',
+  SKATE = 'skate',
+  STATUA_LIBERTA = 'statua_liberta',
+  TRAGUARDO = 'traguardo'
 }
