@@ -1,23 +1,21 @@
 <div class="relative h-screen overflow-hidden">
   <div class="flex h-screen flex-col gap-8 overflow-hidden p-4">
-    <div class="flex flex-col gap-1 text-center">
+    <div class="flex flex-col gap-1 text-center text-on-background">
       <h2 class="text-2xl font-bold">Informativa sulla Privacy</h2>
-      <p class="text-xs"><strong>Ultimo aggiornamento:</strong> [Data]</p>
+      <p class="text-xs"><strong>Ultimo aggiornamento:</strong> 09/11/2024</p>
     </div>
 
-    <div class="flex flex-1 flex-col overflow-y-auto rounded-lg bg-surface p-4 shadow-lg backdrop-blur">
+    <div class="flex flex-1 flex-col overflow-y-auto rounded-lg bg-surface p-4 pb-16 shadow-lg backdrop-blur">
       <h3 class="mt-6 text-xl font-semibold">1. Introduzione</h3>
       <p>
-        Benvenuto su <strong>[Nome dell'Applicazione]</strong>. La tua privacy è fondamentale per noi, e ci impegniamo a
-        trattare i tuoi dati personali in modo trasparente, sicuro e conforme al Regolamento Generale sulla Protezione
-        dei Dati (GDPR). Questa informativa ti illustra come raccogliamo, utilizziamo, conserviamo e proteggiamo i tuoi
-        dati personali.
+        Benvenuto su <strong>Onlyfanta</strong>. La tua privacy è fondamentale per noi, e ci impegniamo a trattare i
+        tuoi dati personali in modo trasparente, sicuro e conforme al Regolamento Generale sulla Protezione dei Dati
+        (GDPR). Questa informativa ti illustra come raccogliamo, utilizziamo, conserviamo e proteggiamo i tuoi dati
+        personali.
       </p>
 
       <h3 class="mt-6 text-xl font-semibold">2. Tipi di Dati Personali Raccolti</h3>
-      <p>
-        Durante l'uso di <strong>[Nome dell'Applicazione]</strong>, raccogliamo e trattiamo i seguenti dati personali:
-      </p>
+      <p>Durante l'uso di <strong>Onlyfanta</strong>, raccogliamo e trattiamo i seguenti dati personali:</p>
       <ul class="ml-5 list-disc">
         <li><strong>Nome e Cognome:</strong> Utilizzato per identificarti e per personalizzare la tua esperienza.</li>
         <li>
@@ -55,12 +53,12 @@
       <p>Trattiamo i tuoi dati personali secondo le seguenti basi giuridiche:</p>
       <ul class="ml-5 list-disc">
         <li>
-          <strong>Consenso:</strong> Registrandoti su <strong>[Nome dell'Applicazione]</strong>, accetti esplicitamente
-          il trattamento dei tuoi dati.
+          <strong>Consenso:</strong> Registrandoti su <strong>Onlyfanta</strong>, accetti esplicitamente il trattamento
+          dei tuoi dati.
         </li>
         <li>
           <strong>Esecuzione di un Contratto:</strong> La gestione del tuo account e la fornitura dei servizi richiesti
-          costituiscono un contratto tra te e <strong>[Nome dell'Applicazione]</strong>.
+          costituiscono un contratto tra te e <strong>Onlyfanta</strong>.
         </li>
         <li>
           <strong>Obblighi di Legge:</strong> La conservazione dei dati può essere necessaria per adempiere a obblighi
@@ -107,14 +105,16 @@
         <li><strong>Opposizione:</strong> Puoi opporti al trattamento dei tuoi dati per motivi specifici.</li>
       </ul>
       <p>
-        Per esercitare questi diritti, contattaci all’indirizzo email: <strong>[Indirizzo Email di Contatto]</strong>.
+        Per esercitare questi diritti, contattaci all’indirizzo email:
+        <strong>{{ 'onlyfanta.service@gmail.com' }}</strong
+        >.
       </p>
 
       <h3 class="mt-6 text-xl font-semibold">8. Condivisione dei Dati</h3>
       <p>
-        <strong>[Nome dell'Applicazione]</strong> non condivide i tuoi dati con terze parti, salvo nei casi in cui ciò
-        sia necessario per erogare i servizi (ad esempio, la piattaforma Firebase) o in presenza di obblighi legali.
-        Firebase potrebbe accedere ai dati personali in conformità con le proprie politiche di sicurezza e privacy.
+        <strong>Onlyfanta</strong> non condivide i tuoi dati con terze parti, salvo nei casi in cui ciò sia necessario
+        per erogare i servizi (ad esempio, la piattaforma Firebase) o in presenza di obblighi legali. Firebase potrebbe
+        accedere ai dati personali in conformità con le proprie politiche di sicurezza e privacy.
       </p>
 
       <h3 class="mt-6 text-xl font-semibold">9. Modifiche all'Informativa sulla Privacy</h3>
@@ -126,13 +126,13 @@
       <h3 class="mt-6 text-xl font-semibold">10. Contatti</h3>
       <p>
         Per domande o ulteriori informazioni riguardo alla nostra informativa sulla privacy, puoi contattarci
-        all’indirizzo email: <strong>[Indirizzo Email di Contatto]</strong>.
+        all’indirizzo email: <strong>{{ 'onlyfanta.service@gmail.com' }}</strong>
       </p>
     </div>
   </div>
 
   <button
-    class="absolute bottom-4 left-1/2 -translate-x-1/2 transform rounded border-2 border-primary-500 bg-purple-500/50 p-2 text-sm backdrop-blur-sm hover:bg-primary-500/75 active:bg-primary-500/100"
+    class="absolute bottom-6 left-1/2 -translate-x-1/2 transform rounded border-2 border-primary-600 bg-primary-600/50 p-2 text-sm backdrop-blur-sm hover:bg-primary-500/75 active:bg-primary-500/100"
     (click)="goToSignUp()">
     Indietro
   </button>
