@@ -1,14 +1,16 @@
 <app-title [pages]="[{ path: '', label: 'Impostazioni' }]"></app-title>
 
-<div class="bord -mx-4 border-b border-neutral-700 px-4 text-on-surface">
+<div class="bord -mx-4 border-b border-primary-600 px-4 text-primary-500">
   <div tabindex="-1" role="tablist">
     @for (tab of TABS; track tab.id) {
       <button
         [tabindex]="activeTab().id === tab.id ? 0 : -1"
         type="button"
         role="tab"
-        class="rounded-t px-4 py-2 text-sm text-neutral-400 hover:bg-neutral-800"
-        [ngClass]="{ 'text-on-surface border-b-2 border-primary-500 font-semibold': activeTab().id === tab.id }"
+        class="rounded-t px-4 py-2 text-sm hover:bg-surface"
+        [ngClass]="{
+          'bg-surface border-b-2 text-on-surface border-primary-600 font-semibold': activeTab().id === tab.id
+        }"
         (click)="activeTab.set(tab)">
         {{ tab.label }}
       </button>
@@ -18,10 +20,10 @@
 
 @switch (activeTab().id) {
   @case ('profile') {
-    <div class="mt-4 rounded-lg border border-card-border bg-surface p-4">
-      <div class="-mx-4 border-b border-card-border px-4 pb-4">
-        <p class="text-base font-semibold text-on-surface">Info personali</p>
-        <p class="text-xs text-neutral-400">
+    <div class="mt-4 rounded-lg border border-primary-600 bg-surface p-4 text-on-surface">
+      <div class="-mx-4 border-b border-primary-600 px-4 pb-4">
+        <p class="text-base font-semibold text-primary-800">Info personali</p>
+        <p class="text-xs text-white">
           Personalizza il tuo profilo, mostra i tuoi successi e segui i tuoi progressi nelle sfide in discoteca
         </p>
       </div>
@@ -31,9 +33,9 @@
     <fv-button-outlined class="mt-12" label="Esci" twColor="rose" [onClick]="logout.bind(this)"></fv-button-outlined>
   }
   @case ('code') {
-    <div class="mt-4 flex flex-col gap-2 rounded-lg border border-card-border bg-surface p-4">
-      <p class="text-base font-semibold text-on-surface">Codice utente univoco</p>
-      <p class="text-5xl text-neutral-400">{{ user()?.props?.code }}</p>
+    <div class="mt-4 flex flex-col gap-2 rounded-lg border border-primary-600 bg-surface p-4 text-on-surface">
+      <p class="text-base font-semibold text-primary-500">Codice utente univoco</p>
+      <p class="text-5xl text-white">{{ user()?.props?.code }}</p>
     </div>
   }
 }

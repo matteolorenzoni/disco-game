@@ -6,12 +6,12 @@
 </app-title>
 
 @if (team(); as team) {
-  <div class="flex h-32 flex-col justify-center">
+  <div class="flex h-32 flex-col justify-center text-primary-500">
     <h3 class="text-center text-3xl font-bold">{{ team.props.name }}</h3>
     <div class="flex items-center justify-evenly">
       <p class="text-center">
         <span class="text-[60px]">{{ team.props.totalPoints }}</span>
-        <span class="text-sm">pt</span>
+        <span class="text-sm text-primary-500">pt</span>
       </p>
     </div>
   </div>
@@ -21,17 +21,16 @@
       @for (teammate of teammates(); track teammate.id) {
         <li class="relative cursor-pointer rounded-lg shadow transition duration-300">
           <button
-            class="flex w-full gap-2 rounded-lg bg-gradient-to-r from-neutral-800/25 to-neutral-800 p-1 pr-4 shadow-lg hover:to-primary-500/50 active:to-primary-500/75"
+            class="flex w-full gap-2 rounded-lg bg-gradient-to-r from-primary-500/25 to-primary-500/75 p-1 pr-4 shadow hover:to-primary-500/50 active:to-primary-500/75"
             (click)="goToUserChallenges(teammate.id)">
             <div class="relative shrink-0 basis-16 overflow-visible">
               <img
-                class="absolute -top-4 h-16 w-16 rounded-3xl border-2 border-neutral-800 object-cover shadow"
-                [ngClass]="{ 'bg-[#8acff1]': teammate.imageUrl === undefined }"
+                class="absolute -top-4 h-16 w-16 rounded-3xl border-2 border-primary-600 bg-secondary-400 object-cover shadow"
                 [ngSrc]="teammate.imageUrl ?? 'images/profile-user.png'"
                 width="64"
                 height="64"
                 priority
-                alt="Immagine utente" />
+                alt="Immagine compagno" />
             </div>
             <div class="flex flex-1 items-center gap-2 overflow-hidden">
               <div class="flex flex-1 flex-col overflow-hidden text-start">
@@ -39,13 +38,13 @@
                   @if (teammate.id === team.props.leaderId) {
                     <fa-icon class="text-yellow-500" [icon]="ICON_CROWN"></fa-icon>
                   }
-                  <span class="truncate font-semibold text-neutral-300">{{ teammate.userName }}</span>
+                  <span class="truncate font-semibold text-secondary-100">{{ teammate.userName }}</span>
                   @if (
                     team.props.eventStartDate.getTime() > NOW.getTime() &&
                     firebaseService.userFirebase()?.uid === team.props.leaderId
                   ) {
                     <button
-                      class="text-xxs uppercase text-rose-700 hover:underline"
+                      class="text-xxs uppercase text-rose-600 hover:underline"
                       (click)="deleteFromTeam($event, teammate.id, team)">
                       Elimina
                     </button>
@@ -55,7 +54,7 @@
                   {{ teammate.challenges | getUserTotalPoints }}
                 </span>
               </div>
-              <fa-icon class="ml-auto" [icon]="ICON_RIGHT"></fa-icon>
+              <fa-icon class="ml-auto text-white" [icon]="ICON_RIGHT"></fa-icon>
             </div>
           </button>
         </li>
@@ -66,27 +65,34 @@
   <div class="fixed bottom-[120px] right-0 px-4">
     <div
       class="flex items-center gap-2 rounded border border-white/50 bg-white/25 px-2 py-1 text-xs shadow-lg backdrop-blur-lg">
-      <p>
+      <p class="text-on-background">
         Codice: <span class="font-bold">{{ team.props.code }}</span>
       </p>
       <button (click)="onCopyCodeToClipboard()">
-        <fa-icon [icon]="ICON_CLIPBOARD"></fa-icon>
+        <fa-icon [icon]="ICON_SHARE"></fa-icon>
       </button>
     </div>
   </div>
 
   @if (myTeammate(); as myTeammate) {
-    <div class="fixed bottom-16 left-0 w-full px-4 py-2 text-on-surface">
+    <div class="fixed bottom-16 left-0 w-full px-4 py-2 text-primary-500">
       <button
         class="flex w-full items-center rounded-lg bg-primary-500/25 p-2 shadow-lg backdrop-blur-lg hover:to-primary-500/50 active:to-primary-500/15"
         (click)="goToUserChallenges(myTeammate.id)">
-        <div class="flex w-full items-end gap-2 text-base">
+        <div class="flex w-full items-center gap-2 text-base">
           @if (firebaseService.userFirebase()?.uid === team.props.leaderId) {
             <fa-icon [icon]="ICON_CROWN"></fa-icon>
           }
-          <p class="truncate font-semibold text-neutral-300">Mio punteggio</p>
+          <img
+            class="h-6 w-6 rounded-full bg-secondary-400 object-cover shadow-xl"
+            [ngSrc]="myTeammate.imageUrl ?? 'images/profile-user.png'"
+            width="6"
+            height="6"
+            priority
+            alt="Immagine utente" />
+          <p class="truncate font-semibold text-primary-400">{{ myTeammate.userName }}</p>
           <span class="font-bold text-white">{{ myTeammate.challenges | getUserTotalPoints }} </span>
-          <fa-icon class="ml-auto" [icon]="ICON_RIGHT"></fa-icon>
+          <fa-icon class="ml-auto text-primary-400" [icon]="ICON_RIGHT"></fa-icon>
         </div>
       </button>
     </div>

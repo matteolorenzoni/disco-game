@@ -3,7 +3,7 @@
 @if (mergedEvents(); as mergedEvents) {
   @if (!mergedEvents.length) {
     <div class="absolute left-0 top-0 -z-10 h-screen p-8 flex-center">
-      <div class="flex-col rounded-lg bg-surface p-4 text-gray-200 shadow backdrop-blur">
+      <div class="flex-col rounded-lg bg-surface p-4 text-on-surface shadow backdrop-blur">
         <h2 class="mb-2 text-lg font-bold">Nessun evento trovato</h2>
         <p class="text-sm">
           Al momento non ci sono eventi disponibili. Torna più avanti per scoprire nuovi eventi e competere con il tuo
@@ -21,20 +21,20 @@
           <img class="aspect-video w-full" [src]="event.imageUrl" alt="Immagine evento" />
           <div class="h-28 w-full"></div>
           <div
-            class="absolute inset-0 flex h-full w-full bg-gradient-to-b from-transparent from-20% to-black to-70%"></div>
-          <div class="absolute inset-0 flex h-full w-full flex-col gap-2 p-2">
+            class="absolute inset-0 flex h-full w-full bg-gradient-to-b from-transparent from-20% to-primary-900 to-70%"></div>
+          <div class="absolute inset-0 flex h-full w-full flex-col gap-2 p-2 text-primary-500 shadow">
             <div
-              class="ml-auto flex h-12 w-12 flex-col items-center justify-center rounded bg-white/80 text-black shadow-md backdrop-blur">
-              <p class="text-lg font-bold">{{ event.startDate | date: 'dd' }}</p>
-              <p class="text-xs uppercase text-gray-700">
+              class="ml-auto flex h-12 w-12 flex-col items-center justify-center rounded bg-white/80 shadow-md backdrop-blur">
+              <p class="text-lg font-bold text-on-background">{{ event.startDate | date: 'dd' }}</p>
+              <p class="text-xs uppercase">
                 {{ (event.startDate | date: 'MMMM')!.substring(0, 3) }}
               </p>
             </div>
             <div
-              class="mt-auto flex flex-col overflow-hidden rounded-lg border border-black/50 p-2 shadow backdrop-blur">
-              <p class="truncate text-xxs text-gray-400">{{ event.location }}</p>
-              <p class="mb-2 truncate text-xl font-bold text-on-background">{{ event.name }}</p>
-              <p class="mb-4 line-clamp-3 whitespace-pre-line text-xs italic text-neutral-400">
+              class="mt-auto flex flex-col overflow-hidden rounded-lg border border-white/25 bg-white/5 p-2 shadow backdrop-blur">
+              <p class="truncate text-xxs text-secondary-500">{{ event.location }}</p>
+              <p class="mb-2 truncate text-xl font-bold text-white">{{ event.name }}</p>
+              <p class="mb-4 line-clamp-3 whitespace-pre-line text-xs italic text-secondary-300">
                 {{ event.description }}
               </p>
               @if (event.teamId) {
@@ -59,10 +59,12 @@
                   <fv-button
                     class="flex-1"
                     label="Crea"
+                    twColor="secondary"
                     [onClick]="addTeam.bind(this, event.id, event.startDate)"></fv-button>
                   <fv-button-outlined
                     class="flex-1"
                     label="Trova"
+                    twColor="secondary"
                     [onClick]="findTeam.bind(this, event.id)"></fv-button-outlined>
                 </div>
               }

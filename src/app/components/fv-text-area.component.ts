@@ -11,17 +11,11 @@ import { ControlContainer, FormGroupDirective, ReactiveFormsModule } from '@angu
       <textarea
         [id]="name()"
         [formControlName]="name()"
-        class="peer mt-6 min-h-20 w-full rounded border border-field-border bg-field-background px-3 py-2 text-xs text-field-color shadow-sm focus:border-2 focus:outline-none disabled:bg-neutral-700 disabled:text-neutral-600"
-        [ngClass]="[
-          'focus:border-' + twColor() + '-500',
-          'focus:text-' + twColor() + '-200',
-          'focus:caret-' + twColor() + '-500'
-        ]">
+        class="peer mt-6 min-h-20 w-full rounded border border-field-border bg-field-background px-3 py-2 text-xs text-field-color shadow-sm focus:border-2 focus:border-focus-field focus:font-semibold focus:text-primary-600 focus:caret-primary-600 focus:outline-none disabled:bg-primary-300 disabled:text-gray-200">
       </textarea>
       <label
         [for]="name()"
-        class="absolute left-0 top-0 block text-sm font-medium text-field-label-color peer-focus:font-semibold"
-        [ngClass]="['peer-focus:text-' + twColor() + '-500']">
+        class="absolute left-0 top-0 block text-sm font-medium text-primary-500 peer-focus:font-bold peer-focus:text-primary-600">
         {{ label() }}
       </label>
     </div>

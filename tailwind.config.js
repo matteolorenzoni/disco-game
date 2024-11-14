@@ -48,41 +48,42 @@ module.exports = {
         'neutral-850': '#121416',
         'neutral-900': '#0b0d0e',
         'neutral-950': '#070809',
-        'primary-50': '#f2ebf5',
-        'primary-100': '#e0d2e7',
-        'primary-200': '#c1a6cf',
-        'primary-300': '#9f7ab5',
-        'primary-400': '#875f9f',
-        'primary-500': '#7B4B92',
-        'primary-600': '#6b3e7e',
-        'primary-700': '#59336a',
-        'primary-800': '#472755',
-        'primary-900': '#2e1a39',
-        'secondary-50': '#e0f4f8',
-        'secondary-100': '#b3e0e9',
-        'secondary-200': '#80c3d0',
-        'secondary-300': '#4DA6B5',
-        'secondary-400': '#4B928E',
-        'secondary-500': '#4A758D',
-        'secondary-600': '#3C5E70',
-        'secondary-700': '#2E4852',
-        'secondary-800': '#1F3234',
-        'secondary-900': '#111B1E',
+        'primary-50': '#E3E3F0',
+        'primary-100': '#BFBFD7',
+        'primary-200': '#9A9ABE',
+        'primary-300': '#7676A4',
+        'primary-400': '#51518B',
+        'primary-500': '#2D2D72',
+        'primary-600': '#262661',
+        'primary-700': '#1E1E51',
+        'primary-800': '#171740',
+        'primary-900': '#0F0F2F',
+        'secondary-50': '#F8F8FC',
+        'secondary-100': '#ECECF7',
+        'secondary-200': '#E0E0F2',
+        'secondary-300': '#D4D4EC',
+        'secondary-400': '#C8C8E7',
+        'secondary-500': '#BCBCE2',
+        'secondary-600': '#9999BB',
+        'secondary-700': '#767694',
+        'secondary-800': '#52526D',
+        'secondary-900': '#2F2F46',
 
-        background: '#000000',
-        'on-background': '#f0f4f8', // neutral-100
+        background: '#E0E0F2',
+        'on-background': '#171740',
 
-        surface: '#0b0d0e', // neutral-900
-        'on-surface': '#dde7ee', // neutral-200
+        surface: '#D4D4EC',
+        'on-surface': '#1E1E51',
 
-        'field-color': '#dde7ee', // neutral-200
-        'field-background': '#0b0d0e', // fv-neutral-900
-        'field-border': '#32383e', // fv-neutral-700
-        'field-label-color': '#f0f4f8', // fv-neutral-100
-        'field-icon-color': '#636b74', // fv-neutral-500
+        'field-color': '#2D2D72',
+        'field-background': '#F8F8FC',
+        'field-border': '#BCBCE2',
+        'field-label-color': '#2D2D72',
+        'field-icon-color': '#BCBCE2',
+        'focus-field': '#262661'
 
-        'card-background': '#0b0d0e', // fv-neutral-900
-        'card-border': '#32383e99' // fv-neutral-700, 60%
+        // 'card-background': '#0b0d0e',
+        // 'card-border': '#32383e99'
       }
     }
   },

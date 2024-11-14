@@ -10,7 +10,7 @@
 
 @if (logService.logs().length) {
   <ul
-    class="fixed bottom-0 left-0 z-[1000] flex max-h-80 min-h-14 w-full flex-col items-center gap-2 overflow-y-auto p-2">
+    class="fixed bottom-2 left-0 z-[1000] flex max-h-80 min-h-14 w-full flex-col items-center gap-2 overflow-y-auto p-2">
     @for (log of logService.logs(); track log.id) {
       <li class="w-full max-w-xl"><fv-toast [log]="log"></fv-toast></li>
     }
@@ -23,7 +23,7 @@
     class="fixed left-0 top-0 z-50 flex h-screen w-screen items-center justify-center backdrop-blur-sm">
     <svg
       aria-hidden="true"
-      class="h-12 w-12 animate-spin fill-primary-500"
+      class="h-12 w-12 animate-spin fill-white text-primary-400"
       viewBox="0 0 100 101"
       fill="none"
       xmlns="http://www.w3.org/2000/svg">

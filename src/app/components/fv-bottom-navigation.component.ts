@@ -9,7 +9,8 @@ import { RouterLinkActive, RouterModule } from '@angular/router';
   standalone: true,
   imports: [CommonModule, RouterModule, RouterLinkActive, FaIconComponent],
   template: `
-    <nav class="fixed bottom-0 left-0 h-16 w-full border-t border-neutral-800 bg-surface p-2 text-neutral-500">
+    <nav
+      class="fixed bottom-0 left-0 z-20 h-16 w-full border-t border-primary-800 bg-primary-500 p-2 text-secondary-700">
       <ul class="flex h-full items-center gap-1">
         @for (item of menu(); track item.id) {
           <li class="flex-1 basis-0 overflow-hidden">

@@ -8,19 +8,19 @@
           height="32"
           width="32"
           alt="Immagine utente"
-          class="aspect-square max-h-32 w-full max-w-32 rounded-full border-2 border-card-border object-cover" />
+          class="aspect-square max-h-32 w-full max-w-32 rounded-full border-2 border-primary-600 object-cover" />
 
         @if (this.imagePreview()) {
           <label
             for="imageUpload"
-            class="absolute -right-2 bottom-8 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border-2 border-card-border bg-surface text-xs text-on-surface hover:bg-neutral-500">
+            class="absolute -right-2 bottom-8 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border-2 border-primary-500 bg-surface text-xxs text-on-surface hover:bg-secondary-400 active:bg-secondary-500">
             <button type="button" (click)="onImageRemove()"><fa-icon [icon]="ICON_TRASH"></fa-icon></button>
           </label>
         }
 
         <label
           for="imageUpload"
-          class="absolute -bottom-1 right-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-card-border bg-surface text-on-surface hover:bg-neutral-500">
+          class="absolute -bottom-1 right-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-primary-500 bg-surface text-on-surface hover:bg-secondary-400 active:bg-secondary-500">
           <fa-icon [icon]="ICON_PEN"></fa-icon>
           <input
             id="imageUpload"
@@ -47,13 +47,30 @@
   <fv-field name="password" label="Password" type="password"></fv-field>
 
   @if (!user()) {
-    <div class="mt-4 flex items-center text-sm text-on-background">
-      <input
-        type="checkbox"
-        id="privacy"
-        class="mr-2 h-4 w-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
-        (change)="onUpdatePolicyAcceptance($event)" />
-      <label for="privacy" class="text-gray-200">
+    <div class="inline-flex items-center">
+      <label class="relative flex cursor-pointer items-center" for="privacy">
+        <input
+          type="checkbox"
+          id="privacy"
+          class="peer h-5 w-5 cursor-pointer appearance-none rounded shadow checked:bg-secondary-500"
+          (change)="onUpdatePolicyAcceptance($event)" />
+        <span
+          class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform text-white opacity-0 peer-checked:opacity-100">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-3.5 w-3.5"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            stroke="currentColor"
+            stroke-width="1">
+            <path
+              fill-rule="evenodd"
+              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+              clip-rule="evenodd"></path>
+          </svg>
+        </span>
+      </label>
+      <label for="privacy" class="ml-2 text-sm text-primary-400">
         Accetto la
         <a href="./sign-up/privacy-policy" class="font-bold text-primary-500 hover:underline">Privacy Policy</a>
       </label>
@@ -61,8 +78,9 @@
   }
 
   <fv-button
-    class="mt-8"
+    class="mt-6"
     type="submit"
+    twColor="secondary"
     [label]="firebaseService.userFirebase() ? 'Aggiorna' : 'Registrati'"
     [disabled]="signUpForm.invalid"></fv-button>
 </form>

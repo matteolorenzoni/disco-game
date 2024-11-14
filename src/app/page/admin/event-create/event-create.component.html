@@ -5,8 +5,8 @@
   ]">
 </app-title>
 
-<form [formGroup]="eventForm" (ngSubmit)="addOrUpdateEvent()" class="flex w-full max-w-2xl flex-col gap-6">
-  <fv-field name="name" label="Nome evento"></fv-field>
+<form [formGroup]="eventForm" (ngSubmit)="addOrUpdateEvent()" class="flex w-full max-w-2xl flex-col gap-4">
+  <fv-field name="name" label="Nome"></fv-field>
 
   <fv-text-area name="description" label="Descrizione"></fv-text-area>
 
@@ -18,11 +18,11 @@
 
   <!-- Anteprima immagine -->
   <div class="flex w-full flex-col justify-center gap-1">
-    <p class="block text-sm font-medium text-field-label-color">Immagine</p>
+    <p class="block text-sm font-medium text-primary-500">Immagine</p>
     @if (!imagePreview()) {
       <label
         for="event-image-upload"
-        class="flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-neutral-600 bg-neutral-800 text-neutral-600 hover:bg-neutral-900">
+        class="flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-primary-600 bg-surface text-on-surface hover:bg-secondary-400 active:bg-secondary-500">
         <div class="flex flex-col items-center justify-center gap-2">
           <fa-icon class="text-2xl" [icon]="ICON_UPLOAD"></fa-icon>
           <p class="text-sm font-bold">Carica immagine</p>
@@ -37,13 +37,13 @@
     } @else {
       <div class="relative aspect-video w-full">
         <img
-          class="w-full rounded border border-card-border object-cover"
+          class="aspect-video w-full rounded border border-primary-500 object-cover shadow"
           [src]="imagePreview()"
           alt="Immagine evento" />
 
         <label
           for="event-image-upload-update"
-          class="absolute bottom-2 right-2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-card-border bg-surface text-on-surface hover:bg-neutral-500">
+          class="absolute bottom-2 right-2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-primary-500 bg-surface text-on-surface hover:bg-secondary-400 active:bg-secondary-500">
           <fa-icon [icon]="ICON_PEN"></fa-icon>
           <input
             id="event-image-upload-update"
@@ -56,16 +56,17 @@
     }
   </div>
 
-  <div class="mt-8 flex gap-2">
+  <div class="mt-6 flex gap-2">
     <fv-button
       class="flex-1"
       type="submit"
+      twColor="secondary"
       [label]="event() ? 'Aggiorna' : 'Salva'"
       [disabled]="eventForm.invalid || !imagePreview()"></fv-button>
     @if (event(); as event) {
       <button
         type="button"
-        class="rounded border border-rose-800 px-2 text-rose-800 hover:bg-rose-900/25 active:bg-rose-900/50"
+        class="rounded border border-rose-600 px-2 text-rose-600 hover:bg-rose-600/25 active:bg-rose-600/50"
         (click)="deleteEvent(event.id, event.props.startDate)">
         <fa-icon [icon]="ICON_TRASH"></fa-icon>
       </button>

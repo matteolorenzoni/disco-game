@@ -13,7 +13,7 @@ import { LogType } from '../model/enum';
   template: `
     <div
       @fade
-      class="flex cursor-pointer items-center gap-2 rounded-md p-2 text-white shadow-lg"
+      class="flex cursor-pointer items-center gap-2 rounded-md p-2 text-white shadow"
       [style.backgroundColor]="logProps().color"
       tabindex="0"
       (click)="logService.removeLog(log().id)"

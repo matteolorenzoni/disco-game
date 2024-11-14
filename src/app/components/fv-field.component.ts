@@ -15,17 +15,13 @@ type InputType = 'text' | 'password' | 'email' | 'number' | 'date' | 'datetime-l
           <input
             [id]="name()"
             type="number"
+            [attr.inputmode]="'numeric'"
             [formControlName]="name()"
             [min]="min()"
             [max]="max()"
             [step]="step()"
             autocomplete="off"
-            class="peer mt-6 h-8 w-full rounded border border-field-border bg-field-background px-3 py-2 text-xs text-field-color shadow focus:border-2 focus:outline-none disabled:bg-neutral-700 disabled:text-neutral-600"
-            [ngClass]="[
-              'focus:border-' + twColor() + '-500',
-              'focus:text-' + twColor() + '-200',
-              'focus:caret-' + twColor() + '-500'
-            ]" />
+            class="peer mt-5 h-8 w-full rounded border border-field-border bg-field-background px-3 py-2 text-xs text-field-color shadow focus:border-2 focus:border-focus-field focus:font-semibold focus:text-focus-field focus:caret-focus-field focus:outline-none disabled:bg-primary-300 disabled:text-gray-200" />
         }
 
         @case ('date' || 'datetime-local') {
@@ -34,12 +30,7 @@ type InputType = 'text' | 'password' | 'email' | 'number' | 'date' | 'datetime-l
             [type]="type()"
             [formControlName]="name()"
             autocomplete="off"
-            class="peer mt-6 h-8 w-full rounded border border-field-border bg-field-background px-3 py-2 text-xs text-field-color shadow focus:border-2 focus:outline-none disabled:bg-neutral-700 disabled:text-neutral-600"
-            [ngClass]="[
-              'focus:border-' + twColor() + '-500',
-              'focus:text-' + twColor() + '-200',
-              'focus:caret-' + twColor() + '-500'
-            ]" />
+            class="peer mt-5 h-8 w-full rounded border border-field-border bg-field-background px-3 py-2 text-xs text-field-color shadow focus:border-2 focus:border-focus-field focus:font-semibold focus:text-focus-field focus:caret-focus-field focus:outline-none disabled:bg-primary-300 disabled:text-gray-200" />
         }
 
         @default {
@@ -48,18 +39,12 @@ type InputType = 'text' | 'password' | 'email' | 'number' | 'date' | 'datetime-l
             [type]="type()"
             [formControlName]="name()"
             autocomplete="off"
-            class="peer mt-6 h-8 w-full rounded border border-field-border bg-field-background px-3 py-2 text-xs text-field-color shadow focus:border-2 focus:outline-none disabled:bg-neutral-700 disabled:text-neutral-600"
-            [ngClass]="[
-              'focus:border-' + twColor() + '-500',
-              'focus:text-' + twColor() + '-200',
-              'focus:caret-' + twColor() + '-500'
-            ]" />
+            class="peer mt-5 h-8 w-full rounded border border-field-border bg-field-background px-3 py-2 text-xs text-field-color shadow focus:border-2 focus:border-focus-field focus:font-semibold focus:text-focus-field focus:caret-focus-field focus:outline-none disabled:bg-primary-300 disabled:text-gray-200" />
         }
       }
       <label
         [for]="name()"
-        class="absolute left-0 top-0 block text-sm font-medium text-field-label-color peer-focus:font-semibold"
-        [ngClass]="['peer-focus:text-' + twColor() + '-500']">
+        class="absolute left-0 top-0 block text-sm font-medium text-primary-500 peer-focus:font-bold peer-focus:text-focus-field">
         {{ label() }}
       </label>
     </div>
@@ -76,5 +61,4 @@ export class FvFieldComponent {
   min = input<number | null>(null);
   max = input<number | null>(null);
   step = input<string | null>(null);
-  twColor = input<string>('primary');
 }

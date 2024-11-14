@@ -6,7 +6,7 @@
 </app-title>
 
 @if (challenge() !== undefined) {
-  <form [formGroup]="challengeForm" (ngSubmit)="addOrUpdateChallenge()" class="flex w-full max-w-2xl flex-col gap-6">
+  <form [formGroup]="challengeForm" (ngSubmit)="addOrUpdateChallenge()" class="flex w-full max-w-2xl flex-col gap-4">
     <fv-field name="name" label="Nome sfida"></fv-field>
 
     <fv-text-area name="description" label="Descrizione"></fv-text-area>
@@ -18,7 +18,7 @@
           class="flex w-full cursor-pointer items-center rounded border border-field-border bg-field-background px-3 py-2 text-sm text-field-color shadow-sm focus:border-2 focus:border-primary-500 focus:outline-none">
           <img [src]="'images/challenge/' + challengeTypeActive().icon + '.png'" alt="" class="mr-2 h-5 w-5" />
           <span class="text-sm text-on-surface">{{ challengeTypeActive().label }}</span>
-          <svg class="ml-auto h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+          <svg class="ml-auto h-5 w-5 text-primary-500" viewBox="0 0 20 20" fill="currentColor">
             <path
               fill-rule="evenodd"
               d="M10.53 3.47a.75.75 0 0 0-1.06 0L6.22 6.72a.75.75 0 0 0 1.06 1.06L10 5.06l2.72 2.72a.75.75 0 1 0 1.06-1.06l-3.25-3.25Zm-4.31 9.81 3.25 3.25a.75.75 0 0 0 1.06 0l3.25-3.25a.75.75 0 1 0-1.06-1.06L10 14.94l-2.72-2.72a.75.75 0 0 0-1.06 1.06Z"
@@ -40,16 +40,17 @@
       [max]="5"
       [step]="'.1'"></fv-field>
 
-    <div class="mt-12 flex gap-2">
+    <div class="mt-6 flex gap-2">
       <fv-button
         class="flex-1"
         type="submit"
+        twColor="secondary"
         [label]="challenge() ? 'Aggiorna' : 'Salva'"
         [disabled]="challengeForm.invalid"></fv-button>
       @if (challenge(); as challenge) {
         <button
           type="button"
-          class="rounded border border-rose-800 px-2 text-rose-800 hover:bg-rose-900/25 active:bg-rose-900/50"
+          class="rounded border border-rose-600 px-2 text-rose-600 hover:bg-rose-600/25 active:bg-rose-600/50"
           (click)="deleteChallenge(challenge.id)">
           <fa-icon [icon]="ICON_TRASH"></fa-icon>
         </button>
@@ -69,13 +70,13 @@
       (click)="onCloseModal($event)">
       <div
         data-dialog="sign-in-modal"
-        class="relative mx-auto flex h-3/5 w-4/5 max-w-[40rem] flex-col gap-4 overflow-hidden rounded-lg bg-surface p-4 shadow-sm">
-        <h3 class="text-center text-lg font-semibold text-on-surface">Seleziona tipo</h3>
+        class="relative mx-auto flex h-3/5 w-4/5 max-w-[40rem] flex-col gap-4 overflow-hidden rounded-lg bg-surface p-4 text-on-surface shadow-sm">
+        <h3 class="text-center text-lg font-semibold text-primary-500">Seleziona tipo</h3>
         <ul class="grid flex-1 grid-cols-[repeat(auto-fill,minmax(8rem,1fr))] gap-4 overflow-y-auto text-on-surface">
           @for (option of OPTIONS; track $index) {
             <li
-              class="cursor-pointer rounded p-2 shadow hover:bg-neutral-800"
-              [ngClass]="option.icon === challengeTypeActive().icon ? 'bg-primary-500/30' : 'bg-surface'">
+              class="cursor-pointer rounded p-2 shadow hover:bg-primary-500/50"
+              [ngClass]="option.icon === challengeTypeActive().icon ? 'bg-primary-500/50' : 'bg-secondary-500'">
               <button class="flex w-full flex-col items-center gap-2" (click)="onSelectType(option.icon)">
                 <img class="h-12 w-12" [src]="'images/challenge/' + option.icon + '.png'" alt="" />
                 <span>{{ option.label }}</span>
