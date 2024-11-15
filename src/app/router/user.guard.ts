@@ -25,7 +25,13 @@ export const userGuard: CanActivateFn = async (route, state) => {
     // Ottiene il tipo di utente (ADMIN, SCANNER o USER)
     const currentUserType = lsUser?.props.role;
 
-    // Controlla se l'utente è già loggato e ridireziona in base al tipo di utente
+    // Controllo: Se l'utente non è autenticato e non è su /sign-up, ridirigi a /login
+    if (!userFirebase && !state.url.startsWith('/sign-up')) {
+      await router.navigateByUrl('/login');
+      return false;
+    }
+
+    // Controllo: Se l'utente è su /login ed è già autenticato, ridirigi in base al ruolo
     if (state.url.startsWith('/login')) {
       if (!userFirebase) {
         lsService.removeUser();
@@ -34,42 +40,42 @@ export const userGuard: CanActivateFn = async (route, state) => {
 
       switch (currentUserType) {
         case UserRole.ADMIN:
-          await router.navigate(['/admin']);
+          await router.navigateByUrl('/admin');
           break;
         case UserRole.SCANNER:
-          await router.navigate(['/scanner']);
+          await router.navigateByUrl('/scanner');
           break;
         case UserRole.USER:
-          await router.navigate(['/user']);
+          await router.navigateByUrl('/user');
           break;
         default:
           break;
       }
     }
 
-    // Controllo di accesso per la sezione /admin (solo per admin)
+    // Controllo: Se l'utente tenta l'accesso per la sezione /admin (solo per admin)
     if (state.url.startsWith('/admin') && currentUserType !== UserRole.ADMIN) {
-      await router.navigate(['/unauthorized']);
+      await router.navigateByUrl('/unauthorized');
       return false;
     }
 
-    // Controllo di accesso per la sezione /scanner (solo per chi deve scannerizzare qrcode)
+    // Controllo: Se l'utente tenta l'accesso per la sezione /scanner (solo per chi deve scannerizzare qrcode)
     if (state.url.startsWith('/scanner') && currentUserType !== UserRole.SCANNER) {
-      await router.navigate(['/unauthorized']);
+      await router.navigateByUrl('/unauthorized');
       return false;
     }
 
-    // Controllo di accesso per la sezione /user (solo per utenti normali)
+    // Controllo: Se l'utente tenta l'accesso per la sezione /user (solo per utenti normali)
     if (state.url.startsWith('/user') && currentUserType !== UserRole.USER) {
-      await router.navigate(['/unauthorized']);
+      await router.navigateByUrl('/unauthorized');
       return false;
     }
 
-    // Accesso permesso
+    // Accesso: permesso accordato
     return true;
   } catch {
     // In caso di errore o se l'utente non è loggato, ridireziona alla pagina di login
-    await router.navigate(['/login']);
+    await router.navigateByUrl('/login');
     return false;
   }
 };
