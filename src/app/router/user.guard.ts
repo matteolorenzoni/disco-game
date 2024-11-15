@@ -25,12 +25,6 @@ export const userGuard: CanActivateFn = async (route, state) => {
     // Ottiene il tipo di utente (ADMIN, SCANNER o USER)
     const currentUserType = lsUser?.props.role;
 
-    // Controllo: Se l'utente non è autenticato e non è su /sign-up, ridirigi a /login
-    if (!userFirebase && !state.url.startsWith('/sign-up')) {
-      await router.navigateByUrl('/login');
-      return false;
-    }
-
     // Controllo: Se l'utente è su /login ed è già autenticato, ridirigi in base al ruolo
     if (state.url.startsWith('/login')) {
       if (!userFirebase) {
@@ -51,6 +45,12 @@ export const userGuard: CanActivateFn = async (route, state) => {
         default:
           break;
       }
+    }
+
+    // Controllo: Se l'utente non è autenticato e non è su /sign-up, ridirigi a /login
+    if (!userFirebase && !state.url.startsWith('/sign-up')) {
+      await router.navigateByUrl('/login');
+      return false;
     }
 
     // Controllo: Se l'utente tenta l'accesso per la sezione /admin (solo per admin)
