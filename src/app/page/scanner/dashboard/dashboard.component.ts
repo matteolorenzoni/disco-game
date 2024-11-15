@@ -273,7 +273,8 @@ export class DashboardComponent implements OnInit {
       if (event) await this.dbService.saveScannerEvent(event);
       else this.dbService.deleteScannerEvent();
 
-      window.location.reload();
+      /* Log */
+      this.logService.addLogConfirm('Evento aggiornato');
     });
   }
 

@@ -1,11 +1,19 @@
 {
   "name": "Onlyfanta",
   "short_name": "Onlyfanta",
-  "theme_color": "#2d2d72",
-  "background_color": "#F8F8FC",
-  "display": "standalone",
   "scope": "./",
   "start_url": "./",
+  "theme_color": "#2d2d72",
+  "background_color": "#F8F8FC",
+  "orientation": "portrait",
+  "display": "standalone",
+  "prefer_related_applications": true,
+  "related_applications": [
+    {
+      "platform": "web",
+      "url": "https://test-disco-7f6db.web.app"
+    }
+  ],
   "icons": [
     {
       "src": "icons/icon-72x72.jpeg",

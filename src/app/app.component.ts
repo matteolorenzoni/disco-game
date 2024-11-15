@@ -3,14 +3,13 @@ import { RouterOutlet } from '@angular/router';
 import { FirebaseService } from './service/firebase.service';
 import { LogService } from './service/log.service';
 import { FvToastComponent } from './components/fv-toast.component';
-import { FvBottomNavigationComponent } from './components/fv-bottom-navigation.component';
 import { LoaderService } from './service/loader.service';
 import { IndexedDbService } from './service/indexed-db.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, FvBottomNavigationComponent, FvToastComponent],
+  imports: [RouterOutlet, FvToastComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

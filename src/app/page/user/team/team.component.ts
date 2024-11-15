@@ -7,7 +7,7 @@ import {
   faAngleRight,
   faArrowDown,
   faArrowUp,
-  faClipboard,
+  faArrowUpFromBracket,
   faCrown,
   faEquals
 } from '@fortawesome/free-solid-svg-icons';
@@ -19,6 +19,7 @@ import { TeamService } from '../../../service/team.service';
 import { GetUserTotalPointsPipe } from '../../../pipe/get-user-total-points.pipe';
 import { LoaderService } from '../../../service/loader.service';
 import { LogService } from '../../../service/log.service';
+import { shareTeamCode } from '../../../util/utils';
 
 @Component({
   selector: 'app-team',
@@ -52,7 +53,7 @@ export class TeamComponent implements OnInit {
   ICON_EQUAL = faEquals;
   ICON_CROWN = faCrown;
   ICON_RIGHT = faAngleRight;
-  ICON_CLIPBOARD = faClipboard;
+  ICON_SHARE = faArrowUpFromBracket;
 
   /* ------------------------ Lifecycle hooks ------------------------ */
   ngOnInit(): void {
@@ -122,10 +123,7 @@ export class TeamComponent implements OnInit {
     if (!team) throw new Error('retry', { cause: 'retry' });
     if (!navigator) return;
 
-    /* Log e clipboard */
-    if (navigator && navigator.clipboard) {
-      navigator.clipboard.writeText(team.props.code);
-      this.logService.addLogConfirm('Codice copiato negli appunti');
-    }
+    /* Condivide o copia codice squadra */
+    shareTeamCode(team.props.code, this.logService);
   }
 }

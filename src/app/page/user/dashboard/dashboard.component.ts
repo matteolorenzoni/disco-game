@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faCalendar, faClipboard, faCrown, faLocationPin, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faArrowUpFromBracket, faCalendar, faCrown, faLocationPin, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { Doc } from '../../../model/firebase';
 import { Event } from '../../../model/event.model';
 import { Team, TeamStatus } from '../../../model/team.model';
@@ -22,6 +22,7 @@ import { LocalStorageService } from '../../../service/local-storage.service';
 import { MergeChallenge, mergeChallenges } from '../../../util/merge.util';
 import { UserService } from '../../../service/user.service';
 import { LoaderService } from '../../../service/loader.service';
+import { shareTeamCode } from '../../../util/utils';
 
 @Component({
   selector: 'app-dashboard',
@@ -72,7 +73,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ICON_CALENDAR = faCalendar;
   ICON_PLACE = faLocationPin;
   ICON_CROWN = faCrown;
-  ICON_CLIPBOARD = faClipboard;
+  ICON_SHARE = faArrowUpFromBracket;
   ICON_TRASH = faTrash;
 
   /* -------------------------- Lifecycle hooks --------------------------  */
@@ -217,11 +218,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (!team) throw new Error('retry', { cause: 'retry' });
     if (!navigator) return;
 
-    /* Log e clipboard */
-    if (navigator && navigator.clipboard) {
-      navigator.clipboard.writeText(team.props.code);
-      this.logService.addLogConfirm('Codice copiato negli appunti');
-    }
+    /* Condivide o copia codice squadra */
+    shareTeamCode(team.props.code, this.logService);
   }
 
   /* -------------------------- Methods utils --------------------------  */

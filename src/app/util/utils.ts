@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { AbstractControl, ValidatorFn } from '@angular/forms';
+import { LogService } from '../service/log.service';
 
 // Definire una funzione di validatore personalizzata per garantire che la data di fine sia dopo la data di inizio
 export const endDateValidator: ValidatorFn = (group: AbstractControl): Record<string, boolean> | null => {
@@ -65,4 +66,20 @@ export const trimFormValues = <T extends Record<string, any>>(form: T): T => {
   });
 
   return trimmedValues as T; // Cast finale a T
+};
+
+export const shareTeamCode = (teamCode: string, logService: LogService): void => {
+  const obj = {
+    title: 'Condividi codice squadra',
+    text: `Questo è il codice della mia squadra: ${teamCode}. Ti aspetto!`,
+    url: `https://test-disco-7f6db.web.app?events/teamCode=${teamCode}`
+  };
+  if (navigator.canShare(obj)) {
+    navigator.share(obj);
+  } else if (navigator && navigator.clipboard) {
+    navigator.clipboard.writeText(teamCode);
+    logService.addLogConfirm('Codice copiato negli appunti');
+  } else {
+    logService.addLogErrorApp('Funzione non supportata dal tuo dispositivo');
+  }
 };

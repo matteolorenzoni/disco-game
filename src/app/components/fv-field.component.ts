@@ -24,7 +24,16 @@ type InputType = 'text' | 'password' | 'email' | 'number' | 'date' | 'datetime-l
             class="peer mt-5 h-8 w-full rounded border border-field-border bg-field-background px-3 py-2 text-xs text-field-color shadow focus:border-2 focus:border-focus-field focus:font-semibold focus:text-focus-field focus:caret-focus-field focus:outline-none disabled:bg-primary-300 disabled:text-gray-200" />
         }
 
-        @case ('date' || 'datetime-local') {
+        @case ('date') {
+          <input
+            [id]="name()"
+            [type]="type()"
+            [formControlName]="name()"
+            autocomplete="off"
+            class="peer mt-5 h-8 w-full rounded border border-field-border bg-field-background px-3 py-2 text-xs text-field-color shadow focus:border-2 focus:border-focus-field focus:font-semibold focus:text-focus-field focus:caret-focus-field focus:outline-none disabled:bg-primary-300 disabled:text-gray-200" />
+        }
+
+        @case ('datetime-local') {
           <input
             [id]="name()"
             [type]="type()"

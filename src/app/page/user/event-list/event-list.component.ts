@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { EventService } from '../../../service/event.service';
@@ -9,30 +9,21 @@ import { FirebaseService } from '../../../service/firebase.service';
 import { LogService } from '../../../service/log.service';
 import { TeamService } from '../../../service/team.service';
 import { UserService } from '../../../service/user.service';
-import { FvFieldIconComponent } from '../../../components/fv-field-icon.component';
 import { FvButtonComponent } from '../../../components/fv-button.component';
 import { TitleComponent } from '../../../components/title/title.component';
 import { FvButtonOutlinedComponent } from '../../../components/fv-button-outlined.component';
-import { FvRatingComponent } from '../../../components/fv-rating.component';
 import { LocalStorageService } from '../../../service/local-storage.service';
 import { IndexedDbService } from '../../../service/indexed-db.service';
 import { MergeEvent, mergeEvents } from '../../../util/merge.util';
 import { Team } from '../../../model/team.model';
 import { Doc } from '../../../model/firebase';
 import { LoaderService } from '../../../service/loader.service';
+import { User } from '../../../model/user.model';
 
 @Component({
   selector: 'app-event-list',
   standalone: true,
-  imports: [
-    CommonModule,
-    FaIconComponent,
-    TitleComponent,
-    FvFieldIconComponent,
-    FvButtonComponent,
-    FvButtonOutlinedComponent,
-    FvRatingComponent
-  ],
+  imports: [CommonModule, FaIconComponent, TitleComponent, FvButtonComponent, FvButtonOutlinedComponent],
   templateUrl: './event-list.component.html',
   styleUrls: ['./event-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -40,6 +31,7 @@ import { LoaderService } from '../../../service/loader.service';
 export class EventListComponent implements OnInit {
   /* Services */
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly firebaseService = inject(FirebaseService);
   private readonly userService = inject(UserService);
   private readonly eventService = inject(EventService);
@@ -64,12 +56,15 @@ export class EventListComponent implements OnInit {
     /* Inizializzazione indexedDB */
     await this.initIndexedDb();
 
+    // Cerca la squadra se è entrato con il link di invito
+    await this.initTeam();
+
     /* Inizializzazione http */
     await this.initHttp();
   }
 
   /* -------------------------- Methods initialization --------------------------  */
-  private async initIndexedDb() {
+  private async initIndexedDb(): Promise<void> {
     const teams = await this.dbService.getTeams();
     this.teams.set(teams);
 
@@ -78,7 +73,18 @@ export class EventListComponent implements OnInit {
     this.mergedEvents.set(mergedEvents);
   }
 
-  private async initHttp() {
+  private async initTeam(): Promise<void> {
+    const user = this.lsService.getUser();
+    const teamCode = this.route.snapshot.queryParamMap.get('teamCode');
+    if (!user || !teamCode) return;
+
+    await this.loaderService.executeImmediate(async () => {
+      /* Cerca la squadra e, se possibile, aggiunge l'utente */
+      await this.addToExistingTeam(user, teamCode);
+    });
+  }
+
+  private async initHttp(): Promise<void> {
     const userId = this.firebaseService.userFirebase()?.uid;
     if (!userId) throw new Error('retry', { cause: 'retry' });
 
@@ -131,7 +137,7 @@ export class EventListComponent implements OnInit {
     });
   }
 
-  protected async findTeam(eventId: string): Promise<void> {
+  protected async findTeam(): Promise<void> {
     await this.loaderService.executeImmediate(async () => {
       const user = this.lsService.getUser();
       if (!user) throw new Error('retry', { cause: 'retry' });
@@ -140,27 +146,8 @@ export class EventListComponent implements OnInit {
       const teamCode = prompt('Inserisci il codice della tua squadra');
       if (!teamCode) return;
 
-      /* Controllo se esiste una squadra con quel codice */
-      const team = await this.teamService.getTeamByCode(teamCode);
-      if (!team) {
-        this.logService.addLogErrorApp('Nessuna squadra trovata');
-        return;
-      }
-
-      /* Controllo se la squadra ha raggiunto il limite di 10 membri */
-      if (team.props.userIds.length >= 10) {
-        this.logService.addLogErrorApp('Squadra al completo (10 membri)');
-        return;
-      }
-
-      /* Aggiungo user al team */
-      await this.teamService.updateNewUser(team, user);
-
-      /* Aggiungo partecipazione */
-      await this.addParticipation(eventId, team.id, user.id);
-
-      /* Log */
-      this.logService.addLogConfirm('Ora fai parte della squadra, buona fortuna');
+      /* Cerca la squadra e, se possibile, aggiunge l'utente */
+      await this.addToExistingTeam(user, teamCode);
     });
   }
 
@@ -204,6 +191,36 @@ export class EventListComponent implements OnInit {
   }
 
   /* -------------------- Methods: utils -------------------- */
+  private async addToExistingTeam(user: Doc<User>, teamCode: string) {
+    /* Controllo se esiste una squadra con quel codice */
+    const team = await this.teamService.getTeamByCode(teamCode);
+    if (!team) {
+      this.logService.addLogErrorApp('Nessuna squadra trovata');
+      return;
+    }
+
+    /* Controllo che l'utente non faccia già parte della squadra */
+    if (team.props.userIds.includes(user.id)) {
+      this.logService.addLogErrorApp('Fai già parte della squadra (usato link di invito)');
+      return;
+    }
+
+    /* Controllo se la squadra ha raggiunto il limite di 10 membri */
+    if (team.props.userIds.length >= 10) {
+      this.logService.addLogErrorApp('Squadra al completo (10 membri)');
+      return;
+    }
+
+    /* Aggiungo user al team */
+    await this.teamService.updateNewUser(team, user);
+
+    /* Aggiungo partecipazione */
+    await this.addParticipation(team.props.eventId, team.id, user.id);
+
+    /* Log */
+    this.logService.addLogConfirm('Ora fai parte della squadra, buona fortuna');
+  }
+
   private async addParticipation(eventId: string, teamId: string, userId: string): Promise<void> {
     /* Aggiorno User (prop: eventIds e teamIds) */
     await this.userService.updateParticipations('ADD', userId, eventId, teamId);
