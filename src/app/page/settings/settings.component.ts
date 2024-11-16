@@ -1,12 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
-import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faAngleRight, faCircleUser, faHome, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 import { FirebaseService } from '../../service/firebase.service';
 import { UserCreateComponent } from '../register/user-create/user-create.component';
 import { FvButtonComponent } from '../../components/fv-button.component';
-import { FvButtonOutlinedComponent } from '../../components/fv-button-outlined.component';
 import { TitleComponent } from '../../components/title/title.component';
 import { LogService } from '../../service/log.service';
 import { Doc } from '../../model/firebase';
@@ -22,15 +20,7 @@ export type Tab = {
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    FaIconComponent,
-    TitleComponent,
-    UserCreateComponent,
-    FvButtonComponent,
-    FvButtonOutlinedComponent
-  ],
+  imports: [CommonModule, RouterModule, TitleComponent, UserCreateComponent, FvButtonComponent],
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

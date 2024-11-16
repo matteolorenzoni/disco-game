@@ -2,12 +2,9 @@
 
 @if (team(); as team) {
   @if (event(); as event) {
-    <div class="flex flex-col gap-2 text-primary-500">
-      <img
-        class="aspect-video w-full rounded-md bg-surface text-on-surface shadow"
-        [src]="event.props.imageUrl"
-        alt="Immagine evento" />
-      <p class="truncate text-2xl font-bold">{{ event.props.name }}</p>
+    <div class="flex flex-col gap-2 rounded-md bg-white p-3 text-primary-500 shadow-lg">
+      <img class="aspect-video w-full rounded bg-surface shadow" [src]="event.props.imageUrl" alt="Immagine evento" />
+      <p class="mt-2 truncate text-2xl font-bold">{{ event.props.name }}</p>
       <p class="flex gap-2 text-xs text-primary-300">
         <fa-icon class="basis-4" [icon]="ICON_PLACE"></fa-icon>
         <span>{{ event.props.location }}</span>
@@ -17,11 +14,11 @@
         <span>{{ event.props.startDate | date: 'dd/MM/yyyy HH:mm' }}</span>
         <span>{{ event.props.endDate | date: 'dd/MM/yyyy HH:mm' }}</span>
       </p>
-      <p class="text-md whitespace-pre-line italic">{{ event.props.description }}</p>
+      <p class="whitespace-pre-line">{{ event.props.description }}</p>
     </div>
 
     @if (event.props.startDate.getTime() > NOW.getTime()) {
-      <div class="mt-8 flex flex-col items-center gap-1 py-8">
+      <div class="mt-8 flex flex-col items-center gap-1 py-2">
         <p class="text-xxs uppercase text-primary-400">Tempo mancante</p>
         <fv-countdown class="truncate text-5xl text-primary-500" [date]="event.props.startDate"></fv-countdown>
       </div>
@@ -37,8 +34,9 @@
       </div>
     }
 
-    <h2 class="mt-8 text-xs uppercase text-primary-500">Squadra</h2>
-    <div class="mt-1 flex flex-col gap-4 overflow-hidden rounded-md bg-primary-500/50 p-2 text-white shadow-lg">
+    <h2 class="mt-8 text-xs font-semibold uppercase text-primary-500">Squadra</h2>
+    <div
+      class="mt-1 flex flex-col gap-4 overflow-hidden rounded-md border-2 border-secondary-400/75 bg-secondary-400/50 p-2 text-on-surface shadow-lg">
       <div class="flex gap-4">
         <div class="flex flex-1 flex-col justify-around overflow-hidden">
           <p class="flex gap-2 text-2xl">
@@ -54,7 +52,7 @@
             </button>
           </div>
         </div>
-        <p class="text-5xl">{{ team.props.totalPoints }}<span class="text-xs text-secondary-100">pt</span></p>
+        <p class="text-5xl font-medium">{{ team.props.totalPoints }}<span class="text-xs">pt</span></p>
       </div>
       <div class="flex flex-col gap-1">
         <p class="text-xs">Membri ({{ team.props.userIds.length }}/10)</p>
@@ -83,22 +81,25 @@
       </div>
     </div>
 
-    <h2 class="mt-8 text-xs uppercase text-secondary-700">Sfide</h2>
-    <div class="mt-1 overflow-hidden rounded-md bg-primary-200/50 px-2 text-on-surface shadow-lg backdrop-blur">
+    <h2 class="mt-8 text-xs font-semibold uppercase text-secondary-700">Sfide</h2>
+    <div class="mt-1 overflow-hidden">
       @if (team.props.status === TEAM_STATUS.ACTIVE) {
         @if (mergedChallenges().length) {
-          <ul class="flex flex-col divide-y text-primary-500">
+          <ul class="flex flex-col gap-1 text-primary-500">
             @for (challenge of mergedChallenges(); track challenge.id) {
-              <li class="py-2">
+              <li>
                 <button
-                  class="relative flex w-full flex-col gap-1 rounded-md p-2 hover:bg-secondary-400 active:rounded-md active:bg-secondary-500"
+                  class="relative flex w-full items-center gap-4 rounded bg-gray-100 p-2 shadow hover:bg-white"
                   (click)="onGoToChallenge(challenge.id)">
-                  <div class="flex w-full items-center gap-4">
-                    <img class="h-8 w-8" [src]="'images/challenge/' + challenge.type + '.png'" alt="" />
-                    <p class="truncate text-base text-on-surface">{{ challenge.name }}</p>
-                    <fv-rating [rating]="challenge.complexity"></fv-rating>
+                  <div class="flex flex-1 flex-col gap-1 overflow-hidden">
+                    <div class="flex w-full items-center gap-4">
+                      <img class="h-8 w-8" [src]="'images/challenge/' + challenge.type + '.png'" alt="" />
+                      <p class="truncate text-base text-on-surface">{{ challenge.name }}</p>
+                      <fv-rating [rating]="challenge.complexity"></fv-rating>
+                    </div>
+                    <p class="w-full truncate text-start text-xs text-primary-400">{{ challenge.description }}</p>
                   </div>
-                  <p class="w-full truncate text-start text-xs text-primary-400">{{ challenge.description }}</p>
+                  <fa-icon class="text-secondary-600" [icon]="ICON_RIGHT"></fa-icon>
                   <fv-challenge-status
                     class="absolute left-0 top-0 h-full w-full"
                     type="effect"
@@ -122,8 +123,8 @@
 }
 
 @if (team() === null) {
-  <div class="mt-40 p-8 flex-center">
-    <div class="flex flex-col rounded-lg bg-surface p-4 text-on-surface shadow-lg backdrop-blur">
+  <div class="mt-12 p-8 flex-center">
+    <div class="flex flex-col rounded-lg bg-white p-4 text-on-surface shadow-lg backdrop-blur">
       <h2 class="mb-4 text-lg font-bold">Nessuna squadra trovata</h2>
       <p class="text-sm">
         Al momento non sei associato a nessuna squadra. Unisciti a noi per partecipare a eventi emozionanti e vivere

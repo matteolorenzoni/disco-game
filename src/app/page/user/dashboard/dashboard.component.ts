@@ -2,7 +2,14 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faArrowUpFromBracket, faCalendar, faCrown, faLocationPin, faTrash } from '@fortawesome/free-solid-svg-icons';
+import {
+  faAngleRight,
+  faArrowUpFromBracket,
+  faCalendar,
+  faCrown,
+  faLocationPin,
+  faTrash
+} from '@fortawesome/free-solid-svg-icons';
 import { Doc } from '../../../model/firebase';
 import { Event } from '../../../model/event.model';
 import { Team, TeamStatus } from '../../../model/team.model';
@@ -75,6 +82,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ICON_CROWN = faCrown;
   ICON_SHARE = faArrowUpFromBracket;
   ICON_TRASH = faTrash;
+  ICON_RIGHT = faAngleRight;
 
   /* -------------------------- Lifecycle hooks --------------------------  */
   async ngOnInit(): Promise<void> {

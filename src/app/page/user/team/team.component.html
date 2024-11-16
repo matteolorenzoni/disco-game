@@ -75,9 +75,9 @@
   </div>
 
   @if (myTeammate(); as myTeammate) {
-    <div class="fixed bottom-16 left-0 w-full px-4 py-2 text-primary-500">
+    <div class="fixed bottom-16 left-0 w-full px-2 py-2 text-primary-500">
       <button
-        class="flex w-full items-center rounded-lg bg-primary-500/25 p-2 shadow-lg backdrop-blur-lg hover:to-primary-500/50 active:to-primary-500/15"
+        class="flex w-full items-center rounded bg-primary-500/25 p-2 shadow-lg backdrop-blur-lg hover:to-primary-500/50 active:to-primary-500/15"
         (click)="goToUserChallenges(myTeammate.id)">
         <div class="flex w-full items-center gap-2 text-base">
           @if (firebaseService.userFirebase()?.uid === team.props.leaderId) {

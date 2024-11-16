@@ -1,7 +1,7 @@
 <app-title [pages]="[{ path: '', label: 'Impostazioni' }]"></app-title>
 
 <div class="bord -mx-4 border-b border-primary-600 px-4 text-primary-500">
-  <div tabindex="-1" role="tablist">
+  <div class="flex" tabindex="-1" role="tablist">
     @for (tab of TABS; track tab.id) {
       <button
         [tabindex]="activeTab().id === tab.id ? 0 : -1"
@@ -23,19 +23,24 @@
     <div class="mt-4 rounded-lg border border-primary-600 bg-surface p-4 text-on-surface">
       <div class="-mx-4 border-b border-primary-600 px-4 pb-4">
         <p class="text-base font-semibold text-primary-800">Info personali</p>
-        <p class="text-xs text-white">
+        <p class="text-xs text-primary-400">
           Personalizza il tuo profilo, mostra i tuoi successi e segui i tuoi progressi nelle sfide in discoteca
         </p>
       </div>
       <app-user-create class="mt-4"></app-user-create>
     </div>
 
-    <fv-button-outlined class="mt-12" label="Esci" twColor="rose" [onClick]="logout.bind(this)"></fv-button-outlined>
+    <button
+      class="mt-12 w-full rounded bg-rose-600 p-2 text-xs font-semibold text-white shadow hover:bg-rose-700 active:bg-rose-800"
+      (click)="logout.bind(this)">
+      Esci
+    </button>
   }
   @case ('code') {
-    <div class="mt-4 flex flex-col gap-2 rounded-lg border border-primary-600 bg-surface p-4 text-on-surface">
+    <div
+      class="mt-4 flex flex-col gap-2 overflow-hidden rounded-lg border border-primary-600 bg-surface p-4 text-on-surface">
       <p class="text-base font-semibold text-primary-500">Codice utente univoco</p>
-      <p class="text-5xl text-white">{{ user()?.props?.code }}</p>
+      <p class="truncate text-5xl text-white">{{ user()?.props?.code }}</p>
     </div>
   }
 }
