@@ -1,7 +1,7 @@
 import { UserService } from './../../../service/user.service';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, ParamMap, Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import {
   faAngleRight,
@@ -56,17 +56,17 @@ export class TeamComponent implements OnInit {
   ICON_SHARE = faArrowUpFromBracket;
 
   /* ------------------------ Lifecycle hooks ------------------------ */
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     // Recupera l'ID dalla route
-    this.route.paramMap.subscribe(async (params) => await this.initHttp(params));
+    await this.initHttp();
   }
 
   /* -------------------------- Methods initialization --------------------------  */
-  private async initHttp(params: ParamMap) {
+  private async initHttp() {
     await this.loaderService.executeWithDelay(async () => {
       const userId = this.firebaseService.userFirebase()?.uid;
-      const eventId = params.get('eventId');
-      const teamId = params.get('teamId');
+      const eventId = this.route.snapshot.paramMap.get('eventId');
+      const teamId = this.route.snapshot.paramMap.get('teamId');
       if (!userId || !eventId || !teamId) throw new Error('retry', { cause: 'retry' });
 
       /* Ottengo la squadra */
@@ -115,7 +115,7 @@ export class TeamComponent implements OnInit {
 
   /* ---------------- Methods: event---------------- */
   protected goToUserChallenges(userId: string) {
-    this.router.navigate([`./`, userId], { relativeTo: this.route });
+    this.router.navigate([`./teammate/`, userId], { relativeTo: this.route });
   }
 
   protected onCopyCodeToClipboard(): void {

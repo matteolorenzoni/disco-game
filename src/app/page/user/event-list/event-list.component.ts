@@ -187,7 +187,7 @@ export class EventListComponent implements OnInit {
   }
   /* -------------------- Methods: on event -------------------- */
   protected async onGoToTeam(eventId: string, teamId: string): Promise<void> {
-    await this.router.navigate([`user/events/${eventId}/${teamId}`]);
+    await this.router.navigate([`user/events/${eventId}/team/${teamId}`]);
   }
 
   /* -------------------- Methods: utils -------------------- */

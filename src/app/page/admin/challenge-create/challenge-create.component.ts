@@ -109,7 +109,7 @@ export class ChallengeCreateComponent implements OnInit {
   /* -------------------------- Methods initialization --------------------------  */
   private async initHttp(params: ParamMap) {
     this.loaderService.executeWithDelay(async () => {
-      const challengeId = params.get('id');
+      const challengeId = params.get('challengeId');
       if (!challengeId) {
         this.challenge.set(null);
         return;

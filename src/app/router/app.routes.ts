@@ -48,25 +48,19 @@ export const routes: Routes = [
           },
           {
             path: ':eventId',
-            children: [
-              {
-                path: '',
-                loadComponent: () =>
-                  import('../page/admin/event-create/event-create.component').then((m) => m.EventCreateComponent)
-              },
-              {
-                path: 'challenges',
-                loadComponent: () =>
-                  import('../page/admin/event-challenge/event-challenge.component').then(
-                    (m) => m.EventChallengeComponent
-                  )
-              },
-              {
-                path: 'teams',
-                loadComponent: () =>
-                  import('../page/admin/event-team/event-team.component').then((m) => m.EventTeamComponent)
-              }
-            ]
+            loadComponent: () =>
+              import('../page/admin/event-create/event-create.component').then((m) => m.EventCreateComponent)
+          },
+          {
+            path: ':eventId/challenges',
+            loadComponent: () =>
+              import('../page/admin/event-challenge/event-challenge.component').then((m) => m.EventChallengeComponent)
+          },
+
+          {
+            path: ':eventId/teams',
+            loadComponent: () =>
+              import('../page/admin/event-team/event-team.component').then((m) => m.EventTeamComponent)
           }
         ]
       },
@@ -88,7 +82,7 @@ export const routes: Routes = [
               )
           },
           {
-            path: ':id',
+            path: ':challengeId',
             loadComponent: () =>
               import('../page/admin/challenge-create/challenge-create.component').then(
                 (m) => m.ChallengeCreateComponent
@@ -104,6 +98,7 @@ export const routes: Routes = [
           import('../page/user/leaderboard/leaderboard.component').then((m) => m.LeaderboardComponent)
       },
 
+      // Impostazioni
       {
         path: 'settings',
         loadComponent: () => import('../page/settings/settings.component').then((m) => m.SettingsComponent)
@@ -150,20 +145,18 @@ export const routes: Routes = [
               import('../page/user/event-list/event-list.component').then((m) => m.EventListComponent)
           },
           {
-            path: ':eventId/:teamId/:teammateId',
+            path: ':eventId/team/:teamId',
+            loadComponent: () => import('../page/user/team/team.component').then((m) => m.TeamComponent)
+          },
+          {
+            path: ':eventId/team/:teamId/teammate/:teammateId',
             loadComponent: () => import('../page/user/user-team/user-team.component').then((m) => m.UserTeamComponent)
           },
           {
-            path: ':eventId/:teamId',
-            loadComponent: () => import('../page/user/team/team.component').then((m) => m.TeamComponent)
+            path: ':eventId/team/:teamId/challenge/:challengeId',
+            loadComponent: () => import('../page/user/challenge/challenge.component').then((m) => m.ChallengeComponent)
           }
         ]
-      },
-
-      // Sfide (non nel bottom menu)
-      {
-        path: 'challenges/:eventId/:teamId/:challengeId',
-        loadComponent: () => import('../page/user/challenge/challenge.component').then((m) => m.ChallengeComponent)
       },
 
       // Classifiche
@@ -171,11 +164,6 @@ export const routes: Routes = [
         path: 'leaderboards',
         loadComponent: () =>
           import('../page/user/leaderboard/leaderboard.component').then((m) => m.LeaderboardComponent)
-      },
-
-      {
-        path: 'challenges/:eventId/:teamId/:challengeId',
-        loadComponent: () => import('../page/user/challenge/challenge.component').then((m) => m.ChallengeComponent)
       },
 
       // Impostazioni

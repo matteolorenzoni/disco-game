@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { ChallengeStatus, EventChallenge } from '../../../model/event-challenge.model';
 import { Doc } from '../../../model/firebase';
-import { ActivatedRoute, ParamMap, Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { EventChallengeService } from '../../../service/event-challenge.service';
 import { User } from '../../../model/user.model';
 import { UserService } from '../../../service/user.service';
@@ -42,15 +42,15 @@ export class UserTeamComponent implements OnInit {
   /* -------------------- Lifecycle hooks -------------------- */
   async ngOnInit(): Promise<void> {
     // Recupera l'ID dell'evento dalla route
-    this.route.paramMap.subscribe(async (params) => await this.initHttp(params));
+    await this.initHttp();
   }
 
   /* -------------------------- Methods initialization --------------------------  */
-  private async initHttp(params: ParamMap) {
+  private async initHttp() {
     this.loaderService.executeWithDelay(async () => {
-      const eventId = params.get('eventId');
-      const teamId = params.get('teamId');
-      const teammateId = params.get('teammateId');
+      const eventId = this.route.snapshot.paramMap.get('eventId');
+      const teamId = this.route.snapshot.paramMap.get('teamId');
+      const teammateId = this.route.snapshot.paramMap.get('teammateId');
       if (!eventId || !teamId || !teammateId) throw new Error('retry', { cause: 'retry' });
 
       /* Evento */
@@ -87,6 +87,6 @@ export class UserTeamComponent implements OnInit {
     const teamId = this.teamId();
     if (!eventId || !teamId) return;
 
-    await this.router.navigate([`user/challenges/${eventId}/${teamId}/${challengeId}`]);
+    await this.router.navigate([`user/events/${eventId}/team/${teamId}/challenge/${challengeId}`]);
   }
 }

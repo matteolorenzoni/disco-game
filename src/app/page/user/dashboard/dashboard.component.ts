@@ -212,13 +212,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
   protected async onGoToTeam(): Promise<void> {
     const team = this.team();
     if (!team) throw new Error('retry', { cause: 'retry' });
-    await this.router.navigate([`user/events/${team.props.eventId}/${team.id}`]);
+    await this.router.navigate([`user/events/${team.props.eventId}/team/${team.id}`]);
   }
 
   protected async onGoToChallenge(challengeId: string): Promise<void> {
     const team = this.team();
     if (!team) throw new Error('retry', { cause: 'retry' });
-    await this.router.navigate([`user/challenges/${team.props.eventId}/${team.id}/${challengeId}`]);
+    await this.router.navigate([`user/events/${team.props.eventId}/team/${team.id}/challenge/${challengeId}`]);
   }
 
   protected onCopyCodeToClipboard(): void {
