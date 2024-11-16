@@ -6,28 +6,28 @@
   ]">
 </app-title>
 
-<div class="mb-8 flex flex-col gap-1 text-center text-on-background">
+<div class="flex flex-col gap-1 text-center text-on-background">
   <h3 class="flex items-center justify-center gap-4">
     <span class="text-3xl font-semibold"> {{ teammate()?.props?.name }} {{ teammate()?.props?.lastName }} </span>
   </h3>
   <p class="text-sm">{{ teammate()?.props?.userName }}</p>
 </div>
 
-<ul class="grid grid-cols-[repeat(auto-fill,minmax(6rem,1fr))] gap-4">
+<ul class="mt-6 grid grid-cols-[repeat(auto-fill,minmax(6rem,1fr))] gap-4">
   @for (challenge of mergedChallenges(); track challenge.eventChallenge.id) {
-    <li class="rounded-xl bg-primary-300 text-white shadow">
+    <li class="rounded-md bg-white text-on-surface shadow hover:bg-secondary-100">
       <button
-        class="relative flex h-full w-full flex-col items-center gap-2 rounded-xl p-1"
+        class="relative flex h-full w-full flex-col items-center gap-2 p-1"
         (click)="onGoToChallenge(challenge.eventChallenge.props.challengeId)">
-        <div class="w-full rounded-lg bg-surface p-2 text-on-surface">
+        <div class="w-full rounded bg-secondary-100/50 p-2 text-on-surface">
           <img
             class="mx-auto h-16 w-16"
             [src]="'images/challenge/' + challenge.eventChallenge.props.challengeType + '.png'"
             [alt]="'Immagine ' + challenge.eventChallenge.props.challengeName" />
         </div>
         <div class="text-primary flex w-full flex-col gap-1 px-1 text-center">
-          <p class="truncate text-xxs">{{ challenge.eventChallenge.props.challengeName }}</p>
-          <p class="truncate text-sm font-semibold">
+          <p class="truncate text-xs">{{ challenge.eventChallenge.props.challengeName }}</p>
+          <p class="text-sm font-semibold">
             <span>
               {{
                 challenge.teamUser?.challenges ?? [] | getUserTotalPoints: challenge.eventChallenge.props.challengeId

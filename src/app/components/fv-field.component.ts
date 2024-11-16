@@ -9,7 +9,7 @@ type InputType = 'text' | 'password' | 'email' | 'number' | 'date' | 'datetime-l
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   template: `
-    <div class="relative flex flex-col">
+    <div class="relative flex flex-col overflow-hidden">
       @switch (type()) {
         @case ('number') {
           <input
@@ -53,7 +53,7 @@ type InputType = 'text' | 'password' | 'email' | 'number' | 'date' | 'datetime-l
       }
       <label
         [for]="name()"
-        class="absolute left-0 top-0 block text-sm font-medium text-primary-500 peer-focus:font-bold peer-focus:text-focus-field">
+        class="absolute left-0 top-0 block w-full truncate text-sm font-medium text-primary-500 peer-focus:font-bold peer-focus:text-focus-field">
         {{ label() }}
       </label>
     </div>

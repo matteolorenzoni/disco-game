@@ -37,13 +37,13 @@ import { faCheck, faCirclePause, faClock, faLock, faTrash } from '@fortawesome/f
                   </p>
                 }
               </div>
-              <fa-icon class="absolute -right-1 -top-2 text-xl text-white" [icon]="ICON_LOCKED"></fa-icon>
+              <fa-icon class="absolute -right-1 -top-2 text-xl text-gray-400" [icon]="ICON_LOCKED"></fa-icon>
             }
           }
           @case (CHALLENGE_STATUS.LOCKED) {
             <div class="absolute left-0 top-0 h-full w-full rounded-md bg-black/25 backdrop-blur-sm"></div>
             @if (detail()) {
-              <fa-icon class="absolute -right-1 -top-2 text-xl text-white" [icon]="ICON_LOCKED"></fa-icon>
+              <fa-icon class="absolute -right-1 -top-2 text-xl text-gray-400" [icon]="ICON_LOCKED"></fa-icon>
             }
           }
           @case (CHALLENGE_STATUS.CANCELED) {

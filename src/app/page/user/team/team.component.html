@@ -62,9 +62,9 @@
     </ul>
   </div>
 
-  <div class="fixed bottom-[120px] right-0 px-4">
+  <div class="fixed bottom-[120px] right-0 px-2">
     <div
-      class="flex items-center gap-2 rounded border border-white/50 bg-white/25 px-2 py-1 text-xs shadow-lg backdrop-blur-lg">
+      class="flex items-center gap-2 rounded border border-white/50 bg-white/25 px-2 py-1 text-xs shadow backdrop-blur-lg">
       <p class="text-on-background">
         Codice: <span class="font-bold">{{ team.props.code }}</span>
       </p>
@@ -77,7 +77,7 @@
   @if (myTeammate(); as myTeammate) {
     <div class="fixed bottom-16 left-0 w-full px-2 py-2 text-primary-500">
       <button
-        class="flex w-full items-center rounded bg-primary-500/25 p-2 shadow-lg backdrop-blur-lg hover:to-primary-500/50 active:to-primary-500/15"
+        class="flex w-full items-center rounded border border-secondary-400/75 bg-secondary-400/50 p-2 shadow backdrop-blur-lg hover:bg-secondary-400/75 hover:to-primary-500/50 active:to-primary-500/15"
         (click)="goToUserChallenges(myTeammate.id)">
         <div class="flex w-full items-center gap-2 text-base">
           @if (firebaseService.userFirebase()?.uid === team.props.leaderId) {

@@ -21,16 +21,16 @@ body {
   min-height: 100vh;
   font-family: 'Inter', sans-serif;
   color-scheme: light;
-  background: #f8f8fc;
+  background: #e5e7eb;
 }
 
 /* Personalizzazione globale della scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #555e68; /* Colore grigio elegante */
-  border-radius: 10px;
+  background-color: #bcbce2;
+  border-radius: 6px;
 }
