@@ -2,7 +2,7 @@ import { trimFormValues } from './../../../util/utils';
 import { CommonModule, formatDate } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, ParamMap } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import {
   faArrowsRotate,
@@ -27,7 +27,6 @@ import { FvFloatingButtonComponent } from '../../../components/fv-floating-butto
 import { FvFieldComponent } from '../../../components/fv-field.component';
 import { FvSelectComponent, SelectOption } from '../../../components/fv-select.component';
 import { FvButtonComponent } from '../../../components/fv-button.component';
-import { FvButtonOutlinedComponent } from '../../../components/fv-button-outlined.component';
 import { TitleComponent } from '../../../components/title/title.component';
 import EventChallengeStatus from './event-challenge-status.config.json';
 import { endDateValidator } from '../../../util/utils';
@@ -46,7 +45,6 @@ import { Event } from '../../../model/event.model';
     TitleComponent,
     FvFieldComponent,
     FvSelectComponent,
-    FvButtonOutlinedComponent,
     FvButtonComponent,
     FvFloatingButtonComponent
   ],
@@ -63,6 +61,9 @@ export class EventChallengeComponent implements OnInit {
   private readonly dbService = inject(IndexedDbService);
   private readonly loaderService = inject(LoaderService);
   private readonly logService = inject(LogService);
+
+  /* Params */
+  EVENT_ID = this.route.snapshot.paramMap.get('eventId');
 
   /* Variables */
   event = signal<Doc<Event> | undefined>(undefined);
@@ -112,7 +113,7 @@ export class EventChallengeComponent implements OnInit {
     await this.initIndexedDb();
 
     /* Inizializzazione http */
-    this.route.paramMap.subscribe(async (params) => await this.initHttp(params));
+    await this.initHttp();
   }
 
   /* -------------------------- Methods initialization --------------------------  */
@@ -122,16 +123,14 @@ export class EventChallengeComponent implements OnInit {
     this.challenges.set(challenges);
   }
 
-  private async initHttp(params: ParamMap) {
+  private async initHttp() {
     await this.loaderService.executeWithDelay(async () => {
-      // Recupera l'ID dell'evento dalla route
-      const eventId = params.get('eventId');
-      if (!eventId) throw new Error('retry', { cause: 'retry' });
+      if (!this.EVENT_ID) throw new Error('retry', { cause: 'retry' });
 
       /* Ottengo l'evento e le sfide che fanno parte */
       const [event, eventChallenges] = await Promise.all([
-        this.eventService.getEventById(eventId),
-        this.eventChallengeService.getEventChallengesByProp([{ key: 'eventId', value: eventId }])
+        this.eventService.getEventById(this.EVENT_ID),
+        this.eventChallengeService.getEventChallengesByProp([{ key: 'eventId', value: this.EVENT_ID }])
       ]);
       this.event.set(event);
       this.eventChallenges.set(eventChallenges);

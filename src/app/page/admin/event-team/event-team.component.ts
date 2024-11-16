@@ -1,20 +1,20 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { TitleComponent } from '../../../components/title/title.component';
-import { ActivatedRoute, ParamMap } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { LoaderService } from '../../../service/loader.service';
 import { TeamService } from '../../../service/team.service';
 import { Doc } from '../../../model/firebase';
 import { Team, TeamStatus } from '../../../model/team.model';
 import EventTeamStatus from './team-status.config.json';
-import { FvSelectComponent, SelectOption } from '../../../components/fv-select.component';
+import { SelectOption } from '../../../components/fv-select.component';
 import { FormsModule } from '@angular/forms';
 import { LogService } from '../../../service/log.service';
 
 @Component({
   selector: 'app-event-team',
   standalone: true,
-  imports: [CommonModule, FormsModule, TitleComponent, FvSelectComponent],
+  imports: [CommonModule, FormsModule, TitleComponent],
   templateUrl: './event-team.component.html',
   styleUrls: ['./event-team.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -25,6 +25,9 @@ export class EventTeamComponent implements OnInit {
   private readonly teamService = inject(TeamService);
   private readonly loaderService = inject(LoaderService);
   private readonly logService = inject(LogService);
+
+  /* Params */
+  EVENT_ID = this.route.snapshot.paramMap.get('eventId');
 
   /* Variables */
   teams = signal<Doc<Team>[]>([]);
@@ -42,18 +45,16 @@ export class EventTeamComponent implements OnInit {
   /* -------------------- Lifecycle hooks -------------------- */
   async ngOnInit(): Promise<void> {
     /* Inizializzazione http */
-    this.route.paramMap.subscribe(async (params) => await this.initHttp(params));
+    await this.initHttp();
   }
 
   /* -------------------------- Methods initialization --------------------------  */
-  private async initHttp(params: ParamMap) {
+  private async initHttp() {
     await this.loaderService.executeWithDelay(async () => {
-      // Recupera l'ID dell'evento dalla route
-      const eventId = params.get('eventId');
-      if (!eventId) throw new Error('retry', { cause: 'retry' });
+      if (!this.EVENT_ID) throw new Error('retry', { cause: 'retry' });
 
       /* Ottengo le squadre che fanno parte dell'evento */
-      const teams = await this.teamService.getActiveTeamsByEventId(eventId);
+      const teams = await this.teamService.getActiveTeamsByEventId(this.EVENT_ID);
       this.teams.set(teams);
     });
   }

@@ -2,7 +2,7 @@ import { EventChallengeService } from './../../../service/event-challenge.servic
 import { CommonModule, formatDate, Location } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, ParamMap } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { Doc } from '../../../model/firebase';
 import { Event as FvEvent } from '../../../model/event.model';
 import { EventModel, FromMap } from '../../../model/form.model';
@@ -48,6 +48,9 @@ export class EventCreateComponent implements OnInit {
   private readonly loaderService = inject(LoaderService);
   private readonly logService = inject(LogService);
 
+  /* Params */
+  EVENT_ID = this.route.snapshot.paramMap.get('eventId');
+
   /* Variables */
   event = signal<Doc<FvEvent> | undefined>(undefined);
   imagePreview = signal<string | ArrayBuffer | undefined>(undefined);
@@ -89,19 +92,18 @@ export class EventCreateComponent implements OnInit {
   );
 
   /* ------------------------ Lifecycle hooks ------------------------ */
-  ngOnInit(): void {
-    // Recupera l'ID dalla route
-    this.route.paramMap.subscribe(async (params) => await this.initHttp(params));
+  async ngOnInit(): Promise<void> {
+    /* Inizializzazione http */
+    await this.initHttp();
   }
-
   /* -------------------------- Methods initialization --------------------------  */
-  private async initHttp(params: ParamMap) {
+  private async initHttp() {
     await this.loaderService.executeWithDelay(async () => {
-      const eventId = params.get('eventId');
-      if (!eventId) return;
+      console.log(this.EVENT_ID);
+      if (!this.EVENT_ID) return;
 
       /* Ottengo event */
-      const event = await this.eventService.getEventById(eventId);
+      const event = await this.eventService.getEventById(this.EVENT_ID);
       this.event.set(event);
 
       /* Setto form */

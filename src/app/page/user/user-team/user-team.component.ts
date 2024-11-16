@@ -30,9 +30,12 @@ export class UserTeamComponent implements OnInit {
   private readonly eventChallengeService = inject(EventChallengeService);
   private readonly loaderService = inject(LoaderService);
 
+  /* Params */
+  EVENT_ID = this.route.snapshot.paramMap.get('eventId');
+  TEAM_ID = this.route.snapshot.paramMap.get('teamId');
+  TEAMMATE_ID = this.route.snapshot.paramMap.get('teammateId');
+
   /* Variables */
-  eventId = signal<string | undefined>(undefined);
-  teamId = signal<string | undefined>(undefined);
   teammate = signal<Doc<User> | undefined>(undefined);
   mergedChallenges = signal<{ eventChallenge: Doc<EventChallenge>; teamUser: TeamUser | undefined }[]>([]);
 
@@ -48,26 +51,17 @@ export class UserTeamComponent implements OnInit {
   /* -------------------------- Methods initialization --------------------------  */
   private async initHttp() {
     this.loaderService.executeWithDelay(async () => {
-      const eventId = this.route.snapshot.paramMap.get('eventId');
-      const teamId = this.route.snapshot.paramMap.get('teamId');
-      const teammateId = this.route.snapshot.paramMap.get('teammateId');
-      if (!eventId || !teamId || !teammateId) throw new Error('retry', { cause: 'retry' });
-
-      /* Evento */
-      this.eventId.set(eventId);
-
-      /* Squadra */
-      this.teamId.set(teamId);
+      if (!this.EVENT_ID || !this.TEAM_ID || !this.TEAMMATE_ID) throw new Error('retry', { cause: 'retry' });
 
       /* Compagno */
-      const teammate = await this.userService.getUserById(teammateId);
+      const teammate = await this.userService.getUserById(this.TEAMMATE_ID);
       this.teammate.set(teammate);
 
       /* Ottengo tutte le sfide di questo evento */
       /* Ottengo ottengo le sfide superate dall'utente per questo evento */
       const [team, eventChallenges] = await Promise.all([
-        this.teamService.getTeamById(teamId),
-        this.eventChallengeService.getEventChallengesByProp([{ key: 'eventId', value: eventId }])
+        this.teamService.getTeamById(this.TEAM_ID),
+        this.eventChallengeService.getEventChallengesByProp([{ key: 'eventId', value: this.EVENT_ID }])
       ]);
 
       /* Metto insieme i dati */
@@ -83,10 +77,8 @@ export class UserTeamComponent implements OnInit {
 
   /* -------------------- Methods -------------------- */
   protected async onGoToChallenge(challengeId: string): Promise<void> {
-    const eventId = this.eventId();
-    const teamId = this.teamId();
-    if (!eventId || !teamId) return;
+    if (!this.EVENT_ID || !this.TEAM_ID) throw new Error('retry', { cause: 'retry' });
 
-    await this.router.navigate([`user/events/${eventId}/team/${teamId}/challenge/${challengeId}`]);
+    await this.router.navigate([`user/events/${this.EVENT_ID}/team/${this.TEAM_ID}/challenge/${challengeId}`]);
   }
 }

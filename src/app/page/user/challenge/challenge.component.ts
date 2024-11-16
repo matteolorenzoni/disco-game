@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, ParamMap } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { ChallengeService } from '../../../service/challenge.service';
 import { EventChallengeService } from '../../../service/event-challenge.service';
 import { Doc } from '../../../model/firebase';
@@ -11,7 +11,7 @@ import { faInfinity } from '@fortawesome/free-solid-svg-icons';
 import { FvChallengeStatusComponent } from '../../../components/fv-challenge-status.component';
 import { FvCountdownComponent } from '../../../components/fv-countdown.component';
 import { FvRatingComponent } from '../../../components/fv-rating.component';
-import { TitleComponent, TitlePageItem } from '../../../components/title/title.component';
+import { TitleComponent } from '../../../components/title/title.component';
 import { QRCodeModule } from 'angularx-qrcode';
 import { FirebaseService } from '../../../service/firebase.service';
 import { LoaderService } from '../../../service/loader.service';
@@ -40,10 +40,12 @@ export class ChallengeComponent implements OnInit {
   private readonly eventChallengeService = inject(EventChallengeService);
   private readonly loaderService = inject(LoaderService);
 
+  /* Params */
+  EVENT_ID = this.route.snapshot.paramMap.get('eventId');
+  TEAM_ID = this.route.snapshot.paramMap.get('teamId');
+  CHALLENGE_ID = this.route.snapshot.paramMap.get('challengeId');
+
   /* Variables */
-  pages = signal<TitlePageItem[]>([]);
-  eventId = signal<string | undefined>(undefined);
-  teamId = signal<string | undefined>(undefined);
   challengeMerged = signal<{ challenge: Doc<Challenge>; eventChallenge: Doc<EventChallenge> } | undefined>(undefined);
   qrdata = signal<string | undefined>(undefined);
 
@@ -55,44 +57,29 @@ export class ChallengeComponent implements OnInit {
 
   /* -------------------- Lifecycle hooks -------------------- */
   async ngOnInit(): Promise<void> {
-    // Recupera l'ID dalla route
-    this.route.paramMap.subscribe(async (params) => await this.initHttp(params));
+    /* Inizializzazione http */
+    await this.initHttp();
   }
 
   /* -------------------------- Methods initialization --------------------------  */
-  private async initHttp(params: ParamMap) {
+  private async initHttp() {
     await this.loaderService.executeWithDelay(async () => {
-      const eventId = params.get('eventId');
-      const teamId = params.get('teamId');
       const userId = this.firebaseService.userFirebase()?.uid;
-      const challengeId = params.get('challengeId');
-      if (!eventId || !teamId || !userId || !challengeId) throw new Error('retry', { cause: 'retry' });
-
-      /* Pages */
-      this.pages.set([
-        { path: '../../../../events', label: 'Eventi' },
-        ...(teamId !== '_' ? [{ path: `../../../../events/${eventId}/${teamId}`, label: 'Squadra' }] : []),
-        { path: '', label: 'Sfida' }
-      ]);
-
-      /* Event */
-      this.eventId.set(eventId);
-
-      /* Team */
-      this.teamId.set(teamId === '_' ? undefined : teamId);
+      if (!userId || !this.EVENT_ID || !this.TEAM_ID || !this.CHALLENGE_ID)
+        throw new Error('retry', { cause: 'retry' });
 
       /* Ottengo i dati della sfida e quelli della sfida applicati a questo evento */
       const [challenge, eventChallenge] = await Promise.all([
-        this.challengeService.getChallengeById(challengeId),
-        this.eventChallengeService.getEventChallengeById(eventId, challengeId)
+        this.challengeService.getChallengeById(this.CHALLENGE_ID),
+        this.eventChallengeService.getEventChallengeById(this.EVENT_ID, this.CHALLENGE_ID)
       ]);
       this.challengeMerged.set({ challenge, eventChallenge });
 
       /* Genero qrcode */
       const qrcode: Qrcode = {
-        teamId,
+        teamId: this.TEAM_ID,
         userId,
-        challengeId,
+        challengeId: this.CHALLENGE_ID,
         points: challenge.props.points
       };
       this.qrdata.set(JSON.stringify(qrcode));

@@ -1,7 +1,7 @@
 import { CommonModule, Location } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, ParamMap } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { ChallengeModel, FromMap } from '../../../model/form.model';
@@ -52,6 +52,9 @@ export class ChallengeCreateComponent implements OnInit {
   private readonly loaderService = inject(LoaderService);
   private readonly logService = inject(LogService);
 
+  /* Params */
+  CHALLENGE_ID = this.route.snapshot.paramMap.get('challengeId');
+
   /* Constants */
   OPTIONS = ChallengeTypes as SelectOption[];
 
@@ -97,9 +100,9 @@ export class ChallengeCreateComponent implements OnInit {
   });
 
   /* ------------------------ Lifecycle hooks ------------------------ */
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     // Recupera l'ID dalla route
-    this.route.paramMap.subscribe(async (params) => await this.initHttp(params));
+    await this.initHttp();
 
     this.challengeForm.controls.type.valueChanges.subscribe((newValue) => {
       this.challengeTypeActive.set(this.OPTIONS.find((x) => x.icon === newValue)!);
@@ -107,15 +110,14 @@ export class ChallengeCreateComponent implements OnInit {
   }
 
   /* -------------------------- Methods initialization --------------------------  */
-  private async initHttp(params: ParamMap) {
+  private async initHttp() {
     this.loaderService.executeWithDelay(async () => {
-      const challengeId = params.get('challengeId');
-      if (!challengeId) {
+      if (!this.CHALLENGE_ID) {
         this.challenge.set(null);
         return;
       }
 
-      const challenge = await this.challengeService.getChallengeById(challengeId);
+      const challenge = await this.challengeService.getChallengeById(this.CHALLENGE_ID);
       this.challenge.set(challenge);
       this.challengeForm.patchValue(challenge.props);
     });

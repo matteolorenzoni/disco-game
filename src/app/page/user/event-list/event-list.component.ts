@@ -41,6 +41,9 @@ export class EventListComponent implements OnInit {
   private readonly loaderService = inject(LoaderService);
   private readonly logService = inject(LogService);
 
+  /* Params */
+  TEAM_CODE = this.route.snapshot.queryParamMap.get('teamCode');
+
   /* Variables */
   mergedEvents = signal<MergeEvent[] | undefined>(undefined);
   teams = signal<Doc<Team>[]>([]);
@@ -74,13 +77,12 @@ export class EventListComponent implements OnInit {
   }
 
   private async initTeam(): Promise<void> {
-    const user = this.lsService.getUser();
-    const teamCode = this.route.snapshot.queryParamMap.get('teamCode');
-    if (!user || !teamCode) return;
-
     await this.loaderService.executeImmediate(async () => {
+      const user = this.lsService.getUser();
+      if (!user || !this.TEAM_CODE) return;
+
       /* Cerca la squadra e, se possibile, aggiunge l'utente */
-      await this.addToExistingTeam(user, teamCode);
+      await this.addToExistingTeam(user, this.TEAM_CODE);
     });
   }
 

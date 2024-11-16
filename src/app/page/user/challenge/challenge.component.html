@@ -1,4 +1,10 @@
-<app-title [pages]="pages()"> </app-title>
+<app-title
+  [pages]="[
+    { path: '../../../../../../events', label: 'Eventi' },
+    { path: '../../../../team/' + TEAM_ID, label: 'Squadra' },
+    { path: '', label: 'Sfida' }
+  ]">
+</app-title>
 
 @if (challengeMerged(); as cm) {
   <div class="flex min-w-[320px] flex-col gap-8 rounded-lg bg-surface p-6 text-primary-500 shadow-lg">
@@ -75,7 +81,7 @@
           <div class="absolute left-0 right-0 top-1/2 h-2 border-t border-dashed border-black bg-transparent"></div>
           <div class="absolute -right-6 top-0 z-10 h-8 w-8 rounded-full bg-surface text-on-surface"></div>
         </div>
-        @if (teamId()) {
+        @if (TEAM_ID) {
           <qrcode [qrdata]="qrdata" [width]="256" [errorCorrectionLevel]="'M'"></qrcode>
           @if (cm.eventChallenge.props.status !== CHALLENGE_STATUS.ACTIVE) {
             <div class="absolute left-0 top-0 h-full w-full rounded-xl backdrop-blur"></div>

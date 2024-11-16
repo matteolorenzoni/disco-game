@@ -39,6 +39,10 @@ export class TeamComponent implements OnInit {
   private readonly loaderService = inject(LoaderService);
   private readonly logService = inject(LogService);
 
+  /* Params */
+  EVENT_ID = this.route.snapshot.paramMap.get('eventId');
+  TEAM_ID = this.route.snapshot.paramMap.get('teamId');
+
   /* Variables */
   team = signal<Doc<Team> | undefined>(undefined);
   teammates = signal<TeamUser[]>([]);
@@ -65,12 +69,10 @@ export class TeamComponent implements OnInit {
   private async initHttp() {
     await this.loaderService.executeWithDelay(async () => {
       const userId = this.firebaseService.userFirebase()?.uid;
-      const eventId = this.route.snapshot.paramMap.get('eventId');
-      const teamId = this.route.snapshot.paramMap.get('teamId');
-      if (!userId || !eventId || !teamId) throw new Error('retry', { cause: 'retry' });
+      if (!userId || !this.EVENT_ID || !this.TEAM_ID) throw new Error('retry', { cause: 'retry' });
 
       /* Ottengo la squadra */
-      const team = await this.teamService.getTeamById(teamId);
+      const team = await this.teamService.getTeamById(this.TEAM_ID);
       this.team.set(team);
 
       /* Separo le informazioni */
