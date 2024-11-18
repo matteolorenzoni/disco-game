@@ -9,7 +9,7 @@ type ButtonType = 'button' | 'submit';
   imports: [CommonModule],
   template: `
     <button
-      class="w-full rounded p-2 text-xs font-semibold text-primary-500 shadow disabled:bg-neutral-300 disabled:text-neutral-400"
+      class="w-full rounded p-2 text-xs font-semibold text-on-background shadow disabled:bg-neutral-300 disabled:text-neutral-400"
       [ngClass]="['bg-' + twColor() + '-500', 'hover:bg-' + twColor() + '-600', 'active:bg-' + twColor() + '-700']"
       [disabled]="disabled()"
       (click)="click($event)">

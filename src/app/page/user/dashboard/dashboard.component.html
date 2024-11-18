@@ -2,7 +2,7 @@
 
 @if (team(); as team) {
   @if (event(); as event) {
-    <div class="flex flex-col gap-2 rounded-md bg-white p-3 text-primary-500 shadow-lg">
+    <div class="polaroid flex flex-col gap-2 rounded-md bg-white p-3 text-primary-500">
       <img class="aspect-video w-full rounded bg-surface shadow" [src]="event.props.imageUrl" alt="Immagine evento" />
       <p class="mt-2 truncate text-2xl font-bold">{{ event.props.name }}</p>
       <p class="flex gap-2 text-xs text-primary-300">
@@ -18,14 +18,14 @@
     </div>
 
     @if (event.props.startDate.getTime() > NOW.getTime()) {
-      <div class="mt-8 flex flex-col items-center gap-1 py-2">
+      <div class="mt-6 flex flex-col items-center gap-1 py-2">
         <p class="text-xxs uppercase text-primary-400">Tempo mancante</p>
         <fv-countdown class="truncate text-5xl text-primary-500" [date]="event.props.startDate"></fv-countdown>
       </div>
     }
 
     @if (team.props.status !== TEAM_STATUS.ACTIVE) {
-      <div class="mt-8 items-center rounded text-sm font-semibold uppercase">
+      <div class="mt-6 items-center rounded text-sm font-semibold uppercase">
         @if (team.props.status === TEAM_STATUS.SUSPENDED) {
           <p class="rounded-md border border-orange-500/50 bg-orange-500/25 p-2 text-center">Squadra sospesa</p>
         } @else if (team.props.status === TEAM_STATUS.BANNED) {
@@ -34,7 +34,7 @@
       </div>
     }
 
-    <h2 class="mt-8 text-xs font-semibold uppercase text-primary-500">Squadra</h2>
+    <h2 class="mt-6 text-xs font-semibold uppercase text-primary-500">Squadra</h2>
     <div
       class="mt-1 flex flex-col gap-4 overflow-hidden rounded-md border-2 border-secondary-400/75 bg-secondary-400/50 p-2 text-on-surface shadow-lg">
       <div class="flex gap-4">
@@ -81,7 +81,7 @@
       </div>
     </div>
 
-    <h2 class="mt-8 text-xs font-semibold uppercase text-secondary-700">Sfide</h2>
+    <h2 class="mt-6 text-xs font-semibold uppercase text-secondary-700">Sfide</h2>
     <div class="mt-1">
       @if (team.props.status === TEAM_STATUS.ACTIVE) {
         @if (mergedChallenges().length) {
@@ -111,7 +111,7 @@
             }
           </ul>
         } @else {
-          <p class="p-4 text-center text-xxs uppercase">
+          <p class="bg-gray-300/75 p-4 text-center text-xxs uppercase">
             Nessuna sfida disponibile al momento. Resta aggiornato per non perdere le prossime opportunità
           </p>
         }

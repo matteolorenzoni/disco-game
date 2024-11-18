@@ -9,7 +9,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
     @for (item of [1, 2, 3, 4, 5]; track $index) {
       <svg
         class="h-3 w-3"
-        [ngClass]="rating() + 0.5 >= item ? 'text-yellow-400' : 'text-white'"
+        [ngClass]="rating() + 0.5 >= item ? 'text-yellow-400 stroke-secondary-500' : 'text-white  stroke-secondary-500'"
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         fill="currentColor"

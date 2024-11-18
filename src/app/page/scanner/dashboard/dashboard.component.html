@@ -33,7 +33,7 @@
         </div>
 
         <div
-          class="mb-8 aspect-square w-full max-w-[450px] overflow-hidden rounded-lg border-2 border-secondary-500 bg-surface shadow-lg">
+          class="mb-8 aspect-square w-full max-w-[450px] overflow-hidden rounded border-2 border-secondary-500 bg-surface shadow-sm">
           <zxing-scanner
             [enable]="!!device()"
             [previewFitMode]="'contain'"
@@ -53,13 +53,13 @@
         }
 
         <form
-          class="flex flex-col gap-2 rounded-lg bg-primary-500/25 p-4 text-on-surface shadow"
+          class="flex flex-col gap-2 rounded-lg bg-surface p-4 text-on-surface shadow-lg"
           [formGroup]="manualScanForm"
           (ngSubmit)="onManualScan(event.id)">
           <h1 class="mb-2 text-sm font-semibold">Scan manuale</h1>
           <div class="flex h-8 gap-2">
             <select
-              class="h-full w-full flex-1 rounded border-on-surface bg-surface text-on-surface outline-none"
+              class="h-full w-full flex-1 rounded border-on-surface bg-white text-on-surface outline-none"
               formControlName="challengeId">
               @for (challenge of mergeChallenges(); track challenge.id) {
                 <option [value]="challenge.id">{{ challenge.name }}</option>
@@ -67,7 +67,7 @@
             </select>
             <button
               type="button"
-              class="h-full basis-8 rounded bg-surface text-on-surface hover:bg-secondary-500 active:bg-secondary-600"
+              class="h-full basis-8 rounded bg-secondary-500 text-on-surface hover:bg-secondary-600 active:bg-secondary-700"
               (click)="onGetChallenges()">
               <fa-icon class="text-xs" [icon]="ICON_REFRESH"></fa-icon>
             </button>
@@ -94,7 +94,7 @@
         </div>
 
         <div class="mt-12 p-8 flex-center">
-          <div class="flex flex-col rounded-lg bg-surface p-4 text-on-surface shadow-lg backdrop-blur">
+          <div class="flex flex-col rounded-lg bg-white p-4 text-on-surface shadow-lg backdrop-blur">
             <h2 class="mb-4 text-lg font-bold">Evento non incominciato</h2>
             <p class="text-sm">Al momento l'evento non è ancora iniziato.</p>
             <p class="mt-2 text-sm">
@@ -132,7 +132,7 @@
   @switch (errorMessage()) {
     @case ('NO_CAMERA') {
       <div class="mt-40 p-8 flex-center">
-        <div class="flex flex-col rounded-lg bg-surface p-4 text-on-surface shadow-lg backdrop-blur">
+        <div class="flex flex-col rounded-lg bg-white p-4 text-on-surface shadow-lg">
           <h2 class="mb-4 text-lg font-bold">Nessuna fotocamera disponibile</h2>
           <p class="text-sm">
             Attualmente non è stato rilevato alcun dispositivo con fotocamera. Per favore, collega un dispositivo dotato
@@ -143,7 +143,7 @@
       </div>
     }
     @default {
-      <div class="rounded-lg bg-surface p-6 text-on-surface shadow-md">
+      <div class="rounded-lg bg-white p-6 text-on-surface shadow-lg">
         <p class="text-center text-xl font-bold">Attivazione dei Permessi della Fotocamera</p>
 
         <p class="mt-4 text-on-background">

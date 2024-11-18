@@ -2,7 +2,7 @@
 
 @if (events() && !events()!.length) {
   <div class="absolute left-0 top-0 -z-10 h-screen p-8 flex-center">
-    <div class="flex-col rounded-lg bg-surface p-4 text-on-surface shadow backdrop-blur">
+    <div class="flex-col rounded-lg bg-white p-6 text-on-surface shadow-lg">
       <h2 class="mb-2 text-lg font-bold">Classifica non disponibile</h2>
       <p class="text-sm">
         Al momento non ci sono classifiche disponibili. Partecipa a nuovi eventi con il tuo team per scalare la
@@ -17,13 +17,17 @@
 
 @if (eventSelected(); as eventSelected) {
   <div class="flex w-full justify-between gap-4 p-2 text-primary-500">
-    <button class="disabled:text-primary-400" (click)="onArrowClick(-1)" [disabled]="events()!.length === 1">
-      <fa-icon [icon]="ICON_LEFT"></fa-icon>
-    </button>
-    <div class="truncate">{{ eventSelected.props.name }}</div>
-    <button class="disabled:text-primary-400" (click)="onArrowClick(1)" [disabled]="events()!.length === 1">
-      <fa-icon [icon]="ICON_RIGHT"></fa-icon>
-    </button>
+    @if (events()!.length > 1) {
+      <button class="disabled:text-primary-400" (click)="onArrowClick(-1)">
+        <fa-icon [icon]="ICON_LEFT"></fa-icon>
+      </button>
+    }
+    <div class="flex-1 truncate text-center">{{ eventSelected.props.name }}</div>
+    @if (events()!.length > 1) {
+      <button class="disabled:text-primary-400" (click)="onArrowClick(1)">
+        <fa-icon [icon]="ICON_RIGHT"></fa-icon>
+      </button>
+    }
   </div>
 
   <div class="mt-2">
