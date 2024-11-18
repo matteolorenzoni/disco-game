@@ -3,7 +3,7 @@ export type Event = {
   description: string;
   code: string;
   location: string;
-  imageUrl: string;
+  imageUrl: string | null;
   startDate: Date;
   endDate: Date;
   teamIds: string[];

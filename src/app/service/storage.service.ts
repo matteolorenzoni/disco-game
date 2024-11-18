@@ -44,6 +44,14 @@ export class StorageService {
     return downloadURL;
   }
 
+  public async deleteImage(collection: string, name: string): Promise<void> {
+    // Crea un riferimento alla cartella specificata in Firebase Storage
+    const imageRef = ref(this.firebaseService.getStorage(), `${collection}/${name}.jpg`);
+
+    // Elimina immagine
+    await deleteObject(imageRef);
+  }
+
   /* --------------------------- Method Firebase --------------------------- */
   public onImageChange(
     event: Event,

@@ -53,7 +53,7 @@ export class EventCreateComponent implements OnInit {
 
   /* Variables */
   event = signal<Doc<FvEvent> | undefined>(undefined);
-  imagePreview = signal<string | ArrayBuffer | undefined>(undefined);
+  imagePreview = signal<string | ArrayBuffer | undefined | null>(undefined);
   imageFile = signal<File | undefined>(undefined);
 
   /* Constants */
@@ -152,6 +152,9 @@ export class EventCreateComponent implements OnInit {
     await this.loaderService.executeImmediate(async () => {
       /* Elimino evento */
       await this.eventService.softDelete(eventId);
+
+      /* Elimino immagine */
+      await this.eventService.deleteImage(eventId);
 
       /* Elimino squadre associate all'evento */
       const teams = await this.teamService.getActiveTeamsByEventId(eventId);

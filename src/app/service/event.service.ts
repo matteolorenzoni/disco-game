@@ -74,7 +74,7 @@ export class EventService {
   }
 
   /* --------------------------- Update ---------------------------*/
-  public async update(eventId: string, form: EventModel, imageUrl: string): Promise<void> {
+  public async update(eventId: string, form: EventModel, imageUrl: string | null): Promise<void> {
     await this.documentService.updateDocuments<Event>([eventId], COL_EVENTS, {
       ...form,
       imageUrl,
@@ -96,7 +96,12 @@ export class EventService {
   }
 
   /* --------------------------- Delete ---------------------------*/
-  public async softDelete(challengeId: string): Promise<void> {
-    await this.documentService.updateDocuments<Event>([challengeId], COL_EVENTS, { isActive: false });
+  public async softDelete(eventId: string): Promise<void> {
+    await this.documentService.updateDocuments<Event>([eventId], COL_EVENTS, { isActive: false });
+  }
+
+  public async deleteImage(eventId: string): Promise<void> {
+    await this.documentService.updateDocuments<Event>([eventId], COL_EVENTS, { imageUrl: null });
+    await this.storageService.deleteImage(COL_EVENTS, eventId);
   }
 }

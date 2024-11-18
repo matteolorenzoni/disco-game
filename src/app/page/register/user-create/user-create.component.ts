@@ -69,6 +69,7 @@ export class UserCreateComponent implements OnInit {
     if (!user) {
       const userId = this.firebaseService.userFirebase()?.uid;
       if (!userId) return;
+
       user = await this.userService.getUserById(userId);
       this.lsService.setUser(user);
     }
@@ -160,6 +161,10 @@ export class UserCreateComponent implements OnInit {
     let imageUrl: string | null = null;
     if (this.imageFile()) {
       imageUrl = await this.userService.updateImage(this.imageFile()!, userId);
+    } else {
+      if (this.user()?.props.imageUrl) {
+        await this.userService.deleteImage(userId);
+      }
     }
 
     /* Aggiorno le varie squadre */

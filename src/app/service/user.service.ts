@@ -99,4 +99,9 @@ export class UserService {
       { eventId, teamId }
     );
   }
+
+  /* --------------------------- Delete ---------------------------*/
+  public async deleteImage(name: string): Promise<void> {
+    await this.storageService.deleteImage(COL_USERS, name);
+  }
 }
