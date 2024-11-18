@@ -141,6 +141,10 @@ export class UserCreateComponent implements OnInit {
     /* Aggiungo utente */
     await this.userService.add(userCredential.user.uid, userModelForm, imageUrl);
 
+    /* Aggiorno local storage */
+    const user = await this.userService.getUserById(userCredential.user.uid);
+    this.lsService.setUser(user);
+
     /* Log */
     this.logService.addLogConfirm('Utente registrato');
 
