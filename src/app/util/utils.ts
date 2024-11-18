@@ -72,7 +72,7 @@ export const shareTeamCode = (teamCode: string, logService: LogService): void =>
   const obj = {
     title: 'Condividi codice squadra',
     text: `Questo è il codice della mia squadra: ${teamCode}. Ti aspetto!`,
-    url: `https://test-disco-7f6db.web.app/user/events?teamCode=${teamCode}`
+    url: `https://fanta-disco.web.app/user/events?teamCode=${teamCode}`
   };
   if (navigator.canShare(obj)) {
     navigator.share(obj);
