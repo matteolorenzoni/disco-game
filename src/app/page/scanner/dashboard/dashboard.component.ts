@@ -26,6 +26,7 @@ import { trimFormValues } from '../../../util/utils';
 import { IndexedDbService } from '../../../service/indexed-db.service';
 import { MergeChallenge, mergeChallenges } from '../../../util/merge.util';
 import { Challenge } from '../../../model/challenge.model';
+import { FirebaseService } from '../../../service/firebase.service';
 
 type ScanError = {
   message: string;
@@ -51,6 +52,7 @@ type ScanError = {
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   /* Services */
+  private readonly firebaseService = inject(FirebaseService);
   private readonly userService = inject(UserService);
   private readonly eventService = inject(EventService);
   private readonly teamService = inject(TeamService);
@@ -82,6 +84,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const deviceId = this.deviceId();
     return cameras.find((x) => x.deviceId === deviceId);
   });
+  errorMessage = signal<'NO_CAMERA' | 'NO_PERMISSION' | null | undefined>(undefined);
   scanError = signal<ScanError | undefined>(undefined);
 
   /* Constants */
@@ -148,7 +151,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     );
   }
 
-  private async initCamera() {
+  private async initCamera(): Promise<void> {
     await this.loaderService.executeWithDelay(async () => {
       /* Verifico se il dispositivo supporta la camera */
       try {
@@ -263,19 +266,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     await this.dbService.deleteScannerEvent();
   }
 
-  protected async onRefreshPage(eventCode: string): Promise<void> {
-    await this.loaderService.executeImmediate(async () => {
-      /* Ottengo evento */
-      const event = await this.eventService.getEventByCode(eventCode);
-
-      /* Aggiorno indexedDB */
-      this.event.set(event);
-      if (event) await this.dbService.saveScannerEvent(event);
-      else this.dbService.deleteScannerEvent();
-
-      /* Log */
-      this.logService.addLogConfirm('Evento aggiornato');
-    });
+  protected async onRefreshPage(): Promise<void> {
+    window.location.reload();
   }
 
   /* --------------------- Method util --------------------- */
@@ -340,7 +332,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   /* --------------------- Method camera --------------------- */
   protected onCameraChange(event: EventTarget | null): void {
-    /* Se nessun evento, chiudo la camera a pulisco il local storage */
+    /* Se nessun evento, chiudo la camera e pulisco il local storage */
     if (!event) {
       this.deviceId.set(undefined);
       this.lsService.removeScannerDeviceId();
@@ -373,7 +365,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   protected handleScanError(scanError: ScanError): void {
-    this.logService.addLogError('SCANNER', scanError);
+    this.logService.addLogError(this.firebaseService.userFirebase()?.uid, scanError);
     this.scanError.set(scanError);
   }
 
