@@ -29,16 +29,44 @@ export class AppComponent {
     this.firebaseService.observeUserState();
 
     // Controlla se è un dispositivo mobile e il suo orientamento
-    this.isMobile.set(/Mobi|Android/i.test(navigator.userAgent));
-    this.isPortrait.set(screen.orientation.type.startsWith('portrait'));
-    screen.orientation.addEventListener('change', () => {
-      this.isPortrait.set(screen.orientation.type.startsWith('portrait'));
-    });
+    this.isMobile.set(this.checkIsMobile());
+    this.isPortrait.set(this.getOrientation() === 'portrait');
+
+    // Aggiungi un listener per i cambiamenti di orientamento
+    if ('screen' in window && 'orientation' in window.screen) {
+      window.screen.orientation.addEventListener('change', () => {
+        this.isPortrait.set(this.getOrientation() === 'portrait');
+      });
+    } else {
+      // Fallback: usa l'evento resize per browser che non supportano screen.orientation
+      window.addEventListener('resize', () => {
+        this.isPortrait.set(this.getOrientation() === 'portrait');
+      });
+    }
   }
 
   /* ------------------- Method: event ------------------- */
   protected async onRefreshPage(): Promise<void> {
     await this.dbService.clearAllStores();
     window.location.reload();
+  }
+
+  /* ------------------- Helper: getOrientation ------------------- */
+  private getOrientation(): string {
+    if ('screen' in window && 'orientation' in window.screen && window.screen.orientation?.type) {
+      // Browser moderni con screen.orientation
+      return window.screen.orientation.type.startsWith('portrait') ? 'portrait' : 'landscape';
+    } else if (typeof window.orientation !== 'undefined') {
+      // Fallback per vecchi browser con window.orientation
+      return window.orientation === 0 || window.orientation === 180 ? 'portrait' : 'landscape';
+    } else {
+      // Fallback universale basato su innerWidth e innerHeight
+      return window.innerHeight > window.innerWidth ? 'portrait' : 'landscape';
+    }
+  }
+
+  /* ------------------- Helper: checkIsMobile ------------------- */
+  private checkIsMobile(): boolean {
+    return /Mobi|Android/i.test(navigator.userAgent) || (window.innerWidth <= 768 && window.innerHeight <= 1024);
   }
 }
