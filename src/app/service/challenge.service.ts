@@ -35,6 +35,15 @@ export class ChallengeService {
     return this.documentService.getDocumentsByIds<Challenge>(COL_CHALLENGES, challengeIds, challengeConverter);
   }
 
+  public subscribeChallenges(onUpdate: (documents: Doc<Challenge>[]) => void): () => void {
+    return this.documentService.subscribeToDocumentsWithConstraints<Challenge>(
+      COL_CHALLENGES,
+      [],
+      challengeConverter,
+      onUpdate
+    );
+  }
+
   /* --------------------------- Create ---------------------------*/
   public async add(form: ChallengeModel): Promise<void> {
     await this.documentService.addDocument<Challenge>(COL_CHALLENGES, {

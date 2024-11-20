@@ -1,15 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { BarcodeFormat } from '@zxing/library';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faArrowsRotate, faCalendar, faTrash, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faCalendar, faTrash, faUser } from '@fortawesome/free-solid-svg-icons';
 import { TitleComponent } from '../../../components/title/title.component';
 import { FvFieldIconComponent } from '../../../components/fv-field-icon.component';
 import { FvButtonComponent } from '../../../components/fv-button.component';
-import { FvFieldComponent } from '../../../components/fv-field.component';
 import { EventService } from '../../../service/event.service';
 import { LogService } from '../../../service/log.service';
 import { LocalStorageService } from '../../../service/local-storage.service';
@@ -19,13 +18,14 @@ import { EventChallengeService } from '../../../service/event-challenge.service'
 import { UserService } from '../../../service/user.service';
 import { Event } from '../../../model/event.model';
 import { Doc } from '../../../model/firebase';
-import { ChallengeStatus, Qrcode } from '../../../model/event-challenge.model';
+import { ChallengeStatus, EventChallenge, Qrcode } from '../../../model/event-challenge.model';
 import { isSameQrcode, isQrcode } from '../../../util/type.util';
 import { Team, TeamStatus } from '../../../model/team.model';
 import { LoaderService } from '../../../service/loader.service';
 import { trimFormValues } from '../../../util/utils';
 import { IndexedDbService } from '../../../service/indexed-db.service';
 import { MergeChallenge, mergeChallenges } from '../../../util/merge.util';
+import { Challenge } from '../../../model/challenge.model';
 
 type ScanError = {
   message: string;
@@ -41,7 +41,6 @@ type ScanError = {
     ReactiveFormsModule,
     TitleComponent,
     FvFieldIconComponent,
-    FvFieldComponent,
     FvButtonComponent,
     FaIconComponent,
     ZXingScannerModule
@@ -50,7 +49,7 @@ type ScanError = {
   styleUrls: ['./dashboard.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   /* Services */
   private readonly userService = inject(UserService);
   private readonly eventService = inject(EventService);
@@ -64,7 +63,14 @@ export class DashboardComponent implements OnInit {
 
   /* Variables */
   event = signal<Doc<Event> | null | undefined>(undefined);
-  mergeChallenges = signal<MergeChallenge[]>([]);
+  challenges = signal<Doc<Challenge>[]>([]);
+  eventChallenges = signal<Doc<EventChallenge>[]>([]);
+  mergeChallenges = computed<MergeChallenge[]>(() => {
+    const challenges = this.challenges();
+    const eventChallenges = this.eventChallenges();
+    if (!challenges.length || !eventChallenges.length) return [];
+    return mergeChallenges(challenges, eventChallenges);
+  });
   lastQrcode = signal<Qrcode | undefined>(undefined);
 
   /* Variables camera*/
@@ -82,11 +88,14 @@ export class DashboardComponent implements OnInit {
   ALLOWED_FORMATS = [BarcodeFormat.QR_CODE];
   NOW = new Date();
 
+  /* Ref */
+  challengeUnsubscribe?: () => void;
+  eventChallengeUnsubscribe?: () => void;
+
   /* Icons */
   ICON_EVENT = faCalendar;
   ICON_TRASH = faTrash;
   ICON_USER = faUser;
-  ICON_REFRESH = faArrowsRotate;
 
   /* Form */
   eventForm = new FormGroup({
@@ -106,9 +115,12 @@ export class DashboardComponent implements OnInit {
 
     await this.initIndexedDB();
 
-    if (!this.mergeChallenges().length) {
-      await this.initHttp();
-    }
+    await this.initHttp();
+  }
+
+  ngOnDestroy(): void {
+    if (this.challengeUnsubscribe) this.challengeUnsubscribe();
+    if (this.eventChallengeUnsubscribe) this.eventChallengeUnsubscribe();
   }
 
   /* -------------------------- Methods initialization --------------------------  */
@@ -116,24 +128,24 @@ export class DashboardComponent implements OnInit {
     /* Recupera l'evento se è già stato cercato */
     const dbEvent = await this.dbService.getScannerEvent();
     this.event.set(dbEvent);
-
-    /* Recupera le sfide se presenti */
-    const mergeChallenges = await this.dbService.getScannerChallenges();
-    this.mergeChallenges.set(mergeChallenges);
   }
 
   private async initHttp() {
     const event = this.event();
     if (!event) return;
 
-    await this.loaderService.executeWithDelay(async () => {
-      /* Recupera le sfide per verificare che non superino il numero massimo di tentativi */
-      const mergeChallenges = await this.getMergedChallenges(event.id);
-      this.mergeChallenges.set(mergeChallenges);
+    // Rimane in ascolto sulle sfide
+    if (this.challengeUnsubscribe) this.challengeUnsubscribe();
+    this.challengeUnsubscribe = this.challengeService.subscribeChallenges(async (challenges) =>
+      this.challenges.set(challenges)
+    );
 
-      /* Aggiorno indexedDB */
-      this.dbService.saveScannerChallenges(mergeChallenges);
-    });
+    // Rimane in ascolto sulle sfide associate all'evento
+    if (this.eventChallengeUnsubscribe) this.eventChallengeUnsubscribe();
+    this.eventChallengeUnsubscribe = this.eventChallengeService.subscribeEventChallengesByProp(
+      [{ key: 'eventId', value: event.id }],
+      async (eventChallenges) => this.eventChallenges.set(eventChallenges)
+    );
   }
 
   private async initCamera() {
@@ -180,19 +192,6 @@ export class DashboardComponent implements OnInit {
 
       /* Log */
       this.logService.addLogConfirm('Evento trovato');
-    });
-  }
-
-  protected async onGetChallenges(): Promise<void> {
-    await this.loaderService.executeImmediate(async () => {
-      const mergeChallenges = await this.getMergedChallenges(this.event()!.id);
-      this.mergeChallenges.set(mergeChallenges);
-
-      /* Aggiorno indexedDB */
-      this.dbService.saveScannerChallenges(mergeChallenges);
-
-      /* Log */
-      this.logService.addLogConfirm('Sfide aggiornate');
     });
   }
 
@@ -259,8 +258,9 @@ export class DashboardComponent implements OnInit {
   /* --------------------- Method event --------------------- */
   protected async onRemoveEvent(): Promise<void> {
     this.event.set(null);
+    this.challenges.set([]);
+    this.eventChallenges.set([]);
     await this.dbService.deleteScannerEvent();
-    await this.dbService.deleteScannerChallenges();
   }
 
   protected async onRefreshPage(eventCode: string): Promise<void> {
@@ -336,14 +336,6 @@ export class DashboardComponent implements OnInit {
 
     /* log */
     this.logService.addLogConfirm('Sfida confermata', false);
-  }
-
-  protected async getMergedChallenges(eventId: string): Promise<MergeChallenge[]> {
-    const eventChallenges = await this.eventChallengeService.getEventChallengesByProp([
-      { key: 'eventId', value: eventId }
-    ]);
-    const challenges = await this.challengeService.getChallengesByIds(eventChallenges.map((x) => x.props.challengeId));
-    return mergeChallenges(challenges, eventChallenges);
   }
 
   /* --------------------- Method camera --------------------- */

@@ -1,9 +1,9 @@
-<app-title [pages]="[{ path: '', label: 'Scanner' }]"> </app-title>
+<app-title [pages]="[{ path: '', label: 'Scanner 📷' }]"> </app-title>
 
 @if (errorMessage() === null) {
   @if (event() !== undefined) {
     @if (event(); as event) {
-      @if (event.props.startDate.getTime() < NOW.getTime()) {
+      @if (event.props.startDate.getTime() < NOW.getTime() || event.props.startDate.getTime() > NOW.getTime()) {
         <div class="mb-12 flex items-center justify-center gap-4">
           <p class="text-center text-3xl font-bold text-on-background">{{ event.props.name }}</p>
           <button
@@ -65,12 +65,6 @@
                 <option [value]="challenge.id">{{ challenge.name }}</option>
               }
             </select>
-            <button
-              type="button"
-              class="h-full basis-8 rounded bg-secondary-500 text-on-surface hover:bg-secondary-600 active:bg-secondary-700"
-              (click)="onGetChallenges()">
-              <fa-icon class="text-xs" [icon]="ICON_REFRESH"></fa-icon>
-            </button>
             <fv-field-icon
               class="ml-2 basis-24"
               [name]="'userCode'"

@@ -313,28 +313,4 @@ export class IndexedDbService {
   public async deleteScannerEvent(): Promise<void> {
     await this.clearStore('scanner-event');
   }
-
-  public async saveScannerChallenges(items: MergeChallenge[]): Promise<void> {
-    /* Se l'array è vuoto allora elimino tutti elementi (per gestione su piu dispositivi) */
-    if (items.length === 0) {
-      this.clearStore('scanner-challenges');
-      return;
-    }
-
-    /* Elimino tutti gli item */
-    await this.clearStore('scanner-challenges');
-
-    /* Salvo i nuovi items */
-    await this.saveItems('scanner-challenges', items);
-  }
-
-  public async getScannerChallenges(): Promise<MergeChallenge[]> {
-    const dbChallenges = await this.getAllItems<MergeChallenge>('scanner-challenges');
-    dbChallenges.sort((a, b) => a.name.localeCompare(b.name));
-    return dbChallenges;
-  }
-
-  public async deleteScannerChallenges(): Promise<void> {
-    await this.clearStore('scanner-challenges');
-  }
 }
