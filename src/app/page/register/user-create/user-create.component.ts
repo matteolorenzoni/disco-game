@@ -162,9 +162,8 @@ export class UserCreateComponent implements OnInit {
     if (this.imageFile()) {
       imageUrl = await this.userService.updateImage(this.imageFile()!, userId);
     } else {
-      if (this.user()?.props.imageUrl) {
-        await this.userService.deleteImage(userId);
-      }
+      if (this.imagePreview()) imageUrl = user.props.imageUrl;
+      else await this.userService.deleteImage(userId);
     }
 
     /* Aggiorno le varie squadre */

@@ -12,11 +12,10 @@
             class="aspect-square h-full w-full rounded-full border-2 border-primary-600 object-cover" />
 
           @if (this.imagePreview()) {
-            <label
-              for="imageUpload"
+            <div
               class="absolute -right-2 bottom-8 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border-2 border-primary-500 bg-secondary-400 text-xxs text-on-surface hover:bg-secondary-500 active:bg-secondary-600">
               <button type="button" (click)="onImageRemove()"><fa-icon [icon]="ICON_TRASH"></fa-icon></button>
-            </label>
+            </div>
           }
 
           <label
