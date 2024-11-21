@@ -90,10 +90,10 @@
       </div>
     } @else {
       @if (event.props.startDate.getTime() < NOW.getTime() || event.props.startDate.getTime() > NOW.getTime()) {
-        <div class="mb-12 flex items-center justify-center gap-4">
-          <p class="text-center text-3xl font-bold text-on-background">{{ event.props.name }}</p>
+        <div class="mb-12 flex items-center justify-center gap-2 overflow-hidden">
+          <p class="flex-1 truncate text-center text-3xl font-bold text-on-background">{{ event.props.name }}</p>
           <button
-            class="h-8 w-8 rounded-full bg-surface p-1 text-on-surface hover:bg-secondary-400 active:bg-secondary-500"
+            class="h-8 basis-8 rounded bg-surface p-1 text-on-surface hover:bg-secondary-400 active:bg-secondary-500"
             (click)="onRemoveEvent()">
             <fa-icon [icon]="ICON_TRASH"></fa-icon>
           </button>
@@ -125,8 +125,8 @@
             [previewFitMode]="'contain'"
             [formats]="ALLOWED_FORMATS"
             [device]="device()"
-            (permissionResponse)="handlePermissionResponse($event)"
             (camerasFound)="handleCamerasFound($event)"
+            (permissionResponse)="handlePermissionResponse($event)"
             (scanSuccess)="handleScanSuccess($event)"
             (scanError)="handleScanError($event)"></zxing-scanner>
         </div>

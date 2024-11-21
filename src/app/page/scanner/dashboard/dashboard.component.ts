@@ -166,6 +166,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.event.set(event);
       await this.dbService.saveScannerEvent(event);
 
+      /* Ottengo le sfide se è la prima volta che entro nell'evento */
+      if (!this.mergeChallenges().length) await this.initHttp();
+
       /* Reset form */
       this.eventForm.reset();
 
@@ -338,7 +341,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   protected handlePermissionResponse(isPermission: boolean): void {
-    this.hasPermissions.set(isPermission);
+    this.hasPermissions.set(isPermission ?? false);
   }
 
   protected handleCamerasFound(cameras: MediaDeviceInfo[]): void {
@@ -366,6 +369,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   protected handleScanError(scanError: ScanError): void {
     this.scanError.set(scanError);
-    this.logService.addLogError(this.firebaseService.userFirebase()?.uid, scanError);
+    this.logService.addLogError(`SCANNER: ${this.firebaseService.userFirebase()?.uid}`, scanError);
   }
 }
