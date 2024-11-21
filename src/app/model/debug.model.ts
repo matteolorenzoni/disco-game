@@ -3,6 +3,7 @@ export type Debug = {
   type: DebugType;
   updatedAt: Date;
   message: string;
+  url: string;
 };
 
 export enum DebugType {

@@ -109,7 +109,8 @@ export class LogService {
       userId: userId ?? null,
       type: DebugType.ERROR,
       updatedAt: new Date(),
-      message: errorMessageDebug
+      message: errorMessageDebug,
+      url: window.location.href
     });
   }
 
