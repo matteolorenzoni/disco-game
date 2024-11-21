@@ -76,7 +76,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   lastQrcode = signal<Qrcode | undefined>(undefined);
 
   /* Variables camera*/
-  errorMessage = signal<'NO_CAMERA' | 'NO_PERMISSION' | null | undefined>(undefined);
+  hasPermissions = signal<boolean | undefined>(undefined);
+  hasCameras = signal<boolean | undefined>(undefined);
   cameras = signal<MediaDeviceInfo[]>([]);
   deviceId = signal<string | undefined>(undefined);
   device = computed<MediaDeviceInfo | undefined>(() => {
@@ -84,7 +85,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const deviceId = this.deviceId();
     return cameras.find((x) => x.deviceId === deviceId);
   });
-  errorMessage = signal<'NO_CAMERA' | 'NO_PERMISSION' | null | undefined>(undefined);
   scanError = signal<ScanError | undefined>(undefined);
 
   /* Constants */
@@ -114,8 +114,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   /* --------------------- Lifecycle hooks --------------------- */
   async ngOnInit(): Promise<void> {
-    await this.initCamera();
-
     await this.initIndexedDB();
 
     await this.initHttp();
@@ -149,28 +147,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       [{ key: 'eventId', value: event.id }],
       async (eventChallenges) => this.eventChallenges.set(eventChallenges)
     );
-  }
-
-  private async initCamera(): Promise<void> {
-    await this.loaderService.executeWithDelay(async () => {
-      /* Verifico se il dispositivo supporta la camera */
-      try {
-        const mediaDevices = await navigator.mediaDevices.enumerateDevices();
-        const videoInputs = mediaDevices.filter((device) => device.kind === 'videoinput');
-
-        if (videoInputs.length > 0) {
-          /* Ha almeno una camera, chiedo il permesso */
-          await navigator.mediaDevices.getUserMedia({ video: true });
-          this.errorMessage.set(null);
-        } else {
-          /* Non ha nessuna camera */
-          this.errorMessage.set('NO_CAMERA');
-        }
-      } catch (error) {
-        console.error("Errore nell'accesso alla fotocamera:", error);
-        this.errorMessage.set('NO_PERMISSION');
-      }
-    });
   }
 
   /* --------------------- Method: firebase --------------------- */
@@ -270,6 +246,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
     window.location.reload();
   }
 
+  protected onCameraChange(event: EventTarget | null): void {
+    /* Se nessun evento, chiudo la camera e pulisco il local storage */
+    if (!event) {
+      this.deviceId.set(undefined);
+      this.lsService.removeScannerDeviceId();
+      return;
+    }
+
+    /* Imposto la camera selezionata */
+    const deviceId = (event as HTMLSelectElement).value;
+    this.deviceId.set(deviceId);
+    this.lsService.setScannerDeviceId(deviceId);
+  }
+
   /* --------------------- Method util --------------------- */
   protected async scan(qrcode: Qrcode, team: Doc<Team>): Promise<void> {
     /* Controllo se la squadra è attiva */
@@ -331,19 +321,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   /* --------------------- Method camera --------------------- */
-  protected onCameraChange(event: EventTarget | null): void {
-    /* Se nessun evento, chiudo la camera e pulisco il local storage */
-    if (!event) {
-      this.deviceId.set(undefined);
-      this.lsService.removeScannerDeviceId();
-      return;
-    }
-
-    /* Imposto la camera selezionata */
-    const deviceId = (event as HTMLSelectElement).value;
-    this.deviceId.set(deviceId);
-    this.lsService.setScannerDeviceId(deviceId);
-  }
 
   protected onToggleCamera(): void {
     const lsScannerDeviceId = this.lsService.getScannerDeviceId();
@@ -360,23 +337,35 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  protected async handleScanSuccess(result: string): Promise<void> {
-    await this.onScan(result);
-  }
-
-  protected handleScanError(scanError: ScanError): void {
-    this.logService.addLogError(this.firebaseService.userFirebase()?.uid, scanError);
-    this.scanError.set(scanError);
+  protected handlePermissionResponse(isPermission: boolean): void {
+    this.hasPermissions.set(isPermission);
   }
 
   protected handleCamerasFound(cameras: MediaDeviceInfo[]): void {
     /* Imposto le camere trovate */
     this.cameras.set(cameras);
+    this.hasCameras.set(cameras.length > 0);
 
     /* Recupero l'ID della camera selezionata dal local storage e verifico se esiste */
     /* Se esiste, imposta quella come camera selezionata, altrimenti seleziona la prima camera disponibile */
     const deviceId = this.lsService.getScannerDeviceId();
     if (deviceId) this.deviceId.set(deviceId);
-    else if (cameras.length > 0) this.deviceId.set(cameras[0].deviceId);
+    else if (cameras.length > 0) {
+      const { deviceId } = cameras[0];
+      this.deviceId.set(deviceId);
+      this.lsService.setScannerDeviceId(deviceId);
+    } else {
+      this.deviceId.set(undefined);
+      this.lsService.removeScannerDeviceId();
+    }
+  }
+
+  protected async handleScanSuccess(result: string): Promise<void> {
+    await this.onScan(result);
+  }
+
+  protected handleScanError(scanError: ScanError): void {
+    this.scanError.set(scanError);
+    this.logService.addLogError(this.firebaseService.userFirebase()?.uid, scanError);
   }
 }

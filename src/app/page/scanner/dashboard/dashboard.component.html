@@ -1,142 +1,8 @@
 <app-title [pages]="[{ path: '', label: 'Scanner 📷' }]"> </app-title>
 
-@if (errorMessage() === null) {
-  @if (event() !== undefined) {
-    @if (event(); as event) {
-      @if (event.props.startDate.getTime() < NOW.getTime() || event.props.startDate.getTime() > NOW.getTime()) {
-        <div class="mb-12 flex items-center justify-center gap-4">
-          <p class="text-center text-3xl font-bold text-on-background">{{ event.props.name }}</p>
-          <button
-            class="h-8 w-8 rounded-full bg-surface p-1 text-on-surface hover:bg-secondary-400 active:bg-secondary-500"
-            (click)="onRemoveEvent()">
-            <fa-icon [icon]="ICON_TRASH"></fa-icon>
-          </button>
-        </div>
-
-        <div class="mb-4 flex w-full gap-4 overflow-hidden">
-          <select
-            class="flex-1 overflow-hidden rounded border-on-surface bg-surface text-on-surface outline-none"
-            [(ngModel)]="deviceId"
-            (change)="onCameraChange($event.target)">
-            @for (camera of cameras(); track camera.deviceId) {
-              <option [value]="camera.deviceId">
-                {{ camera.label || 'Camera ' + (cameras().indexOf(camera) + 1) }}
-              </option>
-            }
-          </select>
-          <fv-button
-            class="basis-1/4"
-            type="button"
-            twColor="secondary"
-            [label]="device() ? 'Chiudi' : 'Apri'"
-            [onClick]="onToggleCamera.bind(this)"></fv-button>
-        </div>
-
-        <div
-          class="mb-8 aspect-square w-full max-w-[450px] overflow-hidden rounded border-2 border-secondary-500 bg-surface shadow-sm">
-          <zxing-scanner
-            [enable]="!!device()"
-            [previewFitMode]="'contain'"
-            [formats]="ALLOWED_FORMATS"
-            [device]="device()"
-            (camerasFound)="handleCamerasFound($event)"
-            (scanSuccess)="handleScanSuccess($event)"
-            (scanError)="handleScanError($event)"></zxing-scanner>
-        </div>
-
-        @if (scanError(); as scanError) {
-          <div class="mb-8 flex w-full flex-col gap-1 rounded border-2 border-rose-500 bg-rose-500/50 p-2 shadow">
-            <p>Codice: {{ scanError.code }}</p>
-            <p>Messaggio: {{ scanError.message }}</p>
-            <p class="mt-4">[Pulire cronologia e cache del browser utilizzato e riprovare]</p>
-          </div>
-        }
-
-        <form
-          class="flex flex-col gap-2 rounded-lg bg-surface p-4 text-on-surface shadow-lg"
-          [formGroup]="manualScanForm"
-          (ngSubmit)="onManualScan(event.id)">
-          <h1 class="mb-2 text-sm font-semibold">Scan manuale</h1>
-          <div class="flex h-8 gap-2">
-            <select
-              class="h-full w-full flex-1 rounded border-on-surface bg-white text-on-surface outline-none"
-              formControlName="challengeId">
-              @for (challenge of mergeChallenges(); track challenge.id) {
-                <option [value]="challenge.id">{{ challenge.name }}</option>
-              }
-            </select>
-            <fv-field-icon
-              class="ml-2 basis-24"
-              [name]="'userCode'"
-              [label]="'Codice'"
-              [type]="'text'"
-              [icon]="ICON_USER"
-              [min]="6"
-              [max]="6">
-            </fv-field-icon>
-          </div>
-          <fv-button type="submit" [label]="'SCAN'" twColor="secondary" [disabled]="manualScanForm.invalid"></fv-button>
-        </form>
-      } @else {
-        <div class="mb-12 flex items-center justify-center gap-4">
-          <p class="text-center text-3xl font-bold text-on-background">{{ event.props.name }}</p>
-          <button
-            class="h-8 w-8 rounded-full bg-surface p-1 text-on-surface hover:bg-secondary-400 active:bg-secondary-500"
-            (click)="onRemoveEvent()">
-            <fa-icon [icon]="ICON_TRASH"></fa-icon>
-          </button>
-        </div>
-
-        <div class="mt-12 p-8 flex-center">
-          <div class="flex flex-col rounded-lg bg-white p-4 text-on-surface shadow-lg backdrop-blur">
-            <h2 class="mb-4 text-lg font-bold">Evento non incominciato</h2>
-            <p class="text-sm">Al momento l'evento non è ancora iniziato.</p>
-            <p class="mt-2 text-sm">
-              Rimanete pronti a scansionare i codici quando l'evento avrà inizio. Controllate la situazione delle sfide
-              e assicuratevi che tutto sia pronto per una gestione fluida!
-            </p>
-            <div class="mt-8 flex flex-col items-center gap-1 text-xxs">
-              <p class="text-xxs">Inizio</p>
-              <p class="text-xs">{{ event.props.startDate | date: 'dd/MM/yyyy HH:mm' }}</p>
-            </div>
-            <button
-              class="mx-auto mt-8 rounded border-2 border-primary-600 p-2 text-xxs uppercase text-primary-500 shadow backdrop-blur-sm hover:text-primary-600 active:border-primary-700 active:text-primary-700"
-              (click)="onRefreshPage()">
-              Aggiorna
-            </button>
-          </div>
-        </div>
-      }
-    } @else {
-      <div class="flex flex-col gap-4 rounded-md bg-surface p-4">
-        <h1 class="text-sm font-semibold">Inserisci codice evento</h1>
-        <form [formGroup]="eventForm" (submit)="onGetEvent()">
-          <fv-field-icon name="code" label="Codice" [icon]="ICON_EVENT"></fv-field-icon>
-          <fv-button
-            class="mt-2"
-            type="submit"
-            twColor="secondary"
-            [label]="'Cerca'"
-            [disabled]="eventForm.invalid"></fv-button>
-        </form>
-      </div>
-    }
-  }
-} @else if (errorMessage() !== undefined) {
-  @switch (errorMessage()) {
-    @case ('NO_CAMERA') {
-      <div class="mt-40 p-8 flex-center">
-        <div class="flex flex-col rounded-lg bg-white p-4 text-on-surface shadow-lg">
-          <h2 class="mb-4 text-lg font-bold">Nessuna fotocamera disponibile</h2>
-          <p class="text-sm">
-            Attualmente non è stato rilevato alcun dispositivo con fotocamera. Per favore, collega un dispositivo dotato
-            di fotocamera per poter continuare con la scansione dei codici. Assicurati di avere tutte le autorizzazioni
-            necessarie attivate!
-          </p>
-        </div>
-      </div>
-    }
-    @default {
+@if (event() !== undefined) {
+  @if (event(); as event) {
+    @if (hasPermissions() === false) {
       <div class="rounded-lg bg-white p-6 text-on-surface shadow-lg">
         <p class="text-center text-xl font-bold">Attivazione dei Permessi della Fotocamera</p>
 
@@ -211,6 +77,135 @@
           già utilizzata da un'altra applicazione.
         </p>
       </div>
+    } @else if (hasCameras() === false) {
+      <div class="mt-40 p-8 flex-center">
+        <div class="flex flex-col rounded-lg bg-white p-4 text-on-surface shadow-lg">
+          <h2 class="mb-4 text-lg font-bold">Nessuna fotocamera disponibile</h2>
+          <p class="text-sm">
+            Attualmente non è stato rilevato alcun dispositivo con fotocamera. Per favore, collega un dispositivo dotato
+            di fotocamera per poter continuare con la scansione dei codici. Assicurati di avere tutte le autorizzazioni
+            necessarie attivate!
+          </p>
+        </div>
+      </div>
+    } @else {
+      @if (event.props.startDate.getTime() < NOW.getTime() || event.props.startDate.getTime() > NOW.getTime()) {
+        <div class="mb-12 flex items-center justify-center gap-4">
+          <p class="text-center text-3xl font-bold text-on-background">{{ event.props.name }}</p>
+          <button
+            class="h-8 w-8 rounded-full bg-surface p-1 text-on-surface hover:bg-secondary-400 active:bg-secondary-500"
+            (click)="onRemoveEvent()">
+            <fa-icon [icon]="ICON_TRASH"></fa-icon>
+          </button>
+        </div>
+
+        <div class="mb-4 flex w-full gap-4 overflow-hidden">
+          <select
+            class="flex-1 overflow-hidden rounded border-on-surface bg-surface text-on-surface outline-none"
+            [(ngModel)]="deviceId"
+            (change)="onCameraChange($event.target)">
+            @for (camera of cameras(); track camera.deviceId) {
+              <option [value]="camera.deviceId">
+                {{ camera.label || 'Camera ' + (cameras().indexOf(camera) + 1) }}
+              </option>
+            }
+          </select>
+          <fv-button
+            class="basis-1/4"
+            type="button"
+            twColor="secondary"
+            [label]="device() ? 'Chiudi' : 'Apri'"
+            [onClick]="onToggleCamera.bind(this)"></fv-button>
+        </div>
+
+        <div
+          class="mb-8 aspect-square w-full max-w-[450px] overflow-hidden rounded border-2 border-secondary-500 bg-surface shadow-sm">
+          <zxing-scanner
+            [enable]="!!device()"
+            [previewFitMode]="'contain'"
+            [formats]="ALLOWED_FORMATS"
+            [device]="device()"
+            (permissionResponse)="handlePermissionResponse($event)"
+            (camerasFound)="handleCamerasFound($event)"
+            (scanSuccess)="handleScanSuccess($event)"
+            (scanError)="handleScanError($event)"></zxing-scanner>
+        </div>
+
+        @if (scanError(); as scanError) {
+          <div class="mb-8 flex w-full flex-col gap-1 rounded border-2 border-rose-500 bg-rose-500/50 p-2 shadow">
+            <p>Codice: {{ scanError.code }}</p>
+            <p>Messaggio: {{ scanError.message }}</p>
+          </div>
+        }
+
+        <form
+          class="flex flex-col gap-2 rounded-lg bg-surface p-4 text-on-surface shadow-lg"
+          [formGroup]="manualScanForm"
+          (ngSubmit)="onManualScan(event.id)">
+          <h1 class="mb-2 text-sm font-semibold">Scan manuale</h1>
+          <div class="flex h-8 gap-2">
+            <select
+              class="h-full w-full flex-1 rounded border-on-surface bg-white text-on-surface outline-none"
+              formControlName="challengeId">
+              @for (challenge of mergeChallenges(); track challenge.id) {
+                <option [value]="challenge.id">{{ challenge.name }}</option>
+              }
+            </select>
+            <fv-field-icon
+              class="ml-2 basis-24"
+              [name]="'userCode'"
+              [label]="'Codice'"
+              [type]="'text'"
+              [icon]="ICON_USER"
+              [min]="6"
+              [max]="6">
+            </fv-field-icon>
+          </div>
+          <fv-button type="submit" [label]="'SCAN'" twColor="secondary" [disabled]="manualScanForm.invalid"></fv-button>
+        </form>
+      } @else {
+        <div class="mb-12 flex items-center justify-center gap-4">
+          <p class="text-center text-3xl font-bold text-on-background">{{ event.props.name }}</p>
+          <button
+            class="h-8 w-8 rounded-full bg-surface p-1 text-on-surface hover:bg-secondary-400 active:bg-secondary-500"
+            (click)="onRemoveEvent()">
+            <fa-icon [icon]="ICON_TRASH"></fa-icon>
+          </button>
+        </div>
+
+        <div class="mt-12 p-8 flex-center">
+          <div class="flex flex-col rounded-lg bg-white p-4 text-on-surface shadow-lg backdrop-blur">
+            <h2 class="mb-4 text-lg font-bold">Evento non incominciato</h2>
+            <p class="text-sm">Al momento l'evento non è ancora iniziato.</p>
+            <p class="mt-2 text-sm">
+              Rimanete pronti a scansionare i codici quando l'evento avrà inizio. Controllate la situazione delle sfide
+              e assicuratevi che tutto sia pronto per una gestione fluida!
+            </p>
+            <div class="mt-8 flex flex-col items-center gap-1 text-xxs">
+              <p class="text-xxs">Inizio</p>
+              <p class="text-xs">{{ event.props.startDate | date: 'dd/MM/yyyy HH:mm' }}</p>
+            </div>
+            <button
+              class="mx-auto mt-8 rounded border-2 border-primary-600 p-2 text-xxs uppercase text-primary-500 shadow backdrop-blur-sm hover:text-primary-600 active:border-primary-700 active:text-primary-700"
+              (click)="onRefreshPage()">
+              Aggiorna
+            </button>
+          </div>
+        </div>
+      }
     }
+  } @else {
+    <div class="flex flex-col gap-4 rounded-md bg-surface p-4">
+      <h1 class="text-sm font-semibold">Inserisci codice evento</h1>
+      <form [formGroup]="eventForm" (submit)="onGetEvent()">
+        <fv-field-icon name="code" label="Codice" [icon]="ICON_EVENT"></fv-field-icon>
+        <fv-button
+          class="mt-2"
+          type="submit"
+          twColor="secondary"
+          [label]="'Cerca'"
+          [disabled]="eventForm.invalid"></fv-button>
+      </form>
+    </div>
   }
 }
