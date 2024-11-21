@@ -8,7 +8,9 @@
 
 <div class="flex flex-col gap-1 text-center text-on-background">
   <h3 class="flex items-center justify-center gap-4">
-    <span class="text-3xl font-semibold"> {{ teammate()?.props?.name }} {{ teammate()?.props?.lastName }} </span>
+    <span class="truncate text-3xl font-semibold">
+      {{ teammate()?.props?.name }} {{ teammate()?.props?.lastName }}
+    </span>
   </h3>
   <p class="text-sm">{{ teammate()?.props?.userName }}</p>
 </div>

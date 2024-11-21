@@ -16,7 +16,7 @@ import { faCheck, faCirclePause, faClock, faLock, faTrash } from '@fortawesome/f
             <fa-icon class="text-emerald-600" [icon]="ICON_ACTIVE"></fa-icon>
           }
           @case (CHALLENGE_STATUS.LOCKED) {
-            <fa-icon class="text-white" [icon]="ICON_LOCKED"></fa-icon>
+            <fa-icon class="text-gray-400" [icon]="ICON_LOCKED"></fa-icon>
           }
           @case (CHALLENGE_STATUS.CANCELED) {
             <fa-icon class="text-rose-600" [icon]="ICON_CANCELED"></fa-icon>
@@ -37,7 +37,9 @@ import { faCheck, faCirclePause, faClock, faLock, faTrash } from '@fortawesome/f
                   </p>
                 }
               </div>
-              <fa-icon class="absolute -right-1 -top-2 text-xl text-gray-400" [icon]="ICON_LOCKED"></fa-icon>
+              @if (detail()) {
+                <fa-icon class="absolute -right-1 -top-2 text-xl text-gray-400" [icon]="ICON_LOCKED"></fa-icon>
+              }
             }
           }
           @case (CHALLENGE_STATUS.LOCKED) {

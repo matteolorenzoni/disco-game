@@ -1,9 +1,9 @@
 <app-title [pages]="[{ path: '', label: 'Classifiche' }]"></app-title>
 
 @if (events() && !events()!.length) {
-  <div class="absolute left-0 top-0 -z-10 h-screen p-8 flex-center">
-    <div class="flex-col rounded-lg bg-white p-6 text-on-surface shadow-lg">
-      <h2 class="mb-2 text-lg font-bold">Classifica non disponibile</h2>
+  <div class="mt-12 p-8 flex-center">
+    <div class="flex flex-col rounded-lg bg-white p-4 text-on-surface shadow-lg backdrop-blur">
+      <h2 class="mb-4 text-lg font-bold">Classifica non disponibile</h2>
       <p class="text-sm">
         Al momento non ci sono classifiche disponibili. Partecipa a nuovi eventi con il tuo team per scalare la
         classifica e raggiungere la vetta!

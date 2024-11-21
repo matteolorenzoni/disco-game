@@ -8,12 +8,9 @@
 
 @if (challengeMerged(); as cm) {
   <div class="flex min-w-[320px] flex-col gap-8 rounded-lg bg-surface p-6 text-primary-500 shadow-lg">
-    <div class="flex items-center gap-4">
-      <img
-        class="h-28 w-28 basis-28"
-        [src]="'images/challenge/' + cm.challenge.props.type + '.png'"
-        alt="Icona sfida" />
-      <div class="line-clamp-2 flex-1 text-center text-3xl font-bold text-on-background">
+    <div class="flex flex-col items-center gap-2">
+      <img class="h-20 w-20" [src]="'images/challenge/' + cm.challenge.props.type + '.png'" alt="Icona sfida" />
+      <div class="text-center text-4xl font-bold text-on-background">
         {{ cm.challenge.props.name }}
       </div>
     </div>
