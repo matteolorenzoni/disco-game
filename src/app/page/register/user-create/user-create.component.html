@@ -45,7 +45,7 @@
 
   <fv-field name="email" label="Email" type="email"></fv-field>
 
-  <fv-field name="password" label="Password" type="password"></fv-field>
+  <fv-field name="password" [label]="user() ? 'Password' : 'Password (minimo 8 caratteri)'" type="password"></fv-field>
 
   @if (!user()) {
     <div class="inline-flex items-center">

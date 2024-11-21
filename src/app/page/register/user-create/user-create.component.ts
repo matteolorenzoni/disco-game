@@ -59,7 +59,7 @@ export class UserCreateComponent implements OnInit {
     }),
     password: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.minLength(6)]
+      validators: [Validators.required, Validators.minLength(8)]
     })
   });
 
