@@ -340,14 +340,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  protected handlePermissionResponse(isPermission: boolean): void {
-    this.hasPermissions.set(isPermission ?? false);
+  protected async handleHasDevices(hasCamera: boolean): Promise<void> {
+    this.hasCameras.set(hasCamera);
+  }
+
+  protected handlePermissionResponse(hasPermission: boolean | null): void {
+    this.hasPermissions.set(hasPermission ?? false);
   }
 
   protected handleCamerasFound(cameras: MediaDeviceInfo[]): void {
     /* Imposto le camere trovate */
-    this.cameras.set(cameras);
-    this.hasCameras.set(cameras.length > 0);
+    this.cameras.set(
+      cameras.filter(
+        (camera) =>
+          !camera.label.toLowerCase().includes('front') &&
+          !camera.label.toLowerCase().includes('selfie') &&
+          !camera.label.toLowerCase().includes('anteriore')
+      )
+    );
 
     /* Recupero l'ID della camera selezionata dal local storage e verifico se esiste */
     /* Se esiste, imposta quella come camera selezionata, altrimenti seleziona la prima camera disponibile */

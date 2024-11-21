@@ -1,8 +1,19 @@
-<app-title [pages]="[{ path: '', label: 'Scanner 📷' }]"> </app-title>
+<app-title [pages]="[{ path: '', label: 'Scanner2 📷' }]"> </app-title>
 
 @if (event() !== undefined) {
   @if (event(); as event) {
-    @if (hasPermissions() === false) {
+    @if (hasCameras() === false) {
+      <div class="mt-40 p-8 flex-center">
+        <div class="flex flex-col rounded-lg bg-white p-4 text-on-surface shadow-lg">
+          <h2 class="mb-4 text-lg font-bold">Nessuna fotocamera disponibile</h2>
+          <p class="text-sm">
+            Attualmente non è stato rilevato alcun dispositivo con fotocamera. Per favore, collega un dispositivo dotato
+            di fotocamera per poter continuare con la scansione dei codici. Assicurati di avere tutte le autorizzazioni
+            necessarie attivate!
+          </p>
+        </div>
+      </div>
+    } @else if (hasPermissions() === false) {
       <div class="rounded-lg bg-white p-6 text-on-surface shadow-lg">
         <p class="text-center text-xl font-bold">Attivazione dei Permessi della Fotocamera</p>
 
@@ -77,17 +88,6 @@
           già utilizzata da un'altra applicazione.
         </p>
       </div>
-    } @else if (hasCameras() === false) {
-      <div class="mt-40 p-8 flex-center">
-        <div class="flex flex-col rounded-lg bg-white p-4 text-on-surface shadow-lg">
-          <h2 class="mb-4 text-lg font-bold">Nessuna fotocamera disponibile</h2>
-          <p class="text-sm">
-            Attualmente non è stato rilevato alcun dispositivo con fotocamera. Per favore, collega un dispositivo dotato
-            di fotocamera per poter continuare con la scansione dei codici. Assicurati di avere tutte le autorizzazioni
-            necessarie attivate!
-          </p>
-        </div>
-      </div>
     } @else {
       @if (event.props.startDate.getTime() < NOW.getTime() || event.props.startDate.getTime() > NOW.getTime()) {
         <div class="mb-12 flex items-center justify-center gap-2 overflow-hidden">
@@ -125,6 +125,7 @@
             [previewFitMode]="'contain'"
             [formats]="ALLOWED_FORMATS"
             [device]="device()"
+            (hasDevices)="handleHasDevices($event)"
             (camerasFound)="handleCamerasFound($event)"
             (permissionResponse)="handlePermissionResponse($event)"
             (scanSuccess)="handleScanSuccess($event)"
