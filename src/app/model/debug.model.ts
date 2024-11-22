@@ -1,5 +1,6 @@
 export type Debug = {
   userId: string | null;
+  userInfo: string | null;
   type: DebugType;
   updatedAt: Date;
   message: string;

@@ -4,6 +4,7 @@ import { FirebaseError } from 'firebase/app';
 import { LogType } from '../model/enum';
 import { AudioService } from './audio.service';
 import { DebugType } from '../model/debug.model';
+import { LocalStorageService } from './local-storage.service';
 
 const ERROR_FIREBASE: Record<string, string> = {
   // Autenticazione
@@ -70,6 +71,7 @@ export class LogService {
   /* Service */
   private readonly debugService = inject(DebugService);
   private readonly audioService = inject(AudioService);
+  private readonly lsService = inject(LocalStorageService);
 
   /* Variables */
   logs = signal<Log[]>([]);
@@ -84,7 +86,7 @@ export class LogService {
 
   public addLogError(userId: string | undefined, error: unknown): void {
     let errorMessageLog: string = ERROR_UNKNOWN;
-    let errorMessageDebug = '';
+    let errorMessageDebug = JSON.stringify(error ?? null);
 
     // Gestione specifica per FirebaseError
     if (error instanceof FirebaseError) {
@@ -105,8 +107,10 @@ export class LogService {
 
     /* Debug */
     // Memorizzare solo quelli utili
+    const user = this.lsService.getUser();
     this.debugService.add({
       userId: userId ?? null,
+      userInfo: user ? `${user.props.name} ${user.props.lastName}` : null,
       type: DebugType.ERROR,
       updatedAt: new Date(),
       message: errorMessageDebug,
