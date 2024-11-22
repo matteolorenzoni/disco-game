@@ -1,2 +1,36 @@
-<p>dashboard works!</p>
-,
+<app-title [pages]="[{ path: '', label: 'Dashboard [PROVVISORIA]' }]"> </app-title>
+
+<p class="text-sm font-semibold italic text-secondary-700">
+  E' brutta ma è una roba veloce per farvi vedere qualche dato già da questo evento
+</p>
+
+<div class="mx-auto max-w-4xl space-y-6 px-4 py-6">
+  <!-- Sezione Utenti iscritti -->
+  <div class="rounded-lg bg-white p-6 text-center shadow-md">
+    <h2 class="text-lg font-medium text-gray-700">Utenti iscritti</h2>
+    <p class="mt-2 text-3xl font-bold text-primary-600">{{ usersCount() }}</p>
+  </div>
+
+  <!-- Sezione Squadre ad evento -->
+  <div class="rounded-lg bg-white p-6 text-center shadow-md">
+    <h2 class="text-lg font-medium text-gray-700">Squadre ad evento</h2>
+    <ul class="mt-4 space-y-2">
+      @for (item of eventTeamsCounts(); track item.event.id) {
+        <li class="flex items-center justify-between gap-4 text-gray-600">
+          <p class="flex-1 truncate text-start text-sm">{{ item.event.props.name }}</p>
+          <span class="text-sm font-semibold text-primary-600">{{ item.count }}</span>
+        </li>
+      }
+      <li class="flex items-center justify-between gap-4 text-gray-600">
+        <p class="flex-1 truncate text-start text-sm">Prossimo evento 1..</p>
+        <span class="text-sm font-semibold text-primary-600">0</span>
+      </li>
+      <li class="flex items-center justify-between gap-4 text-gray-600">
+        <p class="flex-1 truncate text-start text-sm">Prossimo evento 2..</p>
+        <span class="text-sm font-semibold text-primary-600">0</span>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<p class="text-sm font-semibold italic text-secondary-700">Quà poi andranno grafici, liste, tabelle ecc...</p>
