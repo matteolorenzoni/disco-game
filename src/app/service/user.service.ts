@@ -45,10 +45,6 @@ export class UserService {
 
   /* --------------------------- Create ---------------------------*/
   public async add(userId: string, userModelForm: UserModel, imageUrl: string | null): Promise<void> {
-    /* Check user name univoco */
-    const user = await this.getUserByUsername(userModelForm.userName);
-    if (user) throw new Error('usernameNotAvailable', { cause: 'usernameNotAvailable' });
-
     /* Check codice univoco */
     const code = await generateUniqueCode(6, 100, this.getUserByCode.bind(this));
 

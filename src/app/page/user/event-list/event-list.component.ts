@@ -122,7 +122,7 @@ export class EventListComponent implements OnInit {
       /* Aggiungo Team al DB */
       const team = await this.teamService.add(user, eventId, startDate, teamName);
       if (!team) {
-        this.logService.addLogErrorApp('Nome già esistente, sceglierne uno nuovo');
+        this.logService.addLogErrorApp('Il nome della squadra scelto è già in uso. Scegli un nome diverso');
         return;
       }
 

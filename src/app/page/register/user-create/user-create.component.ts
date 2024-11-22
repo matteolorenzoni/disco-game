@@ -130,6 +130,13 @@ export class UserCreateComponent implements OnInit {
       return;
     }
 
+    /* Check user name univoco */
+    const isNewUserName = await this.userService.getUserByUsername(userModelForm.userName);
+    if (isNewUserName) {
+      this.logService.addLogErrorApp('Il nome utente scelto è già in uso. Scegli un nome diverso');
+      return;
+    }
+
     /* Creo profilo */
     const userCredential = await this.firebaseService.signUp(userModelForm.email, userModelForm.password);
 

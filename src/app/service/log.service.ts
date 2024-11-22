@@ -51,9 +51,7 @@ const ERROR_CUSTOM: Record<string, string> = {
   documentNotActive:
     'Il documento non è attivo perché è stato precedentemente eliminato. Contatta il supporto per assistenza.',
   tooManyEvents: 'Limite massimo di eventi creati raggiunto. Contatta il supporto.',
-  tooManyTeams: 'Limite massimo di squadre creato raggiunto. Contatta il supporto.',
-  usernameNotAvailable: 'Il nome utente scelto è già in uso. Scegli un nome diverso.',
-  teamNameNotAvailable: 'Il nome della squadra scelto è già in uso. Scegli un nome diverso.'
+  tooManyTeams: 'Limite massimo di squadre creato raggiunto. Contatta il supporto.'
 };
 
 const ERROR_UNKNOWN = 'Errore sconosciuto, riprovare o contattare assistenza';
