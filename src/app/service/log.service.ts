@@ -105,6 +105,8 @@ export class LogService {
 
     /* Debug */
     // Memorizzare solo quelli utili
+    if (error instanceof FirebaseError && error.code.includes('auth')) return;
+
     const user = this.lsService.getUser();
     this.debugService.add({
       userId: userId ?? null,

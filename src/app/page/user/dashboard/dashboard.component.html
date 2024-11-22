@@ -48,7 +48,9 @@
           <div class="flex items-center gap-2 text-xs leading-4">
             <p class="truncate uppercase">Codice: {{ team.props.code }}</p>
             <button (click)="onCopyCodeToClipboard()">
-              <fa-icon [icon]="ICON_SHARE"></fa-icon>
+              <fa-icon
+                class="rounded px-1 hover:bg-secondary-500 active:bg-secondary-600"
+                [icon]="ICON_SHARE"></fa-icon>
             </button>
           </div>
         </div>

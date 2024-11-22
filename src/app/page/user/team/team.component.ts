@@ -120,7 +120,7 @@ export class TeamComponent implements OnInit {
     this.router.navigate([`./teammate/`, userId], { relativeTo: this.route });
   }
 
-  protected onCopyCodeToClipboard(): void {
+  protected onShareTeamCode(): void {
     const team = this.team();
     if (!team) throw new Error('retry', { cause: 'retry' });
     if (!navigator) return;

@@ -63,15 +63,14 @@
   </div>
 
   <div class="fixed bottom-[120px] right-0 px-2">
-    <div
-      class="flex items-center gap-2 rounded border border-white/50 bg-white/25 px-2 py-1 text-xs shadow backdrop-blur-lg">
+    <button
+      class="flex items-center gap-2 rounded border border-white/50 bg-white/25 px-2 py-1 text-xs shadow backdrop-blur-lg"
+      (click)="onShareTeamCode()">
       <p class="text-on-background">
         Codice: <span class="font-bold">{{ team.props.code }}</span>
       </p>
-      <button (click)="onCopyCodeToClipboard()">
-        <fa-icon [icon]="ICON_SHARE"></fa-icon>
-      </button>
-    </div>
+      <fa-icon [icon]="ICON_SHARE"></fa-icon>
+    </button>
   </div>
 
   @if (myTeammate(); as myTeammate) {
