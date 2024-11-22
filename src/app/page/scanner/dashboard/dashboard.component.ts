@@ -120,6 +120,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.deviceId.set(undefined);
     if (this.challengeUnsubscribe) this.challengeUnsubscribe();
     if (this.eventChallengeUnsubscribe) this.eventChallengeUnsubscribe();
   }

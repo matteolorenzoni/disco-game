@@ -17,7 +17,8 @@ import {
   QueryConstraint,
   onSnapshot,
   deleteDoc,
-  arrayRemove
+  arrayRemove,
+  getCountFromServer
 } from 'firebase/firestore';
 import { Doc } from '../model/firebase';
 import { FirebaseService } from './firebase.service';
@@ -79,6 +80,19 @@ export class FirebaseDocumentService {
     const querySnapshot = await getDocs(q);
     const docs = querySnapshot.docs.map((doc) => ({ id: doc.id, props: doc.data() as T }));
     return docs;
+  }
+
+  public async getDocumentCountWithConstraints<T extends Record<string, any>>(
+    collectionName: string,
+    queryConstraints: QueryConstraint[],
+    converter: FirestoreDataConverter<T>,
+    isActiveConstraint = true
+  ): Promise<number> {
+    const collectionRef = getCollection(this.firebaseService.getDb(), collectionName).withConverter(converter);
+    if (isActiveConstraint) queryConstraints.push(where('isActive', '==', true));
+    const q = query(collectionRef, ...queryConstraints);
+    const countSnapshot = await getCountFromServer(q);
+    return countSnapshot.data().count;
   }
 
   public async getDocumentWithConstraints<T extends Record<string, any>>(

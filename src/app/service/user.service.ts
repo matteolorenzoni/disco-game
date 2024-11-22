@@ -39,6 +39,10 @@ export class UserService {
     return this.documentService.getDocumentsByIds<User>(COL_USERS, userIds, userConverter);
   }
 
+  public async getUsersCount(): Promise<number> {
+    return this.documentService.getDocumentCountWithConstraints<User>(COL_USERS, [], userConverter);
+  }
+
   /* --------------------------- Create ---------------------------*/
   public async add(userId: string, userModelForm: UserModel, imageUrl: string | null): Promise<void> {
     /* Check user name univoco */

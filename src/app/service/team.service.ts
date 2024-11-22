@@ -52,6 +52,11 @@ export class TeamService {
     return await this.documentService.getDocumentWithConstraints<Team>(COL_TEAMS, valueConstraints, teamConverter);
   }
 
+  public async getUsersCountByEventId(eventId: string): Promise<number> {
+    const valueConstraints = [where('eventId', '==', eventId)];
+    return this.documentService.getDocumentCountWithConstraints<Team>(COL_TEAMS, valueConstraints, teamConverter);
+  }
+
   public subscribeFirstTeam(userId: string, onUpdate: (documents: Doc<Team> | null) => void): () => void {
     const limitConstraints = [limit(1)];
     const valueConstraints = [
