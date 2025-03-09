@@ -116,7 +116,9 @@ export class EventListComponent implements OnInit {
       if (!user) throw new Error('retry', { cause: 'retry' });
 
       /* Ottengo il nome dal prompt */
-      const teamName = prompt('Inserisci il nome della tua squadra');
+      const teamName = prompt(
+        "Inserisci il nome della tua squadra (una volta iniziato l'evento non potrai più cambiare)"
+      );
       if (!teamName) return;
 
       /* Aggiungo Team al DB */
@@ -145,7 +147,9 @@ export class EventListComponent implements OnInit {
       if (!user) throw new Error('retry', { cause: 'retry' });
 
       /* Ottengo il codice dal prompt */
-      const teamCode = prompt('Inserisci il codice della tua squadra');
+      const teamCode = prompt(
+        "Inserisci il codice della tua squadra (una volta iniziato l'evento non potrai più cambiare)"
+      );
       if (!teamCode) return;
 
       /* Cerca la squadra e, se possibile, aggiunge l'utente */

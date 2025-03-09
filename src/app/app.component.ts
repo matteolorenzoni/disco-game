@@ -1,10 +1,10 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { FirebaseService } from './service/firebase.service';
-import { LogService } from './service/log.service';
 import { FvToastComponent } from './components/fv-toast.component';
-import { LoaderService } from './service/loader.service';
+import { FirebaseService } from './service/firebase.service';
 import { IndexedDbService } from './service/indexed-db.service';
+import { LoaderService } from './service/loader.service';
+import { LogService } from './service/log.service';
 
 @Component({
   selector: 'app-root',
@@ -13,7 +13,7 @@ import { IndexedDbService } from './service/indexed-db.service';
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent {
+export class AppComponent implements OnInit, OnDestroy {
   /* Services */
   private readonly firebaseService = inject(FirebaseService);
   protected readonly loaderService = inject(LoaderService);
@@ -21,52 +21,62 @@ export class AppComponent {
   protected readonly logService = inject(LogService);
 
   /* Variables */
-  isPortrait = signal<boolean>(false);
-  isMobile = signal<boolean>(false);
+  protected isMobile = signal<boolean>(false);
+  protected isPortrait = signal<boolean>(false);
 
-  /* ------------------- Constructor ------------------- */
-  constructor() {
+  /* Constants */
+  private mediaQueryList = window.matchMedia('(orientation: portrait)');
+
+  /* ------------------- Lifecycle hooks ------------------- */
+  ngOnInit() {
+    // Recupero le informazioni dell'utente
     this.firebaseService.observeUserState();
 
     // Controlla se è un dispositivo mobile e il suo orientamento
     this.isMobile.set(this.checkIsMobile());
-    this.isPortrait.set(this.getOrientation() === 'portrait');
 
-    // Aggiungi un listener per i cambiamenti di orientamento
-    if ('screen' in window && 'orientation' in window.screen) {
-      window.screen.orientation.addEventListener('change', () => {
-        this.isPortrait.set(this.getOrientation() === 'portrait');
-      });
+    // Controlla l'orientamento del dispositivo (portrait/landscape)
+    if (this.mediaQueryList?.matches !== undefined) {
+      this.isPortrait.set(this.mediaQueryList.matches);
     } else {
-      // Fallback: usa l'evento resize per browser che non supportano screen.orientation
-      window.addEventListener('resize', () => {
-        this.isPortrait.set(this.getOrientation() === 'portrait');
-      });
+      this.isPortrait.set(window.innerHeight > window.innerWidth);
+    }
+
+    // Event listener per cambiamenti di orientamento
+    if (typeof this.mediaQueryList.addEventListener === 'function') {
+      this.mediaQueryList.addEventListener('change', this.onOrientationChange);
+    } else if (typeof this.mediaQueryList.addListener === 'function') {
+      this.mediaQueryList.addListener(this.onOrientationChange);
+    } else {
+      window.addEventListener('resize', this.onResize);
     }
   }
 
+  ngOnDestroy() {
+    if (typeof this.mediaQueryList.removeEventListener === 'function') {
+      this.mediaQueryList.removeEventListener('change', this.onOrientationChange);
+    } else if (typeof this.mediaQueryList.removeListener === 'function') {
+      this.mediaQueryList.removeListener(this.onOrientationChange);
+    }
+    window.removeEventListener('resize', this.onResize);
+  }
+
   /* ------------------- Method: event ------------------- */
+  private onOrientationChange = (event: MediaQueryListEvent) => {
+    this.isPortrait.set(event.matches);
+  };
+
+  private onResize = () => {
+    this.isPortrait.set(window.innerHeight > window.innerWidth);
+  };
+
   protected async onRefreshPage(): Promise<void> {
     await this.dbService.clearAllStores();
     window.location.reload();
   }
 
-  /* ------------------- Helper: getOrientation ------------------- */
-  private getOrientation(): string {
-    if ('screen' in window && 'orientation' in window.screen && window.screen.orientation?.type) {
-      // Browser moderni con screen.orientation
-      return window.screen.orientation.type.startsWith('portrait') ? 'portrait' : 'landscape';
-    } else if (typeof window.orientation !== 'undefined') {
-      // Fallback per vecchi browser con window.orientation
-      return window.orientation === 0 || window.orientation === 180 ? 'portrait' : 'landscape';
-    } else {
-      // Fallback universale basato su innerWidth e innerHeight
-      return window.innerHeight > window.innerWidth ? 'portrait' : 'landscape';
-    }
-  }
-
   /* ------------------- Helper: checkIsMobile ------------------- */
-  private checkIsMobile(): boolean {
+  private checkIsMobile = (): boolean => {
     return /Mobi|Android/i.test(navigator.userAgent) || (window.innerWidth <= 768 && window.innerHeight <= 1024);
-  }
+  };
 }

@@ -1,4 +1,4 @@
-<!-- <main>
+<main>
   @if (!isMobile()) {
     <p class="text-primary flex h-screen items-center justify-center text-center text-2xl font-semibold uppercase">
       Al momento disponibile solo su mobile.. stay tuned!
@@ -12,17 +12,17 @@
       </p>
     }
   }
-</main> -->
+</main>
 
-<main>
+<!-- <main>
   @if (!isMobile() || isPortrait()) {
     <router-outlet></router-outlet>
   } @else {
-    <p class="text-primary flex h-screen items-center justify-center text-2xl font-semibold uppercase">
+    <p class="text-primary flex h-screen items-center justify-center text-center text-2xl font-semibold uppercase">
       Utilizzare l'app in modalità verticale
     </p>
   }
-</main>
+</main> -->
 
 @if (logService.logs().length) {
   <ul
