@@ -91,12 +91,25 @@
   </div>
 
   <!-- Resto delle squadre -->
-  <ul class="mt-8 flex flex-col divide-y divide-primary-500">
+  <ul class="mt-8 flex flex-col divide-y divide-primary-100/60">
     @for (team of teams().otherTeams; track team.id) {
       <li class="flex items-center gap-4 py-2 text-base">
         <span class="text-xs">{{ $index + 4 }}.</span>
         <p class="flex-1">{{ team.props.name }}</p>
         <p>{{ team.props.totalPoints }}<span class="text-xxs text-primary-400">pt</span></p>
+      </li>
+    }
+  </ul>
+
+  <h2 class="font-sm mt-12 font-semibold text-primary-500">Utenti top 30</h2>
+  <ul class="flex flex-col divide-y divide-primary-100/60">
+    @for (user of users(); track user.id) {
+      <li class="flex items-center gap-4 py-2 text-base">
+        <span class="text-xs">{{ $index + 1 }}.</span>
+        <p class="flex-1 truncate">
+          {{ user.userName }} <span class="text-xs text-secondary-700">({{ user.teamName }})</span>
+        </p>
+        <p>{{ user.points }}<span class="text-xxs text-primary-400">pt</span></p>
       </li>
     }
   </ul>

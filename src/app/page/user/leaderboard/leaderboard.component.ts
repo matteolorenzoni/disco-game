@@ -43,6 +43,26 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
       otherTeams
     };
   });
+  users = computed(() => {
+    const teams = this.teams();
+    const allTeams = [teams.podium.first, teams.podium.second, teams.podium.third, ...teams.otherTeams];
+
+    // Estrai tutti gli utenti da tutte le squadre e calcola i punti totali
+    const allUsers = allTeams
+      .filter((team) => team) // Filtra i team non definiti
+      .flatMap((team) =>
+        team.props.users.map((user) => ({
+          id: user.userName,
+          userName: user.userName,
+          imageUrl: user.imageUrl,
+          points: user.challenges.reduce((acc, challenge) => acc + challenge.totalPoints, 0),
+          teamName: team.props.name // Aggiungi il nome della squadra
+        }))
+      );
+
+    // Ordina per punti in ordine decrescente e restituisci solo i primi 30
+    return allUsers.sort((a, b) => b.points - a.points).slice(0, 30);
+  });
   secondsLeft = signal<number | undefined>(undefined);
 
   /* Ref */
