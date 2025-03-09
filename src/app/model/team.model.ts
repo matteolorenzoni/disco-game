@@ -3,6 +3,7 @@ export type Team = {
   code: string;
   leaderId: string;
   status: TeamStatus;
+  bonusPoints: number;
   totalPoints: number;
   eventId: string;
   eventStartDate: Date;

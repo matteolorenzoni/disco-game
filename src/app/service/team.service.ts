@@ -96,6 +96,7 @@ export class TeamService {
       name: teamName,
       code,
       status: TeamStatus.ACTIVE,
+      bonusPoints: 0,
       totalPoints: 0,
       eventId,
       eventStartDate,

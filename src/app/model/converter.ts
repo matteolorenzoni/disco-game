@@ -100,6 +100,7 @@ export const teamConverter: FirestoreDataConverter<Team> = {
       code: team.code,
       leaderId: team.leaderId,
       status: team.status,
+      bonusPoints: team.bonusPoints,
       totalPoints: team.totalPoints,
       eventId: team.eventId,
       eventStartDate: team.eventStartDate,
@@ -108,6 +109,7 @@ export const teamConverter: FirestoreDataConverter<Team> = {
         id: user.id,
         userName: user.userName,
         imageUrl: user.imageUrl,
+        registeredAt: user.registeredAt,
         challenges: user.challenges
       })),
       isActive: team.isActive,
@@ -122,6 +124,7 @@ export const teamConverter: FirestoreDataConverter<Team> = {
       code: data['code'],
       leaderId: data['leaderId'],
       status: data['status'],
+      bonusPoints: data['bonusPoints'],
       totalPoints: data['totalPoints'],
       eventId: data['eventId'],
       eventStartDate: timestampToDate(data['eventStartDate'] as unknown as Timestamp),

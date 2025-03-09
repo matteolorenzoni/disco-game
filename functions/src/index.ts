@@ -73,3 +73,38 @@ export const getUsers = onRequest(async (_, res) => {
     res.status(500).send('Error fetching or updating users: ' + error);
   }
 });
+
+export const setProp = onRequest(async (_, res) => {
+  try {
+    // Ottieni la collezione degli utenti da Firestore
+    const db = admin.firestore();
+    const usersRef = db.collection('DEV_teams'); //! ATTENZIONE: prima 'DEV_users'
+    const snapshot = await usersRef.get();
+
+    if (snapshot.empty) {
+      res.status(200).send('No users found.');
+      return;
+    }
+
+    // Inizializza un batch per aggiornare gli utenti in Firestore
+    const batch = db.batch();
+
+    // Per ciascun elemento va a cercare il corrispondente e si aggiorna in base all'info di quest'ultimo
+    snapshot.forEach((doc) => {
+      const userRef = usersRef.doc(doc.id);
+      batch.update(userRef, {
+        bonusPoints: 0
+      });
+    });
+
+    // Esegui il batch di aggiornamenti
+    await batch.commit();
+
+    // Rispondi con successo
+    res.status(200).json({ message: 'Pops updated', data: snapshot.docs });
+  } catch (error) {
+    // Gestisci l'errore
+    console.error('Error fetching or updating users:', error);
+    res.status(500).send('Error fetching or updating users: ' + error);
+  }
+});

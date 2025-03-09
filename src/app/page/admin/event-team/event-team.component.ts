@@ -1,20 +1,22 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
-import { TitleComponent } from '../../../components/title/title.component';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { LoaderService } from '../../../service/loader.service';
-import { TeamService } from '../../../service/team.service';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import { faRefresh } from '@fortawesome/free-solid-svg-icons';
+import { SelectOption } from '../../../components/fv-select.component';
+import { TitleComponent } from '../../../components/title/title.component';
 import { Doc } from '../../../model/firebase';
 import { Team, TeamStatus } from '../../../model/team.model';
-import EventTeamStatus from './team-status.config.json';
-import { SelectOption } from '../../../components/fv-select.component';
-import { FormsModule } from '@angular/forms';
+import { LoaderService } from '../../../service/loader.service';
 import { LogService } from '../../../service/log.service';
+import { TeamService } from '../../../service/team.service';
+import EventTeamStatus from './team-status.config.json';
 
 @Component({
   selector: 'app-event-team',
   standalone: true,
-  imports: [CommonModule, FormsModule, TitleComponent],
+  imports: [CommonModule, FormsModule, FaIconComponent, TitleComponent],
   templateUrl: './event-team.component.html',
   styleUrls: ['./event-team.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -40,7 +42,11 @@ export class EventTeamComponent implements OnInit {
   TEAM_STATUS = TeamStatus;
 
   /* Form */
-  pointsToUpdate: number | null = null;
+  bonusPoints = signal<number>(0);
+  updatePoints = signal<number | null>(null);
+
+  /* Icon */
+  ICON_REFRESH = faRefresh;
 
   /* -------------------- Lifecycle hooks -------------------- */
   async ngOnInit(): Promise<void> {
@@ -60,26 +66,39 @@ export class EventTeamComponent implements OnInit {
   }
 
   /* -------------------------- Methods: firebase --------------------------  */
-  public async updateTeamPoints(operation: 'ADD' | 'REMOVE', team: Doc<Team>): Promise<void> {
+  public async updateTeamBonusPoints(team: Doc<Team>): Promise<void> {
     await this.loaderService.executeImmediate(async () => {
-      /* Check numero */
-      if (this.pointsToUpdate === null) {
-        this.logService.addLogErrorApp('Inserire un valore');
-        return;
-      }
-
-      /* Check numero positivo */
-      if (this.pointsToUpdate < 1) {
-        this.logService.addLogErrorApp('Inserire un valore positivo');
-        return;
-      }
+      /* Controllo input */
+      const bonusPoints = this.inputIsValid(this.bonusPoints());
+      if (bonusPoints === null) return;
 
       /* Aggiorno squadra */
-      const totalPoints = team.props.totalPoints + (operation === 'ADD' ? this.pointsToUpdate : -this.pointsToUpdate);
+      let totalPoints = team.props.totalPoints - team.props.bonusPoints + bonusPoints;
+      totalPoints = totalPoints >= 0 ? totalPoints : 0;
+      await this.teamService.updateProps([team.id], { bonusPoints, totalPoints });
+      this.teams.update((val) =>
+        val.map((x) => (x.id === team.id ? { ...x, props: { ...x.props, bonusPoints, totalPoints } } : x))
+      );
+
+      /* Log */
+      this.logService.addLogConfirm('Punti aggiornati');
+    });
+  }
+
+  public async updateTeamPoints(operation: 'ADD' | 'REMOVE', team: Doc<Team>): Promise<void> {
+    await this.loaderService.executeImmediate(async () => {
+      /* Controllo input */
+      const updatePoints = this.inputIsValid(this.updatePoints());
+      if (updatePoints === null) return;
+
+      /* Aggiorno squadra */
+      let totalPoints = team.props.totalPoints + (operation === 'ADD' ? updatePoints : -updatePoints);
+      totalPoints = totalPoints >= 0 ? totalPoints : 0;
       await this.teamService.updateProps([team.id], { totalPoints });
       this.teams.update((val) => val.map((x) => (x.id === team.id ? { ...x, props: { ...x.props, totalPoints } } : x)));
 
       /* Log */
+      this.updatePoints.set(null);
       this.logService.addLogConfirm('Punti aggiornati');
     });
   }
@@ -98,7 +117,24 @@ export class EventTeamComponent implements OnInit {
 
   /* -------------------------- Methods: event --------------------------  */
   protected onSelectTeam(team: Doc<Team>): void {
-    this.pointsToUpdate = null;
+    this.bonusPoints.set(team.props.bonusPoints);
+    this.updatePoints.set(null);
     this.teamSelected.update((val) => (val?.id === team.id ? undefined : team));
+  }
+
+  private inputIsValid(value: number | null): number | null {
+    /* Check numero */
+    if (value === null) {
+      this.logService.addLogErrorApp('Inserire un valore');
+      return null;
+    }
+
+    /* Check numero positivo */
+    if (value < 0) {
+      this.logService.addLogErrorApp('Inserire un valore positivo');
+      return null;
+    }
+
+    return value;
   }
 }
