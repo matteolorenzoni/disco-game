@@ -1,13 +1,13 @@
 import { Injectable, inject } from '@angular/core';
-import { FirebaseDocumentService } from './firebase-document.service';
-import { environment } from '../../environments/environment';
-import { Team, TeamStatus } from '../model/team.model';
-import { Doc } from '../model/firebase';
-import { teamConverter } from '../model/converter';
-import { generateUniqueCode } from '../util/utils';
 import { limit, orderBy, where } from 'firebase/firestore';
+import { environment } from '../../environments/environment';
+import { teamConverter } from '../model/converter';
+import { Doc } from '../model/firebase';
+import { Team, TeamStatus } from '../model/team.model';
 import { User } from '../model/user.model';
 import { dateYesterday } from '../util/type.util';
+import { generateUniqueCode } from '../util/utils';
+import { FirebaseDocumentService } from './firebase-document.service';
 
 const COL_TEAMS = environment.collection.TEAMS;
 
@@ -100,7 +100,15 @@ export class TeamService {
       eventId,
       eventStartDate,
       userIds: [user.id],
-      users: [{ id: user.id, userName: user.props.userName, imageUrl: user.props.imageUrl, challenges: [] }],
+      users: [
+        {
+          id: user.id,
+          userName: user.props.userName,
+          imageUrl: user.props.imageUrl,
+          registeredAt: user.props.registeredAt,
+          challenges: []
+        }
+      ],
       isActive: true,
       updatedAt: new Date()
     };
@@ -139,6 +147,7 @@ export class TeamService {
         id: user.id,
         userName: user.props.userName,
         imageUrl: user.props.imageUrl,
+        registeredAt: user.props.registeredAt,
         challenges: []
       }
     ];

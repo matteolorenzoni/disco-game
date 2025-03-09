@@ -116,7 +116,7 @@ export const teamConverter: FirestoreDataConverter<Team> = {
   },
 
   fromFirestore(snapshot: QueryDocumentSnapshot<DocumentData>, options: SnapshotOptions): Team {
-    const data = snapshot.data(options)!;
+    const data = snapshot.data(options)! as Team;
     return {
       name: data['name'],
       code: data['code'],
@@ -124,12 +124,13 @@ export const teamConverter: FirestoreDataConverter<Team> = {
       status: data['status'],
       totalPoints: data['totalPoints'],
       eventId: data['eventId'],
-      eventStartDate: timestampToDate(data['eventStartDate']),
+      eventStartDate: timestampToDate(data['eventStartDate'] as unknown as Timestamp),
       userIds: data['userIds'],
       users: data['users'].map((user: TeamUser) => ({
         id: user.id,
         userName: user.userName,
         imageUrl: user.imageUrl,
+        registeredAt: user.registeredAt ? timestampToDate(user.registeredAt as unknown as Timestamp) : undefined,
         challenges: user.challenges.map((challenge) => ({
           id: challenge.id,
           timestamps: challenge.timestamps.map((timestamp) => timestampToDate(timestamp as unknown as Timestamp)),
@@ -137,7 +138,7 @@ export const teamConverter: FirestoreDataConverter<Team> = {
         }))
       })),
       isActive: data['isActive'],
-      updatedAt: timestampToDate(data['updatedAt'] as Timestamp)
+      updatedAt: timestampToDate(data['updatedAt'] as unknown as Timestamp)
     };
   }
 };
