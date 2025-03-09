@@ -6,10 +6,10 @@ import {
   Timestamp
 } from 'firebase/firestore';
 import { Challenge, ChallengeType } from './challenge.model';
+import { ChallengeStatus, EventChallenge } from './event-challenge.model';
 import { Event } from './event.model';
 import { Team, TeamUser } from './team.model';
 import { User, UserRole } from './user.model';
-import { ChallengeStatus, EventChallenge } from './event-challenge.model';
 
 /* ---------------------- Utils ---------------------- */
 // Funzione per convertire stringa ISO in oggetto Date
@@ -30,6 +30,7 @@ export const userConverter: FirestoreDataConverter<User> = {
       lastName: user.lastName,
       userName: user.userName,
       email: user.email,
+      registeredAt: user.registeredAt,
       birthDate: user.birthDate,
       imageUrl: user.imageUrl,
       role: user.role,
@@ -46,8 +47,9 @@ export const userConverter: FirestoreDataConverter<User> = {
       name: data['name'],
       lastName: data['lastName'],
       userName: data['userName'],
-      birthDate: timestampToDate(data['birthDate'] as Timestamp),
       email: data['email'],
+      registeredAt: data['registeredAt'],
+      birthDate: timestampToDate(data['birthDate'] as Timestamp),
       imageUrl: data['imageUrl'] || null,
       role: data['role'] as UserRole,
       code: data['code'],

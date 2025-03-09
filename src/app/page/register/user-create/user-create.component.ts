@@ -1,22 +1,22 @@
 import { CommonModule, formatDate, NgOptimizedImage } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
-import { Router } from '@angular/router';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
-import { FromMap, UserModel } from '../../../model/form.model';
-import { FirebaseService } from '../../../service/firebase.service';
-import { StorageService } from '../../../service/storage.service';
-import { UserService } from '../../../service/user.service';
-import { FvFieldComponent } from '../../../components/fv-field.component';
 import { FvButtonComponent } from '../../../components/fv-button.component';
-import { LocalStorageService } from '../../../service/local-storage.service';
-import { LoaderService } from '../../../service/loader.service';
-import { LogService } from '../../../service/log.service';
-import { trimFormValues } from '../../../util/utils';
+import { FvFieldComponent } from '../../../components/fv-field.component';
 import { Doc } from '../../../model/firebase';
+import { FromMap, UserModel } from '../../../model/form.model';
 import { User } from '../../../model/user.model';
+import { FirebaseService } from '../../../service/firebase.service';
+import { LoaderService } from '../../../service/loader.service';
+import { LocalStorageService } from '../../../service/local-storage.service';
+import { LogService } from '../../../service/log.service';
+import { StorageService } from '../../../service/storage.service';
 import { TeamService } from '../../../service/team.service';
+import { UserService } from '../../../service/user.service';
+import { trimFormValues } from '../../../util/utils';
 
 @Component({
   selector: 'app-user-create',
@@ -147,7 +147,7 @@ export class UserCreateComponent implements OnInit {
     }
 
     /* Aggiungo utente */
-    await this.userService.add(userCredential.user.uid, userModelForm, imageUrl);
+    await this.userService.add(userCredential, userModelForm, imageUrl);
 
     /* Aggiorno local storage */
     const user = await this.userService.getUserById(userCredential.user.uid);

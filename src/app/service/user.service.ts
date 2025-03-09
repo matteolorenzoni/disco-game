@@ -1,14 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { inject, Injectable } from '@angular/core';
+import { UserCredential } from 'firebase/auth';
+import { where } from 'firebase/firestore';
 import { environment } from '../../environments/environment';
-import { User, UserParticipation, UserRole } from '../model/user.model';
+import { userConverter } from '../model/converter';
 import { Doc } from '../model/firebase';
 import { UserModel } from '../model/form.model';
-import { userConverter } from '../model/converter';
-import { FirebaseDocumentService } from './firebase-document.service';
+import { User, UserParticipation, UserRole } from '../model/user.model';
 import { generateUniqueCode } from '../util/utils';
+import { FirebaseDocumentService } from './firebase-document.service';
 import { StorageService } from './storage.service';
-import { where } from 'firebase/firestore';
 
 const COL_USERS = environment.collection.USERS;
 
@@ -44,14 +45,14 @@ export class UserService {
   }
 
   /* --------------------------- Create ---------------------------*/
-  public async add(userId: string, userModelForm: UserModel, imageUrl: string | null): Promise<void> {
+  public async add(userCredential: UserCredential, userModelForm: UserModel, imageUrl: string | null): Promise<void> {
     /* Check codice univoco */
     const code = await generateUniqueCode(6, 100, this.getUserByCode.bind(this));
 
     /* Escludi la password dal userModelForm */
     const { password, ...userWithoutPassword } = userModelForm;
 
-    await this.documentService.addDocumentById<User>(userId, COL_USERS, {
+    await this.documentService.addDocumentById<User>(userCredential.user.uid, COL_USERS, {
       ...userWithoutPassword,
       birthDate: new Date(userWithoutPassword.birthDate),
       imageUrl,
@@ -59,6 +60,9 @@ export class UserService {
       code,
       participations: [],
       isActive: true,
+      registeredAt: userCredential.user.metadata.creationTime
+        ? new Date(userCredential.user.metadata.creationTime)
+        : new Date(),
       updatedAt: new Date()
     });
   }

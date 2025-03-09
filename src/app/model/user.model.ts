@@ -2,8 +2,9 @@ export type User = {
   name: string;
   lastName: string;
   userName: string;
-  birthDate: Date;
   email: string;
+  registeredAt: Date;
+  birthDate: Date;
   imageUrl: string | null;
   role: UserRole;
   code: string;
