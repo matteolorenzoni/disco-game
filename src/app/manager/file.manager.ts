@@ -13,7 +13,7 @@ export class FileManager {
         {
           table: {
             headerRows: 1,
-            widths: Array(5).fill('*'),
+            widths: ['*', '*', 'auto', 70, 60],
             body: [
               [
                 { text: 'Nome', style: 'tableHeader' },
