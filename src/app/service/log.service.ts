@@ -83,21 +83,28 @@ export class LogService {
   }
 
   public addLogError(userId: string | undefined, error: unknown): void {
+    let messageType = 0;
     let errorMessageLog: string = ERROR_UNKNOWN;
     let errorMessageDebug = JSON.stringify(error ?? null);
 
     // Gestione errore
     if (error instanceof FirebaseError) {
+      // Errore firebase
+      messageType = 1;
       errorMessageLog = ERROR_FIREBASE[error.code] || ERROR_UNKNOWN;
     } else if (error instanceof Error) {
+      // Errore custom
+      messageType = 2;
       errorMessageDebug = error.toString();
       if (error.cause && typeof error.cause === 'string') {
         errorMessageLog = ERROR_CUSTOM[error.cause] || ERROR_UNKNOWN;
       }
     } else if (typeof error === 'string') {
+      messageType = 3;
       errorMessageDebug = error;
-    } else if (typeof error === 'object' && error !== null && 'message' in error) {
-      errorMessageDebug = (error as { message: string }).message;
+    } else if (typeof error === 'object' && error !== null && 'message' in error && error['message']) {
+      messageType = 4;
+      errorMessageDebug = JSON.stringify(error.message);
     }
 
     /* Log */
@@ -110,12 +117,14 @@ export class LogService {
 
     const user = this.lsService.getUser();
     this.debugService.add({
+      type: DebugType.ERROR,
       userId: userId ?? null,
       userInfo: user ? `${user.props.name} ${user.props.lastName}` : null,
-      type: DebugType.ERROR,
-      updatedAt: new Date(),
-      message: errorMessageDebug,
-      url: window.location.href
+      url: window.location.href,
+      messageType: messageType,
+      messageLog: errorMessageLog,
+      messageDebug: errorMessageDebug,
+      updatedAt: new Date()
     });
   }
 

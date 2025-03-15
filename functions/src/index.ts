@@ -108,3 +108,45 @@ export const setProp = onRequest(async (_, res) => {
     res.status(500).send('Error fetching or updating users: ' + error);
   }
 });
+
+export const removeDebugByMessage = onRequest(async (req, res) => {
+  try {
+    // Ottieni il parametro message dalla query string
+    const message = req.query.message;
+
+    if (!message) {
+      res.status(400).send('Message query parameter is required.');
+      return;
+    }
+
+    // Ottieni la collezione degli errori da Firestore
+    const db = admin.firestore();
+    const debugRef = db.collection('debugs');
+
+    // Esegui la query per cercare i documenti con il campo message uguale a quello passato
+    const snapshot = await debugRef.where('message', '==', message).get();
+
+    if (snapshot.empty) {
+      res.status(200).send('No debug messages found with that content.');
+      return;
+    }
+
+    // Inizializza un batch per eliminare i documenti
+    const batch = db.batch();
+
+    snapshot.forEach((doc) => {
+      const docRef = debugRef.doc(doc.id);
+      batch.delete(docRef);
+    });
+
+    // Esegui il batch di cancellazione
+    await batch.commit();
+
+    // Rispondi con successo
+    res.status(200).json({ message: 'Debug documents deleted', data: snapshot.docs });
+  } catch (error) {
+    // Gestisci l'errore
+    console.error('Error fetching or deleting debug documents:', error);
+    res.status(500).send('Error fetching or deleting debug documents: ' + error);
+  }
+});
