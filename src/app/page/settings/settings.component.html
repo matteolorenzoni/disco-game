@@ -43,6 +43,12 @@
       <p class="text-base font-semibold text-primary-500">Codice utente univoco</p>
       <p class="truncate text-5xl text-white">{{ user()?.props?.code }}</p>
     </div>
+
+    <div
+      class="mt-4 flex flex-col gap-2 overflow-hidden rounded-lg border border-primary-600 bg-surface p-4 text-on-surface">
+      <p class="text-base font-semibold text-primary-500">Versione app</p>
+      <p class="truncate text-white">V{{ VERSION }}</p>
+    </div>
   }
 
   @case ('esportazione') {

@@ -4,6 +4,7 @@ import { Router, RouterModule } from '@angular/router';
 import { faAngleRight, faCircleUser, faHome, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
+import packageInfo from '../../../../package.json';
 import { TitleComponent } from '../../components/title/title.component';
 import { FileManager } from '../../manager/file.manager';
 import { Doc } from '../../model/firebase';
@@ -42,6 +43,7 @@ export class SettingsComponent implements OnInit {
     { id: 'profile', label: 'Profilo' },
     { id: 'code', label: 'Codice' }
   ];
+  VERSION = packageInfo.version;
 
   /* Variables */
   activeTab = signal<Tab>(this.TABS[0]);
