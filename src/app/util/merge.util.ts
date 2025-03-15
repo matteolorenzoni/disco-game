@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Challenge } from '../model/challenge.model';
-import { Doc } from '../model/firebase';
 import { EventChallenge } from '../model/event-challenge.model';
-import { Team } from '../model/team.model';
 import { Event } from '../model/event.model';
+import { Doc } from '../model/firebase';
+import { Team } from '../model/team.model';
 
 export type MergeEvent = { id: string } & Pick<
   Event,
@@ -14,7 +14,7 @@ export type MergeChallenge = { id: string } & Pick<
   Challenge,
   'name' | 'description' | 'rules' | 'type' | 'points' | 'complexity'
 > &
-  Pick<EventChallenge, 'eventId' | 'status' | 'maxTimes' | 'startDate' | 'endDate'>;
+  Pick<EventChallenge, 'eventId' | 'eventStartDate' | 'status' | 'maxTimes' | 'startDate' | 'endDate'>;
 
 export const mergeEvents = (events: Doc<Event>[], teams: Doc<Team>[]): MergeEvent[] => {
   return events.reduce<MergeEvent[]>((acc, event) => {
@@ -49,6 +49,7 @@ export const mergeChallenges = (
         points: matchingChallenge.props.points,
         complexity: matchingChallenge.props.complexity,
         eventId: eventChallenge.props.eventId,
+        eventStartDate: eventChallenge.props.eventStartDate,
         status: eventChallenge.props.status,
         maxTimes: eventChallenge.props.maxTimes,
         startDate: eventChallenge.props.startDate,

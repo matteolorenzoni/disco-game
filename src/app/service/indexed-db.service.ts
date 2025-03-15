@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable } from '@angular/core';
-import { openDB, DBSchema } from 'idb';
+import { DBSchema, IDBPDatabase, openDB } from 'idb';
+import { Challenge } from '../model/challenge.model';
 import { Event } from '../model/event.model';
 import { Doc, IndexDB } from '../model/firebase';
 import { Team } from '../model/team.model';
 import { MergeChallenge } from '../util/merge.util';
 import { dateYesterday } from '../util/type.util';
-import { Challenge } from '../model/challenge.model';
 
 const DB_NAME = 'fv';
 const DB_VERSION = 1;
@@ -16,13 +16,13 @@ interface FvDB1 extends DBSchema {
   events: { key: string; value: IndexDB<Event> };
   teams: { key: string; value: IndexDB<Team> };
   challenges: { key: string; value: MergeChallenge };
-  leaderboard: { key: string; value: IndexDB<Team> };
+  leaderboard: { key: string; value: IndexDB<Team>; indexes: { eventId: string } };
   'admin-challenges': { key: string; value: IndexDB<Challenge> };
   'scanner-event': { key: string; value: IndexDB<Event> };
   'scanner-challenges': { key: string; value: MergeChallenge };
 }
 
-type ObjectKey =
+type StoreName =
   | 'events'
   | 'teams'
   | 'challenges'
@@ -31,132 +31,116 @@ type ObjectKey =
   | 'scanner-event'
   | 'scanner-challenges';
 
+const indexedDBIsNotSupported = () => !window.indexedDB;
+
 @Injectable({
   providedIn: 'root'
 })
 export class IndexedDbService {
+  private dbPromise: Promise<IDBPDatabase<FvDB1> | null> | undefined = undefined;
+
   constructor() {
-    this.initDB();
+    this.dbPromise = this.initDB();
   }
 
-  // Inizializzazione del database
-  private async initDB() {
-    await openDB<FvDB1>(DB_NAME, DB_VERSION, {
-      upgrade(db) {
-        if (!db.objectStoreNames.contains('events')) {
-          db.createObjectStore('events', { keyPath: 'id' });
+  // Inizializzazione del database con controllo di compatibilità
+  private async initDB(): Promise<IDBPDatabase<FvDB1> | null> {
+    if (indexedDBIsNotSupported()) {
+      console.warn('IndexedDb non supportato');
+      return null;
+    }
+
+    const db = await openDB<FvDB1>(DB_NAME, DB_VERSION, {
+      upgrade(db, oldVersion) {
+        // Verifica versione
+        if (oldVersion < 1) {
+          // Primo setup (versione iniziale)
+          if (!db.objectStoreNames.contains('events')) {
+            db.createObjectStore('events', { keyPath: 'id' });
+          }
+          if (!db.objectStoreNames.contains('teams')) {
+            db.createObjectStore('teams', { keyPath: 'id' });
+          }
+          if (!db.objectStoreNames.contains('challenges')) {
+            db.createObjectStore('challenges', { keyPath: 'id' });
+          }
+          if (!db.objectStoreNames.contains('leaderboard')) {
+            const store = db.createObjectStore('leaderboard', { keyPath: 'id' });
+            store.createIndex('eventId', 'eventId', { unique: false });
+          }
+          if (!db.objectStoreNames.contains('admin-challenges')) {
+            db.createObjectStore('admin-challenges', { keyPath: 'id' });
+          }
+          if (!db.objectStoreNames.contains('scanner-event')) {
+            db.createObjectStore('scanner-event', { keyPath: 'id' });
+          }
+          if (!db.objectStoreNames.contains('scanner-challenges')) {
+            db.createObjectStore('scanner-challenges', { keyPath: 'id' });
+          }
         }
-        if (!db.objectStoreNames.contains('teams')) {
-          db.createObjectStore('teams', { keyPath: 'id' });
-        }
-        if (!db.objectStoreNames.contains('challenges')) {
-          db.createObjectStore('challenges', { keyPath: 'id' });
-        }
-        if (!db.objectStoreNames.contains('leaderboard')) {
-          const store = db.createObjectStore('leaderboard', { keyPath: 'id' }) as unknown as IDBObjectStore;
-          store.createIndex('eventId', 'eventId', { unique: false });
-        }
-        if (!db.objectStoreNames.contains('admin-challenges')) {
-          db.createObjectStore('admin-challenges', { keyPath: 'id' });
-        }
-        if (!db.objectStoreNames.contains('scanner-event')) {
-          db.createObjectStore('scanner-event', { keyPath: 'id' });
-        }
-        if (!db.objectStoreNames.contains('scanner-challenges')) {
-          db.createObjectStore('scanner-challenges', { keyPath: 'id' });
+
+        // Controllo di compatibilità per versioni successive
+        if (oldVersion < DB_VERSION) {
+          console.log('Database upgrade needed, upgrading...');
+          // Qui si può aggiungere logiche di upgrade specifiche per ogni versione
         }
       }
     });
+
+    if (db.version !== DB_VERSION) {
+      console.warn(`Database version mismatch: expected ${DB_VERSION}, found ${db.version}.`);
+    }
+
+    return db;
   }
 
-  /* ---------------------------------- Event ---------------------------------- */
-  public async getAllItems<T>(object: ObjectKey): Promise<IndexDB<T>[]> {
-    try {
-      const db = await openDB(DB_NAME, DB_VERSION);
-      const tx = db.transaction(object, 'readonly');
-      const store = tx.objectStore(object);
-      return await store.getAll();
-    } catch (error) {
-      console.error('Error indexedDB', error);
-      return [];
+  // Restituisce la connessione al database
+  private async getDb(): Promise<IDBPDatabase<FvDB1> | null> {
+    if (this.dbPromise === undefined) {
+      this.dbPromise = this.initDB();
     }
+    return this.dbPromise;
   }
 
-  public async getItemsByProp<T extends Record<string, any>>(
-    object: ObjectKey,
-    prop: { key: Extract<keyof T, string>; value: string }
-  ): Promise<IndexDB<T>[]> {
-    try {
-      const db = await openDB(DB_NAME, DB_VERSION);
-      const tx = db.transaction(object, 'readonly');
-      const store = tx.objectStore(object);
-      const index = store.index(prop.key);
-      return await index.getAll(IDBKeyRange.only(prop.value));
-    } catch (error) {
-      console.error('Error indexedDB', error);
-      return [];
-    }
+  /* ---------------------------------- Utils ---------------------------------- */
+  private async deleteItems(storeName: StoreName, itemIds: string[]): Promise<void> {
+    const db = await this.getDb();
+    if (!db) return;
+
+    const tx = db.transaction(storeName, 'readwrite');
+    const store = tx.objectStore(storeName);
+    await Promise.all(itemIds.map((itemId) => store.delete(itemId)));
+    await tx.done;
   }
 
-  public async saveItems<T extends Record<string, any> & { id: string }>(
-    object: ObjectKey,
-    items: T[]
-  ): Promise<IDBValidKey[] | undefined> {
-    try {
-      const db = await openDB(DB_NAME, DB_VERSION);
-      const tx = db.transaction(object, 'readwrite');
-      const store = tx.objectStore(object);
-      const promises = items.map((item) => store.put(item));
-      const results = await Promise.all(promises);
-      await tx.done;
-      return results;
-    } catch (error) {
-      console.error('Error indexedDB:', error);
-      return undefined;
-    }
-  }
+  private async clearStore(storeName: StoreName): Promise<void> {
+    const db = await this.getDb();
+    if (!db) return;
 
-  public async deleteItems(object: ObjectKey, itemIds: string[]): Promise<void> {
-    try {
-      const db = await openDB(DB_NAME, DB_VERSION);
-      const tx = db.transaction(object, 'readwrite');
-      const store = tx.objectStore(object);
-      await Promise.all(itemIds.map((itemId) => store.delete(itemId)));
-      await tx.done;
-    } catch (error) {
-      console.error('Error indexedDB:', error);
-    }
-  }
-
-  public async clearStore(object: ObjectKey): Promise<void> {
-    try {
-      const db = await openDB(DB_NAME, DB_VERSION);
-      const tx = db.transaction(object, 'readwrite');
-      await tx.objectStore(object).clear();
-      await tx.done;
-    } catch (error) {
-      console.error('Error indexedDB:', error);
-    }
+    const tx = db.transaction(storeName, 'readwrite');
+    await tx.objectStore(storeName).clear();
+    await tx.done;
   }
 
   public async clearAllStores(): Promise<void> {
-    try {
-      const db = await openDB(DB_NAME, DB_VERSION);
-      const tx = db.transaction(['events', 'teams', 'challenges', 'leaderboard'], 'readwrite');
-      await Promise.all([
-        tx.objectStore('events').clear(),
-        tx.objectStore('teams').clear(),
-        tx.objectStore('challenges').clear(),
-        tx.objectStore('leaderboard').clear()
-      ]);
-      await tx.done;
-    } catch (error) {
-      console.error('Error indexedDB:', error);
-    }
+    const db = await this.getDb();
+    if (!db) return;
+
+    const tx = db.transaction(['events', 'teams', 'challenges', 'leaderboard'], 'readwrite');
+    await Promise.all([
+      tx.objectStore('events').clear(),
+      tx.objectStore('teams').clear(),
+      tx.objectStore('challenges').clear(),
+      tx.objectStore('leaderboard').clear()
+    ]);
+    await tx.done;
   }
 
   /* ---------------------------------- Event ---------------------------------- */
   public async saveEvents(items: Doc<Event>[]): Promise<void> {
+    const db = await this.getDb();
+    if (!db) return;
+
     /* Se l'array è vuoto allora elimino tutti elementi (per gestione su piu dispositivi) */
     if (items.length === 0) {
       this.clearStore('events');
@@ -165,25 +149,37 @@ export class IndexedDbService {
 
     /* Salvo i nuovi items */
     const indexedDbItems = items.map((x) => ({ id: x.id, ...x.props }));
-    await this.saveItems('events', indexedDbItems);
+    const tx = db.transaction('events', 'readwrite');
+    const store = tx.objectStore('events');
+    const promises = indexedDbItems.map((item) => store.put(item));
+    await Promise.all(promises);
+    await tx.done;
 
     /* Elimino item scaduti */
     const events = await this.getEvents();
-    const eventsToDelete = events.filter((x) => x.props.startDate.getTime() < dateYesterday().getTime());
+    const expiredEvents = events.filter((x) => x.props.startDate.getTime() < dateYesterday().getTime());
     this.deleteItems(
       'events',
-      eventsToDelete.map((item) => item.id)
+      expiredEvents.map((item) => item.id)
     );
   }
 
   public async getEvents(): Promise<Doc<Event>[]> {
-    const dbEvents = await this.getAllItems<Event>('events');
+    const db = await this.getDb();
+    if (!db) return [];
+
+    const tx = db.transaction('events', 'readonly');
+    const store = tx.objectStore('events');
+    const dbEvents = await store.getAll();
     dbEvents.sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
     return dbEvents.map(({ id, ...props }) => ({ id, props }));
   }
 
   /* ---------------------------------- Team ---------------------------------- */
   public async saveTeams(items: Doc<Team>[]): Promise<void> {
+    const db = await this.getDb();
+    if (!db) return;
+
     /* Se l'array è vuoto allora elimino tutti elementi (per gestione su piu dispositivi) */
     if (items.length === 0) {
       this.clearStore('teams');
@@ -192,19 +188,28 @@ export class IndexedDbService {
 
     /* Salvo i nuovi items */
     const indexedDbItems = items.map((x) => ({ id: x.id, ...x.props }));
-    await this.saveItems('teams', indexedDbItems);
+    const tx = db.transaction('teams', 'readwrite');
+    const store = tx.objectStore('teams');
+    const promises = indexedDbItems.map((item) => store.put(item));
+    await Promise.all(promises);
+    await tx.done;
 
-    /* Elimino item scaduti */
+    /* Elimino gli items scaduti */
     const teams = await this.getTeams();
-    const teamsToDelete = teams.filter((x) => x.props.eventStartDate.getTime() < dateYesterday().getTime());
+    const expiredTeams = teams.filter((x) => x.props.eventStartDate.getTime() < dateYesterday().getTime());
     this.deleteItems(
       'teams',
-      teamsToDelete.map((item) => item.id)
+      expiredTeams.map((item) => item.id)
     );
   }
 
   public async getTeams(): Promise<Doc<Team>[]> {
-    const dbTeams = await this.getAllItems<Team>('teams');
+    const db = await this.getDb();
+    if (!db) return [];
+
+    const tx = db.transaction('teams', 'readonly');
+    const store = tx.objectStore('teams');
+    const dbTeams = await store.getAll();
     dbTeams.sort((a, b) => {
       const pointsDiff = b.totalPoints - a.totalPoints;
       if (pointsDiff !== 0) return pointsDiff;
@@ -219,27 +224,47 @@ export class IndexedDbService {
 
   /* ---------------------------------- Challenge ---------------------------------- */
   public async saveChallenges(items: MergeChallenge[]): Promise<void> {
+    const db = await this.getDb();
+    if (!db) return;
+
     /* Se l'array è vuoto allora elimino tutti elementi (per gestione su piu dispositivi) */
     if (items.length === 0) {
       this.clearStore('challenges');
       return;
     }
 
-    /* Elimino tutti gli item */
-    await this.clearStore('challenges');
-
     /* Salvo i nuovi items */
-    await this.saveItems('challenges', items);
+    const tx = db.transaction('challenges', 'readwrite');
+    const store = tx.objectStore('challenges');
+    const promises = items.map((item) => store.put(item));
+    await Promise.all(promises);
+    await tx.done;
+
+    /* Elimino gli items di eventi scaduti */
+    const teams = await this.getChallenges();
+    const expiredTeams = teams.filter((x) => x.eventStartDate.getTime() < dateYesterday().getTime());
+    this.deleteItems(
+      'challenges',
+      expiredTeams.map((item) => item.id)
+    );
   }
 
   public async getChallenges(): Promise<MergeChallenge[]> {
-    const dbChallenges = await this.getAllItems<MergeChallenge>('challenges');
+    const db = await this.getDb();
+    if (!db) return [];
+
+    const tx = db.transaction('challenges', 'readonly');
+    const store = tx.objectStore('challenges');
+    const dbChallenges = await store.getAll();
     dbChallenges.sort((a, b) => a.name.localeCompare(b.name));
     return dbChallenges;
   }
 
   /* ---------------------------------- Leaderboard ---------------------------------- */
   public async saveLeaderboard(items: Doc<Team>[]): Promise<void> {
+    const db = await this.getDb();
+    if (!db) return;
+
     /* Se l'array è vuoto allora elimino tutti elementi (per gestione su piu dispositivi) */
     if (items.length === 0) {
       this.clearStore('leaderboard');
@@ -248,20 +273,30 @@ export class IndexedDbService {
 
     /* Salvo i nuovi items */
     const indexedDbItems = items.map((x) => ({ id: x.id, ...x.props }));
-    await this.saveItems('leaderboard', indexedDbItems);
+    const tx = db.transaction('leaderboard', 'readwrite');
+    const store = tx.objectStore('leaderboard');
+    const promises = indexedDbItems.map((item) => store.put(item));
+    await Promise.all(promises);
+    await tx.done;
 
-    /* Elimino item scaduti */
-    const dbLeaderboard = await this.getAllItems<Team>('leaderboard');
+    /* Elimino gli items di eventi scaduti */
+    const dbLeaderboard = await store.getAll();
     const leaderboard = dbLeaderboard.map(({ id, ...props }) => ({ id, props }));
-    const teamsToDelete = leaderboard.filter((x) => x.props.eventStartDate.getTime() < dateYesterday().getTime());
+    const expiredTeams = leaderboard.filter((x) => x.props.eventStartDate.getTime() < dateYesterday().getTime());
     this.deleteItems(
       'leaderboard',
-      teamsToDelete.map((item) => item.id)
+      expiredTeams.map((item) => item.id)
     );
   }
 
   public async getLeaderboardByEventId(eventId: string): Promise<Doc<Team>[]> {
-    const dbTeams = await this.getItemsByProp<Team>('leaderboard', { key: 'eventId', value: eventId });
+    const db = await this.getDb();
+    if (!db) return [];
+
+    const tx = db.transaction('leaderboard', 'readonly');
+    const store = tx.objectStore('leaderboard');
+    const index = store.index('eventId');
+    const dbTeams = await index.getAll(IDBKeyRange.only(eventId));
     dbTeams.sort((a, b) => {
       const pointsDiff = b.totalPoints - a.totalPoints;
       if (pointsDiff !== 0) return pointsDiff;
@@ -272,42 +307,76 @@ export class IndexedDbService {
 
   /* ---------------------------------- Admin ---------------------------------- */
   public async saveAdminChallenges(items: Doc<Challenge>[]): Promise<void> {
+    const db = await this.getDb();
+    if (!db) return;
+
     /* Se l'array è vuoto allora elimino tutti elementi (per gestione su piu dispositivi) */
     if (items.length === 0) {
-      this.clearStore('leaderboard');
+      this.clearStore('admin-challenges');
       return;
     }
 
-    /* Elimino tutti gli items */
-    await this.clearStore('admin-challenges');
-
     /* Salvo i nuovi items */
     const indexedDbItems = items.map((x) => ({ id: x.id, ...x.props }));
-    await this.saveItems('admin-challenges', indexedDbItems);
+    const tx = db.transaction('admin-challenges', 'readwrite');
+    const store = tx.objectStore('admin-challenges');
+    const promises = indexedDbItems.map((item) => store.put(item));
+    await Promise.all(promises);
+    await tx.done;
+
+    /* Elimino gli items non più attivi */
+    const teams = await this.getAdminChallenges();
+    const expiredTeams = teams.filter((x) => !x.props.isActive);
+    this.deleteItems(
+      'admin-challenges',
+      expiredTeams.map((item) => item.id)
+    );
   }
 
   public async getAdminChallenges(): Promise<Doc<Challenge>[]> {
-    const dbChallenges = await this.getAllItems<Challenge>('admin-challenges');
+    const db = await this.getDb();
+    if (!db) return [];
+
+    const tx = db.transaction('admin-challenges', 'readonly');
+    const store = tx.objectStore('admin-challenges');
+    const dbChallenges = await store.getAll();
     dbChallenges.sort((a, b) => a.name.localeCompare(b.name));
     return dbChallenges.map(({ id, ...props }) => ({ id, props }));
   }
 
   /* ---------------------------------- Scanner ---------------------------------- */
   public async saveScannerEvent(item: Doc<Event>): Promise<void> {
+    const db = await this.getDb();
+    if (!db) return;
+
     /* Elimino tutti gli items */
     await this.clearStore('scanner-event');
 
     /* Salvo i nuovi items */
     const indexedDbItem = { id: item.id, ...item.props };
-    await this.saveItems('scanner-event', [indexedDbItem]);
+    const tx = db.transaction('scanner-event', 'readwrite');
+    const store = tx.objectStore('scanner-event');
+    const promises = [indexedDbItem].map((item) => store.put(item));
+    await Promise.all(promises);
+    await tx.done;
+
+    /* Elimino gli items non più attivi */
+    const events = await this.getScannerEvents();
+    const expiredEvents = events.filter((x) => x.props.startDate.getTime() < dateYesterday().getTime());
+    this.deleteItems(
+      'scanner-event',
+      expiredEvents.map((item) => item.id)
+    );
   }
 
-  public async getScannerEvent(): Promise<Doc<Event> | null> {
-    const dbEvents = await this.getAllItems<Event>('scanner-event');
-    if (dbEvents.length !== 1) return null;
+  public async getScannerEvents(): Promise<Doc<Event>[]> {
+    const db = await this.getDb();
+    if (!db) return [];
 
-    const { id, ...props } = dbEvents[0];
-    return { id, props };
+    const tx = db.transaction('scanner-event', 'readonly');
+    const store = tx.objectStore('scanner-event');
+    const dbChallenges = await store.getAll();
+    return dbChallenges.map(({ id, ...props }) => ({ id, props }));
   }
 
   public async deleteScannerEvent(): Promise<void> {

@@ -2,31 +2,31 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ZXingScannerModule } from '@zxing/ngx-scanner';
-import { BarcodeFormat } from '@zxing/library';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faCalendar, faTrash, faUser } from '@fortawesome/free-solid-svg-icons';
-import { TitleComponent } from '../../../components/title/title.component';
-import { FvFieldIconComponent } from '../../../components/fv-field-icon.component';
+import { BarcodeFormat } from '@zxing/library';
+import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { FvButtonComponent } from '../../../components/fv-button.component';
-import { EventService } from '../../../service/event.service';
-import { LogService } from '../../../service/log.service';
-import { LocalStorageService } from '../../../service/local-storage.service';
-import { TeamService } from '../../../service/team.service';
-import { ChallengeService } from '../../../service/challenge.service';
-import { EventChallengeService } from '../../../service/event-challenge.service';
-import { UserService } from '../../../service/user.service';
+import { FvFieldIconComponent } from '../../../components/fv-field-icon.component';
+import { TitleComponent } from '../../../components/title/title.component';
+import { Challenge } from '../../../model/challenge.model';
+import { ChallengeStatus, EventChallenge, Qrcode } from '../../../model/event-challenge.model';
 import { Event } from '../../../model/event.model';
 import { Doc } from '../../../model/firebase';
-import { ChallengeStatus, EventChallenge, Qrcode } from '../../../model/event-challenge.model';
-import { isSameQrcode, isQrcode } from '../../../util/type.util';
 import { Team, TeamStatus } from '../../../model/team.model';
-import { LoaderService } from '../../../service/loader.service';
-import { trimFormValues } from '../../../util/utils';
-import { IndexedDbService } from '../../../service/indexed-db.service';
-import { MergeChallenge, mergeChallenges } from '../../../util/merge.util';
-import { Challenge } from '../../../model/challenge.model';
+import { ChallengeService } from '../../../service/challenge.service';
+import { EventChallengeService } from '../../../service/event-challenge.service';
+import { EventService } from '../../../service/event.service';
 import { FirebaseService } from '../../../service/firebase.service';
+import { IndexedDbService } from '../../../service/indexed-db.service';
+import { LoaderService } from '../../../service/loader.service';
+import { LocalStorageService } from '../../../service/local-storage.service';
+import { LogService } from '../../../service/log.service';
+import { TeamService } from '../../../service/team.service';
+import { UserService } from '../../../service/user.service';
+import { MergeChallenge, mergeChallenges } from '../../../util/merge.util';
+import { isQrcode, isSameQrcode } from '../../../util/type.util';
+import { trimFormValues } from '../../../util/utils';
 
 type ScanError = {
   message: string;
@@ -128,8 +128,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   /* -------------------------- Methods initialization --------------------------  */
   private async initIndexedDB() {
     /* Recupera l'evento se è già stato cercato */
-    const dbEvent = await this.dbService.getScannerEvent();
-    this.event.set(dbEvent);
+    const dbEvents = await this.dbService.getScannerEvents();
+    this.event.set(dbEvents[0] ?? null);
   }
 
   private async initHttp() {

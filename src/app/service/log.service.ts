@@ -1,9 +1,9 @@
-import { DebugService } from './debug.service';
 import { inject, Injectable, signal } from '@angular/core';
 import { FirebaseError } from 'firebase/app';
+import { DebugType } from '../model/debug.model';
 import { LogType } from '../model/enum';
 import { AudioService } from './audio.service';
-import { DebugType } from '../model/debug.model';
+import { DebugService } from './debug.service';
 import { LocalStorageService } from './local-storage.service';
 
 const ERROR_FIREBASE: Record<string, string> = {
@@ -86,7 +86,7 @@ export class LogService {
     let errorMessageLog: string = ERROR_UNKNOWN;
     let errorMessageDebug = JSON.stringify(error ?? null);
 
-    // Gestione specifica per FirebaseError
+    // Gestione errore
     if (error instanceof FirebaseError) {
       errorMessageLog = ERROR_FIREBASE[error.code] || ERROR_UNKNOWN;
     } else if (error instanceof Error) {
@@ -101,10 +101,11 @@ export class LogService {
     }
 
     /* Log */
+    // Visualizza toast di errore
     this.addLog(LogType.ERROR, errorMessageLog, true);
 
     /* Debug */
-    // Memorizzare solo quelli utili
+    // Memorizzare nel db solo quelli utili
     if (error instanceof FirebaseError && error.code.includes('auth')) return;
 
     const user = this.lsService.getUser();
