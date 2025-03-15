@@ -2,23 +2,23 @@
 import { inject, Injectable } from '@angular/core';
 import {
   addDoc,
+  arrayRemove,
   arrayUnion,
+  deleteDoc,
   doc,
   DocumentData,
   DocumentReference,
   FirestoreDataConverter,
+  collection as getCollection,
+  getCountFromServer,
   getDoc,
   getDocs,
+  onSnapshot,
   query,
+  QueryConstraint,
   setDoc,
   updateDoc,
-  where,
-  collection as getCollection,
-  QueryConstraint,
-  onSnapshot,
-  deleteDoc,
-  arrayRemove,
-  getCountFromServer
+  where
 } from 'firebase/firestore';
 import { Doc } from '../model/firebase';
 import { FirebaseService } from './firebase.service';
@@ -185,15 +185,25 @@ export class FirebaseDocumentService {
   public async updateDocuments<T extends Record<string, any> & { updatedAt: Date }>(
     ids: string[],
     collectionName: string,
-    data: Partial<T>
+    data: Partial<T>,
+    converter?: FirestoreDataConverter<T> // Converter opzionale
   ): Promise<void> {
     const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
+
     const updates = ids.map(async (id) => {
-      const docRef = doc(collectionRef, id);
-      return updateDoc(docRef, {
-        ...data,
-        updatedAt: new Date()
-      });
+      let docRef = doc(collectionRef, id);
+
+      // Applica il converter se presente
+      if (converter) docRef = doc(collectionRef, id).withConverter(converter);
+
+      return setDoc(
+        docRef,
+        {
+          ...data,
+          updatedAt: new Date()
+        },
+        { merge: true }
+      );
     });
 
     await Promise.all(updates);

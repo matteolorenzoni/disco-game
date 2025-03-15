@@ -81,7 +81,7 @@ export class IndexedDbService {
 
         // Controllo di compatibilità per versioni successive
         if (oldVersion < DB_VERSION) {
-          console.log('Database upgrade needed, upgrading...');
+          console.warn('Database upgrade needed, upgrading...');
           // Qui si può aggiungere logiche di upgrade specifiche per ogni versione
         }
       }

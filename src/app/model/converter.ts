@@ -18,9 +18,11 @@ type ConvertDatesToTimestamp<T> = {
       ? Timestamp | null // Se è Date | null
       : T[K] extends Date | undefined
         ? Timestamp | undefined // Se è Date | undefined
-        : T[K] extends object // Se è un oggetto annidato
-          ? ConvertDatesToTimestamp<T[K]> // Applica ricorsivamente
-          : T[K]; // Altrimenti lascia invariato
+        : T[K] extends Date | null | undefined
+          ? Timestamp | null | undefined // Gestisci Date | null | undefined
+          : T[K] extends object // Se è Date | null | undefined
+            ? ConvertDatesToTimestamp<T[K]> // Applica ricorsivamente
+            : T[K]; // Altrimenti lascia invariato
 };
 
 /* ---------------------- Utils ---------------------- */
@@ -42,7 +44,7 @@ export const userConverter: FirestoreDataConverter<User> = {
       lastName: data['lastName'],
       userName: data['userName'],
       email: data['email'],
-      registeredAt: data['registeredAt'] ? timestampToDate(data['registeredAt']) : undefined,
+      registeredAt: data['registeredAt'] ? timestampToDate(data['registeredAt']) : null,
       birthDate: timestampToDate(data['birthDate']),
       imageUrl: data['imageUrl'],
       role: data['role'] as UserRole,
@@ -97,7 +99,7 @@ export const teamConverter: FirestoreDataConverter<Team> = {
         id: user.id,
         userName: user.userName,
         imageUrl: user.imageUrl,
-        registeredAt: user.registeredAt ? timestampToDate(user.registeredAt) : undefined,
+        registeredAt: user.registeredAt ? timestampToDate(user.registeredAt) : null,
         challenges: user.challenges.map((challenge) => ({
           id: challenge.id,
           timestamps: challenge.timestamps.map((x) => timestampToDate(x)),
