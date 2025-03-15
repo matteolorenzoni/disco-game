@@ -74,7 +74,9 @@ export const shareTeamCode = (teamCode: string, logService: LogService): void =>
     text: `Questo è il codice della mia squadra: ${teamCode}. Ti aspetto!`,
     url: `https://fanta-disco.web.app/user/events?teamCode=${teamCode}`
   };
-  if (navigator.canShare(obj)) {
+
+  // Verifica che la funzione canShare sia disponibile prima di chiamarla
+  if (navigator && typeof navigator.canShare === 'function' && navigator.canShare(obj)) {
     navigator.share(obj);
   } else if (navigator && navigator.clipboard) {
     navigator.clipboard.writeText(teamCode);
