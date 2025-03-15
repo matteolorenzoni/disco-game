@@ -124,6 +124,7 @@ export class LogService {
       messageType: messageType,
       messageLog: errorMessageLog,
       messageDebug: errorMessageDebug,
+      stackTrace: error instanceof Error && error.stack ? error.stack : null,
       device: this.getDevice(),
       browser: this.getBrowserInfo(),
       os: this.getOSInfo(),

@@ -6,6 +6,7 @@ export type Debug = {
   messageType: number;
   messageLog: string;
   messageDebug: string;
+  stackTrace: string | null;
   device: string;
   browser: string;
   os: string;
