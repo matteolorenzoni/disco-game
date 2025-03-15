@@ -29,28 +29,10 @@ const timestampToDate = (timestamp: Timestamp): Date => {
   return timestamp.toDate();
 };
 
-// Funzione per convertire oggetto Date in stringa ISO
-const dateToString = (date: Date): string => {
-  return date.toISOString();
-};
-
 /* ---------------------- Converter ---------------------- */
 export const userConverter: FirestoreDataConverter<User> = {
   toFirestore(user: User): DocumentData {
-    return {
-      name: user.name,
-      lastName: user.lastName,
-      userName: user.userName,
-      email: user.email,
-      registeredAt: user.registeredAt,
-      birthDate: user.birthDate,
-      imageUrl: user.imageUrl,
-      role: user.role,
-      code: user.code,
-      participations: user.participations,
-      isActive: user.isActive,
-      updatedAt: user.updatedAt
-    };
+    return user;
   },
 
   fromFirestore(snapshot: QueryDocumentSnapshot<DocumentData>, options: SnapshotOptions): User {
@@ -74,18 +56,7 @@ export const userConverter: FirestoreDataConverter<User> = {
 
 export const eventConverter: FirestoreDataConverter<Event> = {
   toFirestore(event: Event): DocumentData {
-    return {
-      name: event.name,
-      description: event.description,
-      code: event.code,
-      location: event.location,
-      imageUrl: event.imageUrl,
-      startDate: event.startDate,
-      endDate: event.endDate,
-      teamIds: event.teamIds,
-      isActive: event.isActive,
-      updatedAt: event.updatedAt
-    };
+    return event;
   },
 
   fromFirestore(snapshot: QueryDocumentSnapshot<DocumentData>, options: SnapshotOptions): Event {
@@ -107,26 +78,7 @@ export const eventConverter: FirestoreDataConverter<Event> = {
 
 export const teamConverter: FirestoreDataConverter<Team> = {
   toFirestore(team: Team): DocumentData {
-    return {
-      name: team.name,
-      code: team.code,
-      leaderId: team.leaderId,
-      status: team.status,
-      bonusPoints: team.bonusPoints,
-      totalPoints: team.totalPoints,
-      eventId: team.eventId,
-      eventStartDate: team.eventStartDate,
-      userIds: team.userIds,
-      users: team.users.map((user) => ({
-        id: user.id,
-        userName: user.userName,
-        imageUrl: user.imageUrl,
-        registeredAt: user.registeredAt,
-        challenges: user.challenges
-      })),
-      isActive: team.isActive,
-      updatedAt: team.updatedAt
-    };
+    return team;
   },
 
   fromFirestore(snapshot: QueryDocumentSnapshot<DocumentData>, options: SnapshotOptions): Team {
@@ -160,16 +112,7 @@ export const teamConverter: FirestoreDataConverter<Team> = {
 
 export const challengeConverter: FirestoreDataConverter<Challenge> = {
   toFirestore(challenge: Challenge): DocumentData {
-    return {
-      name: challenge.name,
-      description: challenge.description,
-      rules: challenge.rules,
-      type: challenge.type,
-      points: challenge.points,
-      complexity: challenge.complexity,
-      isActive: challenge.isActive,
-      updatedAt: dateToString(challenge.updatedAt)
-    };
+    return challenge;
   },
 
   fromFirestore(snapshot: QueryDocumentSnapshot<DocumentData>, options: SnapshotOptions): Challenge {
@@ -189,18 +132,7 @@ export const challengeConverter: FirestoreDataConverter<Challenge> = {
 
 export const eventChallengeConverter: FirestoreDataConverter<EventChallenge> = {
   toFirestore(eventChallenge: EventChallenge): DocumentData {
-    return {
-      eventId: eventChallenge.eventId,
-      eventStartDate: eventChallenge.eventStartDate,
-      challengeId: eventChallenge.challengeId,
-      challengeName: eventChallenge.challengeName,
-      challengeType: eventChallenge.challengeType,
-      status: eventChallenge.status,
-      maxTimes: eventChallenge.maxTimes,
-      startDate: eventChallenge.startDate ? dateToString(eventChallenge.startDate) : null,
-      endDate: eventChallenge.endDate ? dateToString(eventChallenge.endDate) : null,
-      updatedAt: eventChallenge.updatedAt
-    };
+    return eventChallenge;
   },
 
   fromFirestore(snapshot: QueryDocumentSnapshot<DocumentData>, options: SnapshotOptions): EventChallenge {
