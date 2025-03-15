@@ -1,13 +1,13 @@
 import { inject, Injectable } from '@angular/core';
-import { FirebaseDocumentService } from './firebase-document.service';
-import { environment } from '../../environments/environment';
-import { Event } from '../model/event.model';
-import { EventModel } from '../model/form.model';
-import { eventConverter } from '../model/converter';
-import { Doc } from '../model/firebase';
-import { generateUniqueCode } from '../util/utils';
 import { orderBy, where } from 'firebase/firestore';
+import { environment } from '../../environments/environment';
+import { eventConverter } from '../model/converter';
+import { Event } from '../model/event.model';
+import { Doc } from '../model/firebase';
+import { EventModel } from '../model/form.model';
 import { dateYesterday } from '../util/type.util';
+import { generateUniqueCode } from '../util/utils';
+import { FirebaseDocumentService } from './firebase-document.service';
 import { StorageService } from './storage.service';
 
 const COL_EVENTS = environment.collection.EVENTS;
@@ -75,20 +75,21 @@ export class EventService {
 
   /* --------------------------- Update ---------------------------*/
   public async update(eventId: string, form: EventModel, imageUrl: string | null): Promise<void> {
-    await this.documentService.updateDocuments<Event>([eventId], COL_EVENTS, {
+    await this.documentService.updateDocuments<Event>(
+      [eventId],
+      COL_EVENTS,
+      {
       ...form,
       imageUrl,
       startDate: new Date(form.startDate),
       endDate: new Date(form.endDate)
-    });
-  }
-
-  public async updateImage(image: File, name: string): Promise<string> {
-    return await this.storageService.updateImage(image, COL_EVENTS, name);
+      },
+      eventConverter
+    );
   }
 
   public async updateProps(eventIds: string[], data: Partial<Event>): Promise<void> {
-    await this.documentService.updateDocuments<Event>(eventIds, COL_EVENTS, data);
+    await this.documentService.updateDocuments<Event>(eventIds, COL_EVENTS, data, eventConverter);
   }
 
   public async updateTeams(operation: 'ADD' | 'REMOVE', eventId: string, teamId: string): Promise<void> {
@@ -97,11 +98,11 @@ export class EventService {
 
   /* --------------------------- Delete ---------------------------*/
   public async softDelete(eventId: string): Promise<void> {
-    await this.documentService.updateDocuments<Event>([eventId], COL_EVENTS, { isActive: false });
+    await this.documentService.updateDocuments<Event>([eventId], COL_EVENTS, { isActive: false }, eventConverter);
   }
 
   public async deleteImage(eventId: string): Promise<void> {
-    await this.documentService.updateDocuments<Event>([eventId], COL_EVENTS, { imageUrl: null });
+    await this.documentService.updateDocuments<Event>([eventId], COL_EVENTS, { imageUrl: null }, eventConverter);
     await this.storageService.deleteImage(COL_EVENTS, eventId);
   }
 }

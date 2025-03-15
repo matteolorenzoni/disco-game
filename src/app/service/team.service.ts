@@ -121,7 +121,7 @@ export class TeamService {
 
   /* --------------------------- Update ---------------------------*/
   public async updateProps(teamIds: string[], data: Partial<Team>): Promise<void> {
-    await this.documentService.updateDocuments<Team>(teamIds, COL_TEAMS, data);
+    await this.documentService.updateDocuments<Team>(teamIds, COL_TEAMS, data, teamConverter);
   }
 
   public async updateUserPoints(team: Doc<Team>, userId: string, challengeId: string, points: number): Promise<void> {
@@ -137,7 +137,7 @@ export class TeamService {
     } else {
       user.challenges.push({ id: challengeId, timestamps: [new Date()], totalPoints: points });
     }
-    await this.documentService.updateDocuments<Team>([team.id], COL_TEAMS, team.props);
+    await this.documentService.updateDocuments<Team>([team.id], COL_TEAMS, team.props, teamConverter);
   }
 
   public async updateNewUser(team: Doc<Team>, user: Doc<User>): Promise<void> {
@@ -152,20 +152,20 @@ export class TeamService {
         challenges: []
       }
     ];
-    await this.documentService.updateDocuments<Team>([team.id], COL_TEAMS, team.props);
+    await this.documentService.updateDocuments<Team>([team.id], COL_TEAMS, team.props, teamConverter);
   }
 
-  public async updateExistingUser(
+  public async updateTeamUser(
     teams: Doc<Team>[],
     userId: string,
-    updates: { userName: string; imageUrl: string | null }
+    props: { userName: string; imageUrl: string | null }
   ): Promise<void> {
     const updatePromises = teams.reduce<Promise<void>[]>((acc, team) => {
       const user = team.props.users.find((existingUser) => existingUser.id === userId);
       if (!user) return acc;
-      user.userName = updates.userName;
-      user.imageUrl = updates.imageUrl;
-      acc.push(this.documentService.updateDocuments<Team>([team.id], COL_TEAMS, team.props));
+      user.userName = props.userName;
+      user.imageUrl = props.imageUrl;
+      acc.push(this.documentService.updateDocuments<Team>([team.id], COL_TEAMS, team.props, teamConverter));
       return acc;
     }, []);
     await Promise.all(updatePromises);
@@ -173,13 +173,13 @@ export class TeamService {
 
   /* --------------------------- Delete ---------------------------*/
   public async softDelete(teamIds: string[]): Promise<void> {
-    await this.documentService.updateDocuments<Team>(teamIds, COL_TEAMS, { isActive: false });
+    await this.documentService.updateDocuments<Team>(teamIds, COL_TEAMS, { isActive: false }, teamConverter);
   }
 
   public async deleteFromTeam(team: Doc<Team>, userId: string): Promise<Doc<Team>> {
     team.props.userIds = team.props.userIds.filter((x) => x !== userId);
     team.props.users = team.props.users.filter((x) => x.id !== userId);
-    await this.documentService.updateDocuments<Team>([team.id], COL_TEAMS, team.props);
+    await this.documentService.updateDocuments<Team>([team.id], COL_TEAMS, team.props, teamConverter);
     return team;
   }
 }

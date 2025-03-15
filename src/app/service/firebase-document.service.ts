@@ -186,15 +186,12 @@ export class FirebaseDocumentService {
     ids: string[],
     collectionName: string,
     data: Partial<T>,
-    converter?: FirestoreDataConverter<T> // Converter opzionale
+    converter: FirestoreDataConverter<T>
   ): Promise<void> {
     const collectionRef = getCollection(this.firebaseService.getDb(), collectionName);
 
     const updates = ids.map(async (id) => {
-      let docRef = doc(collectionRef, id);
-
-      // Applica il converter se presente
-      if (converter) docRef = doc(collectionRef, id).withConverter(converter);
+      const docRef = converter ? doc(collectionRef, id).withConverter(converter) : doc(collectionRef, id);
 
       return setDoc(
         docRef,

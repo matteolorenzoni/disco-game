@@ -80,16 +80,17 @@ export class UserService {
     const { password, ...userWithoutPassword } = userModelForm;
 
     /* Aggiorno user ed eventualmente immagine */
-    await this.documentService.updateDocuments<User>([userId], COL_USERS, {
+    await this.documentService.updateDocuments<User>(
+      [userId],
+      COL_USERS,
+      {
       ...userWithoutPassword,
       imageUrl,
       birthDate: new Date(userWithoutPassword.birthDate),
       updatedAt: new Date()
-    });
-  }
-
-  public async updateImage(image: File, name: string): Promise<string> {
-    return await this.storageService.updateImage(image, COL_USERS, name);
+      },
+      userConverter
+    );
   }
 
   public async updateParticipations(

@@ -1,10 +1,10 @@
 import { inject, Injectable } from '@angular/core';
-import { FirebaseDocumentService } from './firebase-document.service';
-import { EventChallenge } from '../model/event-challenge.model';
+import { orderBy, where } from 'firebase/firestore';
 import { environment } from '../../environments/environment';
 import { eventChallengeConverter } from '../model/converter';
+import { EventChallenge } from '../model/event-challenge.model';
 import { Doc } from '../model/firebase';
-import { orderBy, where } from 'firebase/firestore';
+import { FirebaseDocumentService } from './firebase-document.service';
 
 const COL_EVENT_CHALLENGES = environment.collection.EVENT_CHALLENGES;
 
@@ -65,15 +65,25 @@ export class EventChallengeService {
 
   /* --------------------------- Update ---------------------------*/
   public async update(eventChallengeId: string, form: EventChallenge): Promise<void> {
-    await this.documentService.updateDocuments<EventChallenge>([eventChallengeId], COL_EVENT_CHALLENGES, {
-      ...form,
-      startDate: form.startDate ? new Date(form.startDate) : null,
-      endDate: form.endDate ? new Date(form.endDate) : null
-    });
+    await this.documentService.updateDocuments<EventChallenge>(
+      [eventChallengeId],
+      COL_EVENT_CHALLENGES,
+      {
+        ...form,
+        startDate: form.startDate ? new Date(form.startDate) : null,
+        endDate: form.endDate ? new Date(form.endDate) : null
+      },
+      eventChallengeConverter
+    );
   }
 
   public async updateProps(eventChallengeIds: string[], data: Partial<EventChallenge>): Promise<void> {
-    await this.documentService.updateDocuments<EventChallenge>(eventChallengeIds, COL_EVENT_CHALLENGES, data);
+    await this.documentService.updateDocuments<EventChallenge>(
+      eventChallengeIds,
+      COL_EVENT_CHALLENGES,
+      data,
+      eventChallengeConverter
+    );
   }
 
   /* --------------------------- Delete ---------------------------*/

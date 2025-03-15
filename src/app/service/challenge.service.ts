@@ -1,11 +1,11 @@
 import { inject, Injectable } from '@angular/core';
-import { FirebaseDocumentService } from './firebase-document.service';
-import { environment } from '../../environments/environment';
-import { ChallengeModel } from '../model/form.model';
-import { challengeConverter } from '../model/converter';
-import { Challenge } from '../model/challenge.model';
-import { Doc } from '../model/firebase';
 import { orderBy } from 'firebase/firestore';
+import { environment } from '../../environments/environment';
+import { Challenge } from '../model/challenge.model';
+import { challengeConverter } from '../model/converter';
+import { Doc } from '../model/firebase';
+import { ChallengeModel } from '../model/form.model';
+import { FirebaseDocumentService } from './firebase-document.service';
 
 const COL_CHALLENGES = environment.collection.CHALLENGES;
 
@@ -55,11 +55,16 @@ export class ChallengeService {
 
   /* --------------------------- Update ---------------------------*/
   public async update(challengeId: string, form: ChallengeModel): Promise<void> {
-    await this.documentService.updateDocuments<Challenge>([challengeId], COL_CHALLENGES, form);
+    await this.documentService.updateDocuments<Challenge>([challengeId], COL_CHALLENGES, form, challengeConverter);
   }
 
   /* --------------------------- Delete ---------------------------*/
   public async softDelete(challengeId: string): Promise<void> {
-    await this.documentService.updateDocuments<Challenge>([challengeId], COL_CHALLENGES, { isActive: false });
+    await this.documentService.updateDocuments<Challenge>(
+      [challengeId],
+      COL_CHALLENGES,
+      { isActive: false },
+      challengeConverter
+    );
   }
 }
