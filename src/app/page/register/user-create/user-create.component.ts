@@ -143,7 +143,7 @@ export class UserCreateComponent implements OnInit {
     /* Aggiungo utente immagine */
     let imageUrl: string | null = null;
     if (this.imageFile()) {
-      imageUrl = await this.userService.addImage(this.imageFile()!, userCredential.user.uid);
+      imageUrl = await this.userService.saveImage(this.imageFile()!, userCredential.user.uid);
     }
 
     /* Aggiungo utente */
@@ -167,22 +167,18 @@ export class UserCreateComponent implements OnInit {
     /* Aggiornamento utente immagine */
     let imageUrl: string | null = null;
     if (this.imageFile()) {
-      imageUrl = await this.userService.updateImage(this.imageFile()!, userId);
+      imageUrl = await this.userService.saveImage(this.imageFile()!, userId);
     } else {
       if (this.imagePreview()) imageUrl = user.props.imageUrl;
       else await this.userService.deleteImage(userId);
     }
 
-    /* Aggiorno le varie squadre */
-    const isNewUserName = user.props.userName !== userModelForm.userName;
-    const isNewImage = user.props.userName !== imageUrl;
-    if (isNewUserName || isNewImage) {
-      const teams = await this.teamService.getActiveTeamsByUserId(user.id);
-      await this.teamService.updateExistingUser(teams, user.id, {
-        userName: userModelForm.userName,
-        imageUrl
-      });
-    }
+    /* Aggiorno le varie squadre (è memorizzato solo username e img) */
+    const teams = await this.teamService.getActiveTeamsByUserId(user.id);
+    await this.teamService.updateTeamUser(teams, user.id, {
+      userName: userModelForm.userName,
+      imageUrl
+    });
 
     /* Aggiorna utente */
     await this.userService.update(userId, userModelForm, imageUrl);

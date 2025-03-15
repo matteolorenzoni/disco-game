@@ -197,7 +197,7 @@ export class EventCreateComponent implements OnInit {
     const eventId = this.eventService.createId();
 
     /* Creo immagine */
-    const imageUrl = await this.eventService.addImage(this.imageFile()!, eventId);
+    const imageUrl = await this.eventService.saveImage(this.imageFile()!, eventId);
 
     /* Creazione evento */
     await this.eventService.add(eventId, form, imageUrl);
@@ -226,7 +226,7 @@ export class EventCreateComponent implements OnInit {
     /* Aggiornamento evento immagine */
     let imageUrl = event.props.imageUrl;
     if (this.imageFile()) {
-      imageUrl = await this.eventService.updateImage(this.imageFile()!, event.id);
+      imageUrl = await this.eventService.saveImage(this.imageFile()!, event.id);
     }
 
     /* Aggiorno evento */

@@ -69,7 +69,7 @@ export class EventService {
     return docRef.id;
   }
 
-  public async addImage(image: File, name: string) {
+  public async saveImage(image: File, name: string) {
     return await this.storageService.saveImage(image, COL_EVENTS, name);
   }
 
@@ -79,10 +79,10 @@ export class EventService {
       [eventId],
       COL_EVENTS,
       {
-      ...form,
-      imageUrl,
-      startDate: new Date(form.startDate),
-      endDate: new Date(form.endDate)
+        ...form,
+        imageUrl,
+        startDate: new Date(form.startDate),
+        endDate: new Date(form.endDate)
       },
       eventConverter
     );

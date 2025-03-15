@@ -70,7 +70,7 @@ export class UserService {
     });
   }
 
-  public async addImage(image: File, name: string) {
+  public async saveImage(image: File, name: string) {
     return await this.storageService.saveImage(image, COL_USERS, name);
   }
 
@@ -84,10 +84,10 @@ export class UserService {
       [userId],
       COL_USERS,
       {
-      ...userWithoutPassword,
-      imageUrl,
-      birthDate: new Date(userWithoutPassword.birthDate),
-      updatedAt: new Date()
+        ...userWithoutPassword,
+        imageUrl,
+        birthDate: new Date(userWithoutPassword.birthDate),
+        updatedAt: new Date()
       },
       userConverter
     );

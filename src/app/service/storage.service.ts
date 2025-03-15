@@ -1,7 +1,7 @@
 import { inject, Injectable, WritableSignal } from '@angular/core';
 import { deleteObject, getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
-import { LogService } from './log.service';
 import { FirebaseService } from './firebase.service';
+import { LogService } from './log.service';
 
 @Injectable({
   providedIn: 'root'
@@ -24,32 +24,16 @@ export class StorageService {
     return downloadURL;
   }
 
-  public async updateImage(image: File, collection: string, name: string): Promise<string> {
-    // Crea un riferimento alla cartella specificata in Firebase Storage
-    const imageRef = ref(this.firebaseService.getStorage(), `${collection}/${name}.jpg`);
-
-    // Verifica se esiste già un'immagine con lo stesso nome e la elimina
-    try {
-      const existingImageUrl = await getDownloadURL(imageRef);
-      if (existingImageUrl) await deleteObject(imageRef);
-    } catch {
-      // Ignora l'errore se l'immagine non esiste (comportamento atteso)
-    }
-
-    // Carica la nuova immagine su Firebase Storage
-    const snapshot = await uploadBytesResumable(imageRef, image);
-
-    // Ottieni l'URL della nuova immagine caricata
-    const downloadURL = await getDownloadURL(snapshot.ref);
-    return downloadURL;
-  }
-
   public async deleteImage(collection: string, name: string): Promise<void> {
     // Crea un riferimento alla cartella specificata in Firebase Storage
     const imageRef = ref(this.firebaseService.getStorage(), `${collection}/${name}.jpg`);
 
     // Elimina immagine
-    await deleteObject(imageRef);
+    try {
+      await deleteObject(imageRef);
+    } catch {
+      console.info('Nessuna immagine trovata');
+    }
   }
 
   /* --------------------------- Method Firebase --------------------------- */
