@@ -124,6 +124,9 @@ export class LogService {
       messageType: messageType,
       messageLog: errorMessageLog,
       messageDebug: errorMessageDebug,
+      device: this.getDevice(),
+      browser: this.getBrowserInfo(),
+      os: this.getOSInfo(),
       updatedAt: new Date()
     });
   }
@@ -159,5 +162,46 @@ export class LogService {
   // Metodo per rimuovere il log per ID
   public removeLog(id: number): void {
     this.logs.update((logs) => logs.filter((log) => log.id !== id));
+  }
+
+  /* ------------------ Utils ------------------ */
+  private getDevice(): string {
+    return /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
+  }
+
+  private getBrowserInfo(): string {
+    const userAgent = navigator.userAgent;
+    let browserName = 'Unknown Browser';
+    let browserVersion = 'Unknown Version';
+
+    if (userAgent.indexOf('Chrome') > -1) {
+      browserName = 'Chrome';
+      const versionMatch = userAgent.match(/Chrome\/([0-9.]+)/);
+      if (versionMatch) browserVersion = versionMatch[1];
+    } else if (userAgent.indexOf('Safari') > -1) {
+      browserName = 'Safari';
+      const versionMatch = userAgent.match(/Version\/([0-9.]+)/);
+      if (versionMatch) browserVersion = versionMatch[1];
+    } else if (userAgent.indexOf('Firefox') > -1) {
+      browserName = 'Firefox';
+      const versionMatch = userAgent.match(/Firefox\/([0-9.]+)/);
+      if (versionMatch) browserVersion = versionMatch[1];
+    } else if (userAgent.indexOf('Edge') > -1) {
+      browserName = 'Edge';
+      const versionMatch = userAgent.match(/Edg\/([0-9.]+)/);
+      if (versionMatch) browserVersion = versionMatch[1];
+    }
+
+    return `${browserName} ${browserVersion}`;
+  }
+
+  // Funzione per ottenere il sistema operativo
+  private getOSInfo(): string {
+    const userAgent = navigator.userAgent;
+    if (userAgent.indexOf('Win') > -1) return 'Windows';
+    if (userAgent.indexOf('Mac') > -1) return 'MacOS';
+    if (userAgent.indexOf('X11') > -1) return 'UNIX';
+    if (userAgent.indexOf('Linux') > -1) return 'Linux';
+    return 'Unknown OS';
   }
 }

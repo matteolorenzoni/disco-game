@@ -6,6 +6,9 @@ export type Debug = {
   messageType: number;
   messageLog: string;
   messageDebug: string;
+  device: string;
+  browser: string;
+  os: string;
   updatedAt: Date;
 };
 
