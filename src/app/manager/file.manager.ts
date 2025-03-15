@@ -32,7 +32,7 @@ export class FileManager {
                   fillColor: fillColor(index)
                 },
                 {
-                  text: new Date(props.registeredAt).toLocaleDateString(),
+                  text: props.registeredAt ? new Date(props.registeredAt).toLocaleDateString() : '',
                   style: 'tableCell',
                   fillColor: fillColor(index)
                 }
@@ -60,7 +60,7 @@ export class FileManager {
       props.lastName,
       props.email,
       new Date(props.birthDate).toLocaleDateString(),
-      new Date(props.registeredAt).toLocaleDateString()
+      props.registeredAt ? new Date(props.registeredAt).toLocaleDateString() : ''
     ]);
 
     const csvContent = [

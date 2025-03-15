@@ -8,8 +8,20 @@ import {
 import { Challenge, ChallengeType } from './challenge.model';
 import { ChallengeStatus, EventChallenge } from './event-challenge.model';
 import { Event } from './event.model';
-import { Team, TeamUser } from './team.model';
+import { Team } from './team.model';
 import { User, UserRole } from './user.model';
+
+type ConvertDatesToTimestamp<T> = {
+  [K in keyof T]: T[K] extends Date
+    ? Timestamp // Se è solo Date
+    : T[K] extends Date | null
+      ? Timestamp | null // Se è Date | null
+      : T[K] extends Date | undefined
+        ? Timestamp | undefined // Se è Date | undefined
+        : T[K] extends object // Se è un oggetto annidato
+          ? ConvertDatesToTimestamp<T[K]> // Applica ricorsivamente
+          : T[K]; // Altrimenti lascia invariato
+};
 
 /* ---------------------- Utils ---------------------- */
 // Funzione per convertire stringa ISO in oggetto Date
@@ -42,20 +54,20 @@ export const userConverter: FirestoreDataConverter<User> = {
   },
 
   fromFirestore(snapshot: QueryDocumentSnapshot<DocumentData>, options: SnapshotOptions): User {
-    const data = snapshot.data(options)!;
+    const data = snapshot.data(options)! as ConvertDatesToTimestamp<User>;
     return {
       name: data['name'],
       lastName: data['lastName'],
       userName: data['userName'],
       email: data['email'],
-      registeredAt: timestampToDate(data['registeredAt'] as Timestamp),
-      birthDate: timestampToDate(data['birthDate'] as Timestamp),
-      imageUrl: data['imageUrl'] || null,
+      registeredAt: data['registeredAt'] !== undefined ? timestampToDate(data['registeredAt']) : undefined,
+      birthDate: timestampToDate(data['birthDate']),
+      imageUrl: data['imageUrl'],
       role: data['role'] as UserRole,
       code: data['code'],
       participations: data['participations'],
       isActive: data['isActive'],
-      updatedAt: timestampToDate(data['updatedAt'] as Timestamp)
+      updatedAt: timestampToDate(data['updatedAt'])
     };
   }
 };
@@ -77,7 +89,7 @@ export const eventConverter: FirestoreDataConverter<Event> = {
   },
 
   fromFirestore(snapshot: QueryDocumentSnapshot<DocumentData>, options: SnapshotOptions): Event {
-    const data = snapshot.data(options)!;
+    const data = snapshot.data(options)! as ConvertDatesToTimestamp<Event>;
     return {
       name: data['name'],
       description: data['description'],
@@ -118,7 +130,7 @@ export const teamConverter: FirestoreDataConverter<Team> = {
   },
 
   fromFirestore(snapshot: QueryDocumentSnapshot<DocumentData>, options: SnapshotOptions): Team {
-    const data = snapshot.data(options)! as Team;
+    const data = snapshot.data(options)! as ConvertDatesToTimestamp<Team>;
     return {
       name: data['name'],
       code: data['code'],
@@ -127,21 +139,21 @@ export const teamConverter: FirestoreDataConverter<Team> = {
       bonusPoints: data['bonusPoints'],
       totalPoints: data['totalPoints'],
       eventId: data['eventId'],
-      eventStartDate: timestampToDate(data['eventStartDate'] as unknown as Timestamp),
+      eventStartDate: timestampToDate(data['eventStartDate']),
       userIds: data['userIds'],
-      users: data['users'].map((user: TeamUser) => ({
+      users: data['users'].map((user) => ({
         id: user.id,
         userName: user.userName,
         imageUrl: user.imageUrl,
-        registeredAt: user.registeredAt ? timestampToDate(user.registeredAt as unknown as Timestamp) : undefined,
+        registeredAt: user.registeredAt !== undefined ? timestampToDate(user.registeredAt) : undefined,
         challenges: user.challenges.map((challenge) => ({
           id: challenge.id,
-          timestamps: challenge.timestamps.map((timestamp) => timestampToDate(timestamp as unknown as Timestamp)),
+          timestamps: challenge.timestamps.map((x) => timestampToDate(x)),
           totalPoints: challenge.totalPoints
         }))
       })),
       isActive: data['isActive'],
-      updatedAt: timestampToDate(data['updatedAt'] as unknown as Timestamp)
+      updatedAt: timestampToDate(data['updatedAt'])
     };
   }
 };
@@ -161,7 +173,7 @@ export const challengeConverter: FirestoreDataConverter<Challenge> = {
   },
 
   fromFirestore(snapshot: QueryDocumentSnapshot<DocumentData>, options: SnapshotOptions): Challenge {
-    const data = snapshot.data(options)!;
+    const data = snapshot.data(options)! as ConvertDatesToTimestamp<Challenge>;
     return {
       name: data['name'],
       description: data['description'],
@@ -170,7 +182,7 @@ export const challengeConverter: FirestoreDataConverter<Challenge> = {
       points: data['points'],
       complexity: data['complexity'],
       isActive: data['isActive'],
-      updatedAt: timestampToDate(data['updatedAt'] as Timestamp)
+      updatedAt: timestampToDate(data['updatedAt'])
     };
   }
 };
@@ -192,7 +204,7 @@ export const eventChallengeConverter: FirestoreDataConverter<EventChallenge> = {
   },
 
   fromFirestore(snapshot: QueryDocumentSnapshot<DocumentData>, options: SnapshotOptions): EventChallenge {
-    const data = snapshot.data(options)!;
+    const data = snapshot.data(options)! as ConvertDatesToTimestamp<EventChallenge>;
     return {
       eventId: data['eventId'],
       eventStartDate: timestampToDate(data['eventStartDate']),
@@ -200,10 +212,10 @@ export const eventChallengeConverter: FirestoreDataConverter<EventChallenge> = {
       challengeName: data['challengeName'],
       challengeType: data['challengeType'] as ChallengeType,
       status: data['status'] as ChallengeStatus,
-      maxTimes: data['maxTimes'] !== null ? Number(data['maxTimes']) : null,
-      startDate: data['startDate'] ? timestampToDate(data['startDate'] as Timestamp) : null,
-      endDate: data['endDate'] ? timestampToDate(data['endDate'] as Timestamp) : null,
-      updatedAt: timestampToDate(data['updatedAt'] as Timestamp)
+      maxTimes: data['maxTimes'],
+      startDate: data['startDate'] !== null ? timestampToDate(data['startDate']) : null,
+      endDate: data['endDate'] !== null ? timestampToDate(data['endDate']) : null,
+      updatedAt: timestampToDate(data['updatedAt'])
     };
   }
 };

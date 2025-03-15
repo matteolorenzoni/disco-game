@@ -17,7 +17,7 @@ export type TeamUser = {
   id: string;
   userName: string;
   imageUrl: string | null;
-  registeredAt: Date | undefined;
+  registeredAt?: Date;
   challenges: TeamUserChallenge[];
 };
 

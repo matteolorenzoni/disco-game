@@ -3,7 +3,7 @@ export type User = {
   lastName: string;
   userName: string;
   email: string;
-  registeredAt: Date;
+  registeredAt?: Date;
   birthDate: Date;
   imageUrl: string | null;
   role: UserRole;
