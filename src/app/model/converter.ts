@@ -42,7 +42,7 @@ export const userConverter: FirestoreDataConverter<User> = {
       lastName: data['lastName'],
       userName: data['userName'],
       email: data['email'],
-      registeredAt: data['registeredAt'] !== undefined ? timestampToDate(data['registeredAt']) : undefined,
+      registeredAt: data['registeredAt'] ? timestampToDate(data['registeredAt']) : undefined,
       birthDate: timestampToDate(data['birthDate']),
       imageUrl: data['imageUrl'],
       role: data['role'] as UserRole,
@@ -97,7 +97,7 @@ export const teamConverter: FirestoreDataConverter<Team> = {
         id: user.id,
         userName: user.userName,
         imageUrl: user.imageUrl,
-        registeredAt: user.registeredAt !== undefined ? timestampToDate(user.registeredAt) : undefined,
+        registeredAt: user.registeredAt ? timestampToDate(user.registeredAt) : undefined,
         challenges: user.challenges.map((challenge) => ({
           id: challenge.id,
           timestamps: challenge.timestamps.map((x) => timestampToDate(x)),
@@ -145,8 +145,8 @@ export const eventChallengeConverter: FirestoreDataConverter<EventChallenge> = {
       challengeType: data['challengeType'] as ChallengeType,
       status: data['status'] as ChallengeStatus,
       maxTimes: data['maxTimes'],
-      startDate: data['startDate'] !== null ? timestampToDate(data['startDate']) : null,
-      endDate: data['endDate'] !== null ? timestampToDate(data['endDate']) : null,
+      startDate: data['startDate'] ? timestampToDate(data['startDate']) : null,
+      endDate: data['endDate'] ? timestampToDate(data['endDate']) : null,
       updatedAt: timestampToDate(data['updatedAt'])
     };
   }

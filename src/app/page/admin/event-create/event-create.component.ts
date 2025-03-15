@@ -1,24 +1,24 @@
-import { EventChallengeService } from './../../../service/event-challenge.service';
 import { CommonModule, formatDate, Location } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Doc } from '../../../model/firebase';
-import { Event as FvEvent } from '../../../model/event.model';
-import { EventModel, FromMap } from '../../../model/form.model';
-import { EventService } from '../../../service/event.service';
-import { endDateValidator, trimFormValues } from '../../../util/utils';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import { faPen, faTrash, faUpload } from '@fortawesome/free-solid-svg-icons';
+import { FvButtonComponent } from '../../../components/fv-button.component';
 import { FvFieldComponent } from '../../../components/fv-field.component';
 import { FvTextAeraComponent } from '../../../components/fv-text-area.component';
-import { FvButtonComponent } from '../../../components/fv-button.component';
 import { TitleComponent } from '../../../components/title/title.component';
+import { Event as FvEvent } from '../../../model/event.model';
+import { Doc } from '../../../model/firebase';
+import { EventModel, FromMap } from '../../../model/form.model';
+import { EventService } from '../../../service/event.service';
 import { LoaderService } from '../../../service/loader.service';
 import { LogService } from '../../../service/log.service';
 import { StorageService } from '../../../service/storage.service';
-import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faPen, faTrash, faUpload } from '@fortawesome/free-solid-svg-icons';
 import { TeamService } from '../../../service/team.service';
 import { UserService } from '../../../service/user.service';
+import { endDateValidator, trimFormValues } from '../../../util/utils';
+import { EventChallengeService } from './../../../service/event-challenge.service';
 
 @Component({
   selector: 'app-event-create',
@@ -99,7 +99,6 @@ export class EventCreateComponent implements OnInit {
   /* -------------------------- Methods initialization --------------------------  */
   private async initHttp() {
     await this.loaderService.executeWithDelay(async () => {
-      console.log(this.EVENT_ID);
       if (!this.EVENT_ID) return;
 
       /* Ottengo event */
