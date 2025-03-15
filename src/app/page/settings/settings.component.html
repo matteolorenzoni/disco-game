@@ -45,42 +45,23 @@
     </div>
   }
 
-  <!-- @case ('app') {
-    <div class="mt-4 overflow-hidden rounded-lg border border-primary-600 bg-surface p-4 text-on-surface">
-      <p class="text-base font-semibold text-primary-800">Installa la nostra app</p>
-      <p class="text-xs text-primary-400">
-        Installando l'app potrai accedere più velocemente alle funzionalità, senza bisogno del browser. È gratis, non
-        pesa nulla e non ti giudicherà se la apri alle 3 del mattino! 😏 Che aspetti? Tocca il pulsante e prova!
-      </p>
-      @if (showInstallPrompt()) {
-        <button
-          class="mt-4 w-full rounded bg-primary-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-primary-700 active:bg-primary-800"
-          (click)="installPWA()">
-          Installa l'app
-        </button>
-      } @else {
-        <div class="mt-4 rounded-lg border border-yellow-500 bg-yellow-100 p-4 text-yellow-700">
-          <p class="text-sm font-semibold">
-            Il tuo dispositivo non supporta l'installazione automatica dell'app al momento.
-          </p>
-          <p class="text-xs">
-            Non preoccuparti, puoi comunque usare l'app direttamente dal browser. Se vuoi aggiungere l'app alla tua
-            schermata principale per un accesso più veloce, puoi farlo manualmente!
-          </p>
-          <p class="mt-2 text-xs">Ecco come fare:</p>
-
-          <ul class="list-disc pl-5">
-            <li>
-              Su dispositivi Android: Apri il menu del browser (tre puntini in alto a destra), quindi seleziona
-              "Aggiungi a schermata principale".
-            </li>
-            <li>
-              Su dispositivi iOS: Premi l'icona di condivisione (il quadrato con la freccia verso l'alto) e seleziona
-              "Aggiungi a Home".
-            </li>
-          </ul>
+  @case ('esportazione') {
+    <div class="mt-4 flex flex-col">
+      <div class="flex flex-col gap-2 rounded bg-primary-100/50 p-2 shadow">
+        <h1 class="font-semibold">Lista utenti</h1>
+        <div class="flex gap-4">
+          <button
+            class="h-6 flex-1 rounded bg-primary-500 p-2 text-white flex-center hover:bg-primary-600 active:bg-primary-700"
+            (click)="exportUsers('pdf')">
+            PDF
+          </button>
+          <button
+            class="h-6 flex-1 rounded bg-primary-500 p-2 text-white flex-center hover:bg-primary-600 active:bg-primary-700"
+            (click)="exportUsers('csv')">
+            CSV
+          </button>
         </div>
-      }
+      </div>
     </div>
-  } -->
+  }
 }

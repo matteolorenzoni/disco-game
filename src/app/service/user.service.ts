@@ -22,6 +22,9 @@ export class UserService {
   protected readonly storageService = inject(StorageService);
 
   /* --------------------------- Read ---------------------------*/
+  public async getUser(): Promise<Doc<User>[]> {
+    return this.documentService.getDocumentsWithConstraints<User>(COL_USERS, [], userConverter);
+  }
   public async getUserById(userId: string): Promise<Doc<User>> {
     return this.documentService.getDocumentById<User>(COL_USERS, userId, userConverter);
   }

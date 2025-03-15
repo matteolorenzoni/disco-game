@@ -48,7 +48,7 @@ export const userConverter: FirestoreDataConverter<User> = {
       lastName: data['lastName'],
       userName: data['userName'],
       email: data['email'],
-      registeredAt: data['registeredAt'],
+      registeredAt: timestampToDate(data['registeredAt'] as Timestamp),
       birthDate: timestampToDate(data['birthDate'] as Timestamp),
       imageUrl: data['imageUrl'] || null,
       role: data['role'] as UserRole,
