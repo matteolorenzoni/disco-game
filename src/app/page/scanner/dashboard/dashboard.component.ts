@@ -77,13 +77,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   /* Variables camera*/
   hasPermissions = signal<boolean | undefined>(undefined);
-  hasCameras = signal<boolean | undefined>(undefined);
-  cameras = signal<MediaDeviceInfo[]>([]);
+  cameras = signal<MediaDeviceInfo[] | undefined>(undefined);
   deviceId = signal<string | undefined>(undefined);
   device = computed<MediaDeviceInfo | undefined>(() => {
     const cameras = this.cameras();
     const deviceId = this.deviceId();
-    return cameras.find((x) => x.deviceId === deviceId);
+    return cameras?.find((x) => x.deviceId === deviceId);
   });
   scanError = signal<ScanError | undefined>(undefined);
 
@@ -334,15 +333,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.deviceId.set(undefined);
       this.lsService.removeScannerDeviceId();
     } else {
-      const camera = this.cameras()[0] as MediaDeviceInfo | undefined;
+      const camera = this.cameras()?.[0];
       if (!camera) return;
       this.deviceId.set(camera.deviceId);
       this.lsService.setScannerDeviceId(camera.deviceId);
     }
-  }
-
-  protected async handleHasDevices(hasCamera: boolean): Promise<void> {
-    this.hasCameras.set(hasCamera);
   }
 
   protected handlePermissionResponse(hasPermission: boolean | null): void {

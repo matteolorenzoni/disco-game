@@ -157,7 +157,9 @@ export class IndexedDbService {
 
     /* Elimino item scaduti */
     const events = await this.getEvents();
-    const expiredEvents = events.filter((x) => x.props.startDate.getTime() < dateYesterday().getTime());
+    const expiredEvents = events.filter(
+      (x) => !x.props.isActive || x.props.endDate.getTime() < dateYesterday().getTime()
+    );
     this.deleteItems(
       'events',
       expiredEvents.map((item) => item.id)
@@ -196,7 +198,9 @@ export class IndexedDbService {
 
     /* Elimino gli items scaduti */
     const teams = await this.getTeams();
-    const expiredTeams = teams.filter((x) => x.props.eventStartDate.getTime() < dateYesterday().getTime());
+    const expiredTeams = teams.filter(
+      (x) => !x.props.isActive || x.props.eventStartDate.getTime() < dateYesterday().getTime()
+    ); // TODO: meglio se endDate
     this.deleteItems(
       'teams',
       expiredTeams.map((item) => item.id)
@@ -242,7 +246,7 @@ export class IndexedDbService {
 
     /* Elimino gli items di eventi scaduti */
     const teams = await this.getChallenges();
-    const expiredTeams = teams.filter((x) => x.eventStartDate.getTime() < dateYesterday().getTime());
+    const expiredTeams = teams.filter((x) => x.eventStartDate.getTime() < dateYesterday().getTime()); // TODO: meglio se eventEndDate
     this.deleteItems(
       'challenges',
       expiredTeams.map((item) => item.id)
@@ -282,7 +286,9 @@ export class IndexedDbService {
     /* Elimino gli items di eventi scaduti */
     const dbLeaderboard = await store.getAll();
     const leaderboard = dbLeaderboard.map(({ id, ...props }) => ({ id, props }));
-    const expiredTeams = leaderboard.filter((x) => x.props.eventStartDate.getTime() < dateYesterday().getTime());
+    const expiredTeams = leaderboard.filter(
+      (x) => !x.props.isActive || x.props.eventStartDate.getTime() < dateYesterday().getTime()
+    ); // TODO: meglio se endDate
     this.deleteItems(
       'leaderboard',
       expiredTeams.map((item) => item.id)
@@ -362,7 +368,9 @@ export class IndexedDbService {
 
     /* Elimino gli items non più attivi */
     const events = await this.getScannerEvents();
-    const expiredEvents = events.filter((x) => x.props.startDate.getTime() < dateYesterday().getTime());
+    const expiredEvents = events.filter(
+      (x) => !x.props.isActive || x.props.endDate.getTime() < dateYesterday().getTime()
+    ); // TODO: meglio se endDate
     this.deleteItems(
       'scanner-event',
       expiredEvents.map((item) => item.id)

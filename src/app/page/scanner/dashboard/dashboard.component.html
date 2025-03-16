@@ -1,8 +1,9 @@
-<app-title [pages]="[{ path: '', label: 'Scanner2 📷' }]"> </app-title>
+<app-title [pages]="[{ path: '', label: 'Scanner 📷' }]"> </app-title>
 
+<!-- Primo controllo per attendere recupero della presenza o meno dell'evento -->
 @if (event() !== undefined) {
   @if (event(); as event) {
-    @if (hasCameras() === false) {
+    @if (cameras()?.length === 0) {
       <div class="mt-40 p-8 flex-center">
         <div class="flex flex-col rounded-lg bg-white p-4 text-on-surface shadow-lg">
           <h2 class="mb-4 text-lg font-bold">Nessuna fotocamera disponibile</h2>
@@ -106,7 +107,7 @@
             (change)="onCameraChange($event.target)">
             @for (camera of cameras(); track camera.deviceId) {
               <option [value]="camera.deviceId">
-                {{ camera.label || 'Camera ' + (cameras().indexOf(camera) + 1) }}
+                {{ camera.label || 'Camera ' + $index }}
               </option>
             }
           </select>
@@ -125,7 +126,6 @@
             [previewFitMode]="'contain'"
             [formats]="ALLOWED_FORMATS"
             [device]="device()"
-            (hasDevices)="handleHasDevices($event)"
             (camerasFound)="handleCamerasFound($event)"
             (permissionResponse)="handlePermissionResponse($event)"
             (scanSuccess)="handleScanSuccess($event)"
@@ -140,7 +140,7 @@
         }
 
         <form
-          class="flex flex-col gap-2 rounded-lg bg-surface p-4 text-on-surface shadow-lg"
+          class="flex flex-col gap-2 rounded-lg bg-surface p-4 text-on-surface shadow"
           [formGroup]="manualScanForm"
           (ngSubmit)="onManualScan(event.id)">
           <h1 class="mb-2 text-sm font-semibold">Scan manuale</h1>
