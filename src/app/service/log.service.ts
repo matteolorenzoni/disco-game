@@ -2,9 +2,18 @@ import { inject, Injectable, signal } from '@angular/core';
 import { FirebaseError } from 'firebase/app';
 import { DebugType } from '../model/debug.model';
 import { LogType } from '../model/enum';
+import { ZxingError } from '../page/scanner/dashboard/dashboard.component';
 import { AudioService } from './audio.service';
 import { DebugService } from './debug.service';
 import { LocalStorageService } from './local-storage.service';
+
+export enum MessageType {
+  SCONOSCIUTO,
+  FIREBASE,
+  CUSTOM,
+  GENERALE,
+  ZXING
+}
 
 const ERROR_FIREBASE: Record<string, string> = {
   // Autenticazione
@@ -56,6 +65,19 @@ const ERROR_CUSTOM: Record<string, string> = {
 
 const ERROR_UNKNOWN = 'Errore sconosciuto, riprovare o contattare assistenza';
 
+const ERROR_ZXING: Record<string, string> = {
+  // Questo errore si verifica quando non ci sono informazioni sul tipo di errore (message = false).
+  // Può accadere in situazioni generiche di errore durante la scansione (ad esempio, flusso video non disponibile o altro problema non identificato).
+  false: 'Errore durante la scansione, chiudere e riprovare',
+
+  // Questo errore specifico si verifica quando la fotocamera non può essere avviata correttamente.
+  // È spesso dovuto a un problema con l'accesso alla fotocamera del dispositivo, come:
+  // - I permessi della fotocamera non sono stati concessi.
+  // - La fotocamera è già in uso da un'altra applicazione.
+  // - Problemi hardware o connessi a driver.
+  'NotReadableError: Could not start video source': 'Impossibile avviare la fotocamera, chiudere e riprovare'
+};
+
 export type Log = {
   id: number;
   type: LogType;
@@ -83,45 +105,73 @@ export class LogService {
   }
 
   public addLogError(userId: string | undefined, error: unknown): void {
-    let messageType = 0;
-    let errorMessageLog: string = ERROR_UNKNOWN;
-    let errorMessageDebug = JSON.stringify(error ?? null);
+    let messageType = MessageType.SCONOSCIUTO;
+    let errorMessageLog = ERROR_UNKNOWN;
+    let errorMessageDebug = typeof error === 'string' ? error : JSON.stringify(error);
 
-    // Gestione errore
+    /* ------------- Gestione errore ------------- */
     if (error instanceof FirebaseError) {
       // Errore firebase
-      messageType = 1;
+      messageType = MessageType.FIREBASE;
       errorMessageLog = ERROR_FIREBASE[error.code] || ERROR_UNKNOWN;
-    } else if (error instanceof Error) {
+    } else if (error instanceof Error && error.cause && typeof error.cause === 'string') {
       // Errore custom
-      messageType = 2;
+      messageType = MessageType.CUSTOM;
       errorMessageDebug = error.toString();
-      if (error.cause && typeof error.cause === 'string') {
-        errorMessageLog = ERROR_CUSTOM[error.cause] || ERROR_UNKNOWN;
-      }
-    } else if (typeof error === 'string') {
-      messageType = 3;
-      errorMessageDebug = error;
-    } else if (typeof error === 'object' && error !== null && 'message' in error && error['message']) {
-      messageType = 4;
-      errorMessageDebug = JSON.stringify(error.message);
+      errorMessageLog = ERROR_CUSTOM[error.cause] || ERROR_UNKNOWN;
+    } else if (error instanceof Error) {
+      // Errore generale
+      messageType = MessageType.GENERALE;
+      errorMessageDebug = error.toString();
     }
 
-    /* Log */
+    /* ------------- Log ------------- */
     // Visualizza toast di errore
     this.addLog(LogType.ERROR, errorMessageLog, true);
 
-    /* Debug */
+    /* ------------- Debug ------------- */
     // Memorizzare nel db solo quelli utili
     if (error instanceof FirebaseError && error.code.includes('auth')) return;
 
+    // Aggiunge log a db
     const user = this.lsService.getUser();
     this.debugService.add({
       type: DebugType.ERROR,
       userId: userId ?? null,
       userInfo: user ? `${user.props.name} ${user.props.lastName}` : null,
       url: window.location.href,
-      messageType: messageType,
+      messageType: messageType.toString(),
+      messageLog: errorMessageLog,
+      messageDebug: errorMessageDebug,
+      stackTrace: error instanceof Error && error.stack ? error.stack : null,
+      device: this.getDevice(),
+      browser: this.getBrowserInfo(),
+      os: this.getOSInfo(),
+      updatedAt: new Date()
+    });
+  }
+
+  public addLogErrorZxing(userId: string | undefined, error: ZxingError): void {
+    const messageType = MessageType.ZXING;
+    const errorMessageLog = ERROR_ZXING[error.message] ?? 'Errore scanner, riprovare';
+    const errorMessageDebug = error.message;
+
+    /* ------------- Log ------------- */
+    // Visualizza toast di errore
+    this.addLog(LogType.ERROR, errorMessageLog, true);
+
+    /* ------------- Debug ------------- */
+    // Memorizzare nel db solo quelli utili
+    if (ERROR_ZXING[error.message] !== undefined) return;
+
+    // Aggiunge log a db
+    const user = this.lsService.getUser();
+    this.debugService.add({
+      type: DebugType.ERROR,
+      userId: userId ?? null,
+      userInfo: user ? `${user.props.name} ${user.props.lastName}` : null,
+      url: window.location.href,
+      messageType: messageType.toString(),
       messageLog: errorMessageLog,
       messageDebug: errorMessageDebug,
       stackTrace: error instanceof Error && error.stack ? error.stack : null,

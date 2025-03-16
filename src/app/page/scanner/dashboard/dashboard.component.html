@@ -132,10 +132,10 @@
             (scanError)="handleScanError($event)"></zxing-scanner>
         </div>
 
-        @if (scanError(); as scanError) {
+        @if (zxingError(); as scanError) {
           <div class="mb-8 flex w-full flex-col gap-1 rounded border-2 border-rose-500 bg-rose-500/50 p-2 shadow">
             <p>Codice: {{ scanError.code }}</p>
-            <p>Messaggio: {{ scanError.message }}</p>
+            <p>Messaggio: {{ zxingErrorMessage() }}</p>
           </div>
         }
 

@@ -28,9 +28,23 @@ import { MergeChallenge, mergeChallenges } from '../../../util/merge.util';
 import { isQrcode, isSameQrcode } from '../../../util/type.util';
 import { trimFormValues } from '../../../util/utils';
 
-type ScanError = {
+export type ZxingError = {
   message: string;
   code?: number;
+};
+
+const ERROR_ZXING: Record<string, string> = {
+  // Questo errore si verifica quando non ci sono informazioni sul tipo di errore (message = false).
+  // Può accadere in situazioni generiche di errore durante la scansione (ad esempio, flusso video non disponibile o altro problema non identificato).
+  false: 'Errore durante la scansione, riprovare',
+
+  // Questo errore specifico si verifica quando la fotocamera non può essere avviata correttamente.
+  // È spesso dovuto a un problema con l'accesso alla fotocamera del dispositivo, come:
+  // - I permessi della fotocamera non sono stati concessi.
+  // - La fotocamera è già in uso da un'altra applicazione.
+  // - Problemi hardware o connessi a driver.
+  'NotReadableError: Could not start video source':
+    "Impossibile avviare la fotocamera. Alcune possibili cause: fotocamera aperta da altre applicazioni, permessi fotocamera non concessi all'applicazione, problemi hardware. Chiudere app, controllare e riprovare"
 };
 
 @Component({
@@ -84,7 +98,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const deviceId = this.deviceId();
     return cameras?.find((x) => x.deviceId === deviceId);
   });
-  scanError = signal<ScanError | undefined>(undefined);
+  zxingError = signal<ZxingError | undefined>(undefined);
+  zxingErrorMessage = computed(() => {
+    const zxingError = this.zxingError();
+    if (!zxingError) return '';
+    const msg: string | undefined = ERROR_ZXING[zxingError.message];
+    return msg ?? zxingError.message;
+  });
 
   /* Constants */
   ALLOWED_FORMATS = [BarcodeFormat.QR_CODE];
@@ -242,6 +262,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.event.set(null);
     this.challenges.set([]);
     this.eventChallenges.set([]);
+    this.zxingError.set(undefined);
     await this.dbService.deleteScannerEvent();
   }
 
@@ -265,6 +286,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   /* --------------------- Method util --------------------- */
   protected async scan(qrcode: Qrcode, team: Doc<Team>): Promise<void> {
+    /* Resetto errore scan (se presente) */
+    this.zxingError.set(undefined);
+
     /* Controllo se la squadra è attiva */
     if (team.props.status !== TeamStatus.ACTIVE) {
       this.logService.addLogErrorApp('Squadra non attiva (disattivata dagli admin)', false);
@@ -373,8 +397,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     await this.onScan(result);
   }
 
-  protected handleScanError(scanError: ScanError): void {
-    this.scanError.set(scanError);
-    this.logService.addLogError(`SCANNER: ${this.firebaseService.userFirebase()?.uid}`, scanError);
+  protected handleScanError(zxingError: ZxingError): void {
+    this.zxingError.set(zxingError);
+    this.logService.addLogErrorZxing(`${this.firebaseService.userFirebase()?.uid}`, zxingError);
   }
 }
