@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { Debug } from './../model/debug.model';
+import { DebugDto } from './../model/debug.model';
 import { FirebaseDocumentService } from './firebase-document.service';
 
 const COL_DEBUGS = environment.collection.DEBUGS;
@@ -13,7 +13,7 @@ export class DebugService {
   private readonly documentService = inject(FirebaseDocumentService);
 
   /* --------------------------- Create ---------------------------*/
-  public async add(debug: Debug): Promise<void> {
-    await this.documentService.addDocument<Debug>(COL_DEBUGS, debug);
+  public async add(debug: DebugDto): Promise<void> {
+    await this.documentService.addDocument<DebugDto>(COL_DEBUGS, debug);
   }
 }
