@@ -148,7 +148,7 @@ export class TeamService {
         id: user.id,
         userName: user.props.userName,
         imageUrl: user.props.imageUrl,
-        registeredAt: user.props.registeredAt,
+        registeredAt: user.props.registeredAt ? new Date(user.props.registeredAt) : undefined,
         challenges: []
       }
     ];

@@ -27,8 +27,8 @@ type ConvertDatesToTimestamp<T> = {
 
 /* ---------------------- Utils ---------------------- */
 // Funzione per convertire stringa ISO in oggetto Date
-const timestampToDate = (timestamp: Timestamp): Date => {
-  return timestamp.toDate();
+const timestampToDate = (timestamp: Timestamp | string): Date => {
+  return typeof timestamp === 'string' ? new Date(timestamp) : timestamp.toDate();
 };
 
 /* ---------------------- Converter ---------------------- */
