@@ -146,6 +146,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   /* -------------------------- Methods initialization --------------------------  */
   private async initIndexedDB() {
+    /* Elimina tutti gli eventi scaduti */
+    await this.dbService.deleteExpiredScannerEvent();
+
     /* Recupera l'evento se è già stato cercato */
     const dbEvents = await this.dbService.getScannerEvents();
     this.event.set(dbEvents[0] ?? null);

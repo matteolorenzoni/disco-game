@@ -40,21 +40,20 @@ export class IndexedDbService {
   private dbPromise: Promise<IDBPDatabase<FvDB1> | null> | undefined = undefined;
 
   constructor() {
-    this.dbPromise = this.initDB();
+    this.dbPromise = this.initDB(); // Inizializza la Promise
   }
 
   // Inizializzazione del database con controllo di compatibilità
-  private async initDB(): Promise<IDBPDatabase<FvDB1> | null> {
+  private initDB(): Promise<IDBPDatabase<FvDB1> | null> {
     if (indexedDBIsNotSupported()) {
       console.warn('IndexedDb non supportato');
-      return null;
+      return Promise.resolve(null); // Restituisci subito null se IndexedDB non è supportato
     }
 
-    const db = await openDB<FvDB1>(DB_NAME, DB_VERSION, {
+    return openDB<FvDB1>(DB_NAME, DB_VERSION, {
       upgrade(db, oldVersion) {
-        // Verifica versione
+        // Verifica versione e setup degli oggetti
         if (oldVersion < 1) {
-          // Primo setup (versione iniziale)
           if (!db.objectStoreNames.contains('events')) {
             db.createObjectStore('events', { keyPath: 'id' });
           }
@@ -82,24 +81,22 @@ export class IndexedDbService {
         // Controllo di compatibilità per versioni successive
         if (oldVersion < DB_VERSION) {
           console.warn('Database upgrade needed, upgrading...');
-          // Qui si può aggiungere logiche di upgrade specifiche per ogni versione
+          // Logiche di upgrade per versioni successive
         }
       }
+    }).catch(() => {
+      console.error("Errore nell'apertura del database");
+      return null; // Ritorna null in caso di errore nell'apertura del DB
     });
-
-    if (db.version !== DB_VERSION) {
-      console.warn(`Database version mismatch: expected ${DB_VERSION}, found ${db.version}.`);
-    }
-
-    return db;
   }
 
   // Restituisce la connessione al database
   private async getDb(): Promise<IDBPDatabase<FvDB1> | null> {
     if (this.dbPromise === undefined) {
-      this.dbPromise = this.initDB();
+      const db = await this.initDB();
+      return db;
     }
-    return this.dbPromise;
+    return await this.dbPromise;
   }
 
   /* ---------------------------------- Utils ---------------------------------- */
@@ -367,14 +364,7 @@ export class IndexedDbService {
     await tx.done;
 
     /* Elimino gli items non più attivi */
-    const events = await this.getScannerEvents();
-    const expiredEvents = events.filter(
-      (x) => !x.props.isActive || x.props.endDate.getTime() < dateYesterday().getTime()
-    ); // TODO: meglio se endDate
-    this.deleteItems(
-      'scanner-event',
-      expiredEvents.map((item) => item.id)
-    );
+    await this.deleteExpiredScannerEvent();
   }
 
   public async getScannerEvents(): Promise<Doc<Event>[]> {
@@ -389,5 +379,16 @@ export class IndexedDbService {
 
   public async deleteScannerEvent(): Promise<void> {
     await this.clearStore('scanner-event');
+  }
+
+  public async deleteExpiredScannerEvent(): Promise<void> {
+    const events = await this.getScannerEvents();
+    const expiredEvents = events.filter(
+      (x) => !x.props.isActive || x.props.endDate.getTime() < dateYesterday().getTime()
+    ); // TODO: meglio se endDate
+    this.deleteItems(
+      'scanner-event',
+      expiredEvents.map((item) => item.id)
+    );
   }
 }

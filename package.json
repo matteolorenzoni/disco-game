@@ -1,6 +1,6 @@
 {
   "name": "disco-game",
-  "version": "1.4.1",
+  "version": "1.4.9",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
