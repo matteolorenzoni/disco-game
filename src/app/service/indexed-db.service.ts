@@ -266,7 +266,7 @@ export class IndexedDbService {
     const db = await this.getDb();
     if (!db) return;
 
-    /* Se l'array è vuoto allora elimino tutti elementi (per gestione su piu dispositivi) */
+    /* Se l'array è vuoto allora elimino tutti elementi (per gestione su più dispositivi) */
     if (items.length === 0) {
       this.clearStore('leaderboard');
       return;
@@ -281,15 +281,24 @@ export class IndexedDbService {
     await tx.done;
 
     /* Elimino gli items di eventi scaduti */
-    const dbLeaderboard = await store.getAll();
-    const leaderboard = dbLeaderboard.map(({ id, ...props }) => ({ id, props }));
-    const expiredTeams = leaderboard.filter(
+    const dbLeaderboard = await this.getLeaderboard();
+    const expiredTeams = dbLeaderboard.filter(
       (x) => !x.props.isActive || x.props.eventStartDate.getTime() < dateYesterday().getTime()
     ); // TODO: meglio se endDate
     this.deleteItems(
       'leaderboard',
       expiredTeams.map((item) => item.id)
     );
+  }
+
+  public async getLeaderboard(): Promise<Doc<Team>[]> {
+    const db = await this.getDb();
+    if (!db) return [];
+
+    const tx = db.transaction('leaderboard', 'readonly');
+    const storeRead = tx.objectStore('leaderboard');
+    const dbLeaderboard = await storeRead.getAll();
+    return dbLeaderboard.map(({ id, ...props }) => ({ id, props }));
   }
 
   public async getLeaderboardByEventId(eventId: string): Promise<Doc<Team>[]> {

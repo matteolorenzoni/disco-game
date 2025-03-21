@@ -79,6 +79,11 @@ const ERROR_ZXING: Record<string, string> = {
   'NotReadableError: Could not start video source': 'Impossibile avviare la fotocamera, chiudere e riprovare'
 };
 
+const NO_LOG_ERRORS: string[] = [
+  "InvalidStateError: Failed to execute 'transaction' on 'IDBDatabase': The database connection is closing.",
+  "TransactionInactiveError: Failed to execute 'getAll' on 'IDBObjectStore': The transaction is inactive or finished."
+];
+
 export type Log = {
   id: number;
   type: LogType;
@@ -128,11 +133,13 @@ export class LogService {
 
     /* ------------- Log ------------- */
     // Visualizza toast di errore
-    this.addLog(LogType.ERROR, errorMessageLog, true);
+    if (!NO_LOG_ERRORS.includes(errorMessageDebug)) {
+      this.addLog(LogType.ERROR, errorMessageLog, true);
+    }
 
     /* ------------- Debug ------------- */
     // Memorizzare nel db solo quelli utili
-    if (error instanceof FirebaseError && error.code.includes('auth')) return;
+    if (error instanceof FirebaseError && error.code.startsWith('auth')) return;
 
     // Aggiunge log a db
     const user = this.lsService.getUser();

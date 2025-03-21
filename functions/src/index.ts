@@ -112,7 +112,7 @@ export const setProp = onRequest(async (_, res) => {
 export const removeDebugByMessage = onRequest(async (req, res) => {
   try {
     // Ottieni il parametro message dalla query string
-    const message = req.query.message;
+    const message = req.query.messageDebug;
 
     if (!message) {
       res.status(400).send('Message query parameter is required.');
@@ -124,7 +124,7 @@ export const removeDebugByMessage = onRequest(async (req, res) => {
     const debugRef = db.collection('debugs');
 
     // Esegui la query per cercare i documenti con il campo message uguale a quello passato
-    const snapshot = await debugRef.where('message', '==', message).get();
+    const snapshot = await debugRef.where('messageDebug', '==', message).get();
 
     if (snapshot.empty) {
       res.status(200).send('No debug messages found with that content.');
