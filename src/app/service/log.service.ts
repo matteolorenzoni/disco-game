@@ -1,5 +1,6 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { FirebaseError } from 'firebase/app';
+import packageInfo from '../../../package.json';
 import { DebugType } from '../model/debug.model';
 import { LogType } from '../model/enum';
 import { ZxingError } from '../page/scanner/dashboard/dashboard.component';
@@ -147,6 +148,8 @@ export class LogService {
       device: this.getDevice(),
       browser: this.getBrowserInfo(),
       os: this.getOSInfo(),
+      isLogged: !NO_LOG_ERRORS.includes(errorMessageDebug),
+      appVersion: packageInfo.version,
       updatedAt: new Date()
     });
   }
@@ -178,6 +181,8 @@ export class LogService {
       device: this.getDevice(),
       browser: this.getBrowserInfo(),
       os: this.getOSInfo(),
+      isLogged: !NO_LOG_ERRORS.includes(errorMessageDebug),
+      appVersion: packageInfo.version,
       updatedAt: new Date()
     });
   }
@@ -248,11 +253,16 @@ export class LogService {
 
   // Funzione per ottenere il sistema operativo
   private getOSInfo(): string {
-    const userAgent = navigator.userAgent;
-    if (userAgent.indexOf('Win') > -1) return 'Windows';
-    if (userAgent.indexOf('Mac') > -1) return 'MacOS';
-    if (userAgent.indexOf('X11') > -1) return 'UNIX';
-    if (userAgent.indexOf('Linux') > -1) return 'Linux';
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+
+    if (/android/i.test(userAgent)) return 'Android';
+    if (/iPad|iPhone|iPod/.test(userAgent)) return 'iOS';
+    if (/Win/i.test(userAgent)) return 'Windows';
+    if (/Mac/i.test(userAgent)) return 'MacOS';
+    if (/X11/i.test(userAgent)) return 'UNIX';
+    if (/Linux/i.test(userAgent)) return 'Linux';
+
     return 'Unknown OS';
   }
 }

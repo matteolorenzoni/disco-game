@@ -12,6 +12,8 @@ export type Debug = {
   device: string;
   browser: string;
   os: string;
+  isLogged: boolean;
+  appVersion: string;
   updatedAt: Date;
 };
 
