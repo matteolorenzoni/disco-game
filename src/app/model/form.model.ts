@@ -15,7 +15,7 @@ export type UserModel = {
   name: string;
   lastName: string;
   userName: string;
-  birthDate: string;
+  birthDate: string | null;
   email: string;
   password: string;
 };

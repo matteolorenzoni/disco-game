@@ -27,7 +27,7 @@ export class FileManager {
                 { text: props.lastName, style: 'tableCell', fillColor: fillColor(index) },
                 { text: props.email, style: 'tableCell', fillColor: fillColor(index) },
                 {
-                  text: new Date(props.birthDate).toLocaleDateString(),
+                  text: props.birthDate ? new Date(props.birthDate).toLocaleDateString() : null,
                   style: 'tableCell',
                   fillColor: fillColor(index)
                 },
@@ -52,14 +52,14 @@ export class FileManager {
   };
 
   public static readonly createCsvUser = (users: Doc<User>[]): void => {
-    const escapeCsv = (value: string) => `"${value.replace(/"/g, '""')}"`; // Gestisce virgolette nel CSV
+    const escapeCsv = (value: string | null) => `"${value?.replace(/"/g, '""')}"`; // Gestisce virgolette nel CSV
 
     const header = ['Nome', 'Cognome', 'Email', 'Compleanno', 'Data di iscrizione'];
     const rows = users.map(({ props }) => [
       props.name,
       props.lastName,
       props.email,
-      new Date(props.birthDate).toLocaleDateString(),
+      props.birthDate ? new Date(props.birthDate).toLocaleDateString() : null,
       props.registeredAt ? new Date(props.registeredAt).toLocaleDateString() : ''
     ]);
 

@@ -52,7 +52,7 @@ export class UserCreateComponent implements OnInit {
     name: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     lastName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     userName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    birthDate: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    birthDate: new FormControl(null),
     email: new FormControl('', {
       nonNullable: true,
       validators: [Validators.required, Validators.email]
@@ -87,7 +87,7 @@ export class UserCreateComponent implements OnInit {
       name: user.props.name,
       lastName: user.props.lastName,
       userName: user.props.userName,
-      birthDate: formatDate(user.props.birthDate, 'yyyy-MM-dd', 'it'),
+      birthDate: user.props.birthDate ? formatDate(user.props.birthDate, 'yyyy-MM-dd', 'it') : null,
       email: user.props.email,
       password: '******'
     });
@@ -186,7 +186,12 @@ export class UserCreateComponent implements OnInit {
     /* Aggiorno local storage */
     const userUpdated: Doc<User> = {
       id: user.id,
-      props: { ...user.props, ...userModelForm, birthDate: new Date(userModelForm.birthDate), imageUrl }
+      props: {
+        ...user.props,
+        ...userModelForm,
+        birthDate: userModelForm.birthDate ? new Date(userModelForm.birthDate) : null,
+        imageUrl
+      }
     };
     this.user.set(userUpdated);
     this.lsService.setUser(userUpdated);

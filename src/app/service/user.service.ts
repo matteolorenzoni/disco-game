@@ -57,7 +57,7 @@ export class UserService {
 
     await this.documentService.addDocumentById<User>(userCredential.user.uid, COL_USERS, {
       ...userWithoutPassword,
-      birthDate: new Date(userWithoutPassword.birthDate),
+      birthDate: userWithoutPassword.birthDate ? new Date(userWithoutPassword.birthDate) : null,
       imageUrl,
       role: UserRole.USER,
       code,
@@ -86,7 +86,7 @@ export class UserService {
       {
         ...userWithoutPassword,
         imageUrl,
-        birthDate: new Date(userWithoutPassword.birthDate),
+        birthDate: userWithoutPassword.birthDate ? new Date(userWithoutPassword.birthDate) : null,
         updatedAt: new Date()
       },
       userConverter
