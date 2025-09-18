@@ -101,27 +101,35 @@
         </div>
 
         <div class="mb-4 flex w-full gap-4 overflow-hidden">
-          <select
-            class="flex-1 overflow-hidden rounded border-on-surface bg-surface text-on-surface outline-none"
-            [(ngModel)]="deviceId"
-            (change)="onCameraChange($event.target)">
-            @for (camera of cameras(); track camera.deviceId) {
-              <option [value]="camera.deviceId">
-                {{ camera.label || 'Camera ' + $index }}
-              </option>
+          <div class="flex flex-1 flex-col overflow-hidden">
+            @if (!device()) {
+              <div class="text-sm italic">Seleziona camera</div>
             }
-          </select>
-          <fv-button
-            class="basis-1/4"
-            type="button"
-            twColor="secondary"
-            [label]="device() ? 'Chiudi' : 'Apri'"
-            [onClick]="onToggleCamera.bind(this)"></fv-button>
+            <select
+              class="h-8 rounded border-on-surface bg-surface text-on-surface outline-none"
+              [(ngModel)]="deviceId"
+              (change)="onCameraChange($event.target)">
+              @for (camera of cameras(); track camera.deviceId) {
+                <option [value]="camera.deviceId">
+                  {{ camera.label || 'Camera ' + $index }}
+                </option>
+              }
+            </select>
+          </div>
+          @if (device()) {
+            <fv-button
+              class="basis-1/4"
+              type="button"
+              twColor="secondary"
+              [label]="'Chiudi'"
+              [onClick]="closeCamera.bind(this)"></fv-button>
+          }
         </div>
 
         <div
           class="mb-8 aspect-square w-full max-w-[450px] overflow-hidden rounded border-2 border-secondary-500 bg-surface shadow-sm">
           <zxing-scanner
+            #scannerRef
             [enable]="!!device()"
             [previewFitMode]="'contain'"
             [formats]="ALLOWED_FORMATS"

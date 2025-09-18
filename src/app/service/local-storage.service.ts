@@ -8,7 +8,6 @@ const PREFIX = 'FV';
 
 const KEY_USER = 'USER';
 const KEY_USER_DASHBOARD_TEAM_ID = 'USER_TEAM_ID';
-const KEY_SCANNER_DEVICE_ID = 'SCANNER_DEVICE_ID';
 
 @Injectable({
   providedIn: 'root'
@@ -130,18 +129,5 @@ export class LocalStorageService {
 
   public removeUserDashboardTeamId(): void {
     return this.removeItem(KEY_USER_DASHBOARD_TEAM_ID);
-  }
-
-  /* ------------------------- Scanner ------------------------- */
-  public getScannerDeviceId(): string | null | undefined {
-    return this.getItem(KEY_SCANNER_DEVICE_ID);
-  }
-
-  public setScannerDeviceId(deviceId: string): void {
-    this.setItem<string>(KEY_SCANNER_DEVICE_ID, deviceId);
-  }
-
-  public removeScannerDeviceId(): void {
-    return this.removeItem(KEY_SCANNER_DEVICE_ID);
   }
 }

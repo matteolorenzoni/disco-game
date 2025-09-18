@@ -1,11 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal,
+  viewChild
+} from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faCalendar, faTrash, faUser } from '@fortawesome/free-solid-svg-icons';
 import { BarcodeFormat } from '@zxing/library';
-import { ZXingScannerModule } from '@zxing/ngx-scanner';
+import { ZXingScannerComponent, ZXingScannerModule } from '@zxing/ngx-scanner';
 import { FvButtonComponent } from '../../../components/fv-button.component';
 import { FvFieldIconComponent } from '../../../components/fv-field-icon.component';
 import { TitleComponent } from '../../../components/title/title.component';
@@ -89,6 +98,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   });
   lastQrcode = signal<Qrcode | undefined>(undefined);
 
+  /* Ref */
+  scanner = viewChild<ZXingScannerComponent>('scannerRef');
+
   /* Variables camera*/
   hasPermissions = signal<boolean | undefined>(undefined);
   cameras = signal<MediaDeviceInfo[] | undefined>(undefined);
@@ -138,8 +150,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     await this.initHttp();
   }
 
-  ngOnDestroy(): void {
-    this.deviceId.set(undefined);
+  async ngOnDestroy(): Promise<void> {
+    /* Rimuove camera selezionata e chiude i flussi video attivi */
+    await this.closeCamera();
+
+    /* Chiude subscription */
     if (this.challengeUnsubscribe) this.challengeUnsubscribe();
     if (this.eventChallengeUnsubscribe) this.eventChallengeUnsubscribe();
   }
@@ -262,14 +277,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   /* --------------------- Method event --------------------- */
   protected async onRemoveEvent(): Promise<void> {
+    /* Rimuove dati evento */
     this.event.set(null);
     this.challenges.set([]);
     this.eventChallenges.set([]);
     this.zxingError.set(undefined);
     await this.dbService.deleteScannerEvent();
+
+    /* Rimuove camera selezionata e chiude i flussi video attivi */
+    await this.closeCamera();
   }
 
-  protected async onRefreshPage(): Promise<void> {
+  protected onRefreshPage(): void {
     window.location.reload();
   }
 
@@ -277,15 +296,39 @@ export class DashboardComponent implements OnInit, OnDestroy {
     /* Se nessun evento, chiudo la camera e pulisco il local storage */
     if (!event) {
       this.deviceId.set(undefined);
-      this.lsService.removeScannerDeviceId();
       return;
     }
 
     /* Imposto la camera selezionata */
     const deviceId = (event as HTMLSelectElement).value;
     this.deviceId.set(deviceId);
-    this.lsService.setScannerDeviceId(deviceId);
   }
+
+  protected closeCamera = async (): Promise<void> => {
+    /* Chiude camera e ferma scan */
+    const scanner = this.scanner();
+    if (scanner) {
+      scanner.reset();
+      scanner.scanStop();
+    }
+
+    /* Chiude i flussi video attivi */
+    for (const camera of this.cameras() ?? []) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { deviceId: camera.deviceId } });
+        stream.getTracks().forEach((track) => {
+          if (track.readyState !== 'ended') {
+            track.stop();
+          }
+        });
+      } catch (error) {
+        this.logService.addLogError(`${this.firebaseService.userFirebase()?.uid}`, error);
+      }
+    }
+
+    /* Rimuove camera selezionata */
+    this.deviceId.set(undefined);
+  };
 
   /* --------------------- Method util --------------------- */
   protected async scan(qrcode: Qrcode, team: Doc<Team>): Promise<void> {
@@ -351,22 +394,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   /* --------------------- Method camera --------------------- */
-
-  protected onToggleCamera(): void {
-    const lsScannerDeviceId = this.lsService.getScannerDeviceId();
-
-    /* Se la camera è presente allora la chiudo, viceversa seleziono la prima tra quelle disponibili */
-    if (lsScannerDeviceId) {
-      this.deviceId.set(undefined);
-      this.lsService.removeScannerDeviceId();
-    } else {
-      const camera = this.cameras()?.[0];
-      if (!camera) return;
-      this.deviceId.set(camera.deviceId);
-      this.lsService.setScannerDeviceId(camera.deviceId);
-    }
-  }
-
   protected handlePermissionResponse(hasPermission: boolean | null): void {
     this.hasPermissions.set(hasPermission ?? false);
   }
@@ -381,19 +408,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
           !camera.label.toLowerCase().includes('anteriore')
       )
     );
-
-    /* Recupero l'ID della camera selezionata dal local storage e verifico se esiste */
-    /* Se esiste, imposta quella come camera selezionata, altrimenti seleziona la prima camera disponibile */
-    const deviceId = this.lsService.getScannerDeviceId();
-    if (deviceId) this.deviceId.set(deviceId);
-    else if (cameras.length > 0) {
-      const { deviceId } = cameras[0];
-      this.deviceId.set(deviceId);
-      this.lsService.setScannerDeviceId(deviceId);
-    } else {
-      this.deviceId.set(undefined);
-      this.lsService.removeScannerDeviceId();
-    }
   }
 
   protected async handleScanSuccess(result: string): Promise<void> {
